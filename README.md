@@ -20,7 +20,7 @@ Shantisagar : https://youtu.be/0a4CtFD0nY8?t=25m20s
 
 Using सोंठ (dry ginger) while traveling helps avoid nausea: https://youtu.be/zkS9Wb9FH1s?t=6m7s
 
-Padmavati Yakshi and Padmavati Indrani are two different devi’s: https://youtu.be/qBCurm77WoU?t=4m4s
+Parshawanatha swami yakshi "Padma" and Dharanendra deva's raani/indraani "Padmavati"  are two different devi’s: https://youtu.be/qBCurm77WoU?t=4m4s
 
 Uvasagga-haram stotra: http://www.jainworld.com/societies/Jain%20Calendar%202015.pdf
 
