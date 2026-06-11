@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="kn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ಜೈನ ಪೂಜೆ ಪ್ರಶ್ನೋತ್ತರಗಳ ಸಂಕಲನ | Jaina Pooje F.A.Q.s</title>
+  <meta name="description"
+    content="Jain Pooja questions and answers in a threaded, WhatsApp-style conversation format (Kannada and English).">
+  <link rel="stylesheet" href="faq.css?v=20260610">
+</head>
+
+<body>
+  <header class="faq-header">
+    <a class="faq-home-link" href="/">← Home</a>
+    <h1>ಜೈನ ಪೂಜೆ ಪ್ರಶ್ನೋತ್ತರಗಳ ಸಂಕಲನ</h1>
+    <p>Jaina Pooje F.A.Q.s — threaded Q&amp;A (work in progress)</p>
+    <div class="faq-toolbar">
+      <label for="lang-filter">Language</label>
+      <select id="lang-filter" aria-label="Language filter">
+        <option value="all">All</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="en">English</option>
+      </select>
+      <label for="topic-filter">Topic</label>
+      <select id="topic-filter" aria-label="Topic filter">
+        <option value="all">All topics</option>
+      </select>
+      <button id="print-btn" type="button">Print</button>
+    </div>
+  </header>
+
+  <div class="faq-layout">
+    <aside class="faq-sidebar">
+      <h2>Topics</h2>
+      <ul id="faq-topic-list" class="faq-topic-list"></ul>
+    </aside>
+    <main id="faq-chat" class="faq-chat" aria-live="polite">
+      <p class="faq-status">Loading conversation…</p>
+    </main>
+  </div>
+
+  <script src="faq.js?v=20260610"></script>
+</body>
+
+</html>
