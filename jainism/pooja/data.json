@@ -1,0 +1,47 @@
+[
+  {
+    "id": "q_001",
+    "role": "question",
+    "lang": "kn",
+    "text": ["ಎಲ್ಲಾ ದೇವರು ಒಂದೇ (ದೇವತೆಗಳು =?= ಜಿನೇಂದ್ರ ದೇವ) ?"],
+    "replyTo": null
+  },
+  {
+    "id": "a_001",
+    "role": "answer",
+    "lang": "kn",
+    "text": ["ಯಾರು ಜಿನ ಶಾಸನ ದೆವತೆಗಳನ್ನು ತೀರ್ಥಂಕರ ಭಗವಂತರ ಸಮಾನರೆಂದು ಪೂಜಿಸುತ್ತಾರೋ ಅವರು ಅಧೋ / ನರಕ ಗಾಮಿಗಳಾಗುತ್ತಾರೆ."],
+    "replyTo": "q_001",
+    "url": "https://www.youtube.com/watch?v=bgldj0TMZB4"
+  },
+  {
+    "id": "q_002",
+    "role": "question",
+    "lang": "en",
+    "text": ["All are equal (Devatas =?= Jinendra deva)?"],
+    "replyTo": null
+  },
+  {
+    "id": "a_002",
+    "role": "answer",
+    "lang": "en",
+    "text": ["Result of doing pooja of jina shaasana deva devi pooja thinking as bhagawan - Adho gaami / Narak gaami."],
+    "replyTo": "q_002",
+    "url": "https://youtu.be/bgldj0TMZB4"
+  },
+  {
+    "id": "q_003",
+    "role": "question",
+    "lang": "kn",
+    "text": ["ಸಮ್ಯಕ್ತ್ವ ಮಲಿನ"],
+    "replyTo": null
+  },
+  {
+    "id": "a_003",
+    "role": "answer",
+    "lang": "kn",
+    "text": ["ಭಗವಂತರ ಸ್ವರೂಪ ತಿಳಿದು, ಹಾಗು ದೇವತೆಗಳನ್ನು ವೀತರಾಗ ಭಗವಂತರಲ್ಲ ಎಂದು ಅರಿತು, ದೇವೇತಗಳನ್ನು ಪೂಜೆ ಮಾಡಿದರೆ, ಸಮ್ಯಕ್ತ್ವ ನಷ್ಟವಾಗುದಿಲ್ಲ... ವಿದ್ಯಾ ದೇವತೆಗಳ ಪೂಜೆ ವಿದ್ಯಾ ಸಿದ್ದಿ / ವರ ಪ್ರಾಪ್ತಿ ಮಾಡುಕೊಳ್ಳಲು ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ತ್ವವು ಮಲಿನವಾಗುವುದೂ ಇಲ್ಲ."],
+    "replyTo": "q_003",
+    "url": "https://www.youtube.com/watch?v=u5wU3JpUrEc"
+  }
+]
