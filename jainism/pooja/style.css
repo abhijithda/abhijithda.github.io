@@ -1,13 +1,24 @@
-/* Container for the whole top bar */
 .app-header {
     display: flex;
-    align-items: center;    /* Keeps them vertically centered */
-    gap: 20px;              /* Adds breathing room between search and toggle */
+    align-items: center;
+    gap: 20px;
     padding: 15px 20px;
     background: #f8f9fa;
     position: sticky;
     top: 0;
     z-index: 100;
+}
+#search-bar {
+    flex-grow: 1; /* Fills space */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+}
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0; /* Keeps toggle from squashing */
 }
 
 /* Container for the chat */
@@ -18,25 +29,6 @@
     display: flex;
     flex-direction: column;
 }
-
-/* Let the search bar fill available space */
-#search-bar {
-    flex-grow: 1;           /* Tells the search bar to take all extra space */
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    outline: none;
-}
-
-/* Keeps the toggle compact */
-.toggle-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;         /* Prevents the toggle from getting squashed */
-    white-space: nowrap;    /* Keeps 'Screen / Print View' on one line */
-}
-
 
 /* Base bubble style */
 .bubble {
@@ -137,20 +129,6 @@
     border: 1px solid #ddd;
     border-radius: 20px;
     outline: none;
-}
-
-.toggle-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: fixed; /* Keeps it locked at top-right */
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: white;
-    padding: 10px;
-    border-radius: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .switch { position: relative; display: inline-block; width: 50px; height: 24px; }

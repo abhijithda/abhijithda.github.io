@@ -16,7 +16,7 @@ function filterChat() {
 function createVideoCard(url) {
     // Generate a QR code URL using a free Google-friendly API
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(url)}`;
-    
+
     return `
         <div class="video-card">
             <a href="${url}" target="_blank">
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return match ? match.blocks[0].content.kn[0] : "Original question...";
             }
 
-
+            const lang = document.getElementById('lang-select').value;
             data.forEach(item => {
                 const bubble = document.createElement('div');
                 bubble.className = `bubble ${item.type}`;
@@ -53,7 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Create a container for the text
                 const textDiv = document.createElement('div');
                 textDiv.className = "text-content";
-                textDiv.innerHTML = `<p>${item.blocks[0].content.kn.join('<br>')}</p>`;
+                let contentHtml = "";
+                if (lang === 'kn' || lang === 'both') contentHtml += `<p>${item.blocks[0].content.kn.join('<br>')}</p>`;
+                if (lang === 'en' || lang === 'both') contentHtml += `<p style="color:#555">${item.blocks[0].content.en.join('<br>')}</p>`;
+                textDiv.innerHTML = contentHtml;
                 bubble.appendChild(textDiv);
 
                 // Add video cards to the right side if they exist
@@ -76,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function togglePrintMode() {
     const isChecked = document.getElementById('print-toggle').checked;
     const body = document.body;
-    
+
     if (isChecked) {
         body.classList.add('print-mode');
     } else {
