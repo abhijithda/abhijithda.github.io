@@ -50,10 +50,8 @@ function getQuestionText(id) {
 function renderChat() {
     const container = document.getElementById('chat-container');
     const langSelect = document.getElementById('lang-select');
-    
     // Safety check: if dropdown doesn't exist, default to 'both'
     const lang = langSelect ? langSelect.value : 'both';
-    
     container.innerHTML = ""; // Clear existing
 
     // USE allData here, not data
@@ -63,11 +61,34 @@ function renderChat() {
         bubble.id = item.id;
 
         // Reply Excerpt
-        if (item.replyToId) {
+        if (item.references && item.references.length > 0) {
             const excerpt = document.createElement('div');
             excerpt.className = "reply-excerpt";
-            excerpt.innerText = "Replying to: " + getQuestionText(item.replyToId);
-            bubble.appendChild(excerpt);
+
+            excerpt.onclick = () => {
+                const target = document.getElementById(item.references[0]);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            };
+
+            const match = allData.find(i => i.id === item.references[0]);
+
+            // Choose the language for the excerpt based on the current 'lang' state
+            let excerptText = "...";
+            if (match) {
+                if (lang === 'kn') {
+                    excerptText = match.blocks[0].content.kn[0];
+                } else if (lang === 'en') {
+                    excerptText = match.blocks[0].content.en[0];
+                } else {
+                    // If 'both', show Kannada as default or combine them
+                    excerptText = match.blocks[0].content.kn[0] + " / " + match.blocks[0].content.en[0];
+                }
+            }
+
+            excerpt.innerText = (match ? match.blocks[0].content.kn[0] : "Original question...");
+            bubble.prepend(excerpt);
         }
 
         // Text Content
