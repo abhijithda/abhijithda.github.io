@@ -29,52 +29,69 @@ function createVideoCard(url) {
         </div>
     `;
 }
+let allData = []; // Global variable
 
 document.addEventListener("DOMContentLoaded", () => {
     fetch('data.json')
         .then(response => response.json())
         .then(data => {
-            const container = document.getElementById('chat-container');
-
-
-            // Find the original question text based on the reference ID
-            function getQuestionText(id) {
-                // This looks through the data array to find the question that matches the ID
-                const match = data.find(item => item.id === id);
-                return match ? match.blocks[0].content.kn[0] : "Original question...";
-            }
-
-            const lang = document.getElementById('lang-select').value;
-            data.forEach(item => {
-                const bubble = document.createElement('div');
-                bubble.className = `bubble ${item.type}`;
-                bubble.id = item.id;
-
-                // Create a container for the text
-                const textDiv = document.createElement('div');
-                textDiv.className = "text-content";
-                let contentHtml = "";
-                if (lang === 'kn' || lang === 'both') contentHtml += `<p>${item.blocks[0].content.kn.join('<br>')}</p>`;
-                if (lang === 'en' || lang === 'both') contentHtml += `<p style="color:#555">${item.blocks[0].content.en.join('<br>')}</p>`;
-                textDiv.innerHTML = contentHtml;
-                bubble.appendChild(textDiv);
-
-                // Add video cards to the right side if they exist
-                if (item.blocks[0].videos && item.blocks[0].videos.length > 0) {
-                    const mediaDiv = document.createElement('div');
-                    mediaDiv.className = "media-content";
-                    item.blocks[0].videos.forEach(vid => {
-                        mediaDiv.innerHTML += createVideoCard(vid.url);
-                    });
-                    bubble.appendChild(mediaDiv);
-                }
-
-                container.appendChild(bubble);
-            });
+            allData = data; // Assign the fetched data to the global variable
+            renderChat();   // Initial render
         })
         .catch(error => console.error('Error loading data:', error));
 });
 
+function getQuestionText(id) {
+    // USE allData here, not data
+    const match = allData.find(item => item.id === id);
+    return match ? match.blocks[0].content.kn[0] : "Original question...";
+}
+
+function renderChat() {
+    const container = document.getElementById('chat-container');
+    const langSelect = document.getElementById('lang-select');
+    
+    // Safety check: if dropdown doesn't exist, default to 'both'
+    const lang = langSelect ? langSelect.value : 'both';
+    
+    container.innerHTML = ""; // Clear existing
+
+    // USE allData here, not data
+    allData.forEach(item => {
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${item.type}`;
+        bubble.id = item.id;
+
+        // Reply Excerpt
+        if (item.replyToId) {
+            const excerpt = document.createElement('div');
+            excerpt.className = "reply-excerpt";
+            excerpt.innerText = "Replying to: " + getQuestionText(item.replyToId);
+            bubble.appendChild(excerpt);
+        }
+
+        // Text Content
+        const textDiv = document.createElement('div');
+        textDiv.className = "text-content";
+        let contentHtml = "";
+        if (lang === 'kn' || lang === 'both') contentHtml += `<p>${item.blocks[0].content.kn.join('<br>')}</p>`;
+        if (lang === 'en' || lang === 'both') contentHtml += `<p style="color:#555">${item.blocks[0].content.en.join('<br>')}</p>`;
+        textDiv.innerHTML = contentHtml;
+        bubble.appendChild(textDiv);
+
+        // Videos
+        if (item.blocks[0].videos && item.blocks[0].videos.length > 0) {
+            const mediaDiv = document.createElement('div');
+            mediaDiv.className = "media-content";
+            item.blocks[0].videos.forEach(vid => {
+                mediaDiv.innerHTML += createVideoCard(vid.url);
+            });
+            bubble.appendChild(mediaDiv);
+        }
+
+        container.appendChild(bubble);
+    });
+}
 
 function togglePrintMode() {
     const isChecked = document.getElementById('print-toggle').checked;
