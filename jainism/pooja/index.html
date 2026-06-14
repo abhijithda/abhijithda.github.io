@@ -5,18 +5,20 @@
     <meta charset="UTF-8">
     <title>Jaina Pooja FAQ</title>
     <link rel="stylesheet" href="style.css">
-    <div class="toggle-container">
-        <span>Screen / Print View</span>
-        <label class="switch">
-            <input type="checkbox" id="print-toggle" onchange="togglePrintMode()">
-            <span class="slider"></span>
-        </label>
-    </div>
 </head>
 
 <body>
-    <input type="text" id="search-bar" placeholder="Search topics (e.g., ಅಭಿಷೇಕ)..." onkeyup="filterChat()">
-    
+    <header class="app-header"> 
+        <input type="text" id="search-bar" placeholder="Search topics (e.g., ಅಭಿಷೇಕ)..." onkeyup="filterChat()">
+        <div class="toggle-container">
+            <span>Print View</span>
+            <label class="switch">
+                <input type="checkbox" id="print-toggle" onchange="togglePrintMode()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
+
     <div id="chat-container"></div>
 
     <script src="script.js"></script>
