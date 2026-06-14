@@ -5,7 +5,13 @@
     <meta charset="UTF-8">
     <title>Jaina Pooja FAQ</title>
     <link rel="stylesheet" href="style.css">
-    <button id="toggle-view" onclick="togglePrintMode()">Switch to Print View</button>
+    <div class="toggle-container">
+        <span>Screen / Print View</span>
+        <label class="switch">
+            <input type="checkbox" id="print-toggle" onchange="togglePrintMode()">
+            <span class="slider"></span>
+        </label>
+    </div>
 </head>
 
 <body>

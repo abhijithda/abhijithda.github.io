@@ -73,18 +73,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
 function togglePrintMode() {
+    const isChecked = document.getElementById('print-toggle').checked;
     const body = document.body;
-    const btn = document.getElementById('toggle-view');
-
-    // Toggle a class on the body
-    body.classList.toggle('print-mode');
-
-    // Update button text
-    if (body.classList.contains('print-mode')) {
-        btn.innerText = "Switch to Interactive View";
+    
+    if (isChecked) {
+        body.classList.add('print-mode');
     } else {
-        btn.innerText = "Switch to Print View";
+        body.classList.remove('print-mode');
     }
 }
