@@ -1,0 +1,171 @@
+/* Container for the chat */
+#chat-container {
+    max-width: 600px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.bubble {
+    display: flex; /* This makes text and media sit side-by-side */
+    gap: 15px;     /* Space between text and thumbnail */
+    align-items: flex-start;
+}
+
+.text-content {
+    flex: 2; /* Takes up more space */
+}
+
+.media-content {
+    flex: 1; /* Takes up less space */
+    min-width: 120px;
+}
+
+
+/* Base bubble style */
+.bubble {
+    padding: 12px 16px;
+    margin: 8px;
+    border-radius: 15px;
+    max-width: 80%;
+    line-height: 1.5;
+}
+
+/* Question (User) Style */
+.bubble.question {
+    background-color: #ffffff; /* White */
+    border: 1px solid #ddd;
+    align-self: flex-start;    /* Align to left */
+    border-bottom-left-radius: 0;
+}
+
+/* Answer (System/Jina Pooja FAQ) Style */
+.bubble.answer {
+    background-color: #dcf8c6; /* WhatsApp light green */
+    align-self: flex-end;     /* Align to right */
+    border-bottom-right-radius: 0;
+}
+
+/* First, reset the base behavior */
+.bubble.answer {
+    display: flex;
+    flex-direction: row; /* Default: Text left, Media right */
+}
+
+/* Then alternate only the Answer bubbles */
+#chat-container .bubble.answer:nth-child(even) {
+    flex-direction: row-reverse; /* Text right, Media left */
+}
+
+.video-card {
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: center;
+}
+.video-card img {
+    width: 100%;
+    display: block;
+}
+
+
+.video-card img {
+    width: 100%; /* Thumbnail will now fill the media-content div */
+    border-radius: 8px;
+}
+
+
+.watch-btn {
+    display: block;
+    padding: 8px;
+    background: #25d366;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.reply-excerpt {
+    font-size: 0.75em;
+    color: #555;
+    background: rgba(0,0,0,0.05);
+    padding: 5px;
+    border-left: 3px solid #075e54; /* WhatsApp dark green accent */
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-style: italic;
+}
+
+#search-bar {
+    width: 90%;
+    margin: 10px auto;
+    padding: 10px;
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+}
+
+@media print {
+    #search-bar, .reply-btn, .print-btn, .reply-excerpt {
+        display: none !important;
+    }
+    
+    #chat-container {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .bubble {
+        border: 1px solid #ccc;
+        break-inside: avoid; /* Prevents bubbles from cutting in half across pages */
+    }
+}
+
+/* Hide these elements when print-mode is active */
+body.print-mode #search-bar, 
+body.print-mode #toggle-view, 
+body.print-mode .reply-btn {
+    display: none !important;
+}
+
+/* Make the chat container full-width and clean for print mode */
+body.print-mode #chat-container {
+    max-width: 100%;
+    margin: 0;
+}
+
+/* Ensure the bubbles look like a document, not chat bubbles */
+body.print-mode .bubble {
+    border: 1px solid #ccc;
+    background-color: white !important;
+    color: black;
+    align-self: flex-start !important;
+    width: 100%;
+    margin: 5px 0;
+    border-radius: 0;
+}
+
+/* Constrain video thumbnails in print mode */
+body.print-mode .video-card img {
+    max-width: 200px; /* Forces a fixed, smaller size */
+    margin: 0 auto;
+    display: block;
+}
+
+/* Optional: Hide the watch button text during print to save even more space */
+body.print-mode .watch-btn {
+    display: none; 
+}
+
+/* Keep the toggle visible, but don't print it */
+@media print {
+    #toggle-view { display: none; }
+    .print-only-qr { display: block !important; }
+}
+
+/* Hide QR code on screen, show on print */
+.print-only-qr { display: none; }

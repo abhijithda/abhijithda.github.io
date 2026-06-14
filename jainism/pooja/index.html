@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Jaina Pooja FAQ</title>
     <link rel="stylesheet" href="style.css">
+    <button id="toggle-view" onclick="togglePrintMode()">Switch to Print View</button>
 </head>
-<body>
 
+<body>
+    <input type="text" id="search-bar" placeholder="Search topics (e.g., ಅಭಿಷೇಕ)..." onkeyup="filterChat()">
+    
     <div id="chat-container"></div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
