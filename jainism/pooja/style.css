@@ -32,6 +32,7 @@
 
 /* Base bubble style */
 .bubble {
+    position: relative;    
     padding: 12px 16px;
     margin: 8px;
     border-radius: 15px;
@@ -110,15 +111,23 @@
 }
 
 .reply-excerpt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
     font-size: 0.75em;
-    color: #555;
-    background: rgba(0,0,0,0.05);
-    padding: 5px;
-    border-left: 3px solid #075e54; /* WhatsApp dark green accent */
-    margin-bottom: 10px;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: #444;
     cursor: pointer;
-    border-radius: 3px;
     font-style: italic;
+    border-radius: 15px 15px 0 0; /* Matches bubble curve */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box; /* Ensures padding doesn't widen the element */
 }
 
 #search-bar {
