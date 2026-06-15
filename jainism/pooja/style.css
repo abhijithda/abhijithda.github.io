@@ -181,3 +181,17 @@ body.print-mode .print-only-qr img {
     max-width: 100px;
     margin: 0 auto;
 }
+
+/* Update your print-mode CSS to this: */
+body.print-mode .video-card {
+    display: block !important; /* Keep the card container visible */
+    border: none !important;   /* Clean look */
+}
+
+body.print-mode .video-card a {
+    display: none !important;  /* Only hide the video thumbnail link */
+}
+
+body.print-mode .print-only-qr {
+    display: block !important; /* Force QR to show */
+}
