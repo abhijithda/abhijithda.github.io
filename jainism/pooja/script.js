@@ -12,15 +12,24 @@ function filterChat() {
     });
 }
 
-// Updated Video Card with QR Code
 function createVideoCard(url) {
-    // Generate a QR code URL using a free Google-friendly API
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(url)}`;
+    // Robustly extract video ID
+    // 1. Remove everything after the timestamp '?' to clean the URL
+    const cleanUrl = url.split('?t=')[0].split('&t=')[0]; 
+    
+    // 2. Use the clean URL to extract ID
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = cleanUrl.match(regExp);
+    const videoId = (match && match[2].length === 11) ? match[2] : null;
 
+    if (!videoId) return '';
+
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(url)}`;
+    
     return `
         <div class="video-card">
             <a href="${url}" target="_blank">
-                <img src="https://img.youtube.com/vi/${url.split('v=')[1]}/0.jpg" alt="Watch Video">
+                <img src="https://img.youtube.com/vi/${videoId}/0.jpg" alt="Watch Video">
             </a>
             <div class="print-only-qr">
                 <p>Scan to watch:</p>
@@ -29,6 +38,7 @@ function createVideoCard(url) {
         </div>
     `;
 }
+
 let allData = []; // Global variable
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -37,6 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             allData = data; // Assign the fetched data to the global variable
             renderChat();   // Initial render
+            // RESTORE position AFTER rendering is done
+            setTimeout(() => {
+                const savedPosition = localStorage.getItem('scrollPosition');
+                if (savedPosition) {
+                    window.scrollTo(0, parseInt(savedPosition));
+                }
+            }, 100); // Small delay to ensure browser finished drawing the cards
         })
         .catch(error => console.error('Error loading data:', error));
 });
@@ -68,7 +85,12 @@ function renderChat() {
             excerpt.onclick = () => {
                 const target = document.getElementById(item.references[0]);
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Offset for the sticky header
+                    const yOffset = -100;
+                    const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
                 }
             };
 
@@ -124,3 +146,16 @@ function togglePrintMode() {
         body.classList.remove('print-mode');
     }
 }
+
+// Save scroll position every 2 seconds
+window.addEventListener('scroll', () => {
+    localStorage.setItem('scrollPosition', window.scrollY);
+});
+
+// Restore scroll position on load
+window.addEventListener('DOMContentLoaded', () => {
+    const savedPosition = localStorage.getItem('scrollPosition');
+    if (savedPosition) {
+        window.scrollTo(0, parseInt(savedPosition));
+    }
+});
