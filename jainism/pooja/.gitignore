@@ -1,0 +1,5 @@
+# Dependency directories
+node_modules/
+
+# Test coverage reports (if you add them later)
+coverage/
