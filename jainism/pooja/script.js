@@ -65,75 +65,103 @@ function getQuestionText(id) {
 }
 
 function renderChat() {
-    const container = document.getElementById('chat-container');
-    const langSelect = document.getElementById('lang-select');
-    // Safety check: if dropdown doesn't exist, default to 'both'
-    const lang = langSelect ? langSelect.value : 'both';
-    container.innerHTML = ""; // Clear existing
+  const container = document.getElementById('chat-container');
+  const langSelect = document.getElementById('lang-select');
+  
+  // Safety check: if dropdown doesn't exist, default to 'both'
+  const lang = langSelect ? langSelect.value : 'both';
+  container.innerHTML = ""; // Clear existing
 
-    // USE allData here, not data
-    allData.forEach(item => {
-        const bubble = document.createElement('div');
-        bubble.className = `bubble ${item.type}`;
-        bubble.id = item.id;
+  allData.forEach(item => {
+    const bubble = document.createElement('div');
+    bubble.className = `bubble ${item.type}`;
+    bubble.id = item.id;
 
-        // Reply Excerpt
-        if (item.references && item.references.length > 0) {
-            const excerpt = document.createElement('div');
-            excerpt.className = "reply-excerpt";
-
-            excerpt.onclick = () => {
-                const target = document.getElementById(item.references[0]);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                    // Offset for the sticky header
-                    const yOffset = -100;
-                    const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                    window.scrollTo({ top: y, behavior: 'smooth' });
-                }
-            };
-
-            const match = allData.find(i => i.id === item.references[0]);
-
-            // Choose the language for the excerpt based on the current 'lang' state
-            let excerptText = "...";
-            if (match) {
-                if (lang === 'kn') {
-                    excerptText = match.blocks[0].content.kn[0];
-                } else if (lang === 'en') {
-                    excerptText = match.blocks[0].content.en[0];
-                } else {
-                    // If 'both', show Kannada as default or combine them
-                    excerptText = match.blocks[0].content.kn[0] + " / " + match.blocks[0].content.en[0];
-                }
-            }
-
-            excerpt.innerText = (match ? match.blocks[0].content.kn[0] : "Original question...");
-            bubble.prepend(excerpt);
+    // Reply Excerpt Logic
+    if (item.references && item.references.length > 0) {
+      const excerpt = document.createElement('div');
+      excerpt.className = "reply-excerpt";
+      excerpt.onclick = () => {
+        const target = document.getElementById(item.references[0]);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const yOffset = -100;
+          const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
         }
+      };
 
-        // Text Content
+      const match = allData.find(i => i.id === item.references[0]);
+      let excerptText = "...";
+      if (match && match.blocks && match.blocks.length > 0) {
+        if (lang === 'kn') {
+          excerptText = match.blocks[0].content.kn[0];
+        } else if (lang === 'en') {
+          excerptText = match.blocks[0].content.en[0] || "...";
+        } else {
+          excerptText = match.blocks[0].content.kn[0] + (match.blocks[0].content.en[0] ? " / " + match.blocks[0].content.en[0] : "");
+        }
+      }
+      excerpt.innerText = excerptText;
+      bubble.appendChild(excerpt);
+    }
+
+    // Process ALL blocks sequentially within this item
+    item.blocks.forEach(block => {
+      // Create a separate text container row for EACH block to preserve the grid rows
+      if (block.content.kn || block.content.en) {
         const textDiv = document.createElement('div');
-        textDiv.className = "text-content";
-        let contentHtml = "";
-        if (lang === 'kn' || lang === 'both') contentHtml += `<p>${item.blocks[0].content.kn.join('<br>')}</p>`;
-        if (lang === 'en' || lang === 'both') contentHtml += `<p style="color:#555">${item.blocks[0].content.en.join('<br>')}</p>`;
-        textDiv.innerHTML = contentHtml;
-        bubble.appendChild(textDiv);
-
-        // Videos
-        if (item.blocks[0].videos && item.blocks[0].videos.length > 0) {
-            const mediaDiv = document.createElement('div');
-            mediaDiv.className = "media-content";
-            item.blocks[0].videos.forEach(vid => {
-                mediaDiv.innerHTML += createVideoCard(vid.url);
-            });
-            bubble.appendChild(mediaDiv);
+        textDiv.className = `text-content ${block.type}`; 
+        
+        let knHtml = `<div class="lang-column kn-column">`;
+        if ((lang === 'kn' || lang === 'both') && block.content.kn && block.content.kn.length > 0) {
+          knHtml += `<p class="lang-kn">${block.content.kn.join('<br>')}</p>`;
         }
+        knHtml += `</div>`;
 
-        container.appendChild(bubble);
+        let enHtml = `<div class="lang-column en-column">`;
+        if ((lang === 'en' || lang === 'both') && block.content.en && block.content.en.length > 0) {
+          enHtml += `<p class="lang-en" style="color:#555">${block.content.en.join('<br>')}</p>`;
+        }
+        enHtml += `</div>`;
+
+        textDiv.innerHTML = knHtml + enHtml;
+        bubble.appendChild(textDiv);
+      }
+
+      // 2. Media Content Container for the block
+      if (block.videos && block.videos.length > 0) {
+        const mediaDiv = document.createElement('div');
+        mediaDiv.className = "media-content";
+        block.videos.forEach(vid => {
+          mediaDiv.innerHTML += createVideoCard(vid.url);
+        });
+        bubble.appendChild(mediaDiv);
+      }
+      
+      // 3. Image Content Container for the block
+      if (block.images && block.images.length > 0) {
+        const imageDiv = document.createElement('div');
+        imageDiv.className = "image-content";
+        block.images.forEach(img => {
+          let captionText = "";
+          if (lang === 'kn' && img.caption.kn) captionText = img.caption.kn;
+          else if (lang === 'en' && img.caption.en) captionText = img.caption.en;
+          else if (lang === 'both') captionText = (img.caption.kn || "") + (img.caption.en ? " / " + img.caption.en : "");
+
+          imageDiv.innerHTML += `
+            <div class="image-card">
+              <img src="images/${img.src}" alt="${captionText || 'Image'}">
+              ${captionText ? `<p class="image-caption">${captionText}</p>` : ''}
+            </div>
+          `;
+        });
+        bubble.appendChild(imageDiv);
+      }
     });
+
+    container.appendChild(bubble);
+  });
 }
 
 function togglePrintMode() {

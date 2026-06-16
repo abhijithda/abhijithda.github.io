@@ -1,0 +1,397 @@
+[
+  {
+    "id": "q_001",
+    "type": "question",
+    "timestamp": "2026-06-15T10:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_001_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಎಲ್ಲಾ ದೇವರು ಒಂದೇ (ದೇವತೆಗಳು =?= ಜಿನೇಂದ್ರ ದೇವ) ?"
+          ],
+          "en": [
+            "All are equal (Devatas =?= Jinendra deva)?"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_001",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:01:00Z",
+    "references": ["q_001"],
+    "blocks": [
+      {
+        "id": "a_001_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಾರು ಜಿನ ಶಾಸನ ದೆವತೆಗಳನ್ನು ತೀರ್ಥಂಕರ ಭಗವಂತರ ಸಮಾನರೆಂದು ಪೂಜಿಸುತ್ತಾರೋ ಅವರು ಅಧೋ / ನರಕ ಗಾಮಿಗಳಾಗುತ್ತಾರೆ"
+          ],
+          "en": [
+            "Result of doing pooja of jina shaasana deva devi pooja thinking as bhagawan - Adho gaami / Narak gaami:"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=bgldj0TMZB4",
+            "youtubeId": "bgldj0TMZB4"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_002",
+    "type": "question",
+    "timestamp": "2026-06-15T10:05:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_002_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಮ್ಯಕ್ತ ಮಲಿನ"
+          ],
+          "en": [
+            "Samyak Malinatha"
+          ]
+        },
+        "tags": ["Samyaktva"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_002",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:06:00Z",
+    "references": ["q_002"],
+    "blocks": [
+      {
+        "id": "a_002_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಭಗವಂತರ ಸ್ವರೂಪ ತಿಳಿದು, ಹಾಗು ದೇವತೆಗಳನ್ನು ವೀತರಾಗ ಭಗವಂತರಲ್ಲ ಎಂದು ಅರಿತು, ದೇವೇತಗಳನ್ನು ಪೂಜೆ ಮಾಡಿದರೆ, ಸಮ್ಯಕ್ತ ನಷ್ಟವಾಗುದಿಲ್ಲ / ಮಿಥ್ಯಾತ್ವ ಎಂದು ಪರಿಗಣಿಸುವುದಿಲ್ಲ."
+          ],
+          "en": []
+        },
+        "tags": ["Samyaktva"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_002_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ವರದ ಲೋಭದಿಂದ ಮಾಡಿದರೆ ಮಲಿನವಾಗುತ್ತದೆ... ಏಕೆಂದರೆ, ಇವರ ಕಾರ್ಯ ಧರ್ಮದ ರಕ್ಷಣೆ... ಇವರನ್ನು ತಮ್ಮ ಸ್ವಂತ ಕಾರ್ಯಕ್ಕೆ / ಲೋಭ ಪೂರ್ಣಗೊಳಿಸಲು ಪೂಜೆ ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ಕ ಮಲಿನವಾಗುತ್ತದೆ."
+          ],
+          "en": [
+            "Doing pooja of Jina Shaasana devata with the greed to get boon is Samyak Malinatha, because they're there for protecting shaasana/dharma, and one tries to use them for their own greed."
+          ]
+        },
+        "tags": ["Samyaktva", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_002_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ವಿದ್ಯಾ ದೇವತೆಗಳ ಪೂಜೆ ವಿದ್ಯಾ ಸಿದ್ದಿ / ವರ ಪ್ರಾಪ್ತಿ ಮಾಡುಕೊಳ್ಳಲು ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ತ ಮಲಿನವಾಗುವುದು ಇಲ್ಲ ನಷ್ಟವಾಗುವುದು ಇಲ್ಲ. ಅನೇಕ ಮೋಕ್ಷ ಗಾಮಿಗಳು ವಿದ್ಯಾ ದೇವತಗಳ ಆರಾಧನೆ ವಿದ್ಯಾ ಸಿದ್ದಿಗೋಸ್ಕರ ಮಾಡಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Vidyaa devata pooja neither causes dosha in samyaktva, nor causes samyaktva to be lost. Many moksha gaami's have done aradhana of vidyaa devatas."
+          ]
+        },
+        "tags": ["Samyaktva", "VidyaDevata"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=u5wU3JpUrEC",
+            "youtubeId": "u5wU3JpUrEC"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_003",
+    "type": "question",
+    "timestamp": "2026-06-15T10:10:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_003_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಂಕಟ ನಿವಾರಣೆ ಮಾಡಲು ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಸಹಾಯ?"
+          ],
+          "en": [
+            "To get relief from troubles can we ask help from Jina Shasana Devatas?"
+          ]
+        },
+        "tags": ["SankatNivarana"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_003",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:11:00Z",
+    "references": ["q_003"],
+    "blocks": [
+      {
+        "id": "a_003_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಜಿನ ಶಾಸನ (ಧರ್ಮ) ದೇವತೆಗಳ ಪೂಜೆ ಆರಾಧನೆ ಸಂಕಟ ಪರಿಹಾರವಾಗಲು ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ಷ ಮಲಿನವಾಗುವುದಿಲ್ಲ."
+          ],
+          "en": [
+            "Pooja/Aaradhana of Jina Shasana/Dharma devata for Sankat Nivarana does not cause samyak malinatha."
+          ]
+        },
+        "tags": ["SankatNivarana"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_003_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆದರೆ ದರ್ಶನಿಕ ಪ್ರತಿಮಾಧಾರಿ(ಪ್ರತಿ)ಗಳು ತಮ್ಮ ಸಂಕಟ ನಿವಾರಣೆ ಮಾಡಲು ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಸಹಾಯ ಕೇಳುವ ಹಾಗಿಲ್ಲ. ವಿದ್ಯಾ ದೇವತೆಗಳ ಸಹಾಯ ತೆಗೆದು ಕೊಳ್ಳಬಹುದು."
+          ],
+          "en": [
+            "Though, Darshanik Prathimadhaari (Vrati) cannot ask help from Shasana devata for Sankat Nivaran of self, but can take help of Vidyaa devatas."
+          ]
+        },
+        "tags": ["SankatNivarana", "Vrati"],
+        "videos": [
+          {
+            "url": "https://youtu.be/3Z3uwIGj_VM?feature=shared",
+            "youtubeId": "3Z3uwIGj_VM"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_003_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಂಕಟಗಳಿಂದ ಆಕುಲವಾದರೂ, ಅದರಿಂದ ತನ್ನ ನಿವೃತ್ತಿಯಾಗಲು ವ್ರತಿಗಳು / ಪ್ರತಿಮಧಾರಿಗಳು (ದರ್ಶನಿಕ ಪ್ರತಿಮ ಇಂದ - from first pratima itself) ಶಾಸನ ದೇವತೆಗಳ ಸಹಾಯವನ್ನು ಬೇಡುವುದಿಲ್ಲ. ಯಾವ ಸಂಕಟ ಬಂದರು ಅರಹಂತಾದಿ ( ಪಂಚ ಗುರುಗಳ ) ಚರಣಗಳೇ ಶರಣು."
+          ],
+          "en": [
+            "Story of Dashalakshan vrati after 7/10 days upavas not well - Mother asks help from Padmavati devi:",
+            "https://youtu.be/PKfm5w7jPWo?feature=shared",
+            "Even in difficult times, a vrati / pratima dhaari (darshanik pratima dhaari - from first pratima itself), doesn't ask for help from jina shasana devatas for self. Whatever difficulties/sankat come, they only go to Arahantaadi's (Five gurus) feet for protection."
+          ]
+        },
+        "tags": ["SankatNivarana", "Vrati"],
+        "videos": [
+          {
+            "url": "https://youtu.be/PKfm5w7jPWo?feature=shared",
+            "youtubeId": "PKfm5w7jPWo"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_003_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "೪ನೇ ಗುಣಾಸ್ತಾನದವರು / ಅವ್ರತಿಗಳು (ಅಣುವ್ರತ / ಪ್ರತಿಮ ಇಲ್ಲದವರು) ಸಂಕಟ ಬಂದಾಗ, ವ್ರತಿಗಳಿಗೆ (ಮೋಕ್ಷ ಮಾರ್ಗದಲ್ಲಿ ನಡೆಯಲು ಶುರು ಮಾಡಿದವರಿಗೆ ) ಇರುವ ಮನೋ ಧೈರ್ಯ ಇಲ್ಲದ ಕಾರಣ, ಯಾವಾಗಲಾದರು ಶಾಸನ ದೇವತೆಗಳ ಸಹಾಯವನ್ನು ಕೇಳುತ್ತಾರೆ ."
+          ],
+          "en": [
+            "Unlike a vrati (one who has stepped into moksha maarg), a fourth gunasthaan person (avrati - person without anuvrat / pratimas), doesn't have that level of courage (mind strength) in difficult times, and may sometimes ask for help from jina shasana devatas."
+          ]
+        },
+        "tags": ["SankatNivarana", "Avrati"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=oKrlGt7XL6M",
+            "youtubeId": "oKrlGt7XL6M"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_003_b_5",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "ದರ್ಶನಿಕ ಶ್ರಾವಕ: ಆಪದ ಕುಲಿತೋಪಿ ತನ್ ನಿವೃತ್ಯರ್ಥಂ ಶಾಸನಾದಿ ದೇವತ ನ ಭಜತಿ ||"
+          ],
+          "en": [
+            "Darshinika Shravakah Aapada Kulitopi Tann Nivruityartham Shaasanaadi Devata Na Bajati ||"
+          ]
+        },
+        "tags": ["Shloka"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=-iGJ9IPiJN8",
+            "youtubeId": "-iGJ9IPiJN8"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_004",
+    "type": "question",
+    "timestamp": "2026-06-15T10:15:00Z",
+    "references": ["a_003"],
+    "blocks": [
+      {
+        "id": "q_004_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ವ್ರತಿಕರು ಶಾಸನ ದೇವತೆಗಳಲ್ಲಿ ಸಹಾಯ ಕೇಳಬಾರದಾದರೆ, ತುಂಬಾ ಅವಶ್ಯಕತೆ ಇದ್ದಾಗ ಯಾರ ಹತ್ತಿರ ಹೋಗಬೇಕು?"
+          ],
+          "en": [
+            "Inquirer: If vrati cannot go to shasana devatas for help, then where else to go?"
+          ]
+        },
+        "tags": ["Vrati", "SankatNivarana"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_004",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:16:00Z",
+    "references": ["q_004"],
+    "blocks": [
+      {
+        "id": "a_004_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಯಾರಿಗೆ ಜಿನ ಸಹಸ್ರ ನಾಮದಲ್ಲಿ ಬರುವ ಕೆಳಿಗಿನ ಹೆಸರುಗಳು ತಿಳಿದಿವಿಯೋ, ಅವರು ಜಿನೇಂದ್ರ ಭಗವಾಂತರ ಹತ್ತಿರನೇ ಹೋಗುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Answer: One who knows about below names from Jina Sahasra Naama, they'll go to Jinendra Bhagawan itself."
+          ]
+        },
+        "tags": ["Bhagawan"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_004_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "೧. ಅಭಿಷ್ಟದ",
+            "೨. ಚಿಂತಾಮಣಿ",
+            "೩. ಕಲ್ಪವೃಕ್ಷ",
+            "೪. ಕಾಮದೇನು",
+            "೫. ಮಹಾದಾನಿ",
+            "೬. ವರಪ್ರದ"
+          ],
+          "en": [
+            "1. Abhistada",
+            "2. Chintamani",
+            "3. Kalpavruskha",
+            "4. Kamadenu",
+            "5. Mahadaani",
+            "6. Varaprada"
+          ]
+        },
+        "tags": ["Names"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_004_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ಜಿನಸೇನರು ಜಿನ ಸಹಸ್ರ ನಾಮದಲ್ಲಿ ಅನ್ವರ್ಥ ನಾಮಗಳನ್ನು ತಿಳಿಸಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Acharya Jinasena in Jina Saharsa naama has Jinendra Bhagawan's names that are based on his nature/quality."
+          ]
+        },
+        "tags": ["JinaSahasranama"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=GzSgqtsmBVQ",
+            "youtubeId": "GzSgqtsmBVQ"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_005",
+    "type": "question",
+    "timestamp": "2026-06-15T10:20:00Z",
+    "references": ["a_004"],
+    "blocks": [
+      {
+        "id": "q_005_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ಅಭಿಷ್ಟದ ಅಂದರೆ ಇಷ್ಟ ಪಟ್ಟಿದ್ದನ್ನು ನೀಡುವುದು, ಮತ್ತು ಮಹಾದಾನಿ ಅಂದರೆ ದಾನ ಮಾಡುವವರು ಎಂದು. ಜಿನೇಂದ್ರ ಭಗವಂತರು ದೀಕ್ಷಾ ಸಮಯದಲ್ಲಿ ಎಲ್ಲವನ್ನು ತ್ಯಾಗ ಮಾಡಿದ್ದಾರೆ. ಅವರ ಹತ್ತಿರ ದಾನ ಮಾಡಲು ಏನು ಇದೆ ?"
+          ],
+          "en": [
+            "Inquirer: Abhistada means giving what's wished, and Mahaa daani also means one who gives! But, our Thirthankara Bhagawan left everything behind before taking Dikshaa, so how can he give?"
+          ]
+        },
+        "tags": ["Bhagawan", "Daana"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_005",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:21:00Z",
+    "references": ["q_005"],
+    "blocks": [
+      {
+        "id": "a_005_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ದೀಕ್ಷೆ ಪಡೆದು ಕರ್ಮ ನಷ್ಟ ಮಾಡಿದ ಮೇಲೆ, ಸಮವಸರಣ, ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ತೀರ್ಥಂಕರರಿಗೆ / ಜಿನೇಂದ್ರ ಭಗವಂತರಿಗೆ ಪ್ರಾಪ್ತವಾಗಿರುವುದು . ಅವರ ಹತ್ತಿರ ಇರುವಷ್ಟು ಮಾಹಾ ವಿಭೂತಿಗಳು ಈ ಸಂಸಾರದಲ್ಲಿ ಯಾರಿಗೂ ಪ್ರಾಪ್ತವಾಗುವದಿಲ್ಲ ."
+          ],
+          "en": [
+            "Answer: After taking deeksha and destroying karmas, Samavasarana, Ashta Pratiharya, and so on becomes Tirthankara/Jinendra Bhagawan. No one in this sansara attains so much as them."
+          ]
+        },
+        "tags": ["Bhagawan", "Daana"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  }
+]
