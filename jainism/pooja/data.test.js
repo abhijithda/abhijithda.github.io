@@ -3,28 +3,25 @@ const addFormats = require("ajv-formats");
 const fs = require("fs");
 const path = require("path");
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
+describe('Data Layer Validation', () => {
+  test('data.json exactly matches the schema', () => {
+    const ajv = new Ajv({ allErrors: true });
+    addFormats(ajv);
 
-const testDir = __dirname; // Current directory
-const schemaPath = path.join(testDir, 'schema.json');
-const dataPath = path.join(testDir, 'data.json');
+    const schemaPath = path.join(__dirname, 'schema.json');
+    const dataPath = path.join(__dirname, 'data.json');
 
-const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
-// Compile and validate
-const validate = ajv.compile(schema);
-const valid = validate(data);
+    const validate = ajv.compile(schema);
+    const isValid = validate(data);
 
-if (!valid) {
-  console.error("❌ data.json schema validation failed:\n");
-  validate.errors.forEach(err => {
-    console.error(`- Path: ${err.instancePath || 'root'}`);
-    console.error(`  Error: ${err.message}`);
+    // If it fails, print the errors nicely in Jest
+    if (!isValid) {
+      console.error(validate.errors);
+    }
+
+    expect(isValid).toBe(true);
   });
-  process.exit(1);
-} else {
-  console.log("✅ data.json is valid!");
-  process.exit(0);
-}
+});
