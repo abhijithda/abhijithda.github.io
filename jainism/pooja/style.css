@@ -1,0 +1,197 @@
+/* --- Global & Layout --- */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f6;
+}
+
+#chat-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Header --- */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 40px;
+    background: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+#search-bar {
+    flex-grow: 1;
+    margin: 0 20px;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* --- Content Cards (Formerly Bubbles) --- */
+.bubble {
+    position: relative;
+    padding: 25px;
+    padding-top: 40px; /* Space for excerpt */
+    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    align-items: flex-start;
+    box-sizing: border-box;
+    line-height: 1.5;
+}
+
+.text-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    flex: 2;
+}
+
+.media-content {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* --- Excerpt --- */
+.reply-excerpt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    font-size: 0.75em;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: #555;
+    cursor: pointer;
+    font-style: italic;
+    border-radius: 8px 8px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+
+/* --- Components --- */
+.video-card {
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: center;
+}
+.video-card img {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+}
+
+.switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc; transition: .4s; border-radius: 24px;
+}
+.slider:before {
+    position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: #075e54; }
+input:checked + .slider:before { transform: translateX(26px); }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .text-content { grid-template-columns: 1fr; }
+    .app-header { padding: 10px 15px; }
+}
+
+/* --- Print Mode --- */
+@media print {
+    #search-bar, .reply-excerpt, .toggle-container, .video-card {
+        display: none !important;
+    }
+    #chat-container { width: 100%; margin: 0; }
+    .bubble { border: 1px solid #ccc; break-inside: avoid; }
+    .print-only-qr { display: block !important; }
+}
+
+/* --- Active Print Mode (Toggled via JS) --- */
+body.print-mode #search-bar, 
+body.print-mode .video-card {
+    display: none !important;
+}
+
+body.print-mode .bubble {
+    border: 1px solid #ccc;
+    background-color: white !important;
+    width: 100%;
+    margin: 5px 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Ensure the QR code ONLY shows in Print Mode or actual Print */
+.print-only-qr { 
+    display: none !important; 
+}
+
+/* 1. Show QR code when Print Mode class is added to body */
+body.print-mode .print-only-qr { 
+    display: block !important; 
+}
+
+/* 2. Show QR code when the actual Print dialog is triggered */
+@media print {
+    .print-only-qr { 
+        display: block !important; 
+    }
+}
+
+/* Ensure the QR code container itself is visible when print-mode is active */
+body.print-mode .print-only-qr {
+    display: block !important;
+    margin-top: 10px;
+}
+
+/* Ensure the QR image inside it is also visible and sized correctly */
+body.print-mode .print-only-qr img {
+    display: block !important;
+    max-width: 100px;
+    margin: 0 auto;
+}
+
+/* Update your print-mode CSS to this: */
+body.print-mode .video-card {
+    display: block !important; /* Keep the card container visible */
+    border: none !important;   /* Clean look */
+}
+
+body.print-mode .video-card a {
+    display: none !important;  /* Only hide the video thumbnail link */
+}
+
+body.print-mode .print-only-qr {
+    display: block !important; /* Force QR to show */
+}

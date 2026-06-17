@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Jaina Pooja FAQ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="app-header">
+        <input type="text" id="search-bar" placeholder="Search topics (e.g., ಅಭಿಷೇಕ)..." onkeyup="filterChat()">
+        <select id="lang-select" onchange="renderChat()">
+            <option value="both">Both</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="en">English</option>
+        </select>
+        <div class="toggle-container">
+            <span>Print View</span>
+            <label class="switch">
+                <input type="checkbox" id="print-toggle" onchange="togglePrintMode()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
+
+    <div id="chat-container"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
