@@ -79,6 +79,15 @@ body {
     width: 100%;
 }
 
+.block-id {
+    padding: 15px 20px;
+    font-family: monospace;
+    margin-right: 10px;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 25px; /* Keeps them aligned */
+}
+
 .col-kn, .col-en {
     flex: 1; /* Both columns will grow to share the available width equally */
 }
