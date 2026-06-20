@@ -16,7 +16,9 @@
             "All are equal (Devatas =?= Jinendra deva)?"
           ]
         },
-        "tags": ["DevaMoodhata"],
+        "tags": [
+          "DevaMoodhata"
+        ],
         "videos": [],
         "images": []
       }
@@ -26,7 +28,9 @@
     "id": "a_001",
     "type": "answer",
     "timestamp": "2026-06-15T10:01:00Z",
-    "references": ["q_001"],
+    "references": [
+      "q_001"
+    ],
     "blocks": [
       {
         "id": "a_001_b_1",
@@ -39,7 +43,9 @@
             "Result of doing pooja of jina shaasana deva devi pooja thinking as bhagawan - Adho gaami / Narak gaami:"
           ]
         },
-        "tags": ["DevaMoodhata"],
+        "tags": [
+          "DevaMoodhata"
+        ],
         "videos": [
           {
             "url": "https://www.youtube.com/watch?v=bgldj0TMZB4",
@@ -67,7 +73,9 @@
             "Samyak Malinatha"
           ]
         },
-        "tags": ["Samyaktva"],
+        "tags": [
+          "Samyaktva"
+        ],
         "videos": [],
         "images": []
       }
@@ -77,7 +85,9 @@
     "id": "a_002",
     "type": "answer",
     "timestamp": "2026-06-15T10:06:00Z",
-    "references": ["q_002"],
+    "references": [
+      "q_002"
+    ],
     "blocks": [
       {
         "id": "a_002_b_1",
@@ -88,7 +98,9 @@
           ],
           "en": []
         },
-        "tags": ["Samyaktva"],
+        "tags": [
+          "Samyaktva"
+        ],
         "videos": [],
         "images": []
       },
@@ -103,7 +115,10 @@
             "Doing pooja of Jina Shaasana devata with the greed to get boon is Samyak Malinatha, because they're there for protecting shaasana/dharma, and one tries to use them for their own greed."
           ]
         },
-        "tags": ["Samyaktva", "ShasanaDevata"],
+        "tags": [
+          "Samyaktva",
+          "ShasanaDevata"
+        ],
         "videos": [],
         "images": []
       },
@@ -118,7 +133,10 @@
             "Vidyaa devata pooja neither causes dosha in samyaktva, nor causes samyaktva to be lost. Many moksha gaami's have done aradhana of vidyaa devatas."
           ]
         },
-        "tags": ["Samyaktva", "VidyaDevata"],
+        "tags": [
+          "Samyaktva",
+          "VidyaDevata"
+        ],
         "videos": [
           {
             "url": "https://www.youtube.com/watch?v=u5wU3JpUrEC",
@@ -146,7 +164,9 @@
             "To get relief from troubles can we ask help from Jina Shasana Devatas?"
           ]
         },
-        "tags": ["SankatNivarana"],
+        "tags": [
+          "SankatNivarana"
+        ],
         "videos": [],
         "images": []
       }
@@ -156,7 +176,9 @@
     "id": "a_003",
     "type": "answer",
     "timestamp": "2026-06-15T10:11:00Z",
-    "references": ["q_003"],
+    "references": [
+      "q_003"
+    ],
     "blocks": [
       {
         "id": "a_003_b_1",
@@ -169,7 +191,9 @@
             "Pooja/Aaradhana of Jina Shasana/Dharma devata for Sankat Nivarana does not cause samyak malinatha."
           ]
         },
-        "tags": ["SankatNivarana"],
+        "tags": [
+          "SankatNivarana"
+        ],
         "videos": [],
         "images": []
       },
@@ -184,7 +208,10 @@
             "Though, Darshanik Prathimadhaari (Vrati) cannot ask help from Shasana devata for Sankat Nivaran of self, but can take help of Vidyaa devatas."
           ]
         },
-        "tags": ["SankatNivarana", "Vrati"],
+        "tags": [
+          "SankatNivarana",
+          "Vrati"
+        ],
         "videos": [
           {
             "url": "https://youtu.be/3Z3uwIGj_VM?feature=shared",
@@ -206,7 +233,10 @@
             "Even in difficult times, a vrati / pratima dhaari (darshanik pratima dhaari - from first pratima itself), doesn't ask for help from jina shasana devatas for self. Whatever difficulties/sankat come, they only go to Arahantaadi's (Five gurus) feet for protection."
           ]
         },
-        "tags": ["SankatNivarana", "Vrati"],
+        "tags": [
+          "SankatNivarana",
+          "Vrati"
+        ],
         "videos": [
           {
             "url": "https://youtu.be/PKfm5w7jPWo?feature=shared",
@@ -226,7 +256,10 @@
             "Unlike a vrati (one who has stepped into moksha maarg), a fourth gunasthaan person (avrati - person without anuvrat / pratimas), doesn't have that level of courage (mind strength) in difficult times, and may sometimes ask for help from jina shasana devatas."
           ]
         },
-        "tags": ["SankatNivarana", "Avrati"],
+        "tags": [
+          "SankatNivarana",
+          "Avrati"
+        ],
         "videos": [
           {
             "url": "https://www.youtube.com/watch?v=oKrlGt7XL6M",
@@ -246,7 +279,9 @@
             "Darshinika Shravakah Aapada Kulitopi Tann Nivruityartham Shaasanaadi Devata Na Bajati ||"
           ]
         },
-        "tags": ["Shloka"],
+        "tags": [
+          "Shloka"
+        ],
         "videos": [
           {
             "url": "https://www.youtube.com/watch?v=-iGJ9IPiJN8",
@@ -261,7 +296,9 @@
     "id": "q_004",
     "type": "question",
     "timestamp": "2026-06-15T10:15:00Z",
-    "references": ["a_003"],
+    "references": [
+      "a_003"
+    ],
     "blocks": [
       {
         "id": "q_004_b_1",
@@ -274,7 +311,10 @@
             "Inquirer: If vrati cannot go to shasana devatas for help, then where else to go?"
           ]
         },
-        "tags": ["Vrati", "SankatNivarana"],
+        "tags": [
+          "Vrati",
+          "SankatNivarana"
+        ],
         "videos": [],
         "images": []
       }
@@ -284,7 +324,9 @@
     "id": "a_004",
     "type": "answer",
     "timestamp": "2026-06-15T10:16:00Z",
-    "references": ["q_004"],
+    "references": [
+      "q_004"
+    ],
     "blocks": [
       {
         "id": "a_004_b_1",
@@ -297,7 +339,9 @@
             "Answer: One who knows about below names from Jina Sahasra Naama, they'll go to Jinendra Bhagawan itself."
           ]
         },
-        "tags": ["Bhagawan"],
+        "tags": [
+          "Bhagawan"
+        ],
         "videos": [],
         "images": []
       },
@@ -322,8 +366,15 @@
             "6. Varaprada"
           ]
         },
-        "tags": ["Names"],
-        "videos": [],
+        "tags": [
+          "Names"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=GzSgqtsmBVQ",
+            "youtubeId": "GzSgqtsmBVQ"
+          }
+        ],
         "images": []
       },
       {
@@ -337,13 +388,10 @@
             "Acharya Jinasena in Jina Saharsa naama has Jinendra Bhagawan's names that are based on his nature/quality."
           ]
         },
-        "tags": ["JinaSahasranama"],
-        "videos": [
-          {
-            "url": "https://www.youtube.com/watch?v=GzSgqtsmBVQ",
-            "youtubeId": "GzSgqtsmBVQ"
-          }
+        "tags": [
+          "JinaSahasranama"
         ],
+        "videos": [],
         "images": []
       }
     ]
@@ -352,7 +400,9 @@
     "id": "q_005",
     "type": "question",
     "timestamp": "2026-06-15T10:20:00Z",
-    "references": ["a_004"],
+    "references": [
+      "a_004"
+    ],
     "blocks": [
       {
         "id": "q_005_b_1",
@@ -365,7 +415,10 @@
             "Inquirer: Abhistada means giving what's wished, and Mahaa daani also means one who gives! But, our Thirthankara Bhagawan left everything behind before taking Dikshaa, so how can he give?"
           ]
         },
-        "tags": ["Bhagawan", "Daana"],
+        "tags": [
+          "Bhagawan",
+          "Daana"
+        ],
         "videos": [],
         "images": []
       }
@@ -375,7 +428,9 @@
     "id": "a_005",
     "type": "answer",
     "timestamp": "2026-06-15T10:21:00Z",
-    "references": ["q_005"],
+    "references": [
+      "q_005"
+    ],
     "blocks": [
       {
         "id": "a_005_b_1",
@@ -388,8 +443,2239 @@
             "Answer: After taking deeksha and destroying karmas, Samavasarana, Ashta Pratiharya, and so on becomes Tirthankara/Jinendra Bhagawan. No one in this sansara attains so much as them."
           ]
         },
+        "tags": [
+          "Bhagawan",
+          "Daana"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+{
+    "id": "q_006",
+    "type": "question",
+    "timestamp": "2026-06-15T10:25:00Z",
+    "references": [
+      "a_005"
+    ],
+    "blocks": [
+      {
+        "id": "q_006_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ತೀರ್ಥಂಕರರ ಕೇವಲ ಜ್ಞಾನದ ಗುಣದಿಂದ ದಿವ್ಯ ಧ್ವನಿ ಮೊಳಗುತ್ತದೆ. ಅವರು ದಾನ ಮಾಡಲು ಹೇಗೆ ಸಾದ್ಯ ?"
+          ],
+          "en": [
+            "Inquirer: Tirthankara kevala jnaana (omniscience) quality produces divya dhwani. How is daana possible?"
+          ]
+        },
         "tags": ["Bhagawan", "Daana"],
         "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_006",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:26:00Z",
+    "references": [
+      "q_006"
+    ],
+    "blocks": [
+      {
+        "id": "a_006_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ತೀರ್ಥಂಕರರು ನಾಲ್ಕು ಘಾತಿ ಕರ್ಮಗಳನ್ನು ನಷ್ಟ ಮಾಡಿದ ಮೇಲೆ, ಅವರಿಗೆ ೯ ಕೇವಲ ಲಾಭಿಗಳು ಪ್ರಾಪ್ತವಾಗುತ್ತವೆ. ಅದರಲ್ಲಿ ಕೇವಲ ದಾನವೂ ಒಂದು ಗುಣ ."
+          ],
+          "en": [
+            "Answer: When Tirthankara get rid of karmas, he attains 9 Kevala labdhis. And in that, one of them is Kevala Daana."
+          ]
+        },
+        "tags": ["Bhagawan", "Daana"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_006_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ನೇಮಿಚಂದ್ರ ಸಿದ್ದಾಂತ ಚಕ್ರವರ್ತಿಗಳು ರಚಿಸಿದ ಗೊಮ್ಮಟಸಾರದಲ್ಲಿ (ಹಾಗು ಇನ್ನೂ ಅನೇಕ ಗ್ರಂಥಗಳಲ್ಲಿ ) ೯ ಕ್ಷಾಯಿಕ ಲಬ್ಬಿಗಳ ಹೆಸರುಗಳು :"
+          ],
+          "en": [
+            "Gommata Saara by Acharya Nemi Chandra Siddhanta Chakravarthi (and in many other scriptures,) mentions names of 9 kshaika labdhis:"
+          ]
+        },
+        "tags": ["Bhagawan", "Daana"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_006_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "೧. ಕೇವಲ ದರ್ಶನ",
+            "೨. ಕೇವಲ ಜ್ಞಾನ",
+            "೩. ಕೇವಲ ಚರಿತ್ರೆ",
+            "೪. ಕೇವಲ ದಾನ",
+            "೫. ಕೇವಲ ಲಾಭ",
+            "೬. ಕೇವಲ ವೀರ್ಯ",
+            "೭. ಕೇವಲ ಭೋಗ",
+            "೮. ಕೇವಲ ಉಪಭೋಗ",
+            "೯. ಕೇವಲ സമ್ಯಕ್ತ"
+          ],
+          "en": [
+            "9 Kshaika Kevala Labdhis",
+            "Keval Darshan",
+            "Keval Jnaan",
+            "Keval Charitra",
+            "Keval Daan",
+            "Keval Laabh",
+            "Keval Veerya",
+            "Keval Bhoga",
+            "Keval Upabhoga"
+          ]
+        },
+        "tags": ["Bhagawan", "Daana"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_007",
+    "type": "question",
+    "timestamp": "2026-06-15T10:30:00Z",
+    "references": [
+      "a_006"
+    ],
+    "blocks": [
+      {
+        "id": "q_007_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ಭಗವಂತರು ಏನು ಕೊಡುತ್ತಾರೆ ?"
+          ],
+          "en": [
+            "Inquirer: what all does our Bhagawan give?"
+          ]
+        },
+        "tags": ["Bhagawan", "Daana"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_007",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:31:00Z",
+    "references": [
+      "q_007"
+    ],
+    "blocks": [
+      {
+        "id": "a_007_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಆಚಾರ್ಯ ಕುಂದ ಕುಂದ ಸ್ವಾಮಿಗಳು ಅರ್ಥ (ಸಂಪತ್ತು), ಧರ್ಮ, ದೀಕ್ಷ, ಆದಿ ಎಂದು ತಿಳಿಸಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Acharya Kunda Kunda says wealth, dharma, deeksha and so on."
+          ]
+        },
+        "tags": ["Bhagawan", "Daana"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_007_b_2",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "ಶ್ಲೋಕ:"
+          ],
+          "en": [
+            "Sloka:"
+          ]
+        },
+        "tags": ["Shloka"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=FwSD_q6xfAl",
+            "youtubeId": "FwSD_q6xfAl"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_008",
+    "type": "question",
+    "timestamp": "2026-06-15T10:35:00Z",
+    "references": [
+      "a_003"
+    ],
+    "blocks": [
+      {
+        "id": "q_008_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಹಾಗಿದ್ದರೆ ವ್ರತಿಗಳು ತಮ್ಮ ಸಂಕಟ ನಿವಾರಣೆಗೆ ಬಿಟ್ಟು, ಧರ್ಮ / ಜಿನ ಶಾಸನಕ್ಕೆ ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಸಹಾಯ ಪಡಯಬಹುದೇ?"
+          ],
+          "en": [
+            "Inquirer: Can vrati get help from Jina Shasana Devata if it's not for self sankat nivaaran but maybe related to Dharma/Jina Shasana?"
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_008",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:36:00Z",
+    "references": [
+      "q_008"
+    ],
+    "blocks": [
+      {
+        "id": "a_008_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಮಹಾ-ವ್ರತಿಗಳೂ ಸಹಾ ಸಹಾಯ ಕೇಳಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Answer: Even mahaa-vratis take help."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ಕುಂದ ಕುಂದ ಸ್ವಾಮಿ ಮತ್ತು ಕುಷ್ಮಾಂಡಿನೀ ದೇವಿ:"
+          ],
+          "en": [
+            "Acharya Kunda Kunda Swami and Kushmaandini Devi:"
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [
+          {
+            "url": "https://youtu.be/Ue-MdKMvGXw",
+            "youtubeId": "Ue-MdKMvGXw"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_008_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಹರಿವಂಶ ಪುರಾಣದಲ್ಲಿ ಆಚಾರ್ಯ ಜಿನಸೆನರು, ಜಿನಶಾಸನ ದೇವತೆಗಳು (ಅಪ್ರತಿ ಚಕ್ರ, ಸಿಂಹ ವಾಹಿನಿ ) ಸದಾ ಹತ್ತಿರವಿರುವಂತೆ ಪ್ರಾರ್ಥಿಸುತ್ತಾರೆ ಏಕೆಂದರೆ ಅವರು ಎಲ್ಲಿ ಇರುತ್ತಾರೋ ಅಲ್ಲಿ ಎಲ್ಲವೂ ಒಳ್ಳೆಯದೇ ಆಗುತ್ತದೆ. ಹಾಗಿದ್ದ ಮೇಲೆ ಜಿನ ಶಾಸನದ ಮೇಲೆ ತೊಂದರೆ ಹೇಗೆ ಬರುವುದು?"
+          ],
+          "en": [
+            "Acharya Jinasena (in Hari Vamsha Purana) asks Jina Shasana devatas (Aprati Chakra, Sinha Vaahini) to stay close, because wherever they stay everything gets good."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರತಿಕೂಲ ಗ್ರಹ, ಉರಗ, ನಾಗ, ಭೂತ, ಪಿಶಾಚ, ರಾಕ್ಷಸ ಇತ್ಯಾದಿ ಉಪದ್ರವಿಯ ದೇವತೆಗಳು ಉತ್ತಮ ಕೆಲಸಗಳಲ್ಲಿ ಮನುಷ್ಯರಿಗೆ ವಿಘ್ನ ಉಂಟುಮಾಡುತ್ತಾರೆ. ಆದರೆ ಜಿನಶಾಸನದ ದೇವತೆಗಳು ಇದ್ದಾಗ, ಅವರು ಆ ಉಪದ್ರವಿಯ ದೇವರನ್ನು ಶಾಂತಗೊಳಿಸುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Graha, Urag, Naag, Bhoot, Pichach, Raakshas types of devs interfere/trouble when people are doing good things. But, when Jina Shasana Devatas are present, they pacify upadravi devatas."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=zZIDujtOtKA",
+            "youtubeId": "zZIDujtOtKA"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_008_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ಮಾನತುಂಗ ಸ್ವಾಮಿಯ ಕಥೆಯ ಒಂದು ಭಾಗ"
+          ],
+          "en": [
+            "Excerpt of the Acharya Maanatunga Swami story:"
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_6",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಮೂರ ದಿನಗಳನ್ನು ಕಾರಾಗೃಹದಲ್ಲಿ ಕಳೆದ ನಂತರ, ನಾಲ್ಕನೇ ದಿನ, ಆಚಾರ್ಯ ಮಾನತುಂಗ ಸ್ವಾಮಿಯವರು ಯಂತ್ರ, ಮಂತ್ರ ಮತ್ತು ುದ್ದಿಯನ್ನೊಳಗೊಂಡ ಆದಿನಾಥ ಸ್ತೋತ್ರವನ್ನು (ಭಕ್ತಾಮರ ಸ್ತೋತ್ರ) ರಚಿಸಿ, ಅದನ್ನು ಪಠಿಸುತ್ತಾರೆ. ಅವರು ಪಠಿಸಿದಂತೆ, ಬೀಗಗಳು ಒಂದರ ಬಳಿಕ ಇನ್ನೊಂದು ಬಿಚ್ಚಿ ಕೊಳ್ಳುತ್ತವೆ ಹಾಗು ಬಾಗಿಲುಗಳು ತಾವಾಗಿಯೇ ತೆರೆಯುತ್ತವೆ. ಆಚಾರ್ಯಶ್ರೀ ಕಾರಾಗೃಹದಿಂದ ಹೊರಬರುವುದನ್ನು ಕಂಡು ಅಲ್ಲಿದ್ದ ಪಹರೇದಾರರು ಬೀಗವನ್ನೇನು ಸರಿಯಾಗಿ ಹಾಕದಿರಬಹುದು ಎಂದು ಯೋಚಿಸಿ, ಅವರನ್ನು ಮತ್ತೆ ಬಂಧಿಸುತ್ತಾರೆ. ಕೆಲವು ಸಮಯದ ನಂತರ ಮತ್ತೆ ಬೀಗಗಳು ತೆರೆಯುತ್ತವೆ ಮತ್ತು ಆಚಾರ್ಯಶ್ರೀ ಮತ್ತೆ ಹೊರಬರುತ್ತಾರೆ. ಆಗ ಪಹರೇದಾರರು ರಾಜನ ಆಸ್ಥಾನಕ್ಕೆ ಹೋಗಿ ಈ ಘಟನೆ ಬಗ್ಗೆ ತಿಳಿಸುತ್ತಾರೆ."
+          ],
+          "en": [
+            "After 3 days in prison, Acharya Maanatunga Swami on the 4th day composes aadinatha stotra (Bhaktamara stotra) including yantra, mantra and riddhi, and recites. As he recites, locks one by one open/break, and doors open automatically. Acharyashree comes out of the prison. The prison guards, thinking they might have not locked properly, again put him back in the prison. After some time, the locks open again, and Acharyashree comes out of the prison. The guards then go and report to the king in the palace's court."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_7",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಇದನ್ನು ಕೇಳಿದ ಕಾಳಿದಾಸನು ಕಾಳಿ ದೇವಿಯನ್ನು ಆಹ್ವಾನಿಸಲು ಸಿದ್ಧತೆ ಮಾಡಲು ಪ್ರಾರಂಭಿಸುತ್ತಾನೆ. ಆದರೆ ಆಹ್ವಾನಿಸುವ ಮೊದಲೇ ಕಾಳಿ ದೇವಿಯು ಭಯಾನಕ ರೂಪದಲ್ಲಿ ಪ್ರತ್ಯಕ್ಷವಾಗುತ್ತಾಳೆ. ಅವಳ ರೂಪವನ್ನು ನೋಡಿ ಸಭೆಯಲ್ಲಿರುವರೆಲ್ಲರೂ ಭಯಗೊಳ್ಳುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Hearing this, Kalidasa starts to prepare to invite Kaali devi. But Kaali devi appears even before she was invited in a fearsome appearance. Looking at her, everyone in the king's court becomes frightened."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_8",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಕೂಡಲೇ ಚಕ್ರೇಶ್ವರಿ ದೇವಿಯು ಶುಭ್ರ ಮತ್ತು ಶಾಂತ ರೂಪದಲ್ಲಿ ಪ್ರತ್ಯಕ್ಷರಾಗುತ್ತಾರೆ. ಆಸ್ಥಾನದಲ್ಲಿರುವ ಜನರು ಈ ಇಬ್ಬರ ರೂಪದ ವ್ಯತ್ಯಾಸವನ್ನು ನೋಡಿ ಆಶ್ಚರ್ಯಚಕಿತರಾಗುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Soon Chakreshwari devi appears with a pleasing and serene appearance. The people in the court are surprised to see the differences in the two devis."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_9",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಚಕ್ರೇಶ್ವರಿ ದೇವಿ ಕಾಳಿಗೆ - \"ನೀನು ಆಚಾರ್ಯ ಮಾನತುಂಗ ಸ್ವಾಮಿಯವರಿಗೆ ಉಪದ್ರವ ಕೋಡಲು ಬಂದಿದ್ದೀಯ? ತಾಳು ನಿನಗೆ ನಾನು ಶಿಕ್ಷೆ ಕೋಡುತ್ತೇನೆ.\" ಆಗ ಭಯದಿಂದ ನಡುಗಿದ ಕಾಳಿಯು ಚಕ್ರೇಶ್ವರಿ ದೇವಿಯ ಸ್ತುತಿ ಮಾಡಿ, ಕ್ಷಮೆ ಯಾಚಿಸಿ ಅದೃಶ್ಯಳಾಗುತ್ತಾಳೆ."
+          ],
+          "en": [
+            "Chakreshwari devi warns Kaali devi - have you come here to trouble Acharya Maantatunga swami?. Wait, I'll give you the punishment. Being frightened, Kaali devi does stuti of Chakreshwari devi and ask for forgiveness and disappears."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_10",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಭಕ್ತಾಮರ ಸ್ತೋತ್ರದ ೪೩ನೇ ಶ್ಲೋಕದ ಮಂತ್ರವು ಹರಿವಂಶ ಪುರಾಣದಲ್ಲಿರುವ ಜಿನಶಾಸನ ದೇವತೆಗಳ ಕುರಿತು ಕಾಣುವ ಹೊಂದಾಣಿಕೆ ಸ್ಪಷ್ಟ ಪಡಿಸುತ್ತದೆ ."
+          ],
+          "en": [
+            "The 43rd sloka's mantra of Bhaktamara stotra seems inline with Hari Vamsha Purana reference about Jina Shasana Devatas."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_11",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "ಓಂ ನಮೋ ಚಕ್ರೇಶ್ವರಿ ದೇವಿ, ಚಕ್ರ ಧಾರಿಣಿ, ಜಿನಶಾಸನ ಸೇವಾ ಕಾರಿಣಿ, ಜಿನಶಾಸನ ಕುದ್ರೋಪದ್ರವ ವಿನಾಶಿನಿ, ಧರ್ಮ ಶಾಂತಿ ಕಾರಿಣಿ ನಮಃ ಕುರು ಕುರು ಸ್ವಾಹಾ."
+          ],
+          "en": [
+            "Om Namo Chakreshwari Devi, Chakra Dhaarini, Jina Shasana Sevaa Kaarini, Jina Shasana Kshudropadrava Vinaashini, Dharma Shaanti Kaarini Namah Kuru Kuru Swaahaa."
+          ]
+        },
+        "tags": ["Shloka", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_008_b_12",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಗ್ರಹ, ಉರಗ (ನಾಗ) ಆದಿ ದೋಷ ನಿವಾರಣೆಗೆ ಉ.ದಾ: ಕನಕಗಿರಿ ಕ್ಷೇತ್ರದಲ್ಲಿ ಭಾನುವಾರದಂದು ದೋಷ ನಿವಾರಣೆಗೆ ತೀರ್ಥಂಕರರ ಹಾಗು ಯಕ್ಷ ಯಕ್ಷಿಯರ ಪೂಜೆಯನ್ನು ಮಾಡಿಸುತ್ತಾರೆ. ಇಲ್ಲಿ ಅನೇಕ ಜೈನರು ಹಾಗು ಜೈನೇತರರು ಬಂದು ಪೂಜೆ ಮಾಡುತ್ತಾರೆ."
+          ],
+          "en": [
+            "For graha, uraga (naga) and other dosha removal, one does pooja of Tirthankaras and yakshas yakshis. Ex: At Kanakagiri Jain temple, poojas are done to alleviate such doshas - A specific graha related Tirthankara, his yaksha and his yakshi poojas are done. Many jains and non-jains, participate in these poojas (almost) every Sunday."
+          ]
+        },
+        "tags": ["Vrati", "ShasanaDevata", "Dharma"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_009",
+    "type": "question",
+    "timestamp": "2026-06-15T10:40:00Z",
+    "references": [
+      "a_001"
+    ],
+    "blocks": [
+      {
+        "id": "q_009_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಆಚಾರ್ಯ ಸಮಂತಭದ್ರರು ರತ್ನಾಕರಂಡಕ ಶ್ರಾವಕಾಚಾರದಲ್ಲಿ ಯಾರು ರಾಗ ದ್ವೇಷದಿಂದ ಕೂಡಿರುವರೋ ಅವರನ್ನು ಪೂಜೆ ಮಾಡುವುದು ದೇವ ಮೂಡತೆ ಎಂದಿದ್ದಾರೆ, ಹಾಗಿದ್ದ ಮೇಲೆ ದೇವತೆಗಳನ್ನು ಪೂಜೆ ಮಾಡಿದರೆ ದೇವ ಮೂಡತೆ ಆಗುವುದಿಲ್ಲವೆ ?"
+          ],
+          "en": [
+            "Inquirer: Acharya Samantabhadra, in the Ratnakarandaka Shravakachara, stated that worshipping those who are coupled with Raga and Dvesha is Deva Moodhata'. In that case, wouldn't worshipping Shasana Devatas also be Deva Moodhata?"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "q_009_b_2",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "ದೇವ ಮೂಡತೆ ಶ್ಲೋಕ:",
+            "ವರೋಪಲಿಪ್ಪಯಾಶಾವಾನ್ ರಾಗದ್ವೇಷಮಲೀಮಸಾ |",
+            "ದೇವತಾಯದುಪಾಸೀತ ದೇವತಾಮೂಢಮುಚ್ಯತೇ ||೨೩||"
+          ],
+          "en": [
+            "Deva Moodhata Shloka:",
+            "Varopallipsaya Ashaavaan Raaga Dvesha maleemasa |",
+            "Devataa yadyupaseeta Devataa moodham uchyate ||23||"
+          ]
+        },
+        "tags": ["Shloka", "DevaMoodhata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_009",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:41:00Z",
+    "references": [
+      "q_009"
+    ],
+    "blocks": [
+      {
+        "id": "a_009_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಈ ಶ್ಲೋಕದಲ್ಲಿ \"ದೇವ\" ಎಂದು ಹೇಳಿರುವುದು ದೇವಗತಿಯ ದೇವತೆಗಳನ್ನಲ್ಲ. ಇಲ್ಲಿ \"ದೇವ\" ಎಂದು ಹೇಳಿರುವುದು ಜಿನೇಂದ್ರ ದೇವ - ಭಗವಂತರನ್ನು."
+          ],
+          "en": [
+            "Answer: In this shloka, \"Deva\" does not refer to the celestial beings (Devatas) of the celestial realm (Devagati). Here, \"Deva\" refers to Jinendra Deva i.e., Bhagawan."
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_009_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಾರು ವರದ ಆಸಗೆ ರಾಗ ದ್ವೇಷ ಹೊಂದಿದ ಜೀವವನ್ನು ಇವರೇ ದೇವರು ಎಂದು ಪೂಜಿಸುತ್ತಾರೋ, ಅವರಿಗೆ ದೇವ ಮೂಡತೆ ಎಂದಿದ್ದಾರೆ. ಇಲ್ಲಿ ರಾಗ ದ್ವೇಷ ಹೊಂದಿದ ಜೀವ ಅಂದರೆ ಮನಷ್ಯ, ದೇವ-ಗತಿಯ ದೇವತೆ, ಪಶು/ಪ್ರಾಣಿ ಯಾವುದೇ ಆಗಿರಬಹುದು. ಯಾರು ವರ ಅಂದರೆ ಇಷ್ಟ ಪಟ್ಟ ವಸ್ತುವನ್ನು ಕೊಡುತ್ತಾರೋ ಅವರೇ ದೇವರು ಎಂದು ಪೂಜೆ ಮಾಡುವುದಕ್ಕೆ ದೇವ ಮೂಡತೆ ಎಂದು ಅರ್ಥವು ."
+          ],
+          "en": [
+            "Whoever out of a desire for a boon worships any soul with raaga and dvesha, believing 'this is Bhagawan', is called Deva Moodhata (delusion regarding Bhagawan). Here, any soul with raaga and dvesha could be a human, a Devagati Devata or an animal. Worshipping anyone who gives something we want (i.e., boon) as a Bhagawan is Deva Moodhata."
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_009_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಾರು ದೇವತೆಗಳನ್ನು ಜಿನೇಂದ್ರ ಭಗವಂತರ ಸಮಾನರೆಂದು ತಿಳಿಯುತ್ತಾರೋ ಅವರು ಅಧೋಗಾಮಿಗಳಾಗುತ್ತಾರೆ ಎಂದು ಹಿಂದೆ ಹೇಳಲಾಗಿದೆ. (ಯಾರು ಜಿನ ಶಾಸನ ದೇವತೆಗಳನ್ನು ತೀರ್ಥಂಕರ ಭಗವಂತರ ಸಮಾನರೆಂದು ಪೂಜಿಸುತ್ತಾರೋ ಅವರು ಅಧೋ / ನರಕ ಗಾಮಿಗಳಾಗುತ್ತಾರೆ:"
+          ],
+          "en": [
+            "As mentioned earlier, whoever consider Devatas to be equal to Jinendra Bhagawan go to the lower realms (Adhogami). (Those who worship Jina Shasana Devatas as equal to Tirthankara Bhagawan go to the lower gati / hell - Narak Gami:"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=bgldj0TMZB4",
+            "youtubeId": "bgldj0TMZB4"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_009_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಈ ಶ್ಲೋಕದಲ್ಲೂ ಸಹ ಅದನ್ನೇ ಹೇಳಲಾಗಿದೆ. ಆದರೆ ಬರೀ ದೇವತೆಗಳಷ್ಟೇ ಅಲ್ಲ, ಎಲ್ಲಾ ರಾಗಿ ದ್ವೇಷ ಜೀವಿಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ."
+          ],
+          "en": [
+            "The same thing is stated in this shloka as well. However, not just Devatas, but all RagiDveshi -Jivas are included."
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_009_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ರಾಗಿ ದ್ವೇಷಿ ಜೀವಗಳನ್ನು ಜಿನೇಂದ್ರ ಭಗವಂತರ ಸಮಾನರೆಂದು ತಿಳಿದು ಪೂಜೆ ಮಾಡುವುದಕ್ಕೆ ದೇವ ಮೂಡತೆ ಎಂದಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Worshipping Ragi-Dveshi souls, thinking them to be equal to Jinendra Bhagawan, is called Deva Moodhata."
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [
+          {
+            "url": "https://youtu.be/JjONRQG9NkQ?si=1QbQRIWehF-Jj949",
+            "youtubeId": "JjONRQG9NkQ"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_010",
+    "type": "question",
+    "timestamp": "2026-06-15T10:45:00Z",
+    "references": [
+      "a_009"
+    ],
+    "blocks": [
+      {
+        "id": "q_010_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ಇದು ದೇವ ಗತಿಯ ದೇವತೆಗಳ ಬಗ್ಗೆ ಅಲ್ಲ ಎಂದು ಹೇಗೆ ಖಚಿತವಾಗಿ ಹೇಳುತ್ತೀರಾ?"
+          ],
+          "en": [
+            "Inquirer: How do you confirm that this is not about the Devagati Devatas?"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_010",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:46:00Z",
+    "references": [
+      "q_010"
+    ],
+    "blocks": [
+      {
+        "id": "a_010_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಈ ಶ್ಲೋಕದ ಹಿಂದನ ಮುಂದಿನ ಶ್ಲೋಕಗಳ್ಳನ್ನೂ ನೋಡಿ. ರತ್ನಾಕರಂಡಕ ಶ್ರಾವಕಾಚಾರದಲ್ಲಿ ಇಲ್ಲಿಯವರೆಗೆ ಆಪ್ತ (ಭಗವಂತ), ಆಗಮ (ಶಾಸ್ತ್ರ), ತಪೋನೃತಾಂ (ಗುರು (ಸಾಧು) ಗಳ ಬಗ್ಗೆ ವರ್ಣನೆ ಮಾಡಿದ್ದಾರೆ. ಆದಾದ ಮೇಲೆ ಅದರ ವಿರುದ್ಧ / ವೀಪರಿತ / ಅಪ ನಂಬಿಕೆಗಳ / ಭ್ರಮೆ / ಮೂಢತೆ ಬಗ್ಗೆ ತಿಳಿಸಿದ್ದಾರೆ ."
+          ],
+          "en": [
+            "Answer: Look at the preceding and succeeding shlokas of this verse. So far in the Ratnakarandaka Shravakachara, they have described Apta (Bhagawan), Agama (Shastra/Scripture), and Tapobhrutam (Guru/Sadhu). After that, they have described the opposite/wrong beliefs/delusions/Moodhata."
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_010_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಶಾಸ್ತ್ರದ ಮೂಢತೆಗೆ -> ಲೋಕ ಮೂಢತೆ",
+            "ಜಿನೇಂದ್ರ ದೇವರ -> ಮೂಢತೆಗೆ ದೇವ ಮೂಢತೆ",
+            "ಗುರುಗಳ ಮೂಢತೆಗೆ -> ಗುರು ಮೂಢತೆ"
+          ],
+          "en": [
+            "Shastra's (Scripture's) delusion -> Loka Moodhata",
+            "Bhagawan related delusion -> Deva Moodhata",
+            "Guru related delusion -> Guru Moodhata"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_010_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಅಷ್ಟೇ ಅಲ್ಲದೆ, ದೇವ-ಗತಿಯ ದೇವತೆಗಳು ವರವನ್ನು ಕೊಡಬಲ್ಲರು, ಮತ್ತು ದೇವ-ಗತಿಯ ದೇವತೆಗಳನ್ನು ಜಿನೇಂದ್ರ ಭಗವಂತ ಅಲ್ಲ ಎಂದು ತಿಳಿದಿದ್ದು ಅವರನ್ನು ದೇವ-ಗತಿಯ ದೇವತೆಗಳೇ ಎಂದು ತಿಳಿದರೆ ಅದು ಮೂಢತೆ (ಮೂಡತೆ ಅಂದರೆ ಭ್ರಮೆ) ಆಗಲು ಹೇಗೆ ಸಾಧ್ಯ? ಇರುವುದನ್ನು ಇರುವ ಹಾಗೆ ತಿಳಿಯುವುದು ಮೂಢತೆ/ಭ್ರಮೆ ಆಗಲಾರದು."
+          ],
+          "en": [
+            "Moreover, the Devatas of the Devagati can grant boons, and if one knows that the Devatas of the Devagati are not Jinendra Bhagawan and simply recognizes them as Devatas of the Devagati, how can that be Moodhata (Moodhata means delusion/error)? Knowing a thing as it is is not Moodhata/delusion."
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_010_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [],
+          "en": [
+            "I wonder if Acharya Samantabhadra with Deva Moodatha Shloka is implying that Jinendra Bhagawan gives boon (as we know from earlier messages of Acharya Kunda Kunda and other acharyas that Veetarag Bhagawan gives)."
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_010_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [],
+          "en": [
+            "So, knowing that Jinendra Bhagawan gives, and one of the ways to get it - is by doing pooja, if someone gets what he desired/wanted by doing pooja/prasansha of a raagi jeev, and starts believing them as Bhagawan - then it is deva moodatha. I.e., since someone is giving boon, he starts thinking of them as bhagawan. Otherwise, why else would someone getting what they wished - be confused to believe them as Jinendra Bhagawan if Jinendra Bhagawan wouldn't give?!"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_010_b_6",
+        "type": "paragraph",
+        "content": {
+          "kn": [],
+          "en": [
+            "If we are not asking raagi dveshi jeeva but veetarag bhagawan himself - then it is not moodatha, otherwise, why else would acharya samanta bhadra say raagi dveshi jeev?"
+          ]
+        },
+        "tags": ["DevaMoodhata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+{
+    "id": "q_011",
+    "type": "question",
+    "timestamp": "2026-06-15T10:50:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_011_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ಆಚಾರ್ಯ ಕುಂದ ಕುಂದರು \"ಅಸಂಜುದಂ ನ ವಂದೆ\" - ಆಸಂಯಮಿಗೆ ನಮಸ್ಕಾರ ಮಾಡಬಾರದು ಎಂದಿದ್ದಾರೆ. ಹಾಗಿದ್ದ ಮೇಲೆ ದೇವತೆಗಳ ಪೂಜೆ ಹೇಗೆ ಮಾಡಬಹುದು?"
+          ],
+          "en": [
+            "Inquirer: Acharya Kundakunda said, \"Asanjudam na vande\" - one should not bow to the Asanyami (one without vows/self-control). In that case, how can one worship Devatas?"
+          ]
+        },
+        "tags": ["Asanyami", "AcharyaKundakunda", "Pooja"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_011",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:51:00Z",
+    "references": [
+      "q_011"
+    ],
+    "blocks": [
+      {
+        "id": "a_011_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಅಸಂಯಮಿ ಅಂದರೆ ವ್ರತ ಗ್ರಹಣ ಇಲ್ಲವೆಂದು. ದೇವ ದರ್ಯಾಯದಲ್ಲಿ ದೇವತೆಗಳಿಗೆ ಆಹಾರ ನೆನೆದ ಕೂಡಲೇ ಅವರ ಕಂಠದಲ್ಲಿ ಅಮೃತ ಹರಿಯುವುದು. ಆದ್ದರಿಂದ ಅವರಿಗೆ ಸಂಯಮ ಧಾರಣೆ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರಿಂದ ಅಸಂಯಮಿ ಎನ್ನುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Answer: 'Asanyami' means one who has not taken vows. In the Devagati (celestial state), ambrosia flows in the threats of the Devatas as soon as they think of food. Therefore, it is not possible for them to observe 'Sanyama' (self-control/vows) w.r.t. food."
+          ]
+        },
+        "tags": ["Asanyami", "Devagati"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_011_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸೌಧರ್ಮೇಂದ್ರ ಹಾಗು ಕುಭೇರ ಕ್ಷಾಯಿಕ ಸಮ್ಯಗ್ ದೃಷ್ಟಿ ಜೀವಗಳು, ಹಾಗು ಮುಂದಿನ ಭವದಲ್ಲೇ ಮೋಕ್ಷ ಹೊಂದುವವರು. ಇವರು ತೀರ್ಥಂಕರರು ಜನ್ಮ ಕಲ್ಯಾಣಕ ಸಮಯದಲ್ಲಿ ಪಾಂಡುಕ ಶಿಲೆಯ ಮೇಲೆ ಅಭಿಷೇಕ, ನಂತರ ಪೂಜೆ ಮಾಡುತ್ತಾರೆ. ಆಗ ತಾನೆ ಹುಟ್ಟಿದ ತೀರ್ಥಂಕರರ ಜೀವ ಯಾವ ವ್ರತವು ಗ್ರಹಣ ಮಾಡಿರುವುದಿಲ್ಲ (ಅಂದರೆ ಅಸಂಯಮಿಯ ಅವಸ್ಥೆಯಲ್ಲಿ ಇರುವುದು)."
+          ],
+          "en": [
+            "Saudharmendra and Kubera are Jivas with Kshayika Samyag Darshan (Right Belief) and are destined for liberation in their next birth. They perform Abhisheka on the Panduka Shila during the Janma Kalyana of the Tirthankaras, and then they do pooja. At that moment, the Tirthankara Jiva has not taken any vows (i.e., they are in the state of Asanyami)."
+          ]
+        },
+        "tags": ["Saudharmendra", "Kubera", "Abhisheka", "Asanyami"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_011_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ನೇಮಿನಾಥ ಸ್ವಾಮಿಯ ತಂದೆ ತಾಯಿಯಾರಾದ ಸಮುದ್ರ ವಿಜಯ ಶಿವಾ ದೇವಿಯರನ್ನು ಗರ್ಭ ಕಲ್ಯಾಣದ ಸಮಯದಲ್ಲಿ ಸೌಧರ್ಮೇಂದ್ರ ಹಾಗು ಕುಭೇರ ಅಭಿಷೇಕ ಮಾಡುತ್ತಾರೆ, ನಂತರ ಪೂಜೆ ಮಾಡುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Saudharmendra and Kubera perform Abhisheka and then worship Neminatha Swami's parents Samudravijaya and Shiva Devi as part of Garbha Kalyana."
+          ]
+        },
+        "tags": ["Neminatha", "GarbhaKalyana", "Abhisheka"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_011_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ಕುಂದ ಕುಂದರು \"ಅಸಂಜುದಂ ನ ವಂದೆ\" ಅಂತ ಹೇಳಿರಿವುದು ಯಾರಿಗೆ? ಸಮ್ಯಗೃಷ್ಟಿ ಆಸಂಯಮಿಗಳಿಗ ಅಥವಾ ಮಿತ್ಯಾದೃಷ್ಟಿ ಆಸಂಯಮಿಗಳಿಗ ?"
+          ],
+          "en": [
+            "Acharya Kundakunda said, \"Asanjudam na vande\" (Do not bow to the Asanyami) - who is this referring to? Is it for Samyag Drishti Asamyami or Mithya Drishti Asanyami?"
+          ]
+        },
+        "tags": ["AcharyaKundakunda", "Asanyami"],
+        "videos": [
+          {
+            "url": "https://youtu.be/n_Ng8AKr1k0?si=VFkZX8z085jBym3P",
+            "youtubeId": "n_Ng8AKr1k0"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_011_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [],
+          "en": [
+            "NOTE: The one who is in samavasarana doesn't feel hungry. And Jina Shasana Devatas are always next to Jinendra Bhagawan in samavasarana. So, not as conclusive as Asayami yet though! (Because there could be exceptions - like all devas have devis except ones in 5th swarga)?!"
+          ]
+        },
+        "tags": ["Samavasarana", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_012",
+    "type": "question",
+    "timestamp": "2026-06-15T10:55:00Z",
+    "references": [
+      "a_008"
+    ],
+    "blocks": [
+      {
+        "id": "q_012_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ವ್ರತಿಕರು ಕಷ್ಟ ಬಂದಾಗಲೂ ಜಿನೇಂದ್ರ ಭಗವಂತರ ಹತ್ತಿರನೇ ಹೋಗಬೇಕು, ಜಿನ ಶಾಸನ ದೇವತೆಗಳನ್ನು ಕೇಳಿದರೆ ಸಮ್ಯಕ್ತ ಮಲಿನವಾಗುವುದು ಎಂದು ಮುಂಚೆ ಹೇಳಲಾಗಿತ್ತು. ಹಾಗಿದ್ದ ಮೇಲೆ ವ್ರತಿಕರು ಶಾಸನ ದೇವತೆಗಳ್ಳನು ಪೂಜೆ ಮಾಡ ಬಹುದೇ? ಅಥವಾ, ಇದು ವ್ರತಿಕರಿಗೆ ಬಿಟ್ಟು ಉಳಿದವರಿಗ ?"
+          ],
+          "en": [
+            "Inquirer: Earlier it was said that Vratis must approach only Jinendra Bhagavan even when facing hardships, and that asking Jina Shasana Devatas for help would cause Samyaktva Malinatha (impure). Then can Vratis worship the Shasana Devatas? Or, is that for non-Vratis?"
+          ]
+        },
+        "tags": ["Vrati", "Samyaktva", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_012",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:56:00Z",
+    "references": [
+      "q_012"
+    ],
+    "blocks": [
+      {
+        "id": "a_012_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಶ್ರಾವಕದಿ (ಶ್ರಾವಕ = ವ್ರತಿಕರು, ಆದಿ = ಅವರತಿಗಳು) ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ಮಾಡುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Answer: Shravakadi (Shravaka = Vratis, Adi = Aviratis) do perform the pooja of Jina Shasana Devatas."
+          ]
+        },
+        "tags": ["Shravaka", "Vrati", "Pooja"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_012_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ವರದಾನ ಪಡಿಯಲು ಪೂಜೆ ಮಾಡಿದರೆ ಸಮ್ಯಕ್ತ ಮಲಿನವಾಗುವುದು. ಆದರೆ ವರದಾನದ ಇಚ್ಛೆ ಇಲ್ಲದೆ ಪೂಜೆ ಮಾಡಿದರೆ ಸಮ್ಯಕ್ತ ಮಲಿನ ಆಗದು."
+          ],
+          "en": [
+            "If the pooja is performed with the desire to acquire boons, then Samyaktva Malinatha. However, if the pooja is performed without any desire for boons, Samyaktva doesn't become impure."
+          ]
+        },
+        "tags": ["Samyaktva", "Boons", "Pooja"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_012_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಾರು ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ವಾತ್ಸಲ್ಯ / ಆದರದಿಂದ ಪೂಜೆ ಮಾಡುತ್ತಾರೆ, ಅವರಿಗೆ ಜಿನ ಶಾಸನ ದೇವತಗಳು ವರವನ್ನು ಕೇಳದಿದ್ದರೂ ವರವನ್ನು ಕೊಟ್ಟೇ ಕೊಡುತ್ತಾರೆ ."
+          ],
+          "en": [
+            "Those who worship the Jina Shasana Devatas out of pure affection (Vatsalya) and respect, the Shasana Devatas grant them boons even if they do not ask for them."
+          ]
+        },
+        "tags": ["Vatsalya", "Boons", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_012_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಾರು ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ಮಾಡುವುದಿಲ್ಲವೋ, ಅವರಿಗೆ ಜಿನೇಂದ್ರ ಭಗವಂತರ ಪೂಜೆಯಿಂದ ಬರುವ ಫಲವು ''ಜಠತಿ ನ ಸಿದ್ದತಿ\" - ಜಲ್ಲಿ ಸಿದ್ಧವಾಗುವುದಿಲ್ಲ... ಏಕೆಂದರೆ ಕ್ಷುದ್ರ ದೇವತೆಗಳು ಉಪದ್ರವ ಕೊಟ್ಟಾಗ ಜಿನ ಶಾಸನ ದೇವತೆಗಳು ಉಪದ್ರವ ದೂರ ಮಾಡುವುದಿಲ್ಲ - ಏಕೆಂದರೆ ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ಮಾಡದೆ ಅವಿನಯ ತೋರಿದ್ದಾರೆ ."
+          ],
+          "en": [
+            "Those who do not worship the Jina Shasana Devatas, the fruits obtained from worshipping Jinendra Bhagavan are not quick (\"Jatithi Na Siddhati\"). This happens because when lesser/malicious deities cause obstacles, the Shasana Devatas do not step in to remove those troubles, as the worshipper showed disrespect by neglecting them."
+          ]
+        },
+        "tags": ["Phala", "Obstacles", "ShasanaDevata"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=bQLbYZxkLil",
+            "youtubeId": "bQLbYZxkLil"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_013",
+    "type": "question",
+    "timestamp": "2026-06-15T11:00:00Z",
+    "references": [
+      "a_012"
+    ],
+    "blocks": [
+      {
+        "id": "q_013_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ವರದ ಇಚ್ಛೆ ಇಲ್ಲದೆ ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ಏಕೆ ಮಾಡುವರು ?"
+          ],
+          "en": [
+            "Inquirer: Why would one perform pooja of Jina Shasana Devatas without any desire for boons?"
+          ]
+        },
+        "tags": ["Pooja", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_013",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:01:00Z",
+    "references": [
+      "q_013"
+    ],
+    "blocks": [
+      {
+        "id": "a_013_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಆಚಾರ್ಯ ಪೂಜ್ಯಪಾದ ಸ್ವಾಮಿಗಳ ಅಭಿಷೇಕ ಪಾಠದಲ್ಲಿ ಜಿನೇಂದ್ರ ಭಗವಂತರ ಪೂಜೆಯಲ್ಲಿ ದಿಕ್ಷಾಲಕರ, ಕ್ಷೇತ್ರ ಪಾಲರ, ಹಾಗು ಆಮೇಲೆ ನವ ದೇವತಗಳ ಆದಿ ಅರ್ಥ್ಯ ಹಾಗು ಶಾಸನ ದೇವತೆಗಳ ಅರ್ಥ್ಯ ಕೊಡಬೇಕೆಂದು ಆಜ್ಞೆ ಇದೆ. ಜಿನೇಂದ್ರ ಭಗವಂತರ ಪೂಜೆ ಪೂರ್ಣವಾಗುವುದು ನವ ದೇವತಗಳ ಆದಿ ಅರ್ಥ್ಯ ಹಾಗು ಶಾಸನ ದೇವತೆಗಳ ಅರ್ಥ್ಯ ಕೊಟ್ಟ ಮೇಲೆ ಪೂಜೆ ಪೂರ್ಣವಾಗುದುವು. ಇಲ್ಲವಾದರೆ ಜಿನೇಂದ್ರ ಭಗವಂತರ ಪೂಜೆ ಪೂರ್ಣವಾಗುವುದೇ ಇಲ್ಲ ಎಂದಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Answer: In Acharya Pujyapada Swami's Abhishek Patha, Jinendra Bhagavan's pooja includes argya to Dikpalas, Kshetrapalas, and subsequently to the Nava Devatas and Shasana Devatas. The pooja of Jinendra Bhagavan is complete only after offering the arghyas to the Nava Devatas and Shasana Devatas. Otherwise, Jinendra Bhagavan's pooja doesn't complete it seems."
+          ]
+        },
+        "tags": ["AcharyaPujyapada", "AbhishekPatha", "Arghya", "Pooja"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=Cqr5gqWK_61",
+            "youtubeId": "Cqr5gqWK_61"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_013_b_2",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "ಶ್ಲೋಕ: ಯಜ್ಞಾಂಶ ಸುದಾನೇನ ಮಾನನೀಯ ಸುದೃಷ್ಟಿಭಿ"
+          ],
+          "en": [
+            "Shloka: Yajñāmśa sudānena mānanīya sudrşţibhi"
+          ]
+        },
+        "tags": ["Shloka", "Yajna"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_013_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಜ್ಞ = ಜಿನೇಂದ್ರ ಭಗವಂತರ ಪೂಜೆ",
+            "ಯಜ್ಞಾನಂಶ = ಯಜ್ಞದ + ಅಂಶ = ಜಿನೇಂದ್ರ ಭಗವಂತರ ಪೂಜೆಯ ದ್ರವ್ಯದ ಅಂಶ",
+            "ಸುದಾನೇನ = ಸು + ದಾನ = ಚನ್ನಾಗಿ / ಬಹಳಷ್ಟು ದಾನ"
+          ],
+          "en": [
+            "Yajna: Jinendra Bhagavan's Pooja.",
+            "Yajnansha: Yajna + Ansha = A portion or component of Jinendra Bhagavan's pooja dravya.",
+            "Sudanena: Su + Dana = Generously donating/offering."
+          ]
+        },
+        "tags": ["Yajna", "Daana"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_013_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಜಿನ ಶಾಸನ ದೇವತೆಗಳು ಧರ್ಮದ ರಕ್ಷಣೆಗಾಗಿ ಆಗಮದಲ್ಲಿ ಸ್ಥಾಪಿತರಿದ್ದಾರೆ. ಆದ್ದರಿಂದ ಸಮ್ಯಕ್ ದೃಷ್ಟಿಯ ದ್ವಾರ ಜಿನೇಂದ್ರ ಭಗವಂತರ ದ್ರವ್ಯದ ಅಂಶವನ್ನು ದಾನದ ಪೂರ್ವಕ ಜಿನ ಶಾಸನ ದೇವತಗಳ ಸಮ್ಮಾನ ಮಾಡುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Jina Shasana Devatas are established in Agama for the protection of Jina Shasana. Hence Samyak Drishti offers a portion of the Jinendra Bhagawan's pooja dravya in reverence to Jina Shasana Devatas."
+          ]
+        },
+        "tags": ["ShasanaDevata", "Dharma", "Agama"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=r0HCcfrBNlo",
+            "youtubeId": "r0HCcfrBNlo"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_013_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಜ್ಞಾನಮತಿ ಅಮ್ಮನವರು : ತುಂಬಾ ಹಳೆಯದಾದ ಬಡವಾನಿ, ಮಧ್ಯ ಪ್ರದೇಶದ ಆದಿನಾಥ ಸ್ವಾಮಿಯ ಬಿಂಬದದಲ್ಲೇ ಗೋಮುಖ ಚಕ್ರೇಶ್ವರಿ ಯಕ್ಷ ಯಕ್ಷಿ ಉತ್ತೀರ್ಣವಿದೆ."
+          ],
+          "en": [
+            "Gyanmati Amma: In the very ancient idol of Adinath Swami in Badwani, Madhya Pradesh, the guardian deities Gomukha Yaksha and Chakreshwari Yakshi are carved directly into the Tirthankara idol itself."
+          ]
+        },
+        "tags": ["GyanmatiAmma", "AdinathSwami", "YakshaYakshi"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_013_b_6",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ವಿದ್ಯಾಸಾಗರ ಸ್ವಾಮಿಗಳು : ಕ್ಷುಲ್ಲಕ ಧ್ಯಾನಸಾಗರ ೩೦ ನಿಮಿಷ ಚರ್ಚೆಯಲ್ಲಿ ಶಾಸನ ದೇವತಗಳು ಬೇರು ಇರುವುದಕ್ಕಿಂತ ಜಿನೇಂದ್ರ ಭಗವಂತರ ಬಿಂಬದಲ್ಲೇ ಇರುವುದು ಒಳ್ಳೆಯದು ಎಂದಿದ್ದರು ಎಂದು ತಿಳಿಸಿದ್ದಾರೆ ."
+          ],
+          "en": [
+            "Acharya Vidyasagar Swami: During a 30-minute discussion with Kshullak Dhyanasagar Swamiji, he highlighted that rather than keeping Shasana Devatas separately, it is much better when they are integrated into the idol of Jinendra Bhagavan itself."
+          ]
+        },
+        "tags": ["AcharyaVidyasagar", "KshullakDhyanasagar", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_013_b_7",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಕ್ಷುಲ್ಲಕ ಧ್ಯಾನ ಸಗಾರ ಸ್ವಾಮಿಗಳು : ಸಮವಸರಣದಲ್ಲಿ ಮಧ್ಯದಲ್ಲಿ ಗಂಧ ಕುಟಿ, ಆ ಗಂಧ ಕುಟಿಯ ಮಧ್ಯದಲ್ಲಿ ಜಿನೇಂದ್ರ ಭಗವಂತರು . ಆ ಭಗವಂತರ ಪಕ್ಕದಲ್ಲೇ ಇವರು ಸಹಜವಾಗಿ ಸ್ಥಿತರಿರುತ್ತಾರೆ. ೧೦೦೦ ವರ್ಷಕ್ಕಿಂತ ಹಳೆಯ ಪ್ರತಿಮೆಗಳಲಿ ಸಾಮಾನ್ಯವಾಗಿ ತೀರ್ಥಂಕರ ಪ್ರತಿಮಾಯೆಲ್ಲೇ ಶಾಸನ ದೇವತೆಗಳ ಪ್ರತಿಮೆ ಕಂಡು ಬರುವುದು ."
+          ],
+          "en": [
+            "Kshullak Dhyanasagar Swami: In the middle of Samavasarana is Gandhakuti. And, at the center is Jinendra Bhagavan seated. The Jina Shasana Devatas reside alongside him. Idols that are more than 1,000 years old usually contain Shasana Devatas in the Tirthankara idol itself."
+          ]
+        },
+        "tags": ["Samavasarana", "Gandhakuti", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_013_b_8",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಕುಂಡಲಪುರ, ಮಧ್ಯ ಪ್ರದೇಶ ಆದಿನಾಥ ಸ್ವಾಮಿಯಲ್ಲೂ ಗೋವದನ ಹಾಗು ಚಕ್ರೇಶ್ವರೀ ಯಕ್ಷ ಯಕ್ಷಿ ಇರುವುದು. (ಅಭಿಷೇಕ ಮಾಡುವಾಗ ಮಂಡಿಯ ಕೆಳಗೆ ಕಂಡಿತ್ತು)",
+            "ಗೋಲಕೋಟ, ಮಧ್ಯ ಪ್ರದೇಶ ಆದಿನಾಥ ಸ್ವಾಮಿಯಲ್ಲೂ ಕಾಣ ಬಹುದು"
+          ],
+          "en": [
+            "At Kundalpur, Madhya Pradesh, Adinath swami also has Govadana Yaksha and Chakreshwari Yakshi. (While doing abhisheka, I saw below the knees).",
+            "Golakot, Madhya Pradesh Adinath Swami also has it."
+          ]
+        },
+        "tags": ["Kundalpur", "Golakot", "AdinathSwami", "YakshaYakshi"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+{
+    "id": "q_014",
+    "type": "question",
+    "timestamp": "2026-06-15T11:05:00Z",
+    "references": [
+      "a_007"
+    ],
+    "blocks": [
+      {
+        "id": "q_014_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ಭಗವಂತರಿಂದ ಪಡೆದ ಉದಾಹರಣೆಗಳು ಇವೆಯೇ?"
+          ],
+          "en": [
+            "Inquirer: Can you give examples related to getting from Bhagawan?"
+          ]
+        },
+        "tags": ["Bhagawan", "Examples", "Phala"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_014",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:06:00Z",
+    "references": [
+      "q_014"
+    ],
+    "blocks": [
+      {
+        "id": "a_014_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ಮಾನತುಂಗರು ಭಕ್ತಾಮರ ಸ್ತೋತ್ರವನ್ನು ಪಠಿಸಿದಾಗ, ಎಲ್ಲಾ ಬಂಧನಗಳು ತಾವಾಗಿಯೇ ಕಳಚಿ ಹೋಗುತ್ತವೆ, ಹಾಗು ಬಾಗಿಲುಗಳು ತೆರೆಯುತ್ತವೆ:"
+          ],
+          "en": [
+            "Manatunga acharya does stuti (bhaktamara stotra), and all shackles and door locks open:"
+          ]
+        },
+        "tags": ["Manatunga", "Bhaktamara"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=ZQVeAS8HgaM",
+            "youtubeId": "ZQVeAS8HgaM"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_014_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ಪೂಜ್ಯಪಾದರು ಶಾಂತ್ಯಷ್ಟಕ ಸ್ತೋತ್ರವನ್ನು ಪಠಿಸುತ್ತಾರೆ, ಮತ್ತು ಅವರ ದೃಷ್ಟಿ ಪುನಃ ಬರುತ್ತದೆ."
+          ],
+          "en": [
+            "Acharya Pujyapaada does stuti (shantyastaka), and his eye sight comes back."
+          ]
+        },
+        "tags": ["AcharyaPujyapada", "Shantyastaka"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_014_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಶ್ರೀಪಾಲನ ಕುಷ್ಠ ರೋಗವನ್ನು, ಮದನಸುಂದರಿ ಸಿದ್ದಚಕ್ರ ವಿಧಾನ ಮಾಡುವ ಮೂಲಕ ನಿವಾರಿಸುತ್ತಾಳೆ :"
+          ],
+          "en": [
+            "Shreepaal gets cured of kusta rog (leprosy) with help of madana sundari doing siddha chakra vidhaan."
+          ]
+        },
+        "tags": ["Shreepaal", "MadanaSundari", "Siddhachakra"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_014_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ವಾದಿರಾಜ ಮುನಿಗಳು ಏಕೀಭಾವ ಸ್ತೋತ್ರವನ್ನು ಪಠಿಸಿದಾಗ ಅವರ ಕುಷ್ಠ ರೋಗವು ವಾಸಿಯಾಗುತ್ತದೆ:"
+          ],
+          "en": [
+            "Vaadiraj muni does stuti (ekibhaav stotra), and his leprosy disappears:"
+          ]
+        },
+        "tags": ["VaadirajMuni", "Ekibhaav"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=obbs9GiDnfw",
+            "youtubeId": "obbs9GiDnfw"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_014_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ವರ್ಧಮಾನ ಸಾಗರ್ ಅವರು ಹೊಸ ಮುನಿಯಾಗಿದ್ದಾಗ ದೃಷ್ಟಿ ಕಳೆದುಕೊಂಡಿದ್ದರು. ಅವರು ಒಂದು ಕೋಣೆಯಲ್ಲಿ 48 ಗಂಟೆಗಳ ಕಾಲ ಶಾಂತ್ಯಷ್ಟಕದ ಕೊನೆಯ ಶ್ಲೋಕವನ್ನು ಪಠಿಸುತ್ತಾರೆ. ಅದರಿಂದ ಅವರ ದೃಷ್ಟಿ ಮರಳಿ ಬರುತ್ತದೆ. (ಧ್ಯಾನ ಸಾಗರರವರ ಪ್ರವಚನದಿಂದ - ಬಹುಶಃ ನವದೇವತಾ ಪ್ಲೇಲಿಸ್ಟ್‌ನಿಂದ. TODO: ವೀಡಿಯೋ ಲಿಂಕ್ ಸೇರಿಸಬೇಕು.)"
+          ],
+          "en": [
+            "Acharya Vardhamaan Sagar while he was still a new muni had lost eyesight. He sat in a room and recited the last stanza of Shantyastaka for 48 hours, and his eyesight came back. (From Dhyaan sagar ji's pravachan - maybe from navadevata playlist! TODO: Add video link.)"
+          ]
+        },
+        "tags": ["VardhamaanSagar", "Shantyastaka"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_014_b_6",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಕ್ಷುಲ್ಲಕ ಮುನಿ ಧ್ಯಾನ ಸಾಗರ್ ಅವರು ಭಕ್ತಾಮರ ಸ್ತೋತ್ರ ಮತ್ತು ಶಾಂತ್ಯಷ್ಟಕವನ್ನು ತೃತೀಯ ಬಾರಿಗೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿಸುವ ಮೊದಲು ಪಠಿಸುತ್ತಾರೆ (ಹಲವಾರು ಆಸ್ಪತ್ರೆಗಳಲ್ಲಿ ಶ್ವಾಸಕೋಶ ಸಂಬಂಧಿತ ಸಮಸ್ಯೆಗಳ ಪಾಸಿಟಿವ್ ವರದಿಗಳ ನಂತರ), ಮತ್ತು ವರದಿ ನೆಗೆಟಿವ್ ಆಗುತ್ತದೆ. (ಬಹುಶಃ ನವದೇವತಾ ಪ್ಲೇಲಿಸ್ಟ್‌ನಿಂದ. TODO: ವೀಡಿಯೋ ಲಿಂಕ್ ಸೇರಿಸಬೇಕು.)"
+          ],
+          "en": [
+            "Kshullak Muni Dhyaan Sagar did bhaktamara stotra and shantyastaka just before getting scanned for the 3rd time (after getting positive reports of lung related issues at different hospitals/labs), the report came negative. (Maybe from navadevata playlist! TODO: Add video link.)"
+          ]
+        },
+        "tags": ["KshullakDhyaanSagar", "Bhaktamara"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_014_b_7",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಹತ್ತನೇ ತರಗತಿಯ ಹುಡುಗಿ ಮುಕ್ತಗಿರಿ ಕ್ಷೇತ್ರದಲ್ಲಿ ಪಾರ್ಶ್ವನಾಥ ಸ್ವಾಮಿಯ ದರ್ಶನ ಮಾಡಿದ ನಂತರ ಧ್ವನಿ ಮರಳಿ ಪಡೆಯುತ್ತಾಳೆ, ಮತ್ತು ಇನ್ನೊಬ್ಬ ವ್ಯಕ್ತಿಗೆ ಕೋಲು/ಕ್ರಚ್‌ಗಳಿಲ್ಲದೆ ಸಹಜವಾಗಿ ನಡೆಯಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ:"
+          ],
+          "en": [
+            "A 10th Kid gets her voice back after doing darshan of Parshwanatha swami at Muktagiri, and other person is able to walk normally without crutches anymore"
+          ]
+        },
+        "tags": ["Parshwanatha", "Muktagiri"],
+        "videos": [
+          {
+            "url": "https://youtu.be/0a4CtFD0nY8?t=10m32s",
+            "youtubeId": "0a4CtFD0nY8"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_015",
+    "type": "question",
+    "timestamp": "2026-06-15T11:10:00Z",
+    "references": [
+      "a_014"
+    ],
+    "blocks": [
+      {
+        "id": "q_015_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ಇದನ್ನು ಹೇಗೆ ಪಡೆಯಬಹುದು? ಯಾವುದೇ ಪ್ರಕ್ರಿಯೆಯಿದೆಯೆ?"
+          ],
+          "en": [
+            "Inquirer: How can one get it? Any process?"
+          ]
+        },
+        "tags": ["Process", "SaatishayaPunya"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_015",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:11:00Z",
+    "references": [
+      "q_015"
+    ],
+    "blocks": [
+      {
+        "id": "a_015_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಾತಿಷಯ ಪುಣ್ಯದ ಮೂಲಕ ಇದನ್ನು ಪಡೆಯಲು ಸಾಧ್ಯ."
+          ],
+          "en": [
+            "The saatishaya punya helps in getting it."
+          ]
+        },
+        "tags": ["SaatishayaPunya"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_015_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಾತಿಷಯ (ಸ-ಅತಿಶಯ) ಪುಣ್ಯವನ್ನು ಪಡೆಯುವ ಕೆಲವು ಉದಾಹರಣೆಗಳು...",
+            "ಅಭಿಷೇಕ",
+            "ಶಾಂತಿಧಾರ",
+            "ವಿಧಾನ",
+            "ತಪಸ್ಸು"
+          ],
+          "en": [
+            "Examples of getting saatishaya (sa-atishay) punya is via Abhisheka, Shantidhara, Vidhaan, Tapa."
+          ]
+        },
+        "tags": ["Abhisheka", "Shantidhara", "Vidhaan", "Tapa"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_015_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಈ ಕ್ರಿಯೆಗಳನ್ನು ನೀವು ಇಚ್ಚಿಸಿದನ್ನು ಪಡಿಯಲು ಮಾಡಿದರೆ, ಅದರಿಂದ ಬಂದ ಪುಣ್ಯವು ಆ ಇಚ್ಚಯ ಸಲುವಾಗಿ ಉಪಯೋಗೊಳ್ಳುತ್ತದೆ."
+          ],
+          "en": [
+            "Any of these done in order to obtain what you want, gets used for that."
+          ]
+        },
+        "tags": ["SaatishayaPunya", "Phala"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=VAiyYjG-unY",
+            "youtubeId": "VAiyYjG-unY"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_016",
+    "type": "question",
+    "timestamp": "2026-06-15T11:15:00Z",
+    "references": [
+      "a_015"
+    ],
+    "blocks": [
+      {
+        "id": "q_016_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ : ಏನಾದರು ದುಷ್ಪರಿಣಾಮಗಳು ಇವೆಯೇ? ಏನಾದರು ಯಚ್ಚರಿಕೆ / ಪರಿಗಣಿಸಬೇಕೆ?"
+          ],
+          "en": [
+            "Inquirer: What's the catch? Anything to consider?!"
+          ]
+        },
+        "tags": ["SamyagDrishti", "Sansaara"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_016",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:16:00Z",
+    "references": [
+      "q_016"
+    ],
+    "blocks": [
+      {
+        "id": "a_016_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಾತಿಶಯ ಪುಣ್ಯದಿಂದ ಸಂಸಾರ ಸುಖವನ್ನು ಬಯಸದೆ ಇದ್ದಾಗ, ಅದು ಸಮ್ಯಗ್ ದೃಷ್ಟಿ ಜೀವಿಗೆ ಮುಂದಿನ ಜನ್ಮಗಳಲ್ಲಿ ಮೋಕ್ಷಕ್ಕೆ ಹತ್ತಿರವಾಗುವಂತಹ ಉಪಕರಣಗಳು / ಮೋಕ್ಷಕ್ಕೆ ಉಪಯೋಗವಾಗುವಂತ ದ್ರವ್ಯ, ಕ್ಷೇತ್ರ, ಕಾಲಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ."
+          ],
+          "en": [
+            "When one (Samyag Dristi) does not desire sansaara related sukha, that saatishaya punya in the upcoming births gets as many tools / environment (draya, kshetra, kaala) that's useful and closer to moksha."
+          ]
+        },
+        "tags": ["SamyagDrishti", "Sansaara", "Moksha"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=WBoOaruWWgl",
+            "youtubeId": "WBoOaruWWgl"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_017",
+    "type": "question",
+    "timestamp": "2026-06-15T11:20:00Z",
+    "references": [
+      "a_015"
+    ],
+    "blocks": [
+      {
+        "id": "q_017_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಅಭಿಷೇಕ ಹಾಗು ವಿಧಾನಗಳ ಉದಾಹರಣೆಗಳನ್ನು ನೀಡಿ"
+          ],
+          "en": [
+            "Inquirer: Can you give examples of abhisheka/pooja"
+          ]
+        },
+        "tags": ["Abhisheka", "Pooja", "Vidhaan"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_017",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:21:00Z",
+    "references": [
+      "q_017"
+    ],
+    "blocks": [
+      {
+        "id": "a_017_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ:",
+            "ಗೌತಮ ಚರಿತ್ರೆ - ಸರ್ಗ 3: ವಾಸುಪೂಜ್ಯ ತೀರ್ಥಂಕರರ ಕಾಲದಲ್ಲಿ, ರಾಣಿ ವಿಶಾಲಾಕ್ಷಿ (ಗೌತಮ ಸ್ವಾಮಿಯ ಹಿಂದಿನ ಜನ್ಮ) ಒಬ್ಬ ಮುನಿಗಳಿಗೆ ಉಪಸರ್ಗ ನೀಡುತ್ತಾಳೆ. ನಂತರ ಸರಿಯಾದ ಹಾದಿಗೆ ಬಂದ ನಂತರ, ನರಕಕ್ಕೆ ಹೋಗುವುದರಿಂದ ತನ್ನನ್ನು ರಕ್ಷಿಸಿ ಎಂದು ಅದೇ ಮುನಿಯ ಬಳಿ ಪ್ರಾಯಶ್ಚಿತ್ತ ಕೇಳುತ್ತಾಳೆ. ಆಗ ಮುನಿಗಳು ಮಹಾವೀರ ಸ್ವಾಮಿಯ ಪ್ರತಿಮೆಗೆ ಇಕ್ಷು ರಸ (ಕಬ್ಬಿನ ರಸ), ಉತ್ತಮ ಗ್ರತು (ತುಪ್ಪ), ದಧಿ (ಮೊಸರು), ಜಲ (ನೀರು) ಇತ್ಯಾದಿಗಳಿಂದ ಅಭಿಷೇಕ ಮಾಡುವ 'ಲಬ್ಲಿ ವಿಧಾನ ವ್ರತ'ವನ್ನು ಸೂಚಿಸುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Answer:",
+            "Rani Vishalakshi - Watch 18:18 and 26:14 of this video:"
+          ]
+        },
+        "tags": ["GautamaCharitra", "RaniVishalakshi", "Abhisheka"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_017_b_2",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "ಶ್ರೀ ವೀರನಾಥ ಬಿಂಬಸ್ಯ । ಸ್ನಪನಂ ಕ್ರಿಯತೇ ಮುದಾ ||",
+            "ಇಕ್ಷು, ಸುಗೃತ, ಸದುಗ್ಧ ದಧಿ ವಾರಿ ಘುತೈರ್ ಘಟೈ |",
+            "ತತಃ ಪೂಜಾ ಪ್ರಕರ್ತವ್ಯ | ವೀರಸ್ಯ ಸಲಿಲಾಬಿದೇ ||",
+            "ಕೃತ್ವಾ ಕಾಯಂ ಸ್ತ್ರೀ ಕೃತ್ಯ | ದುಷ್ಕೃತ್ಯ ನಾಶ ಹೇತವೇ ||"
+          ],
+          "en": [
+            "Shree Veeranatha bimbasya | snapanam kriyate muda ||",
+            "Ikshu sukruta sadugga dadhi vaaree ghutair ghataih |",
+            "Tata poojaa prakartavya | veerasya saleeladibhi ||",
+            "Krutvaa kaayam stree krutya | dushkrutya naasha hetave ||"
+          ]
+        },
+        "tags": ["Shloka", "Abhisheka"],
+        "videos": [
+          {
+            "url": "https://youtu.be/B1eE9dUCnq4?t=1098",
+            "youtubeId": "B1eE9dUCnq4"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_017_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಶ್ರೀ ಮಹಾವೀರ ಸ್ವಾಮಿ ಬಿಂಬಕ್ಕೆ ಇಕ್ಷು ರಸ, ತುಪ್ಪ, ಮೊಸರು, ಮತ್ತು ಜಲದಿಂದ ತುಂಬಿದ ಕೊಡಗಳಿಂದ ರಾಣಿ ವಿಶಾಲಾಕ್ಷಿ ಅಭಿಷೇಕ ಮಾಡುತ್ತಾರೆ. (ಶ್ರೀ ಮಹಾವೀರ ಸ್ವಾಮಿಯ ಜನ್ಮದ ಮೊದಲೇ ಅವರ ಬಿಂಬ ಇರುತ್ತಿತ್ತು. ಉದಾಹರಣೆ : ಭರತ ೨೪ ತೀರ್ಥಂಕರರ ಬಿಂಬಗಳ್ಳನ್ನು ಮಾಡಿಸಿದ್ದ.) ಅದರ ಅಭ್ಯುದಯ ಪುಣ್ಯದಿಂದ ಮುಂದಿನ ಜನ್ಮದಲ್ಲಿ ಇಂದ್ರಭೂತಿ ಗೌತಮರಾಗಿ ಹುಟ್ಟುತ್ತಾರೆ"
+          ],
+          "en": [
+            "Queen Vishalakshi performs abhisheka to Shree Mahavira Swami's idol with pots filled with sugarcane juice, ghee, curd, and water. (Mahavira Swami's idol existed even before his birth. Example: Bharata had idols of 24 Tirthankaras made.) Due to the abhyudaya punya of this act, she is born as Indrabhuti Gautama in the next birth."
+          ]
+        },
+        "tags": ["MahaviraSwami", "IndrabhutiGautama", "Abhisheka"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_017_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಹಾಲು, ಮೊಸರು ಮತ್ತು ತುಪ್ಪವನ್ನು ಒಳಗೊಂಡ ಅಭಿಷೇಕ - ಪದ್ಮನಂದಿ ಪಂಚವಿಂಶತಿ:"
+          ],
+          "en": [
+            "Abhisheka involving milk, curd, and ghee - Padmanandi Panchavimshati:"
+          ]
+        },
+        "tags": ["PadmanandiPanchavimshati", "Abhisheka"],
+        "videos": [
+          {
+            "url": "https://youtu.be/J2hqPH4m-5A?t=2793",
+            "youtubeId": "J2hqPH4m-5A"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_017_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪದ್ಮ ಪುರಾಣ - ಪರ್ವ 32: ಆಚಾರ್ಯ ರವಿಷೇಣರು ಪದ್ಮ ಪುರಾಣದ 32ನೇ ಪರ್ವದಲ್ಲಿ ತೀರ್ಥಂಕರ ಪ್ರತಿಮೆಗೆ ಹಾಲು, ಮೊಸರು, ತುಪ್ಪ, ಕಬ್ಬಿನ ರಸ ಮತ್ತು ನೀರಿನಿಂದ ಅಭಿಷೇಕ ಮಾಡುವ ಮಹತ್ವವನ್ನು ವಿವರಿಸಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Padma Purana - Parva 32: Acharya Ravishena in the 32nd parva of Padma Purana explains the significance of doing abhisheka to a Tirthankara idol with milk, curd, ghee, sugarcane juice, and water."
+          ]
+        },
+        "tags": ["PadmaPurana", "AcharyaRavishena", "Abhisheka"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_017_b_6",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಕ್ಷೀರ (ಹಾಲು) ಅಭಿಷೇಕ: ಆಚಾರ್ಯ ಗುಣಭದ್ರ - ಮಹಾ ಪುರಾಣ: ಪುಷ್ಪದಂತ ಸ್ವಾಮಿ ಜನ್ಮ ಕಲ್ಯಾಣ - 55ನೇ ಪರ್ವ (ಉತ್ತರ ಪುರಾಣ) 28ನೇ ಶ್ಲೋಕ -"
+          ],
+          "en": [
+            "Ksheera (Milk) Abhisheka: Acharya Gunabhadra - Maha Purana: Pushpadanta Swami Janma Kalyana - 55th Parva (Uttara Purana) 28th Shloka -"
+          ]
+        },
+        "tags": ["MahaPurana", "PushpadantaSwami", "Abhisheka"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=Daj7yBFuwh0",
+            "youtubeId": "Daj7yBFuwh0"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_017_b_7",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "ಪಂಚಾಮೃತ ಶ್ಲೋಕ - ಪ್ರತಿಷ್ಠಾ ಶಾಸ್ತ್ರ ಅಕಲಂಕ ದೇವ ಸ್ವಾಮಿ:",
+            "ನೀರಂ ತರು ರಸಸ್ ಚೈವ, ಗೋ ರಸ್ ತೃತೀಯಂ ತಥಾ",
+            "ಪಂಚಾಮೃತಮ್ ಇತಿ ಪ್ರೋಕ್ತಮ್, ಜಿನ ಸ್ನಪನ ಕರ್ಮಣಿ"
+          ],
+          "en": [
+            "Panchamruta Shloka - Pratishta Shastra Akalanka Deva Swami:",
+            "Neeram taru rasas chaiva, go ras truteeyam tathaa",
+            "Panchamrutam iti proktam, Jina snapana karmani"
+          ]
+        },
+        "tags": ["Panchamruta", "AkalankaDeva", "Shloka"],
+        "videos": [
+          {
+            "url": "https://youtu.be/oEfk_aiKL4s?feature=shared",
+            "youtubeId": "oEfk_aiKL4s"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_017_b_8",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ನೀರಂ (ನೀರು)",
+            "ತರು (ಗಿಡ/ಮರ) ರಸ - ಕಬ್ಬಿನ ರಸ, ತೆಂಗಿನ ನೀರು, ಗಂಧ, ಮಾವು ಮತ್ತು ಇತ್ಯಾದಿ...",
+            "ಮೂರು ಗೋ (ಹಸು/ದನ) ರಸಗಳು - ಕ್ಷೀರ (ಹಾಲು), ದಧಿ (ಮೊಸರು) ಮತ್ತು ಗ್ರುತ (ತುಪ್ಪ)"
+          ],
+          "en": [
+            "Neeram (water)",
+            "Taru (plant/tree) rasa - sugarcane juice, coconut water, sandalwood, mango, etc...",
+            "Three Go (cow) rasas - Ksheera (milk), Dadhi (curd), and Gruta (ghee)"
+          ]
+        },
+        "tags": ["Panchamruta", "AbhishekaDravya"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+{
+    "id": "q_018",
+    "type": "question",
+    "timestamp": "2026-06-15T11:25:00Z",
+    "references": [
+      "a_017"
+    ],
+    "blocks": [
+      {
+        "id": "q_018_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪಂಚಾಮೃತ ಶ್ಲೋಕ ಇರುವುದರಿಂದ, ದೇವತೆಗಳು ಮೊಸರು, ತುಪ್ಪ, ನೀರುಗಳಿಂದಲೂ ಅಭಿಷೇಕ ಮಾಡಿರಬಹುದೇ ಎಂಬ ಒಂದು ಪ್ರಶ್ನೆ?!."
+          ],
+          "en": []
+        },
+        "tags": ["Panchamruta", "Abhisheka"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_018",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:26:00Z",
+    "references": [
+      "q_018"
+    ],
+    "blocks": [
+      {
+        "id": "a_018_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ತೀರ್ಥಂಕರರ ಜನ್ಮ ಕಲ್ಯಾಣಕದ ಸಮಯದಲ್ಲಿ ಇಂದ್ರ ಮತ್ತು ಇತರ ದೇವತೆಗಳು ಕ್ಷೀರ (ಹಾಲಿನ) ಸಮುದ್ರದಿಂದ ತೀರ್ಥಂಕರರಿಗೆ ಅಭಿಷೇಕ ಮಾಡುತ್ತಾರೆ.",
+            "ನಂದೀಶ್ವರ ದ್ವೀಪ, ಪಂಚ ಮೇರು ಮತ್ತು ಇತರ ಸ್ಥಳಗಳಲ್ಲಿ ಜಿನೇಂದ್ರ ಭಗವಾನರ ಪ್ರತಿಮೆಗಳು ಯಾರೂ ಮಾಡದೆಯೇ ಸಹಜವಾಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿವೆ ಎಂದು ಹೇಳುವಂತೆಯೇ, ವಿವಿಧ ರೀತಿಯ ದ್ರವಗಳನ್ನು ಹೊಂದಿರುವ ಸಾಗರಗಳು ಸಹ ಸಹಜವಾಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿವೆ.",
+            "(ಯಾರೂ ಇಂಧನ ತುಂಬದ ದೊಡ್ಡ ದೀಪದಂತೆ ಉರಿಯುತ್ತಿರುವ ಸೂರ್ಯನ ಹಾಗೆ ).",
+            "ಸಾಗರಗಳ ಹೆಸರುಗಳು ಮತ್ತು ಅವುಗಳ ಒಳಗಿನ ವಿಷಯಗಳು ಕೆಳಗೆ (ಅಂದರೆ, ನೋಡಲು, ಅನುಭವಿಸಲು, ರುಚಿ ನೋಡಲು ಮತ್ತು ವಾಸನೆಗೆ ನಿಖರವಾಗಿ ಒಂದೇ ರೀತಿಯ ದ್ರವಗಳು!):",
+            "ಲವಣ ಸಮುದ್ರ - ಉಪ್ಪು ನೀರು",
+            "ಕಾಲೋದಧಿ - ಕುಡಿಯುವ (ಸಿಹಿ) ನೀರು",
+            "ಪುಷ್ಕರವರ - ಮಧುಕರ (ಕಬ್ಬಿನ ರಸ)",
+            "ವರುಣಿವರ್ - ಮದ್ಯ",
+            "ಕ್ಷೀರವರ - ಹಾಲು",
+            "ದಧಿವರ - ಮೊಸರು",
+            "ಗ್ರುತವರ - ತುಪ್ಪ",
+            "ಸ್ವಯಂಭೂವರ - ಕುಡಿಯುವ (ಸಿಹಿ) ನೀರು",
+            "ಉಳಿದ ಎಲ್ಲಾ ಸಾಗರಗಳು ಮಧುಕರ (ಕಬ್ಬಿನ ರಸ) ನಂತಹ ರುಚಿಯನ್ನು ಹೊಂದಿರುತ್ತವೆ."
+          ],
+          "en": [
+            "Indra does Ksheera (Milk), Ikshu rasa (Sugarcane juice) abhisheka during Janma Kalyanaka."
+          ]
+        },
+        "tags": ["JanmaKalyanaka", "Samudra", "Abhisheka"],
+        "videos": [
+          {
+            "url": "https://youtu.be/WWYVRdhNJuk?si=La4woW5dSADBZI1L",
+            "youtubeId": "WWYVRdhNJuk"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_019",
+    "type": "question",
+    "timestamp": "2026-06-15T11:30:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_019_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ದೇವತೆಗಳಿಗೆ ಜೈ ಜಿನೇಂದ್ರ ಹೇಳಬಹುದು, ಆದರೆ ಅರ್ಥ್ಯ ಕೂಡವುದು ಉಚಿತ ಇಲ್ಲ ಎಂದು ಅನೇಕರು ಹೇಳುತ್ತಾರೆ?",
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ದೇವತೆಗಳಿಗೆ ಪೂಜೆ / ಅರ್ಥ್ಯ ಅಷ್ಟೇನಾ, ಅಥವಾ ಅಭಿಷೇಕ ಕೂಡ ಇರುವುದೇ?"
+          ],
+          "en": []
+        },
+        "tags": ["Arghya", "DevataPooja", "Abhisheka"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_019",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:31:00Z",
+    "references": [
+      "q_019"
+    ],
+    "blocks": [
+      {
+        "id": "a_019_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ವೀರಸೇನಾಚಾರ್ಯರ ಜಯ ಧವಳ ಗ್ರಂಥದಲ್ಲಿ ಅಭಿಷೇಕ ಪೂಜೆಯ ಒಂದು ಅಂಗ ಎಂದು ತಿಳಿಸಿದ್ದಾರೆ.",
+            "ಮೂಲಾಚಾರದಲ್ಲಿ ದೇವ ದೇವಿಯರ ಪೂಜೆ ವಿಜೃಂಭಣೆಯಿಂದ ಮಾಡುವ ಬಗ್ಗೆ ತಿಳಿಸಿದ್ದಾರೆ ."
+          ],
+          "en": []
+        },
+        "tags": ["JayaDhawala", "Moolachara", "Pooja"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=hiCUYrA7cIA",
+            "youtubeId": "hiCUYrA7cIA"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_019_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಹಾರ ದಾನದ ವಿಷಯದಲ್ಲಿ ಯಕ್ಷ ಹಾಗು ನಾಗಕುಮಾರ ದೇವತೆಗಳಿಗೆ ಮಾಡಿದ ಪದಾರ್ಥಗಳ್ಳನ್ನು ಸಾಧುಗಳಿಗೆ ಕೊಡಬಾರದು ಎಂದು ತಿಳಿಸಿದ್ದಾರೆ. ಅಂದರೆ ದೇವತಗಳಿಗೂ ದ್ರವ್ಯಗಳ್ಳನ್ನು ಶ್ರಾವಕರು ತಯಾರಿಸುತ್ತಾರೆ ಎಂದು ಅರ್ಥ."
+          ],
+          "en": []
+        },
+        "tags": ["AaharaDaana", "Dravya", "Devata"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=I0Yz3a82tA8",
+            "youtubeId": "I0Yz3a82tA8"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_020",
+    "type": "question",
+    "timestamp": "2026-06-15T11:35:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_020_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಒಬ್ಬ ಮುನಿಗಳು ಊರಿಗೆ ಬಂದಾಗ ಒಂದು ರೀತಿಯಲ್ಲಿ ಹೇಳುತ್ತಾರೆ, ಮತ್ತೆ ಬೇರೆ ಮುನಿಗಳು ಬಂದಾಗ ಅದರ ವಿರುದ್ಧ ಹೇಳುತ್ತಾರೆ.",
+            "ಹೀಗಿರುವಾಗ ನಾವು ಶ್ರಾವಕರು ಹಾಗು ಸಮಾಜದವರು ಏನು ಮಾಡಬೇಕು?"
+          ],
+          "en": []
+        },
+        "tags": ["Acharyas", "Shravaka", "Dharma"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_020",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:36:00Z",
+    "references": [
+      "q_020"
+    ],
+    "blocks": [
+      {
+        "id": "a_020_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಯಾವುದು ಶಾಸ್ತ್ರದಲ್ಲಿ ಇರುವುದೋ ಅದನ್ನೇ ಮನ್ನಿಸಬೇಕು / ಅದೇ ಕಲ್ಯಾಣಕಾರಿ."
+          ],
+          "en": []
+        },
+        "tags": ["Shastra", "Kalyana"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/live/tfqcc_vpTOg?si=uMTALp7bp8UjWBJA&t=4203",
+            "youtubeId": "tfqcc_vpTOg"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_020_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ವಿಶೇಷ ಸೂಚನೆ: ಸಾಧುಗಳ ಜೊತೆ ವಿವಾದ ಮಾಡಬೇಡಿ ಏಕೆಂದರೆ ಅವರು ದೊಡ್ಡವರು ಎಂದು ಮತ್ತೊಂದೆಡೆ ತಿಳಿಸಿದ್ದಾರೆ."
+          ],
+          "en": []
+        },
+        "tags": ["Sadhu", "Respect"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_021",
+    "type": "question",
+    "timestamp": "2026-06-15T11:40:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_021_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಭಗವಂತರ ಪ್ರತಿಮೆಯಲ್ಲಿ ಅಥವಾ ಭಗವಂತರ ಪೀಠದಲ್ಲಿ ದೇವತೆಗಳ ಪ್ರತಿಮೆಗಳು ಇದ್ದರೆ, ಅಭಿಷೇಕ ಮಾಡಿದಾಗ, ಗಂಧೋಧಕ (ಪ್ರಸಾದ) ಅಸಂಯಮಿ ದೇವತೆಗಳ ಪ್ರಸಾದ ಮಿಶ್ರವಾಗಿ ಅದು ದೂಷಿತವಾಗುವುದಿಲ್ಲವೇ?",
+            "ಅಥವಾ ಅದರ ಶಕ್ತಿ (ಪವ‌ರ್) ಕಡಿಮೆ ಆಗುವುದಲ್ಲವೇ? ಆ ಪ್ರಸಾದ ನಾವು ತೆಗೆದು ಕೊಳ್ಳಬಹುದೇ?"
+          ],
+          "en": []
+        },
+        "tags": ["Gandhodhaka", "Prasada", "Abhisheka"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_021",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:41:00Z",
+    "references": [
+      "q_021"
+    ],
+    "blocks": [
+      {
+        "id": "a_021_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ:",
+            "ថ ថ : https://youtu.be/JZOGH_noCVs"
+          ],
+          "en": []
+        },
+        "tags": ["Gandhodhaka"],
+        "videos": [
+          {
+            "url": "https://youtu.be/JZOGH_noCVs",
+            "youtubeId": "JZOGH_noCVs"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_021_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉದಾಹರಣೆ:",
+            "ಆಚಾರ್ಯ ಶಾಂತಿ ಸಾಗರರು ಆಗಿನ ಕಾಲದಲ್ಲಿ ಜೈನರ ಮನೆಯಲ್ಲಿದ್ದ ಬೇರೆ ದೇವತೆಗಳ ಬಿಂಬಗಳ್ಳನ್ನು ಕೆರೆ ನದಿಗಳ್ಳಲಿ ವಿಸರ್ಜನೆ : https://youtu.be/JeyXMgeBdYQ?si=stP29wFYMmAZPBxG&t=1182",
+            "ಅಂತಃ ಮಹಾನ್ ಆಚಾರ್ಯರು ಜೈನ ದೇವತೆಗಳ ಪೂಜೆ ಅಭಿಷೇಕ ತಾವೇ ಸ್ವತಃ ನೋಡುತ್ತಿದ್ದರು. ಆಚಾರ್ಯ ಶಾಂತಿ ಸಾಗರರ ಮುಂದೆ ತೀರ್ಥಂಕರರ ಹಾಗು ಪದ್ಮಾವತಿ ದೇವಿಯ ಅಭಿಷೇಕ ಒಂದೇ ಪೀಠದಲ್ಲಿ ನಡಿಯುತ್ತಿರುವುದು:"
+          ],
+          "en": []
+        },
+        "tags": ["AcharyaShantiSagar", "Abhisheka"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=6NmEgc3Td3g",
+            "youtubeId": "6NmEgc3Td3g"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_021_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ವಿದ್ಯಾಸಾಗರ ಸ್ವಾಮಿಗಳು:",
+            "ថ / Veetaragi Muni Kabhi Galat Nahi Likate: Full video: https://www.youtube.com/watch?v=l-idKT0wAbY&t=794s"
+          ],
+          "en": []
+        },
+        "tags": ["AcharyaVidyasagar"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=l-idKT0wAbY&t=794s",
+            "youtubeId": "l-idKT0wAbY"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_021_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಮುನಿ ಶ್ರೀ ಸುಧಾ ಸಾಗರರು :",
+            "ជន្ម ថថ",
+            "https://www.youtube.com/watch?v=dSsg8516nX4"
+          ],
+          "en": []
+        },
+        "tags": ["MuniSudhasagar"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=dSsg8516nX4",
+            "youtubeId": "dSsg8516nX4"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_021_b_5",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ವೀರಸೇನರು:",
+            "ಧವಳ ಗ್ರಂಥದಲ್ಲಿ ಆಚಾರ್ಯ ವೀರಸೇನರು ಎರಡು ಪ್ರಕಾರ ವಿವೇಚನೆ ಇದೆ ಎಂದು ಹೇಳಿದ್ದಾರೆ: ಉತ್ತರ ಪ್ರತಿಪತ್ತಿ ಮತ್ತು ದಕ್ಷಿಣ ಪ್ರತಿಪತ್ತಿ.",
+            "ದಕ್ಷಿಣ ಪ್ರತಿಪತ್ತಿನೇ ಭಗವಾನ್ ಮಹಾವೀರರ ಮೂಲ ವಿವೇಚನೆ ಇದೆ ಎಂದು ಪದೇ ಪದೇ ಹೇಳಿದ್ದಾರೆ.",
+            "https://youtu.be/Tij8qJuh8pM?si=5Ymrea9BGWyzJXEF&t=528"
+          ],
+          "en": []
+        },
+        "tags": ["AcharyaVeerasena", "DhawalaGrantha"],
+        "videos": [
+          {
+            "url": "https://youtu.be/Tij8qJuh8pM?si=5Ymrea9BGWyzJXEF&t=528",
+            "youtubeId": "Tij8qJuh8pM"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_022",
+    "type": "question",
+    "timestamp": "2026-06-15T11:45:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_022_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ವ್ರತಿಕರ ಸಂಯಮಿಗಳು, ಅವರ ಗುಣಸ್ಥಾನ ೫ನೇ ಸ್ಥಾನ, ಆದರೆ ಶಾಸನ ದೇವತೆಗಳ ಗುಣಸ್ಥಾನ ೪ನೇ ಸ್ಥಾನ.",
+            "ಹಾಗಿದ್ದ ಮೇಲೆ ವ್ರತಿಕರು ಹೇಗೆ ಜಿನ ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ಮಾಡುವುದು?"
+          ],
+          "en": []
+        },
+        "tags": ["Vrati", "Gunasthana", "ShasanaDevata"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_022",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:46:00Z",
+    "references": [
+      "q_022"
+    ],
+    "blocks": [
+      {
+        "id": "a_022_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ:",
+            "ಜ್ಞಾನಮತಿ ಅಮ್ಮ: ಆಚಾರ್ಯ ಪೂಜ್ಯಪಾದರು ಅಭಿಷೇಕ ಪಾಠ ಗ್ರಂಥದಲ್ಲಿ ಬರೆದಿದ್ದಾರೆ, ಅದು ನನಗೆ ಶಿರೋಧಾರ್ಯ ಇದೆ. https://www.youtube.com/watch?v=JeyXMgeBdYQ"
+          ],
+          "en": []
+        },
+        "tags": ["AcharyaPujyapada", "AbhishekaPatha"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=JeyXMgeBdYQ",
+            "youtubeId": "JeyXMgeBdYQ"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_022_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಮುನಿಗಳು ಸಹ ದಿನ ಪ್ರತಿಕ್ರಮಣದಲ್ಲಿ ಸಮ್ಯಕ್ ದೃಷ್ಟಿಯು ನನಗೆ ಮಂಗಳ ಮಾಡಿಲಿ ಎಂದು ಹೇಳುತ್ತಾರೆ .",
+            "' ಮಮ ಮಂಗಳಂ \"ದಲ್ಲಿ ಗೌತಮ ಸ್ವಾಮಿಯು ಅರಹಂತರು, ಅವಧಿ ಜ್ಞಾನಿ, ತಪಸ್ವಿ, ಗುಣಗಳು, ಮಹಾ ಋಷಿ,.., ಸಮ್ಯಗ್ಗ ದರ್ಶನ, ಸಮ್ಯಕ್ ದೃಷ್ಟಿ, ಬ್ರಹ್ಮಚಾರಿಗಳು, ಬ್ರಹ್ಮಚರ್ಯ ಆದಿ ಆದಿ ನನಗೆ ಮಂಗಳ ಮಾಡಲಿ ಎಂದು ಹೇಳಿದ್ದಾರೆ.",
+            "https://www.youtube.com/watch?v=FAJ 0tNilz0"
+          ],
+          "en": []
+        },
+        "tags": ["Pratikramana", "MamaMangalam"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_022_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಇದರಲ್ಲಿ ಸಮ್ಯಗ್ ದೃಷ್ಟಿ ಅಷ್ಟೇ ಅಲ್ಲ ಬ್ರಹ್ಮಚಾರಿಗಳೂ ಸಹ ಮುನಿಗಳಿಗಿಂತ ಗುಣಸ್ಥಾನದಲ್ಲಿ ಚಿಕ್ಕವರು. ಆದರೂ ನಮಗೆ ಮಂಗಳ ಮಾಡಿ ಎಂದು ಪ್ರತಿಕ್ರಮಣದಲ್ಲಿ ಹೇಳುತ್ತಾರೆ."
+          ],
+          "en": []
+        },
+        "tags": ["Gunasthana", "Pratikramana"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_023",
+    "type": "question",
+    "timestamp": "2026-06-15T11:50:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_023_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಜನ್ಮ ಕಲ್ಯಾಣದಲ್ಲಿ ಅಭಿಷೇಕವನ್ನು ಇಂದ್ರನೇ ಮಾಡುತ್ತಾನೆ. ಇಂದ್ರ ಸ್ಥಾಪನೆ ಪುರುಷರಿಂದ ಮಾತ್ರ ಸಾಧ್ಯವೆಂದು ಹೇಳುತ್ತಾರೆ. ಹಾಗಾದರೆ ರಾಣಿ ವಿಶಾಲಾಕ್ಷಿ ಹೇಗೆ ಅಭಿಷೇಕ ಮಾಡಿದರು?"
+          ],
+          "en": [
+            "Inquirer: Indra does abhisheka during Janma Kalayana. And, Indra staphana can be done by men.",
+            "But, how did raani vishalakshi do abhisheka?"
+          ]
+        },
+        "tags": ["JanmaKalyanaka", "Indra", "Abhisheka"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_023",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:51:00Z",
+    "references": [
+      "q_023"
+    ],
+    "blocks": [
+      {
+        "id": "a_023_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ದೇವತೆಗಳು ನೂರಾರು, ಸಾವಿರಾರು, ಲಕ್ಷಾಂತರ ತುಂಬಿದ ಘಡಾ/ಬಿಂಡಿಗೆಗಳನ್ನು ತಂದು, ಮೊದಲಿಗೆ ಸುರಪತಿ ಇಂದ್ರನು ಅಭಿಷೇಕವನ್ನು ಪೂರ್ಣಗೊಳಿಸುವವರೆಗೆ ಕಾಯುತ್ತಾರೆ. ನಂತರ ದೇವರುಗಳು ದೇವಿಯರೊಂದಿಗೆ ಸೇರಿ ಅಭಿಷೇಕವನ್ನು ಮಾಡುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Answer: Devas bring hundreds, thousands and lakhs of full ghada/bindige, then wait for Surapati Indra to complete the abhisheka.",
+            "Then later devas do abhisheka along with devis."
+          ]
+        },
+        "tags": ["Devas", "Abhisheka"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/shorts/5iPr8mqvu7E",
+            "youtubeId": "5iPr8mqvu7E"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_023_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸ್ತ್ರೀ ಅಭಿಷೇಕದ ಬಗ್ಗೆ ಆಚಾರ್ಯ ಶಾಂತಿಸಾಗರ, ಜ್ಞಾನಸಾಗರ ಮತ್ತು ವಿದ್ಯಾಸಾಗರ ಸ್ವಾಮಿಗಳ ...: https://www.youtube.com/watch?v=7Ou-PEdHJU"
+          ],
+          "en": [
+            "Acharya Shanti Sagar and Jnaana Sagar and Vidya Sagar Swamigalu on stree abhisheka: https://www.youtube.com/watch?v= 70u-PEdHJU"
+          ]
+        },
+        "tags": ["StreeAbhisheka", "Acharyas"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_024",
+    "type": "question",
+    "timestamp": "2026-06-15T11:55:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_024_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಪಂಚಾಮೃತ ಅಭಿಷೇಕವು ಹಿಂದೂಗಳಿಂದ ಜೈನರಿಗೆ ಬಂದದ್ದಲ್ಲವೇ?"
+          ],
+          "en": [
+            "Inquirer: Didn't panchamruta come from hindus to Jains?"
+          ]
+        },
+        "tags": ["Panchamruta"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_024",
+    "type": "answer",
+    "timestamp": "2026-06-15T11:56:00Z",
+    "references": [
+      "q_024"
+    ],
+    "blocks": [
+      {
+        "id": "a_024_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಕುಂದಕುಂದಾಚಾರ್ಯ, ಪೂಜ್ಯಪಾದ, ಜಿನಸೇನಾಚಾರ್ಯ ಮತ್ತು ಅನೇಕ ಆಚಾರ್ಯರು ರಚಿಸಿದ ಗ್ರಂಥಗಳಲ್ಲಿ ವಿವಿಧ ರೂಪಗಳಲ್ಲಿ ಪಂಚಾಮೃತ ಅಭಿಷೇಕದ ಉಲ್ಲೇಖಗಳು ದೊರೆಯುತ್ತವೆ.",
+            "ಆದರೆ, ಹಿಂದೂ ಪಂಡಿತರು ಸ್ವತಃ ಹೇಳುವಂತೆ ಅವರ ಯಾವುದೇ ಗ್ರಂಥಗಳಲ್ಲಿ ಪಂಚಾಮೃತ ಅಭಿಷೇಕ ಎಂಬ ವಿಧಿ ಇಲ್ಲ.",
+            "ಅವರಲ್ಲಿ “ಪಂಚಾಮೃತ\" ಎಂದರೆ ಗಂಗಾಜಲ ಅಂದರೆ ಕೇವಲ ನೀರಿನ ಉಲ್ಲೇಖ ಮಾತ್ರ."
+          ],
+          "en": [
+            "Answer:",
+            "Many Jain Digambar Acharyas granthas have panchamruta abhisheka in one form or the other.",
+            "Hindu pandits say none of their granthas have panchamruta abhisheka.",
+            "The panchamruta there is referred to as just gangajal i.e., only water."
+          ]
+        },
+        "tags": ["Panchamruta", "HinduPandits"],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_024_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ವಿದ್ಯಾಸಾಗರ ಮಹಾರಾಜರ ಸಾನ್ನಿಧ್ಯದಲ್ಲಿ ಪಂಚಾಮೃತ ಮತ್ತು ಸ್ತ್ರೀ-ಅಭಿಷೇಕದ ಬಗ್ಗೆ ಉಲ್ಲೇಖ, ಹಾಗೂ ಇನ್ನೂ  កម ថ្ម: https://youtu.be/cZjPOAdWk9E?si=F3UA1Gn8iUAMddH8"
+          ],
+          "en": [
+            "Acharya Vidyasagar Swami:",
+            "1. Ksheera (Milk) & Ikshu ras (Sugarcane juice) abhisheka by Indra during Janma Kalyanaka",
+            "2. Offer Shree phala (Coconut containing water) for Moksha Phala. https://youtu.be/WWYVRdhNJuk"
+          ]
+        },
+        "tags": ["AcharyaVidyasagar", "Panchamruta"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_025",
+    "type": "question",
+    "timestamp": "2026-06-15T12:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_025_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಪಂಚಾಮೃತ ಶ್ಲೋಕದಲ್ಲಿ 'ತರು ರಸ' ಎಂದು ಹೇಳಲಾಗಿದೆ, ಹಾಗಿದ್ದ ಮೇಲೆ ಪುಷ್ಪವೃಷ್ಟಿಯು ಇಲ್ಲಿ ಹೇಗೆ ಅನ್ವಯಸುತ್ತದೆ ?"
+          ],
+          "en": [
+            "Inquirer: Panchamruta shloka says taru ras (plant based juice/liquid), then how does flowers (pushpa vrusti) fit in?"
+          ]
+        },
+        "tags": ["TaruRasa", "PushpaVrusti"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_025",
+    "type": "answer",
+    "timestamp": "2026-06-15T12:01:00Z",
+    "references": [
+      "q_025"
+    ],
+    "blocks": [
+      {
+        "id": "a_025_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಪುಷ್ಪವೃಷ್ಟಿಯು ಸಮವಸರಣದಲ್ಲಿ ನಡೆಯುತ್ತದೆ.",
+            "ದೇವತೆಗಳು ಜಿನೇಂದ್ರ ಭಗವಂತರ ಪಾದಗಳ ಮೇಲೆ ಪುಷ್ಪವೃಷ್ಟಿ ಮಾಡುತ್ತಾರೆ. ಗಂಧಕುಟಿಯಲ್ಲಿ ಪುಷ್ಪಗಳು ತುಂಬಿ ಮಂಡಿಯವರಗೆ ಬರುತ್ತದೆ ."
+          ],
+          "en": [
+            "Answer:",
+            "Pushpa vrusti happens in Samavasararna:"
+          ]
+        },
+        "tags": ["PushpaVrusti", "Samavasararna"],
+        "videos": [
+          {
+            "url": "https://youtu.be/13my0lhOmYk?si=il0l0okpwEAhUBjZ",
+            "youtubeId": "13my0lhOmYk"
+          },
+          {
+            "url": "https://youtu.be/qRBGURJp2Cl?si=AesaaZdVdwO57NiA",
+            "youtubeId": "qRBGURJp2Cl"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=J_noWizvxsw",
+            "youtubeId": "J_noWizvxsw"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_025_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆಚಾರ್ಯ ಕುಂದಕುಂದರು ಹಾಗು/ಅಥವಾ ಪೂಜ್ಯಪಾದ ಸ್ವಾಮಿಗಳು ಹೇಳುವಂತೆ, ನಂದೀಶ್ವರ ದ್ವೀಪದಲ್ಲಿ ದೇವತೆಗಳು ದಿವ್ಯನ ಗಂಧೇನ, ದಿವೇನ ಪುಪ್ಪೇನ, ದಿವೇನ ವಾಸನೆ ಮತ್ತು ದಿವೇನ ಣಾಣೇನ ಎಂಬ ದಿವ್ಯ ವಸ್ತುಗಳಿಂದ ಪೂಜೆ ಮಾಡುತ್ತಾರೆ.",
+            "https://youtu.be/9SpvgDVq_10?si=w9vfobZsNb4NuCQc."
+          ],
+          "en": [
+            "Acharya Kunda Kunda and/or Pujyapada Swami says in Nandhishwara dweepa, celestial beings do pooja with Divyena Gandhena, Divyena Puppane (flowers), Divyena Vaasena, Divyena Nanena: https://youtu.be/9SpvgDVq_10?si=w9vfobZsNb4NuCQc."
+          ]
+        },
+        "tags": ["NandhishwaraDweepa", "DivyaPooja"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_026",
+    "type": "question",
+    "timestamp": "2026-06-15T12:05:00Z",
+    "references": [
+      "a_025"
+    ],
+    "blocks": [
+      {
+        "id": "q_026_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಪ್ರಶ್ನೆ ಕರ್ತ: ಇಂದ್ರಾಣಿ ಹಾಗು ಇತರರು ಏನು ಮಾಡುತ್ತಾರೆ ?"
+          ],
+          "en": [
+            "Inquirer: What about Indrani and others?"
+          ]
+        },
+        "tags": ["Indrani", "Devis"],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_026",
+    "type": "answer",
+    "timestamp": "2026-06-15T12:06:00Z",
+    "references": [
+      "q_026"
+    ],
+    "blocks": [
+      {
+        "id": "a_026_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ಪದ್ಮ ಚರಿತಂ ಪ್ರಕಾರ: ಇಂದ್ರಾಣಿ ಮತ್ತು ಇತರ ದೇವಿಯರು ತಮ್ಮ ಸ್ವಂತ ಕೈಗಳಿಂದ ಗಂಧ ಉಪಲೇಪನವನ್ನು ಮಾಡುತ್ತಾರೆ.",
+            "ಅದರ ನಂತರ ಆದಿನಾಥ ಸ್ವಾಮಿಗೆ ಕುಂಭದಿಂದ (ಘಟ) ಅಭಿಷೇಕ ಮಾಡುತ್ತಾರೆ. ನಂತರ ಸ್ವಚ್ಛಗೊಳಿಸಿ ಆಭೂಷಣಗಳನ್ನು ಧರಿಸುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Answer:",
+            "Padma Charitam: Indrani and other devis does gandha upa-lepana with their own hands.",
+            "After that does abhisheka with kumbha (Ghada) of Aadinatha swami. Then after cleaning, puts abhushana."
+          ]
+        },
+        "tags": ["PadmaCharitam", "Indrani", "GandhaUpaLepana"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/shorts/BhjW6NQn6kQ",
+            "youtubeId": "BhjW6NQn6kQ"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_026_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [],
+          "en": [
+            "Devas bring hundreds, thousands and lakhs of full ghada/bindige, then wait for Surapati Indra to complete the abhisheka.",
+            "Then later devas do abhisheka along with devis."
+          ]
+        },
+        "tags": ["SurapatiIndra", "Abhisheka"],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/shorts/5iPr8mqvu7E",
+            "youtubeId": "5iPr8mqvu7E"
+          }
+        ],
         "images": []
       }
     ]

@@ -1,13 +1,13 @@
 function filterChat() {
     const query = document.getElementById('search-bar').value.toLowerCase();
-    const bubbles = document.querySelectorAll('.bubble');
+    const cards = document.querySelectorAll('.card');
 
-    bubbles.forEach(bubble => {
-        const text = bubble.innerText.toLowerCase();
+    cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
         if (text.includes(query)) {
-            bubble.style.display = ""; // Show
+            card.style.display = ""; // Show
         } else {
-            bubble.style.display = "none"; // Hide
+            card.style.display = "none"; // Hide
         }
     });
 }
@@ -31,10 +31,9 @@ function createVideoCard(url) {
             <a href="${url}" target="_blank">
                 <img src="https://img.youtube.com/vi/${videoId}/0.jpg" alt="Watch Video">
             </a>
-            <div class="print-only-qr">
-                <p>Scan to watch:</p>
-                <img src="${qrCodeUrl}" alt="QR Code">
-            </div>
+        </div>
+        <div class="qr-code">
+            <img src="${qrCodeUrl}" alt="QR Code">
         </div>
     `;
 }
@@ -45,9 +44,15 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             const container = document.getElementById('chat-container');
             const langSelect = document.getElementById('lang-select');
-            const lang = langSelect ? langSelect.value : 'both';
+            console.log("Language changed to:", langSelect);
+            const lang = langSelect ? langSelect.value : 'all';
 
             renderChat(data, container, lang);   // Initial render
+
+            // Add Listener HERE (it has access to 'data' and 'container' via closure)
+            langSelect.addEventListener('change', (e) => {
+                renderChat(data, container, e.target.value);
+            });
 
             // RESTORE position AFTER rendering is done
             setTimeout(() => {
@@ -60,13 +65,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => console.error('Error loading data:', error));
 });
 
-function renderChat(data, container, lang = 'both') {
+function renderChat(data, container, lang = 'all') {
     if (!container) return; // Safety check
     container.innerHTML = "";
 
     data.forEach(item => {
         const card = document.createElement('div');
-        card.className = `bubble ${item.type}`;
+        card.className = `card ${item.type}`;
         card.id = item.id;
 
         // --- Excerpt Logic ---
@@ -97,20 +102,20 @@ function renderChat(data, container, lang = 'both') {
             row.className = `block-row ${block.type}`;
 
             // Column 1: Kannada
-            const knCol = document.createElement('div');
-            knCol.className = "col-kn";
-            if ((lang === 'kn' || lang === 'both') && block.content.kn && block.content.kn.length > 0) {
+            if ((lang === 'kn' || lang === 'all') && block.content.kn && block.content.kn.length > 0) {
+                const knCol = document.createElement('div');
+                knCol.className = "col-kn";
                 knCol.innerHTML = `<p>${block.content.kn.join('<br>')}</p>`;
+                row.appendChild(knCol);
             }
-            row.appendChild(knCol);
 
             // Column 2: English
-            const enCol = document.createElement('div');
-            enCol.className = "col-en";
-            if ((lang === 'en' || lang === 'both') && block.content.en && block.content.en.length > 0) {
+            if ((lang === 'en' || lang === 'all') && block.content.en && block.content.en.length > 0) {
+                const enCol = document.createElement('div');
+                enCol.className = "col-en";
                 enCol.innerHTML = `<p>${block.content.en.join('<br>')}</p>`;
+                row.appendChild(enCol);
             }
-            row.appendChild(enCol);
 
             // Column 3: Media
             const mediaCol = document.createElement('div');
@@ -128,11 +133,6 @@ function renderChat(data, container, lang = 'both') {
 
             card.appendChild(row);
         });
-
-        // --- QR Code Base ---
-        const qrDiv = document.createElement('div');
-        qrDiv.className = 'print-only-qr';
-        card.appendChild(qrDiv);
 
         container.appendChild(card);
     });

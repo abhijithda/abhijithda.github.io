@@ -35,6 +35,14 @@ body {
     outline: none;
 }
 
+#lang-select {
+    border-radius: 20px; /* Makes the corners fully rounded */
+    padding: 5px 15px;   /* Adds breathing room inside */
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+}
+
 .toggle-container {
     display: flex;
     align-items: center;
@@ -42,35 +50,89 @@ body {
     flex-shrink: 0;
 }
 
-/* --- Content Cards (Formerly Bubbles) --- */
-.bubble {
+/* --- Content cards --- */
+.card {
     position: relative;
     padding: 25px;
-    padding-top: 40px; /* Space for excerpt */
+    /* Space for excerpt */
+    padding-top: 40px;
     margin: 20px 0;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
     background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     width: 100%;
+
+    /* Stack rows vertically */
     display: flex;
-    flex-direction: row;
-    gap: 25px;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
     box-sizing: border-box;
     line-height: 1.5;
 }
 
-.text-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    flex: 2;
+/* --- 3-Column Rows --- */
+.block-row {
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    width: 100%;
 }
 
-.media-content {
-    flex: 1;
-    min-width: 200px;
+.col-kn, .col-en {
+    flex: 1; /* Both columns will grow to share the available width equally */
+}
+
+.col-media {
+    flex: 0 0 auto; /* Media stays at its original size */
+}
+
+.col-media {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 220px;
+}
+
+/* Hides media column if empty */
+.col-media:empty {
+    display: none;
+}
+
+
+/* Questions */
+.card.question {
+    background-color: #ffebee; /* Light red background */
+    border-left: 4px solid #d32f2f; /* Dark red border */
+    padding: 15px 20px;
+    border-radius: 4px;
+}
+
+/* Answers */
+.card.answer {
+    background-color: #f1f8e9; /* Light green background */
+    border-left: 4px solid #4caf50; /* A matching green border */
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 10px; /* Optional: adds space between answers */
+}
+
+/* Shlokas */
+.block-row.shloka {
+    background-color: #fdfaf2;
+    border-left: 4px solid #b38f4f;
+    /* padding: 15px 20px; */
+    border-radius: 4px;
+}
+
+.block-row.shloka p {
+    font-style: italic;
+    font-weight: 500;
+    margin: 0;
+}
+
+.col-en p {
+    color: #555;
 }
 
 /* --- Excerpt --- */
@@ -96,102 +158,201 @@ body {
 
 /* --- Components --- */
 .video-card {
-    margin-top: 10px;
-    border: 1px solid #ddd;
+    /* Enforce same size as QR code */
+    width: 150px !important;
+    height: 150px !important;
+    /* border: 1px solid #ddd; */
     border-radius: 8px;
     overflow: hidden;
     text-align: center;
 }
+
 .video-card img {
     width: 100%;
     display: block;
     border-radius: 8px;
 }
 
-.switch { position: relative; display: inline-block; width: 50px; height: 24px; }
-.switch input { opacity: 0; width: 0; height: 0; }
+.image-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.image-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.image-caption {
+    padding: 8px 12px;
+    font-size: 0.85em;
+    color: #666;
+    background: #f9f9f9;
+    border-top: 1px solid #eee;
+    margin: 0;
+    text-align: center;
+}
+
+/* --- Toggle Switch --- */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
 .slider {
-    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #ccc; transition: .4s; border-radius: 24px;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
 }
+
 .slider:before {
-    position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-    background-color: white; transition: .4s; border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
 }
-input:checked + .slider { background-color: #075e54; }
-input:checked + .slider:before { transform: translateX(26px); }
+
+input:checked+.slider {
+    background-color: #075e54;
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+/* --- Hidden by default QR --- */
+.qr-code {
+    display: none;
+}
 
 /* --- Responsive --- */
 @media (max-width: 768px) {
-    .text-content { grid-template-columns: 1fr; }
-    .app-header { padding: 10px 15px; }
+    .block-row {
+        grid-template-columns: 1fr;
+    }
+
+    .col-media {
+        width: 100%;
+    }
+
+    .app-header {
+        padding: 10px 15px;
+    }
 }
 
-/* --- Print Mode --- */
+/* ==========================================================================
+   Print Mode & Layout Optimizations (QR Code on Right)
+   ========================================================================== */
+
+/* 1. Hide the interactive switch ONLY when doing an actual physical print */
 @media print {
-    #search-bar, .reply-excerpt, .toggle-container, .video-card {
+    .toggle-container {
         display: none !important;
     }
-    #chat-container { width: 100%; margin: 0; }
-    .bubble { border: 1px solid #ccc; break-inside: avoid; }
-    .print-only-qr { display: block !important; }
 }
 
-/* --- Active Print Mode (Toggled via JS) --- */
-body.print-mode #search-bar, 
-body.print-mode .video-card {
+/* 2. Shared formatting for both Actual Print AND Web Print Preview */
+@media print,
+body.print-mode {
+
+    #search-bar,
+    .reply-excerpt,
+    .video-card {
+        display: none !important;
+    }
+
+    #chat-container {
+        width: 100%;
+        margin: 0;
+        max-width: 1000px;
+    }
+
+    .card {
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+        background-color: white !important;
+        margin: 10px 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 20px !important;
+
+        /* Keep Flexbox layout: text rows on left, QR on right */
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+    }
+
+    /* Hide the normal media column to make room for QR */
+    .col-media {
+        display: none !important;
+    }
+
+    /* Keep the text blocks at 2 columns */
+    .block-row {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 20px !important;
+    }
+
+    /* Place QR Code natively on the right side */
+    .qr-code {
+        display: block !important;
+        /* Enforce the industry standard scannable size */
+        width: 150px !important;
+        height: 150px !important;
+        margin-left: 25px !important;
+        /* Clean gap between text and QR */
+        margin-right: 0 !important;
+        margin-top: 0 !important;
+        flex-shrink: 0 !important;
+    }
+
+    .qr-code img {
+        width: 100% !important;
+        height: auto !important;
+        display: block !important;
+    }
+}
+
+
+/* =========================================
+   PRINT MODE UI TOGGLES
+========================================= */
+
+/* 1. Default State: Hide QR Codes completely */
+.qr-code {
     display: none !important;
 }
 
-body.print-mode .bubble {
-    border: 1px solid #ccc;
-    background-color: white !important;
-    width: 100%;
-    margin: 5px 0;
-    border-radius: 0;
-    box-shadow: none;
-}
-
-/* Ensure the QR code ONLY shows in Print Mode or actual Print */
-.print-only-qr { 
-    display: none !important; 
-}
-
-/* 1. Show QR code when Print Mode class is added to body */
-body.print-mode .print-only-qr { 
-    display: block !important; 
-}
-
-/* 2. Show QR code when the actual Print dialog is triggered */
-@media print {
-    .print-only-qr { 
-        display: block !important; 
-    }
-}
-
-/* Ensure the QR code container itself is visible when print-mode is active */
-body.print-mode .print-only-qr {
+/* 2. Print Mode State: Show QR Codes */
+body.print-mode .qr-code {
     display: block !important;
-    margin-top: 10px;
 }
 
-/* Ensure the QR image inside it is also visible and sized correctly */
-body.print-mode .print-only-qr img {
-    display: block !important;
-    max-width: 100px;
-    margin: 0 auto;
-}
-
-/* Update your print-mode CSS to this: */
-body.print-mode .video-card {
-    display: block !important; /* Keep the card container visible */
-    border: none !important;   /* Clean look */
-}
-
-body.print-mode .video-card a {
-    display: none !important;  /* Only hide the video thumbnail link */
-}
-
-body.print-mode .print-only-qr {
-    display: block !important; /* Force QR to show */
+/* 3. Print Mode State: Hide Videos */
+body.print-mode .video-card,
+body.print-mode iframe {
+    display: none !important;
 }

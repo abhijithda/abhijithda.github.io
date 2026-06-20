@@ -1,79 +1,111 @@
-const { renderChat } = require('./script.js'); // <-- Update function name here
+const { renderChat } = require('./script.js');
 
 describe('Jaina Pooja FAQ - UI Rendering Logic', () => {
   let container;
 
-  // This runs before every single test to give us a clean, empty DOM
   beforeEach(() => {
-    document.body.innerHTML = '<div id="main-content"></div>';
-    container = document.getElementById('main-content');
+    // Provide a fresh, empty DOM container for every row
+    container = document.createElement('div');
   });
 
-  test('1. Renders both Kannada and English text correctly', () => {
-    const mockData = [{
-      id: "q_test_1",
-      type: "question",
-      blocks: [{
-        id: "test_b_1",
-        type: "paragraph",
-        content: {
-          kn: ["ಕನ್ನಡ ಪಠ್ಯ (Kannada Text)"],
-          en: ["English Text"]
-        },
+  // 1. Define the test slice
+  const testCases = [
+    {
+      name: 'Renders Kannada and English',
+      lang: 'all',
+      mockBlocks: [{
+        id: "test_b_1", type: "paragraph",
+        content: { kn: ["ಕನ್ನಡ ಪಠ್ಯ"], en: ["English Text"] },
         tags: [], videos: [], images: []
-      }]
-    }];
-
-    // Execute your function
-    renderChat(mockData, container);
-
-    // Verify the text was injected into the DOM
-    expect(container.innerHTML).toContain('ಕನ್ನಡ ಪಠ್ಯ (Kannada Text)');
-    expect(container.innerHTML).toContain('English Text');
-  });
-
-  test('2. Renders [Watch Video] link when video data is present', () => {
-    const expectedVideos = [{ url: "https://youtu.be/dQw4w9WgXcQ", youtubeId: "dQw4w9WgXcQ" }]
-
-    const mockDataWithVideo = [{
-      id: "test_002",
-      type: "answer",
-      blocks: [{
-        id: "test_002_b_2",
-        type: "paragraph",
-        content: { kn: ["..."], en: ["..."] },
-        tags: [],
-        videos: expectedVideos,
+      }],
+      // The specific assertions for this row
+      assert: (dom) => {
+        expect(dom.innerHTML).toContain('ಕನ್ನಡ ಪಠ್ಯ');
+        expect(dom.innerHTML).toContain('English Text');
+      }
+    },
+    {
+      name: 'Renders Kannada and not English',
+      lang: 'kn',
+      mockBlocks: [{
+        id: "test_b_1", type: "paragraph",
+        content: { kn: ["ಕನ್ನಡ ಪಠ್ಯ"], en: ["English Text"] },
+        tags: [], videos: [], images: []
+      }],
+      // The specific assertions for this row
+      assert: (dom) => {
+        expect(dom.innerHTML).toContain('ಕನ್ನಡ ಪಠ್ಯ');
+        expect(dom.innerHTML).not.toContain('English Text');
+      }
+    },
+    {
+      name: 'Renders English and not Kannada',
+      lang: 'en',
+      mockBlocks: [{
+        id: "test_b_1", type: "paragraph",
+        content: { kn: ["ಕನ್ನಡ ಪಠ್ಯ"], en: ["English Text"] },
+        tags: [], videos: [], images: []
+      }],
+      // The specific assertions for this row
+      assert: (dom) => {
+        expect(dom.innerHTML).toContain('English Text');
+        expect(dom.innerHTML).not.toContain('ಕನ್ನಡ ಪಠ್ಯ');
+      }
+    },
+    {
+      name: 'Renders [Watch Video] links and QR codes',
+      lang: 'all',
+      mockBlocks: [{
+        id: "test_b_2", type: "paragraph",
+        content: { kn: [], en: [] },
+        videos: [{ url: "https://youtu.be/dQw4w9WgXcQ", youtubeId: "dQw4w9WgXcQ" }],
         images: []
-      }]
-    }];
+      }],
+      assert: (dom) => {
+        const videoLink = dom.querySelector('a');
+        expect(videoLink).not.toBeNull();
+        expect(videoLink.href).toBe('https://youtu.be/dQw4w9WgXcQ');
 
-    renderChat(mockDataWithVideo, container);
-
-    // Verify an anchor tag with the correct YouTube URL was created
-    const videoLink = container.querySelector('a');
-    expect(videoLink).not.toBeNull();
-    expect(videoLink.href).toBe(expectedVideos[0].url);
-  });
-
-  test('3. Renders images (e.g., personal photos) correctly', () => {
-    const mockDataWithImage = [{
-      id: "test_003",
-      type: "random",
-      blocks: [{
-        id: "test_003_b_3",
-        type: "paragraph",
-        content: { kn: ["..."], en: ["..."] },
-        tags: [], videos: [],
+        const qrCode = dom.querySelector('.qr-code img');
+        expect(qrCode).not.toBeNull();
+        expect(qrCode.src).toContain('api.qrserver.com');
+      }
+    },
+    {
+      name: 'Renders personal images correctly based on language selection',
+      lang: 'kn',
+      mockBlocks: [{
+        id: "test_b_3", type: "paragraph",
+        content: { kn: [], en: [] },
+        videos: [],
         images: [{ src: "family-photo.jpg", caption: { kn: "ನನ್ನ ಫೋಟೋ", en: "My Photo" } }]
-      }]
+      }],
+      assert: (dom) => {
+        const img = dom.querySelector('img');
+        expect(img).not.toBeNull();
+        expect(img.getAttribute('src')).toBe('images/family-photo.jpg');
+        
+        const caption = dom.querySelector('.image-caption');
+        expect(caption.innerHTML).toBe('ನನ್ನ ಫೋಟೋ');
+      }
+    }
+  ];
+
+  // 2. Execute the table
+  // Jest automatically injects the row data into the destructured parameters
+  test.each(testCases)('✓ $name', ({ lang, mockBlocks, assert }) => {
+    
+    // Arrange: Build the standard JSON wrapper expected by your function
+    const mockData = [{
+      id: "q_test",
+      type: "question",
+      blocks: mockBlocks
     }];
 
-    renderChat(mockDataWithImage, container);
+    // Act: Execute the UI rendering
+    renderChat(mockData, container, lang);
 
-    // Verify the image tag was created with the correct source
-    const img = container.querySelector('img');
-    expect(img).not.toBeNull();
-    expect(img.getAttribute('src')).toBe('images/family-photo.jpg');
+    // Assert: Run the row-specific validation callback
+    assert(container);
   });
 });
