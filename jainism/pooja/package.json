@@ -13,10 +13,11 @@
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e"
   },
-  "jest": {
+"jest": {
     "testEnvironment": "jsdom",
-    "testMatch": [
-      "**/*.test.js"
+    "testPathIgnorePatterns": [
+      "/e2e/"
     ]
   }
+  
 }
