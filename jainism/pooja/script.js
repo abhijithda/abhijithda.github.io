@@ -105,7 +105,7 @@ function renderChat(data, container, lang = 'all') {
             const idLabel = document.createElement('span');
             idLabel.className = 'block-id';
             // This logic turns "q_022_b_1" into "Q-22"
-            const typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
+            let typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
             if (block.type === 'shloka') {
                 typeInitial = `S`;
             }
