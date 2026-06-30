@@ -17,7 +17,7 @@
           "type": "object",
           "properties": {
             "id": { "type": "string" },
-            "type": { "type": "string", "enum": ["paragraph", "shloka"] },
+            "type": { "type": "string", "enum": ["paragraph", "note", "shloka"] },
             "content": {
               "type": "object",
               "properties": {

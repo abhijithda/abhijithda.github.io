@@ -106,8 +106,10 @@ function renderChat(data, container, lang = 'all') {
             idLabel.className = 'block-id';
             // This logic turns "q_022_b_1" into "Q-22"
             let typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
-            if (block.type === 'shloka') {
-                typeInitial = `S`;
+            if (block.type === "shloka") {
+                typeInitial = "S";
+            } else if (block.type === "note") {
+                typeInitial = "N";
             }
             const parts = block.id.split('_');
             const number = parseInt(parts[1], 10);        // '022' -> 22
