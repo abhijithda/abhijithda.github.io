@@ -38,18 +38,6 @@ function createVideoCard(url) {
     `;
 }
 
-function updateMediaVisibility() {
-    const showVideos = document.getElementById('toggle-videos').checked;
-    const showQrs = document.getElementById('toggle-qrs').checked;
-
-    // Toggle classes on the body element
-    document.body.classList.toggle('show-videos', showVideos);
-    document.body.classList.toggle('show-qrs', showQrs);
-}
-
-// Call this once on load to ensure the UI matches the body classes
-document.addEventListener('DOMContentLoaded', updateMediaVisibility);
-
 document.addEventListener("DOMContentLoaded", () => {
     fetch('data.json')
         .then(response => response.json())
