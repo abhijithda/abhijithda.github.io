@@ -15,11 +15,15 @@
             <option value="kn">ಕನ್ನಡ</option>
             <option value="en">English</option>
         </select>
-        <div class="toggle-container">
-            <span>Print View</span>
-            <label class="switch">
-                <input type="checkbox" id="print-toggle" onchange="togglePrintMode()">
-                <span class="slider"></span>
+        <div class="display-options" style="display: flex; gap: 15px; align-items: center; font-size: 0.9em;">
+            <strong>Show:</strong>
+            <label>
+                <input type="checkbox" id="toggle-videos" checked onchange="updateMediaVisibility()">
+                🎬 Videos
+            </label>
+            <label>
+                <input type="checkbox" id="toggle-qrs" onchange="updateMediaVisibility()">
+                📱 QR Codes
             </label>
         </div>
     </header>

@@ -292,6 +292,29 @@ input:checked+.slider:before {
     }
 }
 
+/* =========================================
+   MEDIA VISIBILITY CONTROLS
+   ========================================= */
+
+/* When BOTH are showing, turn the media column into a relative container */
+body.show-videos.show-qrs .col-media {
+    position: relative;
+    width: 180px; /* Give the video a little room */
+}
+
+/* Position the QR code inside the bottom-right corner of the video */
+body.show-videos.show-qrs .qr-code {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 65px !important;  /* Small enough to stay out of the way */
+    height: 65px !important; /* Big enough to scan */
+    background: white;       /* Crucial for scanning over a dark video */
+    padding: 4px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
 /* ==========================================================================
    Print Mode & Layout Optimizations (QR Code on Right)
    ========================================================================== */
