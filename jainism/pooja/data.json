@@ -511,10 +511,10 @@
         "type": "paragraph",
         "content": {
           "kn": [
-            "ಆಚಾರ್ಯ ನೇಮಿಚಂದ್ರ ಸಿದ್ದಾಂತ ಚಕ್ರವರ್ತಿಗಳು ರಚಿಸಿದ ಗೊಮ್ಮಟಸಾರದಲ್ಲಿ (ಹಾಗು ಇನ್ನೂ ಅನೇಕ ಗ್ರಂಥಗಳಲ್ಲಿ ) ೯ ಕ್ಷಾಯಿಕ ಲಬ್ಬಿಗಳ ಹೆಸರುಗಳು :"
+            "ಆಚಾರ್ಯ ನೇಮಿಚಂದ್ರ ಸಿದ್ದಾಂತ ಚಕ್ರವರ್ತಿಗಳು ರಚಿಸಿದ ಗೊಮ್ಮಟಸಾರದಲ್ಲಿ (ಹಾಗು ಇನ್ನೂ ಅನೇಕ ಗ್ರಂಥಗಳಲ್ಲಿ ) ೯ ಕ್ಷಾಯಿಕ ಲಬ್ಬಿಗಳ ಹೆಸರುಗಳು."
           ],
           "en": [
-            "Gommata Saara by Acharya Nemi Chandra Siddhanta Chakravarthi (and in many other scriptures,) mentions names of 9 kshaika labdhis:"
+            "Gommata Saara by Acharya Nemi Chandra Siddhanta Chakravarthi (and in many other scriptures,) mentions names of 9 kshaika labdhis."
           ]
         },
         "tags": [
@@ -526,9 +526,11 @@
       },
       {
         "id": "a_006_b_3",
-        "type": "paragraph",
+        "type": "shloka",
         "content": {
           "kn": [
+            "೯ ಕ್ಷಾಯಿಕ ಲಬ್ಬಿಗಳು:",
+            "",
             "೧. ಕೇವಲ ದರ್ಶನ",
             "೨. ಕೇವಲ ಜ್ಞಾನ",
             "೩. ಕೇವಲ ಚರಿತ್ರೆ",
@@ -540,16 +542,17 @@
             "೯. ಕೇವಲ ಸಮ್ಯಕ್ತ್ವ"
           ],
           "en": [
-            "9 Kshaika Kevala Labdhis",
-            "Keval Darshan",
-            "Keval Jnaan",
-            "Keval Charitra",
-            "Keval Daana",
-            "Keval Laabha",
-            "Keval Veerya",
-            "Keval Bhoga",
-            "Keval Upabhoga",
-            "Keval Samyaktva"
+            "9 kshaika labdhis:",
+            "",
+            "1. Kevala Darshana",
+            "2. Kevala Jnaana",
+            "3. Kevala Charitra",
+            "4. Kevala Daana",
+            "5. Kevala Laabha",
+            "6. Kevala Veerya",
+            "7. Kevala Bhoga",
+            "8. Kevala Upabhoga",
+            "9. Kevala Samyaktva"
           ]
         },
         "tags": [
@@ -878,12 +881,16 @@
       },
       {
         "id": "a_008_b_11",
-        "type": "shloka",
+        "type": "mantra",
         "content": {
           "kn": [
+            "ಭಕ್ತಾಮರ ಸ್ತೋತ್ರದ ೪೩ನೇ ಶ್ಲೋಕದ ಮಂತ್ರ:",
+            "",
             "ಓಂ ನಮೋ ಚಕ್ರೇಶ್ವರಿ ದೇವಿ, ಚಕ್ರ ಧಾರಿಣಿ, ಜಿನಶಾಸನ ಸೇವಾ ಕಾರಿಣಿ, ಜಿನಶಾಸನ ಕುದ್ರೋಪದ್ರವ ವಿನಾಶಿನಿ, ಧರ್ಮ ಶಾಂತಿ ಕಾರಿಣಿ ನಮಃ ಕುರು ಕುರು ಸ್ವಾಹಾ."
           ],
           "en": [
+            "Bhaktamara stotra's 43rd sloka's mantra:",
+            "",
             "Om Namo Chakreshwari Devi, Chakra Dhaarini, Jina Shasana Sevaa Kaarini, Jina Shasana Kshudropadrava Vinaashini, Dharma Shaanti Kaarini Namah Kuru Kuru Swaahaa."
           ]
         },
@@ -946,11 +953,13 @@
         "content": {
           "kn": [
             "ದೇವ ಮೂಡತೆ ಶ್ಲೋಕ:",
+            "",
             "ವರೋಪಲಿಪ್ಪಯಾಶಾವಾನ್ ರಾಗದ್ವೇಷಮಲೀಮಸಾ |",
             "ದೇವತಾಯದುಪಾಸೀತ ದೇವತಾಮೂಢಮುಚ್ಯತೇ ||೨೩||"
           ],
           "en": [
             "Deva Moodhata Shloka:",
+            "",
             "Varopallipsaya Ashaavaan Raaga Dvesha maleemasa |",
             "Devataa yadyupaseeta Devataa moodham uchyate ||23||"
           ]
@@ -1905,13 +1914,17 @@
         "content": {
           "kn": [
             "ಸಾತಿಷಯ (ಸ-ಅತಿಶಯ) ಪುಣ್ಯವನ್ನು ಪಡೆಯುವ ಕೆಲವು ಉದಾಹರಣೆಗಳು...",
-            "ಅಭಿಷೇಕ",
-            "ಶಾಂತಿಧಾರ",
-            "ವಿಧಾನ",
-            "ತಪಸ್ಸು"
+            "- ಅಭಿಷೇಕ",
+            "- ಶಾಂತಿಧಾರ",
+            "- ವಿಧಾನ",
+            "- ತಪಸ್ಸು"
           ],
           "en": [
-            "Examples of getting saatishaya (sa-atishay) punya is via Abhisheka, Shantidhara, Vidhaan, Tapa."
+            "Examples of getting saatishaya (sa-atishay) punya is via...",
+            "- Abhisheka",
+            "- Shantidhara",
+            "- Vidhaan",
+            "- Tapa"
           ]
         },
         "tags": [
@@ -2188,11 +2201,13 @@
         "content": {
           "kn": [
             "ಪಂಚಾಮೃತ ಶ್ಲೋಕ - ಪ್ರತಿಷ್ಠಾ ಶಾಸ್ತ್ರ ಅಕಲಂಕ ದೇವ ಸ್ವಾಮಿ:",
+            "",
             "ನೀರಂ ತರು ರಸಸ್ ಚೈವ, ಗೋ ರಸ್ ತೃತೀಯಂ ತಥಾ",
             "ಪಂಚಾಮೃತಮ್ ಇತಿ ಪ್ರೋಕ್ತಮ್, ಜಿನ ಸ್ನಪನ ಕರ್ಮಣಿ"
           ],
           "en": [
             "Panchamruta Shloka - Pratishta Shastra Akalanka Deva Swami:",
+            "",
             "Neeram taru rasas chaiva, go ras truteeyam tathaa",
             "Panchamrutam iti proktam, Jina snapana karmani"
           ]

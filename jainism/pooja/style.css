@@ -66,7 +66,7 @@ body {
     /* Stack rows vertically */
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 5px;
     box-sizing: border-box;
     line-height: 1.5;
 }
@@ -75,17 +75,19 @@ body {
 .block-row {
     display: flex;
     flex-direction: row;
-    gap: 25px;
+    gap: 12px;
     width: 100%;
+    margin: 5px 0; /* Reduced vertical gap between all blocks */
+    padding: 8px 12px; /* Balanced padding inside each block */
+    border-radius: 4px;    
 }
 
 .block-id {
-    padding: 15px 20px;
+    padding: 15px 5px;
     font-family: monospace;
-    margin-right: 10px;
     font-weight: bold;
     display: inline-block;
-    min-width: 25px; /* Keeps them aligned */
+    min-width: 50px; /* Keeps them aligned */
 }
 
 .col-kn, .col-en {
@@ -113,7 +115,7 @@ body {
 .card.question {
     background-color: #ffebee; /* Light red background */
     border-left: 4px solid #d32f2f; /* Dark red border */
-    padding: 15px 20px;
+    padding: 10px 5px;
     border-radius: 4px;
 }
 
@@ -121,15 +123,34 @@ body {
 .card.answer {
     background-color: #f1f8e9; /* Light green background */
     border-left: 4px solid #4caf50; /* A matching green border */
-    padding: 15px 20px;
+    padding: 10px 5px;
     border-radius: 4px;
     margin-bottom: 10px; /* Optional: adds space between answers */
 }
 
-/* Shlokas */
-.block-row.shloka {
+/* Answer: Green margin */
+.block-row.answer {
+    background-color: #e8f5e9;
+    border-left: 5px solid #4caf50; /* Same 5px width as Shloka */
+}
+
+.block-row.mantra {
+    background-color: #f97e03;
+    border-left: 5px solid #ff0000;
+}
+
+/* Note: Helpful, cautionary, contrast-highlighting */
+.block-row.note {
     background-color: #fdfaf2;
-    border-left: 4px solid #b38f4f;
+    border-left: 5px solid #b38f4f;
+    /* padding: 10px;
+    margin: 10px 0; */
+}
+
+/* Shloka: Trustworthy, authoritative, needs respect */
+.block-row.shloka {
+    background-color: #fff9c4;
+    border-left: 5px solid #fbc02d;
     /* padding: 15px 20px; */
     border-radius: 4px;
 }
@@ -167,9 +188,9 @@ body {
 
 /* --- Components --- */
 .video-card {
-    /* Enforce same size as QR code */
+    /* Enforce same size as QR code for width, and auto for height to maintain aspect ratio */
     width: 150px !important;
-    height: 150px !important;
+    height: auto !important;
     /* border: 1px solid #ddd; */
     border-radius: 8px;
     overflow: hidden;
@@ -279,6 +300,10 @@ input:checked+.slider:before {
 @media print {
     .toggle-container {
         display: none !important;
+    }
+    .block-row {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }
 
