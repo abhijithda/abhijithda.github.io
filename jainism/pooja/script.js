@@ -101,6 +101,23 @@ function renderChat(data, container, lang = 'all') {
             const row = document.createElement('div');
             row.className = `block-row ${block.type}`;
 
+            // Create an ID element (e.g., Q1, A1, S1)
+            const idLabel = document.createElement('span');
+            idLabel.className = 'block-id';
+            // This logic turns "q_022_b_1" into "Q-22"
+            let typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
+            if (block.type === "shloka") {
+                typeInitial = "S";
+            } else if (block.type === "note") {
+                typeInitial = "N";
+            }
+            const parts = block.id.split('_');
+            const number = parseInt(parts[1], 10);        // '022' -> 22
+            const subNumber = parts[3];        // '022' -> 22
+            idLabel.innerText = `${typeInitial}-${number}.${subNumber}`; // e.g., "Q-22.1"
+
+            row.appendChild(idLabel); // Add ID to the card
+
             // Column 1: Kannada
             if ((lang === 'kn' || lang === 'all') && block.content.kn && block.content.kn.length > 0) {
                 const knCol = document.createElement('div');

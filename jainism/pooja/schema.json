@@ -4,38 +4,90 @@
   "items": {
     "type": "object",
     "properties": {
-      "id": { "type": "string" },
-      "type": { "type": "string", "enum": ["question", "answer"] },
-      "timestamp": { "type": "string", "format": "date-time" },
+      "id": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "question",
+          "answer"
+        ]
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time"
+      },
       "references": {
-        "type": ["array", "null"],
-        "items": { "type": "string" }
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
       },
       "blocks": {
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
-            "id": { "type": "string" },
-            "type": { "type": "string", "enum": ["paragraph", "shloka"] },
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "paragraph",
+                "mantra",
+                "note",
+                "shloka"
+              ]
+            },
             "content": {
               "type": "object",
               "properties": {
-                "kn": { "type": "array", "items": { "type": "string" } },
-                "en": { "type": "array", "items": { "type": "string" } }
+                "kn": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "en": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
               },
-              "required": ["kn", "en"]
+              "required": [
+                "kn",
+                "en"
+              ]
             },
-            "tags": { "type": "array", "items": { "type": "string" } },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "videos": {
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "url": { "type": "string", "format": "uri" },
-                  "youtubeId": { "type": "string" }
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "youtubeId": {
+                    "type": "string"
+                  }
                 },
-                "required": ["url", "youtubeId"]
+                "required": [
+                  "url",
+                  "youtubeId"
+                ]
               }
             },
             "images": {
@@ -43,17 +95,31 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "src": { "type": "string" },
-                  "cap": { "type": "string" }
+                  "src": {
+                    "type": "string"
+                  },
+                  "cap": {
+                    "type": "string"
+                  }
                 },
-                "required": ["src"]
+                "required": [
+                  "src"
+                ]
               }
             }
           },
-          "required": ["id", "type", "content"]
+          "required": [
+            "id",
+            "type",
+            "content"
+          ]
         }
       }
     },
-    "required": ["id", "type", "blocks"]
+    "required": [
+      "id",
+      "type",
+      "blocks"
+    ]
   }
 }
