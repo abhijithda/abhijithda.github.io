@@ -334,9 +334,10 @@ body.print-mode {
 
         /* Keep Flexbox layout: text rows on left, QR on right */
         display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        align-items: flex-start !important;
+        flex-direction: column !important;
+        /* justify-content: space-between !important;
+        align-items: flex-start !important; */
+        gap: 5px !important;
     }
 
     /* Hide the normal media column to make room for QR */
@@ -344,10 +345,12 @@ body.print-mode {
         display: none !important;
     }
 
-    /* Keep the text blocks at 2 columns */
+    /* Keep the text blocks and QR codes aligned in a row */
     .block-row {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 20px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 12px !important;
+        width: 100% !important;
     }
 
     /* Place QR Code natively on the right side */
