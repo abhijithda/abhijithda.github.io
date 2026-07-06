@@ -16,9 +16,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         await expect(videosCheckbox).toBeChecked();
         await expect(qrsCheckbox).not.toBeChecked();
         
-        // Take screenshot
-        await page.screenshot({ path: 'test-results/screenshots/01-default-videos-on.png', fullPage: true });
-        
         // Validate that video is visible and QR is hidden
         const firstCardWithVideo = chatContainer.locator('.card:has(.video-card)').first();
         const videoInCard = firstCardWithVideo.locator('.video-card').first();
@@ -26,6 +23,12 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         
         await expect(videoInCard).toBeVisible();
         await expect(qrInCard).toBeHidden();
+        
+        // Capture visual snapshot for comparison (viewport only for consistency)
+        await expect(page).toHaveScreenshot('screenshot-default-state-videos-on-qr-off.png', { 
+            fullPage: false, 
+            maxDiffPixels: 1000
+        });
         
         console.log('✓ Default state: Videos visible, QR hidden');
     });
@@ -47,9 +50,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         // Wait for visibility changes
         await page.waitForTimeout(500);
         
-        // Take screenshot
-        await page.screenshot({ path: 'test-results/screenshots/02-qr-only.png', fullPage: true });
-        
         // Validate that QR is visible and video is hidden
         const firstCardWithMedia = chatContainer.locator('.card:has(.video-card)').first();
         const videoInCard = firstCardWithMedia.locator('.video-card').first();
@@ -57,6 +57,12 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         
         await expect(videoInCard).toBeHidden();
         await expect(qrInCard).toBeVisible();
+        
+        // Capture visual snapshot for comparison (viewport only for consistency)
+        await expect(page).toHaveScreenshot('screenshot-qr-only-state-videos-off-qr-on.png', { 
+            fullPage: false, 
+            maxDiffPixels: 1000
+        });
         
         console.log('✓ QR-only state: Videos hidden, QR visible');
     });
@@ -78,9 +84,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         // Wait for visibility changes
         await page.waitForTimeout(500);
         
-        // Take screenshot
-        await page.screenshot({ path: 'test-results/screenshots/03-both-videos-and-qr.png', fullPage: true });
-        
         // Validate both are visible
         const firstCardWithMedia = chatContainer.locator('.card:has(.video-card)').first();
         const videoInCard = firstCardWithMedia.locator('.video-card').first();
@@ -100,6 +103,12 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
             expect(qrBounds.y >= mediaWrapBounds.y).toBe(true);
             console.log(`✓ PIP Layout verified: QR positioned over video within media-wrap`);
         }
+        
+        // Capture visual snapshot for comparison (viewport only for consistency)
+        await expect(page).toHaveScreenshot('screenshot-both-state-videos-on-qr-on.png', { 
+            fullPage: false, 
+            maxDiffPixels: 1000
+        });
         
         console.log('✓ Both state: Videos and QR visible with PIP layout');
     });
@@ -121,9 +130,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         // Wait for visibility changes
         await page.waitForTimeout(500);
         
-        // Take screenshot
-        await page.screenshot({ path: 'test-results/screenshots/04-none-hidden.png', fullPage: true });
-        
         // Validate both are hidden
         // Find a card that originally had videos
         const firstCardWithVideo = chatContainer.locator('.card:has(.video-card)').first();
@@ -132,6 +138,12 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         
         await expect(videoInCard).toBeHidden();
         await expect(qrInCard).toBeHidden();
+        
+        // Capture visual snapshot for comparison (viewport only for consistency)
+        await expect(page).toHaveScreenshot('screenshot-none-state-videos-off-qr-off.png', { 
+            fullPage: false, 
+            maxDiffPixels: 1000
+        });
         
         console.log('✓ None state: Videos and QR hidden');
     });
@@ -153,9 +165,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         // Wait for visibility changes
         await page.waitForTimeout(500);
         
-        // Take screenshot
-        await page.screenshot({ path: 'test-results/screenshots/05-videos-only.png', fullPage: true });
-        
         // Validate
         const firstCardWithMedia = chatContainer.locator('.card:has(.video-card)').first();
         const videoInCard = firstCardWithMedia.locator('.video-card').first();
@@ -163,6 +172,12 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         
         await expect(videoInCard).toBeVisible();
         await expect(qrInCard).toBeHidden();
+        
+        // Capture visual snapshot for comparison (viewport only for consistency)
+        await expect(page).toHaveScreenshot('screenshot-videos-only-state-videos-on-qr-off.png', { 
+            fullPage: false, 
+            maxDiffPixels: 1000
+        });
         
         console.log('✓ Videos-only state: Videos visible, QR hidden');
     });
