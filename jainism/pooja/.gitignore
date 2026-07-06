@@ -1,6 +1,2 @@
 # Dependency directories
 node_modules/
-
-# Test coverage and results
-coverage/
-test-results/
