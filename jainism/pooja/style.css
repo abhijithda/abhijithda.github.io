@@ -263,8 +263,14 @@ body {
 .media-wrap .qr-code img { width: 100%; height: auto; display: block; }
 .media-wrap .video-card img { display: block; width: 100%; height: auto; max-height: 160px; object-fit: cover; }
 
-/* Prevent media from overflowing the card */
-.col-media { overflow: hidden; }
+/* Keep media column fixed width and right-aligned so thumbnails don't push content */
+.col-media {
+    flex: 0 0 220px;
+    width: 220px;
+    margin-left: auto;
+    box-sizing: border-box;
+    overflow: visible; /* allow PIP to position inside wrapper */
+}
 
 /* --- Toggle Switch --- */
 .switch {
