@@ -192,10 +192,9 @@ body {
 
 /* --- Components --- */
 .video-card {
-    /* Enforce same size as QR code for width, and auto for height to maintain aspect ratio */
-    width: 150px !important;
+    /* Smaller thumbnail to match master branch styling */
+    width: 140px !important;
     height: auto !important;
-    /* border: 1px solid #ddd; */
     border-radius: 8px;
     overflow: hidden;
     text-align: center;
@@ -233,7 +232,7 @@ body {
 /* Media wrapper for PIP layout */
 .media-wrap {
     position: relative;
-    width: 180px; /* thumbnail width */
+    width: 140px; /* thumbnail width (restored smaller size) */
     flex: 0 0 auto;
 }
 
@@ -261,12 +260,12 @@ body {
 }
 
 .media-wrap .qr-code img { width: 100%; height: auto; display: block; }
-.media-wrap .video-card img { display: block; width: 100%; height: auto; max-height: 160px; object-fit: cover; }
+.media-wrap .video-card img { display: block; width: 100%; height: auto; max-height: 120px; object-fit: cover; }
 
 /* Keep media column fixed width and right-aligned so thumbnails don't push content */
 .col-media {
-    flex: 0 0 220px;
-    width: 220px;
+    flex: 0 0 160px;
+    width: 160px;
     margin-left: auto;
     box-sizing: border-box;
     overflow: visible; /* allow PIP to position inside wrapper */
@@ -343,7 +342,7 @@ input:checked+.slider:before {
    ========================================= */
 
 .video-card iframe {
-    width: 180px !important;
+    width: 140px !important;
 }
 
 .qr-code {
