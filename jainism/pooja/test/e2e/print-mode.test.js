@@ -1,57 +1,53 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('Jaina Pooja WebUI - E2E Integration', () => {
-
-    test('Successfully loads JSON data and toggles Print Mode', async ({ page }) => {
-        // 1. Navigate to the local server
+test.describe('Jaina Pooja WebUI - E2E Integration (Display Options)', () => {
+    test('Display options: default, videos-only, qrs-only, none, both', async ({ page }) => {
         await page.goto('/');
 
-        // 2. Wait for the fetch() call to finish and render the cards
-        // Playwright is smart enough to auto-retry until the element appears
-        const firstCard = page.locator('.card').first();
-        await expect(firstCard).toBeVisible();
-
-        // 3. Verify we start in normal mode
         const body = page.locator('body');
-        await expect(body).not.toHaveClass(/print-mode/);
+        const videosCheckbox = page.locator('#toggle-videos');
+        const qrsCheckbox = page.locator('#toggle-qrs');
 
-        // 4. Click the Print Mode toggle
-        // Based on your script.js, this is triggered by a checkbox with id="print-toggle"
-        // Target the visible slider UI directly
-        const printToggleSlider = page.locator('.switch .slider');
-        await printToggleSlider.click();
+        // Wait for content
+        await expect(page.locator('.card').first()).toBeVisible();
 
-        // 5. Verify the CSS class was added to the body
-        await expect(body).toHaveClass(/print-mode/);
+        // DEFAULT: videos ON, qrs OFF
+        await expect(body).toHaveClass(/show-videos/);
+        await expect(body).not.toHaveClass(/show-qrs/);
+        await expect(page.locator('.video-card').first()).toBeVisible();
+        await expect(page.locator('.qr-code').first()).toBeHidden();
 
-        // 6. Verify QR codes are physically VISIBLE on screen
-        const qrCodeImage = page.locator('.qr-code img').first();
-        await expect(
-            qrCodeImage,
-            'Print View Toggle Failed: The QR code is missing or still hidden.'
-        ).toBeVisible();
+        // VIDEOS ONLY -> toggle qrs ON then videos OFF
+        await qrsCheckbox.click();
+        await expect(body).toHaveClass(/show-qrs/);
+        await videosCheckbox.click();
+        await expect(body).not.toHaveClass(/show-videos/);
+        // Videos should be hidden, QR visible
+        await expect(page.locator('.video-card').first()).toBeHidden();
+        await expect(page.locator('.qr-code img').first()).toBeVisible();
 
-        // 7. Verify the video elements are physically HIDDEN
-        const videoContainer = page.locator('.video-card, iframe, a[href*="youtu"]').first();
-        await expect(
-            videoContainer,
-            'Print View Toggle Failed: Video elements are still showing up on the page.'
-        ).toBeHidden();
-    });
+        // NONE -> turn qrs OFF
+        await qrsCheckbox.click();
+        await expect(body).not.toHaveClass(/show-qrs/);
+        await expect(page.locator('.qr-code').first()).toBeHidden();
 
-    test('Print Mode layout matches baseline screenshot', async ({ page }) => {
-        // 1. Arrange: Go to page and enable Print Mode
-        await page.goto('/');
-        await page.locator('.switch .slider').click();
-
-        // Give a tiny moment for any animations or images to fully settle
-        await page.waitForTimeout(500);
-
-        // 2. Act & Assert: Take a screenshot and compare it to the baseline
-        // Playwright will automatically name the screenshot after your test name
-        await expect(page).toHaveScreenshot('print-mode-desktop.png', {
-            fullPage: true, // Optional: captures the entire scrollable page
-            timeout: 20000
+        // BOTH -> turn videos ON and qrs ON
+        await videosCheckbox.click();
+        await qrsCheckbox.click();
+        await expect(body).toHaveClass(/show-videos/);
+        await expect(body).toHaveClass(/show-qrs/);
+        await expect(page.locator('.video-card').first()).toBeVisible();
+        await expect(page.locator('.qr-code img').first()).toBeVisible();
+        
+        // Verify QR PIP is inside the media wrapper bounds
+        const pipInside = await page.evaluate(() => {
+            const media = document.querySelector('.media-wrap');
+            const pip = document.querySelector('.media-wrap .qr-code');
+            if (!media || !pip) return false;
+            const m = media.getBoundingClientRect();
+            const p = pip.getBoundingClientRect();
+            return p.left >= m.left && p.right <= m.right && p.top >= m.top && p.bottom <= m.bottom;
         });
+        expect(pipInside).toBe(true);
     });
 });

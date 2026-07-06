@@ -1,0 +1,2 @@
+document.getElementById('toggle-videos').addEventListener('change', updateMediaVisibility);
+document.getElementById('toggle-qrs').addEventListener('change', updateMediaVisibility); -i 1d jainism/pooja/script.js

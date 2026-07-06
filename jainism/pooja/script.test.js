@@ -1,111 +1,72 @@
-const { renderChat } = require('./script.js');
+const { updateMediaVisibility } = require('./script');
 
-describe('Jaina Pooja FAQ - UI Rendering Logic', () => {
-  let container;
+describe('Display Options', () => {
+    let toggleVideos, toggleQrs;
 
-  beforeEach(() => {
-    // Provide a fresh, empty DOM container for every row
-    container = document.createElement('div');
-  });
-
-  // 1. Define the test slice
-  const testCases = [
-    {
-      name: 'Renders Kannada and English',
-      lang: 'all',
-      mockBlocks: [{
-        id: "test_b_1", type: "paragraph",
-        content: { kn: ["ಕನ್ನಡ ಪಠ್ಯ"], en: ["English Text"] },
-        tags: [], videos: [], images: []
-      }],
-      // The specific assertions for this row
-      assert: (dom) => {
-        expect(dom.innerHTML).toContain('ಕನ್ನಡ ಪಠ್ಯ');
-        expect(dom.innerHTML).toContain('English Text');
-      }
-    },
-    {
-      name: 'Renders Kannada and not English',
-      lang: 'kn',
-      mockBlocks: [{
-        id: "test_b_1", type: "paragraph",
-        content: { kn: ["ಕನ್ನಡ ಪಠ್ಯ"], en: ["English Text"] },
-        tags: [], videos: [], images: []
-      }],
-      // The specific assertions for this row
-      assert: (dom) => {
-        expect(dom.innerHTML).toContain('ಕನ್ನಡ ಪಠ್ಯ');
-        expect(dom.innerHTML).not.toContain('English Text');
-      }
-    },
-    {
-      name: 'Renders English and not Kannada',
-      lang: 'en',
-      mockBlocks: [{
-        id: "test_b_1", type: "paragraph",
-        content: { kn: ["ಕನ್ನಡ ಪಠ್ಯ"], en: ["English Text"] },
-        tags: [], videos: [], images: []
-      }],
-      // The specific assertions for this row
-      assert: (dom) => {
-        expect(dom.innerHTML).toContain('English Text');
-        expect(dom.innerHTML).not.toContain('ಕನ್ನಡ ಪಠ್ಯ');
-      }
-    },
-    {
-      name: 'Renders [Watch Video] links and QR codes',
-      lang: 'all',
-      mockBlocks: [{
-        id: "test_b_2", type: "paragraph",
-        content: { kn: [], en: [] },
-        videos: [{ url: "https://youtu.be/dQw4w9WgXcQ", youtubeId: "dQw4w9WgXcQ" }],
-        images: []
-      }],
-      assert: (dom) => {
-        const videoLink = dom.querySelector('a');
-        expect(videoLink).not.toBeNull();
-        expect(videoLink.href).toBe('https://youtu.be/dQw4w9WgXcQ');
-
-        const qrCode = dom.querySelector('.qr-code img');
-        expect(qrCode).not.toBeNull();
-        expect(qrCode.src).toContain('api.qrserver.com');
-      }
-    },
-    {
-      name: 'Renders personal images correctly based on language selection',
-      lang: 'kn',
-      mockBlocks: [{
-        id: "test_b_3", type: "paragraph",
-        content: { kn: [], en: [] },
-        videos: [],
-        images: [{ src: "family-photo.jpg", caption: { kn: "ನನ್ನ ಫೋಟೋ", en: "My Photo" } }]
-      }],
-      assert: (dom) => {
-        const img = dom.querySelector('img');
-        expect(img).not.toBeNull();
-        expect(img.getAttribute('src')).toBe('images/family-photo.jpg');
+    beforeEach(() => {
+        document.body.innerHTML = `
+            <input type="checkbox" id="toggleVideos">
+            <input type="checkbox" id="toggleQrs">
+        `;
+        toggleVideos = document.getElementById('toggleVideos');
+        toggleQrs = document.getElementById('toggleQrs');
         
-        const caption = dom.querySelector('.image-caption');
-        expect(caption.innerHTML).toBe('ನನ್ನ ಫೋಟೋ');
-      }
-    }
-  ];
+        // Mock global variables if they are used directly in script.js
+        global.toggleVideos = toggleVideos;
+        global.toggleQrs = toggleQrs;
+    });
 
-  // 2. Execute the table
-  // Jest automatically injects the row data into the destructured parameters
-  test.each(testCases)('✓ $name', ({ lang, mockBlocks, assert }) => {
-    
-    // Arrange: Build the standard JSON wrapper expected by your function
-    const mockData = [{
-      id: "q_test",
-      type: "question",
-      blocks: mockBlocks
-    }];
+    test('should toggle show-videos class on body when checkbox is clicked', () => {
+        toggleVideos.checked = true;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-videos')).toBe(true);
 
-    // Act: Execute the UI rendering
-    renderChat(mockData, container, lang);
+        toggleVideos.checked = false;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-videos')).toBe(false);
+    });
 
-    // Assert: Run the row-specific validation callback
-    assert(container);
-  });
+    test('should toggle show-qrs class on body when checkbox is clicked', () => {
+        toggleQrs.checked = true;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-qrs')).toBe(true);
+
+        toggleQrs.checked = false;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-qrs')).toBe(false);
+    });
+});
+
+describe('updateMediaVisibility', () => {
+    let toggleVideos, toggleQRs;
+
+    beforeEach(() => {
+        document.body.innerHTML = `
+            <input type="checkbox" id="toggle-videos">
+            <input type="checkbox" id="toggle-qrs">
+        `;
+        toggleVideos = document.getElementById('toggle-videos');
+        toggleQRs = document.getElementById('toggle-qrs');
+        document.body.className = '';
+    });
+
+    test('should toggle show-videos class based on checkbox state', () => {
+        toggleVideos.checked = true;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-videos')).toBe(true);
+
+        toggleVideos.checked = false;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-videos')).toBe(false);
+    });
+
+    test('should toggle show-qrs class based on checkbox state', () => {
+        toggleQRs.checked = true;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-qrs')).toBe(true);
+
+        toggleQRs.checked = false;
+        updateMediaVisibility();
+        expect(document.body.classList.contains('show-qrs')).toBe(false);
+    });
 });

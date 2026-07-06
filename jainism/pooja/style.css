@@ -82,17 +82,22 @@ body {
     border-radius: 4px;    
 }
 
+.block-row { align-items: flex-start; }
+
 .block-id {
     padding: 15px 5px;
     font-family: monospace;
     font-weight: bold;
     display: inline-block;
     min-width: 50px; /* Keeps them aligned */
+    flex: 0 0 60px; /* reserve consistent width in the row */
 }
 
 .col-kn, .col-en {
     flex: 1; /* Both columns will grow to share the available width equally */
 }
+
+.col-kn, .col-en { min-width: 0; }
 
 .col-media {
     flex: 0 0 auto; /* Media stays at its original size */
@@ -105,6 +110,8 @@ body {
     width: 220px;
 }
 
+.col-media { align-self: flex-start; }
+
 /* Hides media column if empty */
 .col-media:empty {
     display: none;
@@ -115,9 +122,6 @@ body {
 .card.question {
     background-color: #ffebee; /* Light red background */
     border-left: 4px solid #d32f2f; /* Dark red border */
-    padding: 10px 5px;
-    border-radius: 4px;
-}
 
 /* Answers */
 .card.answer {
@@ -226,6 +230,42 @@ body {
     text-align: center;
 }
 
+/* Media wrapper for PIP layout */
+.media-wrap {
+    position: relative;
+    width: 180px; /* thumbnail width */
+    flex: 0 0 auto;
+}
+
+.media-wrap .video-card {
+    width: 100% !important;
+    height: auto;
+}
+
+.media-wrap .qr-code {
+    /* PIP positioning controlled by CSS variables for easy tuning */
+    --pip-size: 56px;
+    --pip-gap: 8px;
+    position: absolute;
+    bottom: var(--pip-gap);
+    right: var(--pip-gap);
+    width: var(--pip-size) !important;
+    height: var(--pip-size) !important;
+    padding: 4px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.media-wrap .qr-code img { width: 100%; height: auto; display: block; }
+.media-wrap .video-card img { display: block; width: 100%; height: auto; max-height: 160px; object-fit: cover; }
+
+/* Prevent media from overflowing the card */
+.col-media { overflow: hidden; }
+
 /* --- Toggle Switch --- */
 .switch {
     position: relative;
@@ -296,123 +336,28 @@ input:checked+.slider:before {
    MEDIA VISIBILITY CONTROLS
    ========================================= */
 
-/* When BOTH are showing, turn the media column into a relative container */
-body.show-videos.show-qrs .col-media {
-    position: relative;
-    width: 180px; /* Give the video a little room */
+.video-card iframe {
+    width: 180px !important;
 }
 
-/* Position the QR code inside the bottom-right corner of the video */
-body.show-videos.show-qrs .qr-code {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    width: 65px !important;  /* Small enough to stay out of the way */
-    height: 65px !important; /* Big enough to scan */
-    background: white;       /* Crucial for scanning over a dark video */
-    padding: 4px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+.qr-code {
+    /* default sizing overridden when inside .media-wrap */
+    width: 85px !important;
+    height: 85px !important;
 }
 
-/* ==========================================================================
-   Print Mode & Layout Optimizations (QR Code on Right)
-   ========================================================================== */
-
-/* 1. Hide the interactive switch ONLY when doing an actual physical print */
+/* ========================================================
+   PRINT MODE UI TOGGLES
+   ======================================================== */
 @media print {
-    .toggle-container {
-        display: none !important;
-    }
-    .block-row {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-}
-
-/* 2. Shared formatting for both Actual Print AND Web Print Preview */
-@media print,
-body.print-mode {
-
-    #search-bar,
-    .reply-excerpt,
-    .video-card {
-        display: none !important;
-    }
-
-    #chat-container {
-        width: 100%;
-        margin: 0;
-        max-width: 1000px;
-    }
-
-    .card {
-        border: 1px solid #ccc !important;
-        break-inside: avoid;
-        background-color: white !important;
-        margin: 10px 0 !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        padding: 20px !important;
-
-        /* Keep Flexbox layout: text rows on left, QR on right */
-        display: flex !important;
-        flex-direction: column !important;
-        /* justify-content: space-between !important;
-        align-items: flex-start !important; */
-        gap: 5px !important;
-    }
-
-    /* Hide the normal media column to make room for QR */
-    .col-media {
-        display: none !important;
-    }
-
-    /* Keep the text blocks and QR codes aligned in a row */
-    .block-row {
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 12px !important;
-        width: 100% !important;
-    }
-
-    /* Place QR Code natively on the right side */
     .qr-code {
         display: block !important;
-        /* Enforce the industry standard scannable size */
-        width: 150px !important;
-        height: 150px !important;
-        margin-left: 25px !important;
-        /* Clean gap between text and QR */
-        margin-right: 0 !important;
-        margin-top: 0 !important;
-        flex-shrink: 0 !important;
     }
-
-    .qr-code img {
-        width: 100% !important;
-        height: auto !important;
-        display: block !important;
+    .video-card, iframe {
+        display: none !important;
     }
 }
 
-
-/* =========================================
-   PRINT MODE UI TOGGLES
-========================================= */
-
-/* 1. Default State: Hide QR Codes completely */
-.qr-code {
-    display: none !important;
-}
-
-/* 2. Print Mode State: Show QR Codes */
-body.print-mode .qr-code {
-    display: block !important;
-}
-
-/* 3. Print Mode State: Hide Videos */
-body.print-mode .video-card,
-body.print-mode iframe {
-    display: none !important;
-}
+.video-card, .qr-code { display: none; }
+body.show-videos .media-wrap .video-card, body.show-videos .video-card { display: block; }
+body.show-qrs .media-wrap .qr-code, body.show-qrs .qr-code { display: flex; }

@@ -26,44 +26,68 @@ function createVideoCard(url) {
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(url)}`;
 
+    // Return a single media wrapper so QR can be positioned as PIP over the video thumbnail
     return `
-        <div class="video-card">
-            <a href="${url}" target="_blank">
-                <img src="https://img.youtube.com/vi/${videoId}/0.jpg" alt="Watch Video">
-            </a>
-        </div>
-        <div class="qr-code">
-            <img src="${qrCodeUrl}" alt="QR Code">
+        <div class="media-wrap">
+            <div class="video-card">
+                <a href="${url}" target="_blank">
+                    <img src="https://img.youtube.com/vi/${videoId}/0.jpg" alt="Watch Video">
+                </a>
+            </div>
+            <div class="qr-code">
+                <img src="${qrCodeUrl}" alt="QR Code">
+            </div>
         </div>
     `;
 }
 
 function updateMediaVisibility() {
-    const showVideos = document.getElementById('toggle-videos').checked;
-    const showQrs = document.getElementById('toggle-qrs').checked;
+    const toggleVideos = document.getElementById('toggle-videos') || document.getElementById('toggleVideos');
+    const toggleQrs = document.getElementById('toggle-qrs') || document.getElementById('toggleQrs');
+    const showVideos = toggleVideos ? toggleVideos.checked : false;
+    const showQrs = toggleQrs ? toggleQrs.checked : false;
 
-    // Toggle classes on the body element
     document.body.classList.toggle('show-videos', showVideos);
     document.body.classList.toggle('show-qrs', showQrs);
+
+    // Also set inline styles for deterministic visibility (helps tests and PIP)
+    document.querySelectorAll('.video-card').forEach(el => {
+        el.style.display = showVideos ? '' : 'none';
+    });
+    document.querySelectorAll('.qr-code').forEach(el => {
+        el.style.display = showQrs ? '' : 'none';
+    });
 }
 
-// Call this once on load to ensure the UI matches the body classes
-document.addEventListener('DOMContentLoaded', updateMediaVisibility);
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleVideos = document.getElementById('toggle-videos') || document.getElementById('toggleVideos');
+    const toggleQrs = document.getElementById('toggle-qrs') || document.getElementById('toggleQrs');
 
-document.addEventListener("DOMContentLoaded", () => {
+    if (toggleVideos) {
+        toggleVideos.addEventListener('change', updateMediaVisibility);
+    }
+    if (toggleQrs) {
+        toggleQrs.addEventListener('change', updateMediaVisibility);
+    }
+
+
+    updateMediaVisibility();
+
     fetch('data.json')
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('chat-container');
             const langSelect = document.getElementById('lang-select');
-            console.log("Language changed to:", langSelect);
             const lang = langSelect ? langSelect.value : 'all';
 
             renderChat(data, container, lang);   // Initial render
+            // Ensure media visibility rules apply to newly-rendered elements
+            updateMediaVisibility();
 
             // Add Listener HERE (it has access to 'data' and 'container' via closure)
             langSelect.addEventListener('change', (e) => {
                 renderChat(data, container, e.target.value);
+                updateMediaVisibility();
             });
 
             // RESTORE position AFTER rendering is done
@@ -194,10 +218,9 @@ window.addEventListener('DOMContentLoaded', () => {
 // --- TEST EXPORTS ---
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        // Export the functions you want to test here, for example:
         filterChat,
         createVideoCard,
         renderChat,
-        togglePrintMode,
+        updateMediaVisibility,
     };
 }
