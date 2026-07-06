@@ -16,14 +16,15 @@
             <option value="en">English</option>
         </select>
         <div class="display-options" style="display: flex; gap: 15px; align-items: center; font-size: 0.9em;">
-            <strong>Show:</strong>
+            <strong>🎬 Videos:</strong>
             <label class="switch">
                 <input type="checkbox" id="toggle-videos" checked onchange="updateMediaVisibility()">
-                🎬 Videos
+                <span class="slider"></span>
             </label>
+            <strong>📱 QR Codes:</strong>
             <label class="switch">
                 <input type="checkbox" id="toggle-qrs" onchange="updateMediaVisibility()">
-                📱 QR Codes
+                <span class="slider"></span>
             </label>
             <!-- print toggle removed: use display options (Videos / QR Codes) -->
         </div>

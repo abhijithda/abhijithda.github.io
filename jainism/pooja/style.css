@@ -122,6 +122,9 @@ body {
 .card.question {
     background-color: #ffebee; /* Light red background */
     border-left: 4px solid #d32f2f; /* Dark red border */
+    padding: 10px 5px;
+    border-radius: 4px;
+}
 
 /* Answers */
 .card.answer {
