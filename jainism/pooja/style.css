@@ -1,4 +1,4 @@
-/* 1. GENERAL LAYOUT */
+/* 1. GENERAL & WRAPPER */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -13,7 +13,7 @@ body {
     flex-direction: column;
 }
 
-/* 2. HEADER & CONTROLS */
+/* 2. HEADER & SEARCH */
 .app-header {
     display: flex;
     align-items: center;
@@ -43,11 +43,14 @@ body {
     cursor: pointer;
 }
 
-/* 3. CARD & CONTENT STRUCTURE */
+/* 3. CARD DESIGN & BLOCK ROWS */
 .card {
     position: relative;
-    padding: 40px 25px 25px;
+    padding-top: 40px;
+    padding-right: 25px;
+    padding-bottom: 25px;
     padding-left: 0 !important;
+    /* Adjacent Border logic */
     margin: 20px 0;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
@@ -62,20 +65,17 @@ body {
 }
 
 .block-row {
-    margin-left: -1px;
     display: flex;
     flex-direction: row;
     gap: 12px;
     width: 100%;
     margin: 5px 0;
-    padding: 8px 12px;
-    padding-left: 20px;
-    border-radius: 4px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    padding: 8px 12px 8px 20px;
+    border-radius: 0 4px 4px 0;
     align-items: flex-start;
 }
 
+/* Padding for non-row elements */
 .card>*:not(.block-row) {
     padding-left: 25px;
 }
@@ -89,7 +89,7 @@ body {
 
 .col-kn,
 .col-en {
-    flex: 1;
+    flex: 1 1 0%;
     min-width: 0;
 }
 
@@ -97,27 +97,39 @@ body {
     color: #555;
 }
 
-/* 4. MEDIA & OVERLAY LOGIC (The Fix) */
+/* 4. MEDIA & QR OVERLAY (The Perfect Corner Fix) */
 .col-media {
-    flex: 0 0 160px;
-    /* Adjusted to fit the 150px wrap */
-    display: flex;
+    display: none !important;
+    /* Hidden unless toggled AND content exists */
+    flex: 0 0 200px;
+    width: 200px;
+    margin-left: 15px;
     flex-direction: column;
     align-self: flex-start;
+    overflow: visible;
+}
+
+/* Show only if content exists and toggles are on */
+body.show-videos .col-media:not(:empty),
+body.show-qrs .col-media:not(:empty) {
+    display: flex !important;
 }
 
 .media-wrap {
     position: relative;
-    display: block;
-    width: 150px;
-    min-height: 10px;
+    display: inline-block;
+    width: 200px;
+    line-height: 0;
+    /* Removes bottom image gap */
+    vertical-align: top;
+    overflow: visible;
 }
 
-/* Video Styling */
 .video-card {
     display: none;
-    /* Hidden by default */
     width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .video-card img {
@@ -126,30 +138,30 @@ body {
     border-radius: 8px;
 }
 
-/* QR Overlay Styling */
 .qr-code {
     display: none;
-    /* Hidden by default */
     position: absolute;
-    bottom: 5px;
-    right: 5px;
-    width: 60px;
-    height: 60px;
+    bottom: 0;
+    right: 0;
+    width: 85px;
+    height: 85px;
     background: white;
-    padding: 2px;
+    padding: 4px;
+    /* Quiet zone for scanning */
     border: 1px solid #ccc;
-    border-radius: 4px;
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 8px 0;
+    /* Match bottom-right thumbnail curve */
+    z-index: 100;
+    box-sizing: border-box;
 }
 
 .qr-code img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
 }
 
-/* 5. TOGGLE SYSTEM (Body Classes) */
+/* 5. TOGGLE SYSTEM */
 body.show-videos .video-card {
     display: block;
 }
@@ -158,15 +170,16 @@ body.show-qrs .qr-code {
     display: block;
 }
 
-/* Handle QR-only view (Moves it out of 'overlay' mode) */
+/* QR-only view (Non-overlay) */
 body:not(.show-videos).show-qrs .qr-code {
     position: static;
     width: 120px;
     height: 120px;
     margin: 10px auto;
+    border-radius: 4px;
 }
 
-/* 6. SWITCH UI (Toggles) */
+/* 6. SWITCHES & BLOCK TYPES */
 .switch {
     position: relative;
     display: inline-block;
@@ -209,7 +222,6 @@ input:checked+.slider::before {
     transform: translateX(20px);
 }
 
-/* 7. BLOCK TYPES & COLORS */
 .card.question {
     background-color: #ffebee;
     border-left: 4px solid #d32f2f;
@@ -218,7 +230,6 @@ input:checked+.slider::before {
 .card.answer {
     background-color: #f1f8e9;
     border-left: 4px solid #4caf50;
-    margin-bottom: 10px;
 }
 
 .block-row.note {
@@ -232,8 +243,6 @@ input:checked+.slider::before {
 }
 
 .reply-excerpt {
-    left: 0;
-    width: 100%;
     position: absolute;
     top: 0;
     left: 0;
@@ -246,7 +255,65 @@ input:checked+.slider::before {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    cursor: pointer !important;   /* Forces the hand-sign */
-    user-select: none;           /* Prevents text highlighting, making it feel like a button */
-    -webkit-user-select: none;    /* Safari support */
+    user-select: none;
+    cursor: pointer !important;
+}
+
+/* 7. RESPONSIVE & PRINT */
+@media (max-width: 768px) {
+    .block-row {
+        flex-direction: column;
+    }
+
+    .col-media {
+        width: 100%;
+        align-items: center;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+@media print {
+
+    .app-header,
+    .reply-excerpt {
+        display: none !important;
+    }
+
+    .card {
+        break-inside: avoid;
+        border: 1px solid #eee;
+        margin: 10px 0;
+    }
+
+    .block-row {
+        display: flex !important;
+        flex-flow: row !important;
+        width: 100% !important;
+        gap: 15px !important;
+    }
+
+    .col-kn,
+    .col-en {
+        overflow-wrap: break-word;
+        flex: 1 1 auto !important;
+        min-width: 150px !important;
+    }
+
+    .qr-code {
+        border: 1px solid #000 !important;
+        bottom: 0 !important;
+        right: 0 !important;
+    }
+
+    .col-media {
+        display: none;
+    }
+
+    body.show-videos .col-media:not(:empty),
+    body.show-qrs .col-media:not(:empty) {
+        display: flex !important;
+        flex: 0 0 170px !important; 
+        width: 170px !important;
+    }
 }
