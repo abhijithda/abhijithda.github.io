@@ -232,6 +232,11 @@ input:checked+.slider::before {
     border-left: 4px solid #4caf50;
 }
 
+.block-row.mantra {
+    background-color: rgb(249, 126, 3);
+    border-left: 5px solid rgb(255, 0, 0);
+}
+
 .block-row.note {
     background-color: #fdfaf2;
     border-left: 5px solid #b38f4f;
@@ -313,7 +318,7 @@ input:checked+.slider::before {
     body.show-videos .col-media:not(:empty),
     body.show-qrs .col-media:not(:empty) {
         display: flex !important;
-        flex: 0 0 170px !important; 
+        flex: 0 0 170px !important;
         width: 170px !important;
     }
 }
