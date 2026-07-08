@@ -101,6 +101,20 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error loading data:', error));
 });
 
+// formatIdForDisplay logic turns "q_022_b_1" into "Q-22"
+function formatIdForDisplay(block) {
+    let typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
+    if (block.type === "shloka") {
+        typeInitial = "S";
+    } else if (block.type === "note") {
+        typeInitial = "N";
+    }
+    const parts = block.id.split('_');
+    const number = parseInt(parts[1], 10);        // '022' -> 22
+    const subNumber = parts[3];        // '022' -> 22
+    return `${typeInitial}-${number}.${subNumber}`; // e.g., "Q-22.1"
+}
+
 function renderChat(data, container, lang = 'all') {
     if (!container) return; // Safety check
     container.innerHTML = "";
@@ -122,13 +136,17 @@ function renderChat(data, container, lang = 'all') {
                 }
             };
             const match = data.find(i => i.id === item.references[0]);
+            // const excerptRefID = document.createElement('span');
+            // excerptRefID.className = 'block-id';
             let excerptText = "...";
+            let refPrefix = "";
             if (match && match.blocks && match.blocks.length > 0) {
+                refPrefix = `[Ref: ${formatIdForDisplay(match.blocks[0])}] `;
                 if (lang === 'kn') excerptText = match.blocks[0].content.kn[0];
                 else if (lang === 'en') excerptText = match.blocks[0].content.en[0] || "...";
                 else excerptText = match.blocks[0].content.kn[0] + (match.blocks[0].content.en[0] ? " / " + match.blocks[0].content.en[0] : "");
             }
-            excerpt.innerText = excerptText;
+            excerpt.innerText = refPrefix + excerptText;
             card.appendChild(excerpt);
         }
 
@@ -140,18 +158,7 @@ function renderChat(data, container, lang = 'all') {
             // Create an ID element (e.g., Q1, A1, S1)
             const idLabel = document.createElement('span');
             idLabel.className = 'block-id';
-            // This logic turns "q_022_b_1" into "Q-22"
-            let typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
-            if (block.type === "shloka") {
-                typeInitial = "S";
-            } else if (block.type === "note") {
-                typeInitial = "N";
-            }
-            const parts = block.id.split('_');
-            const number = parseInt(parts[1], 10);        // '022' -> 22
-            const subNumber = parts[3];        // '022' -> 22
-            idLabel.innerText = `${typeInitial}-${number}.${subNumber}`; // e.g., "Q-22.1"
-
+            idLabel.innerText = formatIdForDisplay(block);
             row.appendChild(idLabel); // Add ID to the card
 
             // Column 1: Kannada

@@ -274,6 +274,14 @@ input:checked+.slider::before {
     box-sizing: border-box;
 }
 
+.reply-excerpt .reference-number {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-right: 10px;
+    border-right: 1px solid #ccc;
+    padding-right: 8px;
+}
+
 /* 7. RESPONSIVE & PRINT */
 @media (max-width: 768px) {
     .block-row {
@@ -293,6 +301,11 @@ input:checked+.slider::before {
     .app-header,
     .reply-excerpt {
         display: none !important;
+    }
+
+    .reply-excerpt .reference-number {
+        color: black;
+        border-color: black;
     }
 
     .card {

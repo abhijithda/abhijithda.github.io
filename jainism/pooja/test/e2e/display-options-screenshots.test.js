@@ -27,7 +27,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         // Capture visual snapshot for comparison (viewport only for consistency)
         await expect(page).toHaveScreenshot('screenshot-default-state-videos-on-qr-off.png', {
             fullPage: true, // Optional: captures the entire scrollable page
-            timeout: 50000
+            timeout: 20000
         });
 
         console.log('✓ Default state: Videos visible, QR hidden');
@@ -61,7 +61,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         // Capture visual snapshot for comparison (viewport only for consistency)
         await expect(page).toHaveScreenshot('screenshot-qr-only-state-videos-off-qr-on.png', {
             fullPage: true, // Optional: captures the entire scrollable page
-            timeout: 50000
+            timeout: 20000
             //fullPage: false,
             // maxDiffPixels: 1000
         });
@@ -111,7 +111,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
             // fullPage: false,
             // maxDiffPixels: 1000
             fullPage: true, // Optional: captures the entire scrollable page
-            timeout: 50000
+            timeout: 20000
         });
 
         console.log('✓ Both state: Videos and QR visible with PIP layout');
@@ -182,7 +182,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
             // fullPage: false,
             // maxDiffPixels: 1000
             fullPage: true, // Optional: captures the entire scrollable page
-            timeout: 50000
+            timeout: 20000
         });
 
         console.log('✓ Videos-only state: Videos visible, QR hidden');
