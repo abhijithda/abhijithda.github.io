@@ -67,8 +67,10 @@ body {
 .block-row {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 12px;
     width: 100%;
+    box-sizing: border-box;
     margin: 5px 0;
     padding: 8px 12px 8px 20px;
     border-radius: 0 4px 4px 0;
@@ -103,10 +105,12 @@ body {
     /* Hidden unless toggled AND content exists */
     flex: 0 0 200px;
     width: 200px;
+    max-width: 100%;
     margin-left: 15px;
     flex-direction: column;
     align-self: flex-start;
     overflow: visible;
+    box-sizing: border-box;
 }
 
 /* Show only if content exists and toggles are on */
@@ -267,6 +271,7 @@ input:checked+.slider::before {
     text-overflow: ellipsis;
     user-select: none;
     cursor: pointer !important;
+    box-sizing: border-box;
 }
 
 /* 7. RESPONSIVE & PRINT */
