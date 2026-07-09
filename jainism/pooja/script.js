@@ -26,32 +26,68 @@ function createVideoCard(url) {
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(url)}`;
 
+    // Return a single media wrapper so QR can be positioned as PIP over the video thumbnail
     return `
-        <div class="video-card">
-            <a href="${url}" target="_blank">
-                <img src="https://img.youtube.com/vi/${videoId}/0.jpg" alt="Watch Video">
-            </a>
-        </div>
-        <div class="qr-code">
-            <img src="${qrCodeUrl}" alt="QR Code">
+        <div class="media-wrap">
+            <div class="video-card">
+                <a href="${url}" target="_blank">
+                    <img src="https://img.youtube.com/vi/${videoId}/0.jpg" alt="Watch Video">
+                </a>
+            </div>
+            <div class="qr-code">
+                <img src="${qrCodeUrl}" alt="QR Code">
+            </div>
         </div>
     `;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function updateMediaVisibility() {
+    const toggleVideos = document.getElementById('toggle-videos') || document.getElementById('toggleVideos');
+    const toggleQrs = document.getElementById('toggle-qrs') || document.getElementById('toggleQrs');
+    const showVideos = toggleVideos ? toggleVideos.checked : false;
+    const showQrs = toggleQrs ? toggleQrs.checked : false;
+
+    document.body.classList.toggle('show-videos', showVideos);
+    document.body.classList.toggle('show-qrs', showQrs);
+
+    // Also set inline styles for deterministic visibility (helps tests and PIP)
+    document.querySelectorAll('.video-card').forEach(el => {
+        el.style.display = showVideos ? '' : 'none';
+    });
+    document.querySelectorAll('.qr-code').forEach(el => {
+        el.style.display = showQrs ? '' : 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleVideos = document.getElementById('toggle-videos') || document.getElementById('toggleVideos');
+    const toggleQrs = document.getElementById('toggle-qrs') || document.getElementById('toggleQrs');
+
+    if (toggleVideos) {
+        toggleVideos.addEventListener('change', updateMediaVisibility);
+    }
+    if (toggleQrs) {
+        toggleQrs.addEventListener('change', updateMediaVisibility);
+    }
+
+
+    updateMediaVisibility();
+
     fetch('data.json')
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('chat-container');
             const langSelect = document.getElementById('lang-select');
-            console.log("Language changed to:", langSelect);
             const lang = langSelect ? langSelect.value : 'all';
 
             renderChat(data, container, lang);   // Initial render
+            // Ensure media visibility rules apply to newly-rendered elements
+            updateMediaVisibility();
 
             // Add Listener HERE (it has access to 'data' and 'container' via closure)
             langSelect.addEventListener('change', (e) => {
                 renderChat(data, container, e.target.value);
+                updateMediaVisibility();
             });
 
             // RESTORE position AFTER rendering is done
@@ -64,6 +100,20 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(error => console.error('Error loading data:', error));
 });
+
+// formatIdForDisplay logic turns "q_022_b_1" into "Q-22"
+function formatIdForDisplay(block) {
+    let typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
+    if (block.type === "shloka") {
+        typeInitial = "S";
+    } else if (block.type === "note") {
+        typeInitial = "N";
+    }
+    const parts = block.id.split('_');
+    const number = parseInt(parts[1], 10);        // '022' -> 22
+    const subNumber = parts[3];        // '022' -> 22
+    return `${typeInitial}-${number}.${subNumber}`; // e.g., "Q-22.1"
+}
 
 function renderChat(data, container, lang = 'all') {
     if (!container) return; // Safety check
@@ -86,13 +136,17 @@ function renderChat(data, container, lang = 'all') {
                 }
             };
             const match = data.find(i => i.id === item.references[0]);
+            // const excerptRefID = document.createElement('span');
+            // excerptRefID.className = 'block-id';
             let excerptText = "...";
+            let refPrefix = "";
             if (match && match.blocks && match.blocks.length > 0) {
+                refPrefix = `[Ref: ${formatIdForDisplay(match.blocks[0])}] `;
                 if (lang === 'kn') excerptText = match.blocks[0].content.kn[0];
                 else if (lang === 'en') excerptText = match.blocks[0].content.en[0] || "...";
                 else excerptText = match.blocks[0].content.kn[0] + (match.blocks[0].content.en[0] ? " / " + match.blocks[0].content.en[0] : "");
             }
-            excerpt.innerText = excerptText;
+            excerpt.innerText = refPrefix + excerptText;
             card.appendChild(excerpt);
         }
 
@@ -104,18 +158,7 @@ function renderChat(data, container, lang = 'all') {
             // Create an ID element (e.g., Q1, A1, S1)
             const idLabel = document.createElement('span');
             idLabel.className = 'block-id';
-            // This logic turns "q_022_b_1" into "Q-22"
-            let typeInitial = block.id[0].toUpperCase(); // 'q' -> 'Q'
-            if (block.type === "shloka") {
-                typeInitial = "S";
-            } else if (block.type === "note") {
-                typeInitial = "N";
-            }
-            const parts = block.id.split('_');
-            const number = parseInt(parts[1], 10);        // '022' -> 22
-            const subNumber = parts[3];        // '022' -> 22
-            idLabel.innerText = `${typeInitial}-${number}.${subNumber}`; // e.g., "Q-22.1"
-
+            idLabel.innerText = formatIdForDisplay(block);
             row.appendChild(idLabel); // Add ID to the card
 
             // Column 1: Kannada
@@ -182,10 +225,9 @@ window.addEventListener('DOMContentLoaded', () => {
 // --- TEST EXPORTS ---
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        // Export the functions you want to test here, for example:
         filterChat,
         createVideoCard,
         renderChat,
-        togglePrintMode,
+        updateMediaVisibility,
     };
 }

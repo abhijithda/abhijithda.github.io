@@ -1,4 +1,4 @@
-/* --- Global & Layout --- */
+/* 1. GENERAL & WRAPPER */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -13,7 +13,7 @@ body {
     flex-direction: column;
 }
 
-/* --- Header --- */
+/* 2. HEADER & SEARCH */
 .app-header {
     display: flex;
     align-items: center;
@@ -36,34 +36,27 @@ body {
 }
 
 #lang-select {
-    border-radius: 20px; /* Makes the corners fully rounded */
-    padding: 5px 15px;   /* Adds breathing room inside */
+    border-radius: 20px;
+    padding: 5px 15px;
     border: 1px solid #ccc;
     background-color: white;
     cursor: pointer;
 }
 
-.toggle-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
-
-/* --- Content cards --- */
+/* 3. CARD DESIGN & BLOCK ROWS */
 .card {
     position: relative;
-    padding: 25px;
-    /* Space for excerpt */
     padding-top: 40px;
+    padding-right: 25px;
+    padding-bottom: 25px;
+    padding-left: 0 !important;
+    /* Adjacent Border logic */
     margin: 20px 0;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
-    background-color: #ffffff;
+    background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     width: 100%;
-
-    /* Stack rows vertically */
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -71,130 +64,76 @@ body {
     line-height: 1.5;
 }
 
-/* --- 3-Column Rows --- */
 .block-row {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 12px;
     width: 100%;
-    margin: 5px 0; /* Reduced vertical gap between all blocks */
-    padding: 8px 12px; /* Balanced padding inside each block */
-    border-radius: 4px;    
+    box-sizing: border-box;
+    margin: 5px 0;
+    padding: 8px 12px 8px 20px;
+    border-radius: 0 4px 4px 0;
+    align-items: flex-start;
+}
+
+/* Padding for non-row elements */
+.card>*:not(.block-row) {
+    padding-left: 25px;
 }
 
 .block-id {
     padding: 15px 5px;
     font-family: monospace;
     font-weight: bold;
-    display: inline-block;
-    min-width: 50px; /* Keeps them aligned */
+    flex: 0 0 60px;
 }
 
-.col-kn, .col-en {
-    flex: 1; /* Both columns will grow to share the available width equally */
-}
-
-.col-media {
-    flex: 0 0 auto; /* Media stays at its original size */
-}
-
-.col-media {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 220px;
-}
-
-/* Hides media column if empty */
-.col-media:empty {
-    display: none;
-}
-
-
-/* Questions */
-.card.question {
-    background-color: #ffebee; /* Light red background */
-    border-left: 4px solid #d32f2f; /* Dark red border */
-    padding: 10px 5px;
-    border-radius: 4px;
-}
-
-/* Answers */
-.card.answer {
-    background-color: #f1f8e9; /* Light green background */
-    border-left: 4px solid #4caf50; /* A matching green border */
-    padding: 10px 5px;
-    border-radius: 4px;
-    margin-bottom: 10px; /* Optional: adds space between answers */
-}
-
-/* Answer: Green margin */
-.block-row.answer {
-    background-color: #e8f5e9;
-    border-left: 5px solid #4caf50; /* Same 5px width as Shloka */
-}
-
-.block-row.mantra {
-    background-color: #f97e03;
-    border-left: 5px solid #ff0000;
-}
-
-/* Note: Helpful, cautionary, contrast-highlighting */
-.block-row.note {
-    background-color: #fdfaf2;
-    border-left: 5px solid #b38f4f;
-    /* padding: 10px;
-    margin: 10px 0; */
-}
-
-/* Shloka: Trustworthy, authoritative, needs respect */
-.block-row.shloka {
-    background-color: #fff9c4;
-    border-left: 5px solid #fbc02d;
-    /* padding: 15px 20px; */
-    border-radius: 4px;
-}
-
-.block-row.shloka p {
-    font-style: italic;
-    font-weight: 500;
-    margin: 0;
+.col-kn,
+.col-en {
+    flex: 1 1 0%;
+    min-width: 0;
 }
 
 .col-en p {
     color: #555;
 }
 
-/* --- Excerpt --- */
-.reply-excerpt {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    margin: 0;
-    font-size: 0.75em;
-    padding: 5px 10px;
-    background: rgba(0, 0, 0, 0.05);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    color: #555;
-    cursor: pointer;
-    font-style: italic;
-    border-radius: 8px 8px 0 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* 4. MEDIA & QR OVERLAY (The Perfect Corner Fix) */
+.col-media {
+    display: none !important;
+    /* Hidden unless toggled AND content exists */
+    flex: 0 0 200px;
+    width: 200px;
+    max-width: 100%;
+    margin-left: 15px;
+    flex-direction: column;
+    align-self: flex-start;
+    overflow: visible;
     box-sizing: border-box;
 }
 
-/* --- Components --- */
+/* Show only if content exists and toggles are on */
+body.show-videos .col-media:not(:empty),
+body.show-qrs .col-media:not(:empty) {
+    display: flex !important;
+}
+
+.media-wrap {
+    position: relative;
+    display: inline-block;
+    width: 200px;
+    line-height: 0;
+    /* Removes bottom image gap */
+    vertical-align: top;
+    overflow: visible;
+}
+
 .video-card {
-    /* Enforce same size as QR code for width, and auto for height to maintain aspect ratio */
-    width: 150px !important;
-    height: auto !important;
-    /* border: 1px solid #ddd; */
-    border-radius: 8px;
-    overflow: hidden;
-    text-align: center;
+    display: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .video-card img {
@@ -203,30 +142,48 @@ body {
     border-radius: 8px;
 }
 
-.image-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
+.qr-code {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 85px;
+    height: 85px;
+    background: white;
+    padding: 4px;
+    /* Quiet zone for scanning */
+    border: 1px solid #ccc;
+    border-radius: 0 0 8px 0;
+    /* Match bottom-right thumbnail curve */
+    z-index: 100;
+    box-sizing: border-box;
 }
 
-.image-card img {
+.qr-code img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
 }
 
-.image-caption {
-    padding: 8px 12px;
-    font-size: 0.85em;
-    color: #666;
-    background: #f9f9f9;
-    border-top: 1px solid #eee;
-    margin: 0;
-    text-align: center;
+/* 5. TOGGLE SYSTEM */
+body.show-videos .video-card {
+    display: block;
 }
 
-/* --- Toggle Switch --- */
+body.show-qrs .qr-code {
+    display: block;
+}
+
+/* QR-only view (Non-overlay) */
+body:not(.show-videos).show-qrs .qr-code {
+    position: static;
+    width: 120px;
+    height: 120px;
+    margin: 10px auto;
+    border-radius: 4px;
+}
+
+/* 6. SWITCHES & BLOCK TYPES */
 .switch {
     position: relative;
     display: inline-block;
@@ -235,161 +192,156 @@ body {
 }
 
 .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0.01;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
 }
 
 .slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-color: #ccc;
-    transition: .4s;
-    border-radius: 24px;
+    transition: 0.4s;
+    border-radius: 20px;
 }
 
-.slider:before {
+.slider::before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
+    height: 14px;
+    width: 14px;
     left: 3px;
     bottom: 3px;
     background-color: white;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 50%;
 }
 
 input:checked+.slider {
-    background-color: #075e54;
+    background-color: #2196F3;
 }
 
-input:checked+.slider:before {
-    transform: translateX(26px);
+input:checked+.slider::before {
+    transform: translateX(20px);
 }
 
-/* --- Hidden by default QR --- */
-.qr-code {
-    display: none;
+.card.question {
+    background-color: #ffebee;
+    border-left: 4px solid #d32f2f;
 }
 
-/* --- Responsive --- */
+.card.answer {
+    background-color: #f1f8e9;
+    border-left: 4px solid #4caf50;
+}
+
+.block-row.mantra {
+    background-color: rgb(249, 126, 3);
+    border-left: 5px solid rgb(255, 0, 0);
+}
+
+.block-row.note {
+    background-color: #fdfaf2;
+    border-left: 5px solid #b38f4f;
+}
+
+.block-row.shloka {
+    background-color: #fff9c4;
+    border-left: 5px solid #fbc02d;
+}
+
+.reply-excerpt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    font-size: 0.75em;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.05);
+    color: #555;
+    border-radius: 8px 8px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    cursor: pointer !important;
+    box-sizing: border-box;
+}
+
+.reply-excerpt .reference-number {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-right: 10px;
+    border-right: 1px solid #ccc;
+    padding-right: 8px;
+}
+
+/* 7. RESPONSIVE & PRINT */
 @media (max-width: 768px) {
     .block-row {
-        grid-template-columns: 1fr;
+        flex-direction: column;
     }
 
     .col-media {
         width: 100%;
-    }
-
-    .app-header {
-        padding: 10px 15px;
+        align-items: center;
+        margin-left: 0;
+        margin-top: 10px;
     }
 }
 
-/* ==========================================================================
-   Print Mode & Layout Optimizations (QR Code on Right)
-   ========================================================================== */
-
-/* 1. Hide the interactive switch ONLY when doing an actual physical print */
 @media print {
-    .toggle-container {
-        display: none !important;
-    }
-    .block-row {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-}
 
-/* 2. Shared formatting for both Actual Print AND Web Print Preview */
-@media print,
-body.print-mode {
-
-    #search-bar,
-    .reply-excerpt,
-    .video-card {
+    .app-header,
+    .reply-excerpt {
         display: none !important;
     }
 
-    #chat-container {
-        width: 100%;
-        margin: 0;
-        max-width: 1000px;
+    .reply-excerpt .reference-number {
+        color: black;
+        border-color: black;
     }
 
     .card {
-        border: 1px solid #ccc !important;
         break-inside: avoid;
-        background-color: white !important;
-        margin: 10px 0 !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        padding: 20px !important;
-
-        /* Keep Flexbox layout: text rows on left, QR on right */
-        display: flex !important;
-        flex-direction: column !important;
-        /* justify-content: space-between !important;
-        align-items: flex-start !important; */
-        gap: 5px !important;
+        border: 1px solid #eee;
+        margin: 10px 0;
     }
 
-    /* Hide the normal media column to make room for QR */
-    .col-media {
-        display: none !important;
-    }
-
-    /* Keep the text blocks and QR codes aligned in a row */
     .block-row {
         display: flex !important;
-        flex-direction: row !important;
-        gap: 12px !important;
+        flex-flow: row !important;
         width: 100% !important;
+        gap: 15px !important;
     }
 
-    /* Place QR Code natively on the right side */
+    .col-kn,
+    .col-en {
+        overflow-wrap: break-word;
+        flex: 1 1 auto !important;
+        min-width: 150px !important;
+    }
+
     .qr-code {
-        display: block !important;
-        /* Enforce the industry standard scannable size */
-        width: 150px !important;
-        height: 150px !important;
-        margin-left: 25px !important;
-        /* Clean gap between text and QR */
-        margin-right: 0 !important;
-        margin-top: 0 !important;
-        flex-shrink: 0 !important;
+        border: 1px solid #000 !important;
+        bottom: 0 !important;
+        right: 0 !important;
     }
 
-    .qr-code img {
-        width: 100% !important;
-        height: auto !important;
-        display: block !important;
+    .col-media {
+        display: none;
     }
-}
 
-
-/* =========================================
-   PRINT MODE UI TOGGLES
-========================================= */
-
-/* 1. Default State: Hide QR Codes completely */
-.qr-code {
-    display: none !important;
-}
-
-/* 2. Print Mode State: Show QR Codes */
-body.print-mode .qr-code {
-    display: block !important;
-}
-
-/* 3. Print Mode State: Hide Videos */
-body.print-mode .video-card,
-body.print-mode iframe {
-    display: none !important;
+    body.show-videos .col-media:not(:empty),
+    body.show-qrs .col-media:not(:empty) {
+        display: flex !important;
+        flex: 0 0 170px !important;
+        width: 170px !important;
+    }
 }

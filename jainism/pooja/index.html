@@ -10,17 +10,24 @@
 <body>
     <header class="app-header">
         <input type="text" id="search-bar" placeholder="Search topics (e.g., ಅಭಿಷೇಕ)..." onkeyup="filterChat()">
-        <select id="lang-select" onchange="renderChat()">
+        <span>🗣️ Language:</span>
+        <select id="lang-select">
             <option value="all">All</option>
             <option value="kn">ಕನ್ನಡ</option>
             <option value="en">English</option>
         </select>
-        <div class="toggle-container">
-            <span>Print View</span>
+        <div class="display-options" style="display: flex; gap: 15px; align-items: center; font-size: 0.9em;">
+            <span>🎬 Videos:</span>
             <label class="switch">
-                <input type="checkbox" id="print-toggle" onchange="togglePrintMode()">
+                <input type="checkbox" id="toggle-videos" checked onchange="updateMediaVisibility()">
                 <span class="slider"></span>
             </label>
+            <span>📱 QR Codes:</span>
+            <label class="switch">
+                <input type="checkbox" id="toggle-qrs" onchange="updateMediaVisibility()">
+                <span class="slider"></span>
+            </label>
+            <!-- print toggle removed: use display options (Videos / QR Codes) -->
         </div>
     </header>
 
