@@ -126,28 +126,48 @@ function renderChat(data, container, lang = 'all') {
 
         // --- Excerpt Logic ---
         if (item.references && item.references.length > 0) {
-            const excerpt = document.createElement('div');
-            excerpt.className = "reply-excerpt";
-            excerpt.onclick = () => {
-                const target = document.getElementById(item.references[0]);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 100, behavior: 'smooth' });
+            const refId = item.references[0];
+            const isBlockRef = refId.includes('_b_');
+            const parentId = isBlockRef ? refId.split('_b_')[0] : refId;
+
+            // 1. Find the parent item (e.g., a_017)
+            const parentMatch = data.find(i => i.id === parentId);
+
+            if (parentMatch) {
+                const excerpt = document.createElement('div');
+                excerpt.className = "reply-excerpt";
+
+                // 2. Setup Click Handler
+                excerpt.onclick = () => {
+                    const target = document.getElementById(refId) || document.getElementById(parentId);
+                    if (target) {
+                        // Calculate position with offset for the sticky header
+                        const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
+                        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                };
+
+                // 3. Find the specific block to show the correct text
+                const blockMatch = isBlockRef
+                    ? parentMatch.blocks.find(b => b.id === refId)
+                    : parentMatch.blocks[0];
+
+                if (blockMatch) {
+                    let refPrefix = `[Ref: ${formatIdForDisplay(blockMatch)}] `;
+                    let excerptText = "...";
+                    if (lang === 'kn') excerptText = blockMatch.content.kn[0];
+                    else if (lang === 'en') excerptText = blockMatch.content.en[0] || "...";
+                    else excerptText = blockMatch.content.kn[0] + (blockMatch.content.en[0] ? " / " + blockMatch.content.en[0] : "");
+
+                    excerpt.innerText = refPrefix + excerptText;
+                    card.appendChild(excerpt);
                 }
-            };
-            const match = data.find(i => i.id === item.references[0]);
-            // const excerptRefID = document.createElement('span');
-            // excerptRefID.className = 'block-id';
-            let excerptText = "...";
-            let refPrefix = "";
-            if (match && match.blocks && match.blocks.length > 0) {
-                refPrefix = `[Ref: ${formatIdForDisplay(match.blocks[0])}] `;
-                if (lang === 'kn') excerptText = match.blocks[0].content.kn[0];
-                else if (lang === 'en') excerptText = match.blocks[0].content.en[0] || "...";
-                else excerptText = match.blocks[0].content.kn[0] + (match.blocks[0].content.en[0] ? " / " + match.blocks[0].content.en[0] : "");
             }
-            excerpt.innerText = refPrefix + excerptText;
-            card.appendChild(excerpt);
         }
 
         // --- Multi-Block Row Generation ---
@@ -155,6 +175,7 @@ function renderChat(data, container, lang = 'all') {
             const row = document.createElement('div');
             row.className = `block-row ${block.type}`;
 
+            row.id = block.id;
             // Create an ID element (e.g., Q1, A1, S1)
             const idLabel = document.createElement('span');
             idLabel.className = 'block-id';
