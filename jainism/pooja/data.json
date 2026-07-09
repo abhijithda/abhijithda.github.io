@@ -2324,6 +2324,8 @@
     "type": "answer",
     "timestamp": "2026-01-16T21:36:00Z",
     "references": [
+      "a_017_b_6",
+      "a_017_b_7",
       "a_017_b_10"
     ],
     "blocks": [
@@ -3016,6 +3018,8 @@
     "type": "question",
     "timestamp": "2026-06-15T12:05:00Z",
     "references": [
+      "a_017_b_6",
+      "a_018_b_1",
       "a_025"
     ],
     "blocks": [

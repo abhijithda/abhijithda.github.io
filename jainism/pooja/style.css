@@ -256,30 +256,65 @@ input:checked+.slider::before {
     border-left: 5px solid #fbc02d;
 }
 
-.reply-excerpt {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    font-size: 0.75em;
-    padding: 5px 10px;
-    background: rgba(0, 0, 0, 0.05);
-    color: #555;
-    border-radius: 8px 8px 0 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    user-select: none;
-    cursor: pointer !important;
-    box-sizing: border-box;
+/* --- Reply Excerpt Container --- */
+.reply-excerpt.multi-block {
+  background: rgba(0, 0, 0, 0.05);
+  /* Pull up by -40px to cover the card's top padding */
+  margin: -40px 0 20px 0; 
+  padding: 4px 0;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.reply-excerpt .reference-number {
-    font-weight: bold;
-    color: #2c3e50;
-    margin-right: 10px;
-    border-right: 1px solid #ccc;
-    padding-right: 8px;
+/* --- Row within Excerpt --- */
+.excerpt-row.block-row {
+  margin: 0 !important;
+  padding: 4px 12px 4px 20px !important;
+  font-size: 0.85em !important;
+  opacity: 0.8;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.1) !important;
+  min-height: auto !important;
+  display: flex !important;
+  cursor: pointer;
+}
+
+.excerpt-row:last-child {
+  border-bottom: none !important;
+}
+
+.excerpt-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* --- ID Column Formatting --- */
+.excerpt-row .block-id {
+  flex: 0 0 75px !important; /* Fixed width for alignment */
+  font-size: 10px !important;
+  background: transparent !important;
+  color: #555 !important;
+  font-family: monospace;
+  font-weight: bold;
+  padding: 0 !important;
+}
+
+/* Add "Ref:" label for printing/visual purposes */
+.excerpt-row .block-id::before {
+  content: "Ref: ";
+  font-weight: normal;
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+/* --- Text Truncation (Optional: Keep it clean) --- */
+.excerpt-row .col-kn p, 
+.excerpt-row .col-en p {
+  margin: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 350px; /* Adjust based on your layout */
 }
 
 /* 7. RESPONSIVE & PRINT */

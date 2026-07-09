@@ -126,48 +126,49 @@ function renderChat(data, container, lang = 'all') {
 
         // --- Excerpt Logic ---
         if (item.references && item.references.length > 0) {
-            const refId = item.references[0];
-            const isBlockRef = refId.includes('_b_');
-            const parentId = isBlockRef ? refId.split('_b_')[0] : refId;
+            const excerptContainer = document.createElement('div');
+            // Always use multi-block for consistency
+            excerptContainer.className = "reply-excerpt multi-block";
 
-            // 1. Find the parent item (e.g., a_017)
-            const parentMatch = data.find(i => i.id === parentId);
+            item.references.forEach(refId => {
+                const isBlockRef = refId.includes('_b_');
+                const parentId = isBlockRef ? refId.split('_b_')[0] : refId;
+                const parentMatch = data.find(i => i.id === parentId);
 
-            if (parentMatch) {
-                const excerpt = document.createElement('div');
-                excerpt.className = "reply-excerpt";
+                if (parentMatch) {
+                    const blockData = isBlockRef
+                        ? (parentMatch.blocks || []).find(b => b.id === refId)
+                        : (parentMatch.blocks || [])[0];
 
-                // 2. Setup Click Handler
-                excerpt.onclick = () => {
-                    const target = document.getElementById(refId) || document.getElementById(parentId);
-                    if (target) {
-                        // Calculate position with offset for the sticky header
-                        const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
-                        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+                    // Use your existing formatIdForDisplay function
+                    const shortId = blockData ? formatIdForDisplay(blockData) : parentId;
 
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
-                    }
-                };
+                    const blockRow = document.createElement('div');
+                    blockRow.className = "block-row excerpt-row";
 
-                // 3. Find the specific block to show the correct text
-                const blockMatch = isBlockRef
-                    ? parentMatch.blocks.find(b => b.id === refId)
-                    : parentMatch.blocks[0];
+                    blockRow.innerHTML = `
+                        <span class="block-id">${shortId}</span>
+                        <div class="col-kn">
+                            <p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p>
+                        </div>
+                        <div class="col-en">
+                            <p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p>
+                        </div>
+                    `;
 
-                if (blockMatch) {
-                    let refPrefix = `[Ref: ${formatIdForDisplay(blockMatch)}] `;
-                    let excerptText = "...";
-                    if (lang === 'kn') excerptText = blockMatch.content.kn[0];
-                    else if (lang === 'en') excerptText = blockMatch.content.en[0] || "...";
-                    else excerptText = blockMatch.content.kn[0] + (blockMatch.content.en[0] ? " / " + blockMatch.content.en[0] : "");
-
-                    excerpt.innerText = refPrefix + excerptText;
-                    card.appendChild(excerpt);
+                    blockRow.onclick = (e) => {
+                        e.stopPropagation();
+                        const target = document.getElementById(refId);
+                        if (target) {
+                            const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
+                            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+                            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                        }
+                    };
+                    excerptContainer.appendChild(blockRow);
                 }
-            }
+            });
+            card.prepend(excerptContainer); // Prepend so it sits at the very top
         }
 
         // --- Multi-Block Row Generation ---
