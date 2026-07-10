@@ -126,28 +126,73 @@ function renderChat(data, container, lang = 'all') {
 
         // --- Excerpt Logic ---
         if (item.references && item.references.length > 0) {
-            const excerpt = document.createElement('div');
-            excerpt.className = "reply-excerpt";
-            excerpt.onclick = () => {
-                const target = document.getElementById(item.references[0]);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 100, behavior: 'smooth' });
+            const excerptContainer = document.createElement('div');
+            excerptContainer.className = "reply-excerpt multi-block";
+
+            item.references.forEach(refId => {
+                const isBlockRef = refId.includes('_b_');
+                const parentId = isBlockRef ? refId.split('_b_')[0] : refId;
+                const parentMatch = data.find(i => i.id === parentId);
+
+                if (parentMatch) {
+                    const blockData = isBlockRef
+                        ? (parentMatch.blocks || []).find(b => b.id === refId)
+                        : (parentMatch.blocks || [])[0];
+
+                    const shortId = blockData ? formatIdForDisplay(blockData) : parentId;
+
+                    const blockRow = document.createElement('div');
+                    blockRow.className = "block-row excerpt-row";
+
+                    // Nested structure for horizontal columns
+                    const knContent = (lang === 'kn' || lang === 'all')
+                        ? `<div class="col-kn"><p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p></div>`
+                        : '';
+                    const enContent = (lang === 'en' || lang === 'all')
+                        ? `<div class="col-en"><p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p></div>`
+                        : '';
+
+                    blockRow.innerHTML = `
+                        <span class="block-id" title="Jump to source">${shortId}</span>
+                        <div class="excerpt-content-wrap">
+                            ${knContent}
+                            ${enContent}
+                        </div>
+                    `;
+
+                    // Action 1: Click ID to Jump
+                    blockRow.querySelector('.block-id').onclick = (e) => {
+                        e.stopPropagation();
+                        const target = document.getElementById(refId);
+                        if (target) {
+                            window.__lastReadPos = window.scrollY; // Bookmark current position
+                            const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
+                            window.scrollTo({
+                                top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20,
+                                behavior: 'smooth'
+                            });
+
+                            const backBtn = document.getElementById('back-to-message');
+                            if (backBtn) {
+                                backBtn.style.display = 'block';
+                                backBtn.onclick = () => {
+                                    window.scrollTo({ top: window.__lastReadPos, behavior: 'smooth' });
+                                    backBtn.style.display = 'none';
+                                };
+                            }
+                        }
+                    };
+
+                    // Action 2: Click Text to Expand
+                    blockRow.querySelector('.excerpt-content-wrap').onclick = (e) => {
+                        e.stopPropagation();
+                        blockRow.classList.toggle('expanded');
+                    };
+
+                    excerptContainer.appendChild(blockRow);
                 }
-            };
-            const match = data.find(i => i.id === item.references[0]);
-            // const excerptRefID = document.createElement('span');
-            // excerptRefID.className = 'block-id';
-            let excerptText = "...";
-            let refPrefix = "";
-            if (match && match.blocks && match.blocks.length > 0) {
-                refPrefix = `[Ref: ${formatIdForDisplay(match.blocks[0])}] `;
-                if (lang === 'kn') excerptText = match.blocks[0].content.kn[0];
-                else if (lang === 'en') excerptText = match.blocks[0].content.en[0] || "...";
-                else excerptText = match.blocks[0].content.kn[0] + (match.blocks[0].content.en[0] ? " / " + match.blocks[0].content.en[0] : "");
-            }
-            excerpt.innerText = refPrefix + excerptText;
-            card.appendChild(excerpt);
+            });
+            card.prepend(excerptContainer);
         }
 
         // --- Multi-Block Row Generation ---
@@ -155,6 +200,7 @@ function renderChat(data, container, lang = 'all') {
             const row = document.createElement('div');
             row.className = `block-row ${block.type}`;
 
+            row.id = block.id;
             // Create an ID element (e.g., Q1, A1, S1)
             const idLabel = document.createElement('span');
             idLabel.className = 'block-id';

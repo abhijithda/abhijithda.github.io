@@ -1860,6 +1860,7 @@
     "type": "question",
     "timestamp": "2026-06-15T11:10:00Z",
     "references": [
+      "a_007_b_1",
       "a_014"
     ],
     "blocks": [
@@ -2298,20 +2299,10 @@
         ],
         "videos": [],
         "images": []
-      }
-    ]
-  },
-  {
-    "id": "q_018",
-    "type": "question",
-    "timestamp": "2025-11-15T11:25:00Z",
-    "references": [
-      "a_017"
-    ],
-    "blocks": [
+      },
       {
-        "id": "q_018_b_1",
-        "type": "paragraph",
+        "id": "a_017_b_10",
+        "type": "note",
         "content": {
           "kn": [
             "ಪಂಚಾಮೃತ ಶ್ಲೋಕ ಇರುವುದರಿಂದ, ದೇವತೆಗಳು ಮೊಸರು, ತುಪ್ಪ, ನೀರುಗಳಿಂದಲೂ ಅಭಿಷೇಕ ಮಾಡಿರಬಹುದೇ ಎಂಬ ಒಂದು ಪ್ರಶ್ನೆ?!."
@@ -2334,7 +2325,9 @@
     "type": "answer",
     "timestamp": "2026-01-16T21:36:00Z",
     "references": [
-      "q_018"
+      "a_017_b_6",
+      "a_017_b_7",
+      "a_017_b_10"
     ],
     "blocks": [
       {
@@ -3026,6 +3019,8 @@
     "type": "question",
     "timestamp": "2026-06-15T12:05:00Z",
     "references": [
+      "a_017_b_6",
+      "a_018_b_1",
       "a_025"
     ],
     "blocks": [
