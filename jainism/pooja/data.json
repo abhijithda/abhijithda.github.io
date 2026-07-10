@@ -1860,6 +1860,7 @@
     "type": "question",
     "timestamp": "2026-06-15T11:10:00Z",
     "references": [
+      "a_007_b_1",
       "a_014"
     ],
     "blocks": [

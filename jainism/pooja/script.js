@@ -127,7 +127,6 @@ function renderChat(data, container, lang = 'all') {
         // --- Excerpt Logic ---
         if (item.references && item.references.length > 0) {
             const excerptContainer = document.createElement('div');
-            // Always use multi-block for consistency
             excerptContainer.className = "reply-excerpt multi-block";
 
             item.references.forEach(refId => {
@@ -140,35 +139,53 @@ function renderChat(data, container, lang = 'all') {
                         ? (parentMatch.blocks || []).find(b => b.id === refId)
                         : (parentMatch.blocks || [])[0];
 
-                    // Use your existing formatIdForDisplay function
                     const shortId = blockData ? formatIdForDisplay(blockData) : parentId;
 
                     const blockRow = document.createElement('div');
                     blockRow.className = "block-row excerpt-row";
 
+                    // Nested structure for horizontal columns
                     blockRow.innerHTML = `
-                        <span class="block-id">${shortId}</span>
-                        <div class="col-kn">
-                            <p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p>
-                        </div>
-                        <div class="col-en">
-                            <p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p>
-                        </div>
-                    `;
+                <span class="block-id" title="Jump to source">${shortId}</span>
+                <div class="excerpt-content-wrap">
+                    <div class="col-kn"><p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p></div>
+                    <div class="col-en"><p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p></div>
+                </div>
+            `;
 
-                    blockRow.onclick = (e) => {
+                    // Action 1: Click ID to Jump
+                    blockRow.querySelector('.block-id').onclick = (e) => {
                         e.stopPropagation();
                         const target = document.getElementById(refId);
                         if (target) {
+                            window.__lastReadPos = window.scrollY; // Bookmark current position
                             const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
-                            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
-                            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                            window.scrollTo({
+                                top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20,
+                                behavior: 'smooth'
+                            });
+
+                            const backBtn = document.getElementById('back-to-message');
+                            if (backBtn) {
+                                backBtn.style.display = 'block';
+                                backBtn.onclick = () => {
+                                    window.scrollTo({ top: window.__lastReadPos, behavior: 'smooth' });
+                                    backBtn.style.display = 'none';
+                                };
+                            }
                         }
                     };
+
+                    // Action 2: Click Text to Expand
+                    blockRow.querySelector('.excerpt-content-wrap').onclick = (e) => {
+                        e.stopPropagation();
+                        blockRow.classList.toggle('expanded');
+                    };
+
                     excerptContainer.appendChild(blockRow);
                 }
             });
-            card.prepend(excerptContainer); // Prepend so it sits at the very top
+            card.prepend(excerptContainer);
         }
 
         // --- Multi-Block Row Generation ---
