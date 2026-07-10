@@ -2,6 +2,17 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('Display Options - Visual Validation (Screenshots)', () => {
 
+    test.beforeEach(async ({ page }) => {
+        // Intercept any network request for data.json and serve the local test file instead
+        await page.route('data.json', route => {
+            route.fulfill({ path: 'test.data.json' });
+        });
+
+        await page.goto('/');
+        // Wait for the mock items to render onto the page
+        await expect(page.locator('.card').first()).toBeVisible();
+    });
+
     test('Screenshot: Default state (Videos ON, QR OFF)', async ({ page }) => {
         await page.goto('/');
 
