@@ -256,123 +256,150 @@ input:checked+.slider::before {
     border-left: 5px solid #fbc02d;
 }
 
-/* --- Excerpt Container (Covering Top Padding) --- */
+/* --- 1. EXCERPT CONTAINER --- */
 .reply-excerpt.multi-block {
-  background: rgba(0, 0, 0, 0.04);
-  margin: -40px 0 10px 0 !important;
-  padding: 0 !important;
-  border-radius: 8px 8px 0 0;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  width: 100% !important;
-  box-sizing: border-box;
-  overflow: hidden;
+    background: rgba(0, 0, 0, 0.04);
+    /* Pull up to cover card padding (-40px) and add space below (10px) */
+    margin: -40px 0 10px 0 !important;
+    padding: 0 !important;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    width: 100% !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-/* --- Row Layout & Vertical Spacing --- */
+/* --- 2. ROW LAYOUT (STRICT COLUMNS) --- */
 .excerpt-row.block-row {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  padding: 4px 15px 4px 0 !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
-  min-height: auto !important;
-}
-.excerpt-row:last-child { border-bottom: none !important; }
-.excerpt-row:nth-child(even) { background: rgba(0, 0, 0, 0.01); }
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    /* Force columns to stay horizontal */
+    align-items: flex-start !important;
 
-/* --- ID Column (Perfect 60px Alignment) --- */
+    padding: 4px 15px 4px 0 !important;
+    /* Zero left padding to align ID column */
+    margin: 0 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
+    min-height: auto !important;
+    width: 100% !important;
+}
+
+.excerpt-row:last-child {
+    border-bottom: none !important;
+}
+
+.excerpt-row:nth-child(even) {
+    background: rgba(0, 0, 0, 0.015);
+}
+
+/* Zebra striping */
+
+/* --- 3. ID COLUMN (Ref: Q-0.0) --- */
 .excerpt-row .block-id {
-  flex: 0 0 60px !important;
-  min-width: 60px !important;
-  margin: 0 10px 0 0 !important;
-  text-align: right;
-  font-size: 10px !important;
-  font-family: monospace;
-  font-weight: bold;
-  color: #0066cc !important;
-  line-height: 1.1 !important;
-  cursor: pointer !important;
-}
-.excerpt-row .block-id::before {
-  content: "Ref: "; font-weight: normal; color: #999; font-size: 8px; display: block; margin-bottom: 1px;
+    flex: 0 0 60px !important;
+    /* Fixed width to match main block IDs */
+    min-width: 60px !important;
+    max-width: 60px !important;
+    margin: 0 10px 0 0 !important;
+    padding: 0 5px !important;
+
+    text-align: right;
+    font-size: 10px !important;
+    font-family: monospace;
+    font-weight: bold;
+    color: #0066cc !important;
+    /* Blue link color */
+    line-height: 1.1 !important;
+    cursor: pointer !important;
 }
 
-/* --- Content & Columns --- */
-.excerpt-content-wrap {
-  display: flex !important;
-  flex: 1 !important;
-  min-width: 0 !important;
-  gap: 15px !important;
-  cursor: zoom-in !important;
-  position: relative;
-  padding-right: 20px !important;
+/* Move 'Ref:' label above the number for perfect alignment */
+.excerpt-row .block-id::before {
+    content: "Ref: ";
+    font-weight: normal;
+    color: #999;
+    font-size: 8px;
+    display: block;
+    line-height: 1;
+    margin-bottom: 1px;
 }
+
+/* --- 4. CONTENT WRAPPER --- */
+.excerpt-content-wrap {
+    display: flex !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    /* Prevents long text from breaking layout */
+    gap: 12px !important;
+    align-items: flex-start !important;
+    cursor: zoom-in !important;
+    position: relative;
+    padding-right: 20px !important;
+}
+
+/* Expand Indicator Icon */
 .excerpt-content-wrap::after {
-  content: "▼"; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 8px; opacity: 0.3;
+    content: "▼";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0.3;
+}
+
+/* Language Columns */
+.excerpt-row .col-kn,
+.excerpt-row .col-en {
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
 .excerpt-row p {
-  margin: 0 !important;
-  font-size: 11px !important;
-  line-height: 1.3 !important;
-  color: #444 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+    color: #444 !important;
+
+    /* Default Truncation (Single Line) */
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
 }
 
-/* --- Interactive State (Expanded) --- */
-.excerpt-row.expanded { background: rgba(255, 255, 255, 0.5) !important; }
-.excerpt-row.expanded p { white-space: normal !important; overflow: visible !important; }
-.excerpt-row.expanded .excerpt-content-wrap { cursor: zoom-out !important; }
-.excerpt-row.expanded .excerpt-content-wrap::after { content: "▲"; }
-
-/* FORCE the tightness by targeting the p tag more specifically */
-.excerpt-row.block-row .excerpt-content-wrap p {
-  margin: 0 !important;
-  padding: 0 !important;
-  line-height: 1.2 !important; /* Shrunk even further */
-  height: 1.2em !important; /* Fixed height for the truncated state */
-  display: block !important;
+/* --- 5. EXPANDED VIEW (5-Line Partial Reveal) --- */
+.excerpt-row.expanded {
+    background: rgba(255, 255, 255, 0.5) !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
 }
 
-/* Balance the alignment of the ID with the text */
-.excerpt-row .block-id {
-  margin-top: 2px !important; /* Shifting the ID down slightly to match the text center */
+.excerpt-row.expanded p {
+    white-space: normal !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    /* Limit to 5 lines */
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    cursor: zoom-out !important;
+
+    /* Fade out effect on the 5th line */
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
 }
 
-/* If it still looks 'tall', check if the row padding is being ignored */
-.excerpt-row.block-row {
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
+.excerpt-row.expanded .excerpt-content-wrap {
+    cursor: zoom-out !important;
 }
 
-/* 1. Squeeze the ID column vertically */
-.excerpt-row .block-id {
-  flex: 0 0 60px !important;
-  min-width: 60px !important;
-  
-  /* FORCE it to be short */
-  height: auto !important; 
-  padding: 0 5px !important;
-  margin: 0 10px 0 0 !important;
-  
-  /* This is the key: Tighten the line height for the stacked Ref/Number */
-  line-height: 0.9 !important; 
-}
-
-/* 2. Tighten the Row height */
-.excerpt-row.block-row {
-  padding: 4px 15px 4px 0 !important;
-  min-height: auto !important;
-  height: auto !important;
-  align-items: center !important; /* Change to center to align the short ID with the text */
-}
-
-/* 3. Subtler Ref label spacing */
-.excerpt-row .block-id::before {
-  margin-bottom: 0px !important; /* Remove space between Ref and Number */
+.excerpt-row.expanded .excerpt-content-wrap::after {
+    content: "▲";
 }
 
 /* 7. RESPONSIVE & PRINT */
