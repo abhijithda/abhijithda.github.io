@@ -145,13 +145,20 @@ function renderChat(data, container, lang = 'all') {
                     blockRow.className = "block-row excerpt-row";
 
                     // Nested structure for horizontal columns
+                    const knContent = (lang === 'kn' || lang === 'all')
+                        ? `<div class="col-kn"><p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p></div>`
+                        : '';
+                    const enContent = (lang === 'en' || lang === 'all')
+                        ? `<div class="col-en"><p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p></div>`
+                        : '';
+
                     blockRow.innerHTML = `
-                <span class="block-id" title="Jump to source">${shortId}</span>
-                <div class="excerpt-content-wrap">
-                    <div class="col-kn"><p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p></div>
-                    <div class="col-en"><p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p></div>
-                </div>
-            `;
+                        <span class="block-id" title="Jump to source">${shortId}</span>
+                        <div class="excerpt-content-wrap">
+                            ${knContent}
+                            ${enContent}
+                        </div>
+                    `;
 
                     // Action 1: Click ID to Jump
                     blockRow.querySelector('.block-id').onclick = (e) => {

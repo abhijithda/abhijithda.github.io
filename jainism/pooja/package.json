@@ -10,6 +10,7 @@
   "scripts": {
     "postinstall": "playwright install --with-deps",
     "test:unit": "jest",
+    "test:update-snapshots": "npx playwright test --update-snapshots",
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e"
   },
