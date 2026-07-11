@@ -43,6 +43,74 @@ body {
     cursor: pointer;
 }
 
+/* Settings Menu */
+.view-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-trigger {
+    padding: 8px 20px;
+    cursor: pointer;
+    background: white;
+    border: 0.8px solid #ddd;
+    border-radius: 20px;
+    font-size: 13.33px;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    height: 38px;
+}
+
+.menu-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    background-color: white;
+    border: 1px solid #eee;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 220px;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.menu-section {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* VGA Photos */
+.image-card,
+.image-card img {
+    width: 640px;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-caption {
+    font-weight: bold;
+    margin-top: 8px;
+    font-family: Arial, sans-serif;
+    color: #444;
+}
+
+@media (max-width: 700px) {
+
+    .image-card,
+    .image-card img {
+        width: 100%;
+        max-width: 640px;
+    }
+}
+
 /* 3. CARD DESIGN & BLOCK ROWS */
 .card {
     position: relative;

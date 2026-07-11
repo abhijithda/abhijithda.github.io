@@ -116,7 +116,7 @@ function formatIdForDisplay(block) {
 }
 
 function renderChat(data, container, lang = 'all') {
-    if (!container) return; // Safety check
+    if (!container) return;
     container.innerHTML = "";
 
     data.forEach(item => {
@@ -124,122 +124,66 @@ function renderChat(data, container, lang = 'all') {
         card.className = `card ${item.type}`;
         card.id = item.id;
 
-        // --- Excerpt Logic ---
-        if (item.references && item.references.length > 0) {
-            const excerptContainer = document.createElement('div');
-            excerptContainer.className = "reply-excerpt multi-block";
-
-            item.references.forEach(refId => {
-                const isBlockRef = refId.includes('_b_');
-                const parentId = isBlockRef ? refId.split('_b_')[0] : refId;
-                const parentMatch = data.find(i => i.id === parentId);
-
-                if (parentMatch) {
-                    const blockData = isBlockRef
-                        ? (parentMatch.blocks || []).find(b => b.id === refId)
-                        : (parentMatch.blocks || [])[0];
-
-                    const shortId = blockData ? formatIdForDisplay(blockData) : parentId;
-
-                    const blockRow = document.createElement('div');
-                    blockRow.className = "block-row excerpt-row";
-
-                    // Nested structure for horizontal columns
-                    const knContent = (lang === 'kn' || lang === 'all')
-                        ? `<div class="col-kn"><p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p></div>`
-                        : '';
-                    const enContent = (lang === 'en' || lang === 'all')
-                        ? `<div class="col-en"><p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p></div>`
-                        : '';
-
-                    blockRow.innerHTML = `
-                        <span class="block-id" title="Jump to source">${shortId}</span>
-                        <div class="excerpt-content-wrap">
-                            ${knContent}
-                            ${enContent}
-                        </div>
-                    `;
-
-                    // Action 1: Click ID to Jump
-                    blockRow.querySelector('.block-id').onclick = (e) => {
-                        e.stopPropagation();
-                        const target = document.getElementById(refId);
-                        if (target) {
-                            window.__lastReadPos = window.scrollY; // Bookmark current position
-                            const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
-                            window.scrollTo({
-                                top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20,
-                                behavior: 'smooth'
-                            });
-
-                            const backBtn = document.getElementById('back-to-message');
-                            if (backBtn) {
-                                backBtn.style.display = 'block';
-                                backBtn.onclick = () => {
-                                    window.scrollTo({ top: window.__lastReadPos, behavior: 'smooth' });
-                                    backBtn.style.display = 'none';
-                                };
-                            }
-                        }
-                    };
-
-                    // Action 2: Click Text to Expand
-                    blockRow.querySelector('.excerpt-content-wrap').onclick = (e) => {
-                        e.stopPropagation();
-                        blockRow.classList.toggle('expanded');
-                    };
-
-                    excerptContainer.appendChild(blockRow);
-                }
-            });
-            card.prepend(excerptContainer);
-        }
-
-        // --- Multi-Block Row Generation ---
         item.blocks.forEach(block => {
             const row = document.createElement('div');
             row.className = `block-row ${block.type}`;
-
             row.id = block.id;
-            // Create an ID element (e.g., Q1, A1, S1)
+
+            // ID Label (e.g. Q-1.1)
             const idLabel = document.createElement('span');
             idLabel.className = 'block-id';
             idLabel.innerText = formatIdForDisplay(block);
-            row.appendChild(idLabel); // Add ID to the card
+            row.appendChild(idLabel);
 
-            // Column 1: Kannada
-            if ((lang === 'kn' || lang === 'all') && block.content.kn && block.content.kn.length > 0) {
+            // Kannada Column
+            if ((lang === 'kn' || lang === 'all') && block.content?.kn) {
                 const knCol = document.createElement('div');
                 knCol.className = "col-kn";
                 knCol.innerHTML = `<p>${block.content.kn.join('<br>')}</p>`;
                 row.appendChild(knCol);
             }
 
-            // Column 2: English
-            if ((lang === 'en' || lang === 'all') && block.content.en && block.content.en.length > 0) {
+            // English Column
+            if ((lang === 'en' || lang === 'all') && block.content?.en) {
                 const enCol = document.createElement('div');
                 enCol.className = "col-en";
                 enCol.innerHTML = `<p>${block.content.en.join('<br>')}</p>`;
                 row.appendChild(enCol);
             }
 
-            // Column 3: Media
+            // Media Column (Images/Videos)
             const mediaCol = document.createElement('div');
             mediaCol.className = "col-media";
-            if (block.videos && block.videos.length > 0) {
-                block.videos.forEach(vid => { mediaCol.innerHTML += createVideoCard(vid.url); });
-            }
+
+            // Process Images
             if (block.images && block.images.length > 0) {
                 block.images.forEach(img => {
-                    let cap = (lang === 'kn' && img.caption.kn) ? img.caption.kn : (lang === 'en' && img.caption.en) ? img.caption.en : (img.caption.kn || "") + (img.caption.en ? " / " + img.caption.en : "");
-                    mediaCol.innerHTML += `<div class="image-card"><img src="images/${img.src}" alt="${cap}">${cap ? `<p class="image-caption">${cap}</p>` : ''}</div>`;
+                    const capKn = (img.caption && img.caption.kn) ? img.caption.kn : "";
+                    const capEn = (img.caption && img.caption.en) ? img.caption.en : "";
+                    
+                    let capText = "";
+                    if (lang === 'all') {
+                        capText = (capKn && capEn) ? `${capKn} / ${capEn}` : (capKn || capEn);
+                    } else {
+                        capText = (lang === 'kn') ? capKn : capEn;
+                    }
+
+                    mediaCol.innerHTML += `
+                        <div class="image-card">
+                            <img src="images/${img.src}" alt="${capText}">
+                            ${capText ? `<p class="image-caption">${capText}</p>` : ''}
+                        </div>`;
                 });
             }
-            row.appendChild(mediaCol);
 
+            // Process Videos
+            if (block.videos && typeof createVideoCard === 'function') {
+                block.videos.forEach(v => mediaCol.innerHTML += createVideoCard(v.url));
+            }
+
+            row.appendChild(mediaCol);
             card.appendChild(row);
         });
-
         container.appendChild(card);
     });
 }
