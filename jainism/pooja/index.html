@@ -9,30 +9,39 @@
 
 <body>
     <header class="app-header">
-        <input type="text" id="search-bar" placeholder="Search topics (e.g., ಅಭಿಷೇಕ)..." onkeyup="filterChat()">
-        <span>🗣️ Language:</span>
-        <select id="lang-select">
-            <option value="all">All</option>
-            <option value="kn">ಕನ್ನಡ</option>
-            <option value="en">English</option>
-        </select>
-        <div class="display-options" style="display: flex; gap: 15px; align-items: center; font-size: 0.9em;">
-            <span>🎬 Videos:</span>
-            <label class="switch">
-                <input type="checkbox" id="toggle-videos" checked onchange="updateMediaVisibility()">
-                <span class="slider"></span>
-            </label>
-            <span>📱 QR Codes:</span>
-            <label class="switch">
-                <input type="checkbox" id="toggle-qrs" onchange="updateMediaVisibility()">
-                <span class="slider"></span>
-            </label>
-            <!-- print toggle removed: use display options (Videos / QR Codes) -->
+        <input type="text" id="search-bar" placeholder="Search topics..." onkeyup="filterChat()">
+
+        <div class="view-menu-container">
+            <button id="settings-btn" class="menu-trigger">Settings ⚙️</button>
+            <div id="settings-menu" class="menu-content">
+                <div class="menu-section">
+                    <label for="lang-select">Language</label>
+                    <select id="lang-select">
+                        <option value="all">All</option>
+                        <option value="kn">ಕನ್ನಡ</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div class="menu-section">
+                    <label>🎬 Videos:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-videos" checked="" onchange="updateMediaVisibility()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-section">
+                    <label>📱 QR Codes:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-qrs" onchange="updateMediaVisibility()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     </header>
 
     <div id="chat-container"></div>
-    
+
     <button id="back-to-message"
         style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">
         ↑ Back to Message
