@@ -85,8 +85,8 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
 
         await page.waitForSelector('#chat-container .card .video-card');
 
-        // Open the Settings menu — the toggles are hidden inside it until this is clicked
-        await settingsBtn.click();
+        // // Open the Settings menu — the toggles are hidden inside it until this is clicked
+        // await settingsBtn.click();
         await expect(qrsCheckbox).toBeVisible();
 
         await videosCheckbox.check();

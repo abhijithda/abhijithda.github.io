@@ -1,5 +1,17 @@
 const { test, expect } = require('@playwright/test');
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/data.json', route => {
+    route.fulfill({ path: 'test.data.json' });
+  });
+
+  await page.goto('/');
+  await expect(page.locator('.card').first()).toBeVisible();
+
+  await page.locator('#settings-btn').click();
+  await expect(page.locator('#toggle-videos')).toBeVisible();
+});
+
 test('Language Selector filters content correctly', async ({ page }) => {
   await page.goto('/');
 
@@ -7,12 +19,14 @@ test('Language Selector filters content correctly', async ({ page }) => {
   // Default is 'all'. Ensure both are present.
   await expect(page.locator('.col-en').first()).toBeVisible();
   await expect(page.locator('.col-kn').first()).toBeVisible();
-
+  
+  await page.locator('#settings-btn').click();
+  
   // --- STATE 2: ENGLISH ---
   await page.selectOption('#lang-select', 'en');
   await expect(page.locator('.col-en').first()).toBeVisible();
   // Check that Kannada column is gone (not just hidden, but removed by renderChat)
-  await expect(page.locator('.col-kn')).toHaveCount(0); 
+  await expect(page.locator('.col-kn')).toHaveCount(0);
   await expect(page.locator('.col-en').first()).toContainText(/All are equal/i);
 
   // --- STATE 3: KANNADA ---

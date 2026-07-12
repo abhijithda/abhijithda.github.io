@@ -1,4 +1,4 @@
-const { test } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 
 // This is NOT a regression test — it makes no assertions and never fails on
 // content changes. It exists purely to produce always-current screenshots of
@@ -16,10 +16,20 @@ const COMBINATIONS = [
 
 test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
 
+    test.beforeEach(async ({ page }) => {
+        await page.route('**/data.json', route => {
+            route.fulfill({ path: 'test.data.json' });
+        });
+
+        await page.goto('/');
+        await expect(page.locator('.card').first()).toBeVisible();
+
+        await page.locator('#settings-btn').click();
+        await expect(page.locator('#toggle-videos')).toBeVisible();
+    });
+
     for (const combo of COMBINATIONS) {
         test(`Screen view: ${combo.name}`, async ({ page }) => {
-            await page.goto('/');
-            await page.waitForSelector('#chat-container .card');
 
             // force: true — these checkboxes live inside the collapsed Settings
             // menu, and we don't need to open the menu just to toggle them.
@@ -36,8 +46,6 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
         });
 
         test(`Print view: ${combo.name}`, async ({ page }) => {
-            await page.goto('/');
-            await page.waitForSelector('#chat-container .card');
 
             await page.locator('#toggle-videos').setChecked(combo.videos, { force: true });
             await page.locator('#toggle-qrs').setChecked(combo.qrs, { force: true });
