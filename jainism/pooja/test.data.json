@@ -123,6 +123,77 @@
     ]
   },
   {
+    "id": "a_003",
+    "type": "answer",
+    "timestamp": "2026-06-16T09:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "a_003_b_1",
+        "type": "mantra",
+        "content": {
+          "kn": [
+            "ॐ ह्रीं अर्हं"
+          ],
+          "en": [
+            "Om Hreem Arham"
+          ]
+        },
+        "tags": [
+          "Mantra"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_003_b_2",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "सर्वमंगलमांगल्यं सर्वकल्याणकारणम्"
+          ],
+          "en": [
+            "That which is auspicious among all auspicious things, the cause of all well-being."
+          ]
+        },
+        "tags": [
+          "Shloka"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "i_001",
+    "type": "images",
+    "timestamp": "2026-07-11T10:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "i_001_b_1",
+        "type": "images",
+        "content": {
+          "kn": [],
+          "en": []
+        },
+        "tags": [
+          "personal"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Adinatha Swami Golakot.jpg",
+            "caption": {
+              "kn": "ಆದಿನಾಥ ಸ್ವಾಮಿ",
+              "en": "Adinatha Swami"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "q_001",
     "type": "question",
     "timestamp": "2026-06-15T10:00:00Z",

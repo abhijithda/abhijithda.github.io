@@ -398,12 +398,12 @@
   },
   {
     "id": "i_005",
-    "type": "image",
+    "type": "images",
     "timestamp": "2026-07-11T15:32:00Z",
     "blocks": [
       {
-        "id": "i_105_b_1",
-        "type": "image",
+        "id": "i_005_b_1",
+        "type": "images",
         "tags": [
           "personal"
         ],

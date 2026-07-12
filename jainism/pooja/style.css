@@ -352,6 +352,35 @@ input:checked+.slider::before {
     border-left: 4px solid #4caf50;
 }
 
+.card.images {
+    background-color: #fafafa;
+    border-left: 4px solid #607d8b;
+}
+
+.card.images .image-card {
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.image-card {
+    display: inline-block;
+    max-width: 220px;
+    margin: 4px;
+    text-align: center;
+}
+
+.image-card img {
+    width: 100%;
+    border-radius: 6px;
+    display: block;
+}
+
+.image-caption {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 4px;
+}
+
 .block-row.mantra {
     background-color: rgb(249, 126, 3);
     border-left: 5px solid rgb(255, 0, 0);

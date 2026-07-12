@@ -3,8 +3,13 @@ const { test, expect } = require('@playwright/test');
 test.describe('Display Options - Visual Validation (Screenshots)', () => {
 
     test.beforeEach(async ({ page }) => {
-        // Intercept any network request for data.json and serve the local test file instead
-        await page.route('data.json', route => {
+        // Always use the small, stable fixture here — this test asserts pixel-exact
+        // layout via toHaveScreenshot(), so it needs deterministic content in every
+        // environment (local AND CI). Mixing in the real, evolving data.json would
+        // make this test fail every time content is added, regardless of whether the
+        // layout actually broke. For a live preview of the real site, see
+        // site-preview.spec.js instead.
+        await page.route('**/data.json', route => {
             route.fulfill({ path: 'test.data.json' });
         });
 

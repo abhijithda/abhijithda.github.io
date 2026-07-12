@@ -1,18 +1,22 @@
-const btn = document.getElementById('settings-btn');
-const menu = document.getElementById('settings-menu');
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('settings-btn');
+    const menu = document.getElementById('settings-menu');
 
-// Toggle menu on click
-btn.onclick = (e) => {
-    e.stopPropagation();
-    const isVisible = menu.style.display === 'block';
-    menu.style.display = isVisible ? 'none' : 'block';
-};
+    if (!btn || !menu) return;
 
-// Close menu when clicking outside
-document.addEventListener('click', (e) => {
-    if (menu && !menu.contains(e.target) && e.target !== btn) {
-        menu.style.display = 'none';
-    }
+    // Toggle menu on click
+    btn.onclick = (e) => {
+        e.stopPropagation();
+        const isVisible = menu.style.display === 'block';
+        menu.style.display = isVisible ? 'none' : 'block';
+    };
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (menu && !menu.contains(e.target) && e.target !== btn) {
+            menu.style.display = 'none';
+        }
+    });
 });
 
 function filterChat() {
