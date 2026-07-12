@@ -357,30 +357,6 @@ input:checked+.slider::before {
     border-left: 4px solid #607d8b;
 }
 
-.card.images .image-card {
-    max-width: 320px;
-    margin: 0 auto;
-}
-
-.image-card {
-    display: inline-block;
-    max-width: 220px;
-    margin: 4px;
-    text-align: center;
-}
-
-.image-card img {
-    width: 100%;
-    border-radius: 6px;
-    display: block;
-}
-
-.image-caption {
-    font-size: 0.85em;
-    color: #666;
-    margin-top: 4px;
-}
-
 .block-row.mantra {
     background-color: rgb(249, 126, 3);
     border-left: 5px solid rgb(255, 0, 0);
@@ -603,5 +579,27 @@ input:checked+.slider::before {
         display: flex !important;
         flex: 0 0 170px !important;
         width: 170px !important;
+    }
+
+    /* Photos aren't part of the Videos/QR toggle system — always show them
+       in print regardless of those toggle states. */
+    .block-row.images .col-media {
+        display: flex !important;
+    }
+
+    /* Standalone image items have no text columns competing for space
+       (see script.js: empty content arrays no longer create col-kn/col-en),
+       so let the photo use the full card width instead of the 170px slot
+       sized for video thumbnails/QR codes. */
+    .card.images .block-row .col-media {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+
+    .card.images .image-card,
+    .card.images .image-card img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
     }
 }

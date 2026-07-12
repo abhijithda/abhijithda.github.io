@@ -157,7 +157,7 @@ function renderChat(data, container, lang = 'all') {
             row.appendChild(idLabel);
 
             // Kannada Column
-            if ((lang === 'kn' || lang === 'all') && block.content?.kn) {
+            if ((lang === 'kn' || lang === 'all') && block.content?.kn?.length > 0) {
                 const knCol = document.createElement('div');
                 knCol.className = "col-kn";
                 knCol.innerHTML = `<p>${block.content.kn.join('<br>')}</p>`;
@@ -165,7 +165,7 @@ function renderChat(data, container, lang = 'all') {
             }
 
             // English Column
-            if ((lang === 'en' || lang === 'all') && block.content?.en) {
+            if ((lang === 'en' || lang === 'all') && block.content?.en?.length > 0) {
                 const enCol = document.createElement('div');
                 enCol.className = "col-en";
                 enCol.innerHTML = `<p>${block.content.en.join('<br>')}</p>`;
