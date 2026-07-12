@@ -18,7 +18,7 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test.data.json' });
+            route.fulfill({ path: 'test/data.json' });
         });
 
         await page.goto('/');

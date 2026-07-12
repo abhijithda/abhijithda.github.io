@@ -4,7 +4,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test.data.json' });
+            route.fulfill({ path: 'test/data.json' });
         });
 
         await page.goto('/');

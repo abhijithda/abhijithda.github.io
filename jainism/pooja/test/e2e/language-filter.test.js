@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/data.json', route => {
-    route.fulfill({ path: 'test.data.json' });
+    route.fulfill({ path: 'test/data.json' });
   });
 
   await page.goto('/');
@@ -21,7 +21,7 @@ test('Language Selector filters content correctly', async ({ page }) => {
   await expect(page.locator('.col-kn').first()).toBeVisible();
   
   await page.locator('#settings-btn').click();
-  
+
   // --- STATE 2: ENGLISH ---
   await page.selectOption('#lang-select', 'en');
   await expect(page.locator('.col-en').first()).toBeVisible();

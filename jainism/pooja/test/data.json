@@ -18,10 +18,10 @@
         "videos": [],
         "images": [
           {
-            "src": "Adinatha Swami Golakot.jpg",
+            "src": "Bahubali Swami Charanagalu.jpeg",
             "caption": {
-              "kn": "ಆದಿನಾಥ ಸ್ವಾಮಿ",
-              "en": "Adinatha Swami"
+              "en": "Bahubali Swami",
+              "kn": "ಬಾಹುಬಲಿ ಸ್ವಾಮಿ"
             }
           }
         ]
@@ -187,17 +187,25 @@
         "type": "mantra",
         "content": {
           "kn": [
-            "ॐ ह्रीं अर्हं"
+            "ಓಂ ಹ್ರೀಂ ಶ್ರೀಂ ಕ್ಲೀಂ ಐಂ ಅರ್ಹಂ ಶ್ರೀ ವೃಷಭ ತೀರ್ಥಕರ ಪರಮ ಜಿನ ದೇವಾಯ ಗೋವದನ ಅಪ್ರತಿಚಕ್ರೇ ಯಕ್ಷ ಯಕ್ಷೀ ಸಹಿತಾಯ, ಸಮವಸರಣ ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ವಿಭೂಷಿತಾಯ ನಮಃ"
           ],
           "en": [
-            "Om Hreem Arham"
+            "Om Hreem Shreem Kleem Iyam Arham Shree Vrushabha Tirthakara Parama Jina Devaya Govadana ApratiChakre Yaksha Yakshi Sahitaya, Samavasarana Asta Pratihaarya Aadi Vibhushitaya Namah."
           ]
         },
         "tags": [
           "Mantra"
         ],
         "videos": [],
-        "images": []
+        "images": [
+          {
+            "src": "Adinatha Swami Golakot.jpg",
+            "caption": {
+              "en": "Adinatha Swami",
+              "kn": "ಆದಿನಾಥ ಸ್ವಾಮಿ"
+            }
+          }
+        ]
       },
       {
         "id": "a_003_b_2",
