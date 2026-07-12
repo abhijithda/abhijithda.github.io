@@ -127,10 +127,29 @@ body {
     gap: 10px;
 }
 
-/* VGA Photos */
-.image-card,
-.image-card img {
+/* Standalone "images"-type items: the photo IS the content, so it gets the
+   large, prominent treatment. */
+.card.images .image-card,
+.card.images .image-card img {
     width: 640px;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Photos attached to a text block (e.g. an image inside a mantra/answer's
+   `images` array) sit inside the slim .col-media column next to the text —
+   they must stay contained to that column's width, or (since .col-media
+   uses overflow: visible for the QR-over-video PIP effect) a wide image
+   just spills out past its box and drags the row's background along with
+   it. Match the video-thumbnail's existing size instead of the 640px
+   "standalone photo" treatment. */
+.card:not(.images) .image-card,
+.card:not(.images) .image-card img {
+    width: 100%;
+    max-width: 200px;
     height: auto;
     border-radius: 8px;
     display: block;
@@ -147,8 +166,8 @@ body {
 
 @media (max-width: 700px) {
 
-    .image-card,
-    .image-card img {
+    .card.images .image-card,
+    .card.images .image-card img {
         width: 100%;
         max-width: 640px;
     }
@@ -601,5 +620,10 @@ input:checked+.slider::before {
         width: 100% !important;
         max-width: 100% !important;
         height: auto !important;
+    }
+
+    .card:not(.images) .image-card,
+    .card:not(.images) .image-card img {
+        max-width: 170px !important;
     }
 }
