@@ -1642,6 +1642,23 @@
         "images": []
       },
       {
+        "id": "i_013_b_4",
+        "type": "images",
+        "tags": [
+          "personal"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Adinatha Swami Bawangaja.png",
+            "caption": {
+              "en": "Adinatha Swami at Bawangaja",
+              "kn": "ಸ್ವಾಮಿ"
+            }
+          }
+        ]
+      },
+      {
         "id": "a_013_b_5",
         "type": "paragraph",
         "content": {
@@ -1661,6 +1678,23 @@
         "images": []
       },
       {
+        "id": "i_013_b_5",
+        "type": "images",
+        "tags": [
+          "personal"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Adinatha Swami Charana Bawangaja.png",
+            "caption": {
+              "en": "Govadana Yaksha Chakreshwari Yakshi Sahitaya Adinatha Swami at Bawangaja",
+              "kn": "ಗೋವದನ ಯಕ್ಷ ಹಾಗು ಚಕ್ರೇಶ್ವರೀ ಯಕ್ಷಿ ಸಹಿತಾಯ ಆದಿನಾಥ ಸ್ವಾಮಿ"
+            }
+          }
+        ]
+      },
+      {
         "id": "a_013_b_6",
         "type": "paragraph",
         "content": {
@@ -1677,7 +1711,24 @@
           "ShasanaDevata"
         ],
         "videos": [],
-        "images": []
+        "images": [
+          {
+            "src": "Adinatha Swami Kundalapur.jpg",
+            "caption": {}
+          }
+        ]
+      },
+      {
+        "id": "m_013_b_6",
+        "type": "mantra",
+        "content": {
+          "en": [
+              "Om Hreem Shreem Kleem Iyam Arham Shree Vrushabha Tirthakara Parama Jina Devaya Govadana ApratiChakre Yaksha Yakshi Sahitaya, Samavasarana Asta Pratihaarya Aadi Vibhushitaya Namah"
+          ],
+          "kn": [
+              "ಓಂ ಹ್ರೀಂ ಶ್ರೀಂ ಕ್ಲೀಂ ಐಂ ಅರ್ಹಂ ಶ್ರೀ ವೃಷಭ ತೀರ್ಥಕರ ಪರಮ ಜಿನ ದೇವಾಯ ಗೋವದನ ಅಪ್ರತಿಚಕ್ರೇ ಯಕ್ಷ ಯಕ್ಷೀ ಸಹಿತಾಯ, ಸಮವಸರಣ ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ವಿಭೂಷಿತಾಯ ನಮಃ"
+          ]
+        }
       },
       {
         "id": "a_013_b_7",

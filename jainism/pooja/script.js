@@ -147,7 +147,8 @@ function renderChat(data, container, lang = 'all') {
 
         item.blocks.forEach(block => {
             const row = document.createElement('div');
-            row.className = `block-row ${block.type}`;
+            const hasText = (block.content?.kn?.length > 0) || (block.content?.en?.length > 0);
+            row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}`;
             row.id = block.id;
 
             // ID Label (e.g. Q-1.1)

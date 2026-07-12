@@ -127,11 +127,18 @@ body {
     gap: 10px;
 }
 
-/* Standalone "images"-type items: the photo IS the content, so it gets the
-   large, prominent treatment. */
-.card.images .image-card,
-.card.images .image-card img {
+/* Content-less image blocks (no text to sit beside) get the large,
+   prominent treatment — whether it's a standalone "images"-type item or
+   just a photo-only block inside an otherwise text-heavy answer. */
+.block-row.media-only .col-media {
+    flex: 1 1 100%;
+    width: 100%;
+}
+
+.block-row.media-only .image-card,
+.block-row.media-only .image-card img {
     width: 640px;
+    max-width: 100%;
     height: auto;
     border-radius: 8px;
     display: block;
@@ -139,15 +146,14 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Photos attached to a text block (e.g. an image inside a mantra/answer's
-   `images` array) sit inside the slim .col-media column next to the text —
-   they must stay contained to that column's width, or (since .col-media
-   uses overflow: visible for the QR-over-video PIP effect) a wide image
-   just spills out past its box and drags the row's background along with
-   it. Match the video-thumbnail's existing size instead of the 640px
-   "standalone photo" treatment. */
-.card:not(.images) .image-card,
-.card:not(.images) .image-card img {
+/* Photos attached to a block that also has text sit inside the slim
+   .col-media column next to the text — they must stay contained to that
+   column's width, or (since .col-media uses overflow: visible for the
+   QR-over-video PIP effect) a wide image just spills out past its box and
+   drags the row's background along with it. Match the video-thumbnail's
+   existing size instead of the large "content-less" treatment. */
+.block-row:not(.media-only) .image-card,
+.block-row:not(.media-only) .image-card img {
     width: 100%;
     max-width: 200px;
     height: auto;
@@ -166,8 +172,8 @@ body {
 
 @media (max-width: 700px) {
 
-    .card.images .image-card,
-    .card.images .image-card img {
+    .block-row.media-only .image-card,
+    .block-row.media-only .image-card img {
         width: 100%;
         max-width: 640px;
     }
@@ -620,24 +626,24 @@ input:checked+.slider::before {
         width: 170px !important;
     }
 
-    /* Standalone image items have no text columns competing for space
-       (see script.js: empty content arrays no longer create col-kn/col-en),
-       so let the photo use the full card width instead of the 170px slot
-       sized for video thumbnails/QR codes. */
-    .card.images .block-row .col-media {
+    /* Content-less blocks (no text competing for space) let the photo use
+       the full card width instead of the 170px slot sized for video
+       thumbnails/QR codes — whether it's a standalone image item or a
+       photo-only block inside a text-heavy answer. */
+    .block-row.media-only .col-media {
         flex: 1 1 100% !important;
         width: 100% !important;
     }
 
-    .card.images .image-card,
-    .card.images .image-card img {
+    .block-row.media-only .image-card,
+    .block-row.media-only .image-card img {
         width: 100% !important;
         max-width: 100% !important;
         height: auto !important;
     }
 
-    .card:not(.images) .image-card,
-    .card:not(.images) .image-card img {
+    .block-row:not(.media-only) .image-card,
+    .block-row:not(.media-only) .image-card img {
         max-width: 170px !important;
     }
 }
