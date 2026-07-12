@@ -3,24 +3,18 @@ const { test, expect } = require('@playwright/test');
 test.describe('Display Options - Visual Validation (Screenshots)', () => {
 
     test.beforeEach(async ({ page }) => {
-        // Always use the small, stable fixture here — this test asserts pixel-exact
-        // layout via toHaveScreenshot(), so it needs deterministic content in every
-        // environment (local AND CI). Mixing in the real, evolving data.json would
-        // make this test fail every time content is added, regardless of whether the
-        // layout actually broke. For a live preview of the real site, see
-        // site-preview.spec.js instead.
         await page.route('**/data.json', route => {
             route.fulfill({ path: 'test.data.json' });
         });
 
         await page.goto('/');
-        // Wait for the mock items to render onto the page
         await expect(page.locator('.card').first()).toBeVisible();
+
+        await page.locator('#settings-btn').click();
+        await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
     test('Screenshot: Default state (Videos ON, QR OFF)', async ({ page }) => {
-        await page.goto('/');
-
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
         const chatContainer = page.locator('#chat-container');
@@ -50,8 +44,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     });
 
     test('Screenshot: QR-only state (Videos OFF, QR ON)', async ({ page }) => {
-        await page.goto('/');
-
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
         const chatContainer = page.locator('#chat-container');
@@ -86,20 +78,20 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     });
 
     test('Screenshot: Both state (Videos ON, QR ON)', async ({ page }) => {
-        await page.goto('/');
-
+        const settingsBtn = page.locator('#settings-btn');
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
         const chatContainer = page.locator('#chat-container');
 
-        // Wait for content to load
         await page.waitForSelector('#chat-container .card .video-card');
 
-        // Set both ON state
+        // Open the Settings menu — the toggles are hidden inside it until this is clicked
+        await settingsBtn.click();
+        await expect(qrsCheckbox).toBeVisible();
+
         await videosCheckbox.check();
         await qrsCheckbox.check();
 
-        // Wait for visibility changes
         await page.waitForTimeout(500);
 
         // Validate both are visible
@@ -134,8 +126,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     });
 
     test('Screenshot: None state (Videos OFF, QR OFF)', async ({ page }) => {
-        await page.goto('/');
-
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
         const chatContainer = page.locator('#chat-container');
@@ -169,8 +159,6 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     });
 
     test('Screenshot: Videos-only state (Videos ON, QR OFF) - verify default persists', async ({ page }) => {
-        await page.goto('/');
-
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
         const chatContainer = page.locator('#chat-container');
