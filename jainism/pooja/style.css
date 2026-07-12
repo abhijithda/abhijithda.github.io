@@ -249,6 +249,15 @@ body.show-qrs .col-media:not(:empty) {
     display: flex !important;
 }
 
+/* Photos are independent content, not part of the Videos/QR toggle system —
+   a temple photo or mantra image should stay visible even if both toggles
+   are off. The .video-card/.qr-code elements inside still respect their own
+   toggle visibility individually, so a video sitting alongside a photo in
+   the same block-row stays correctly hidden until its own toggle is on. */
+.col-media.has-images {
+    display: flex !important;
+}
+
 .media-wrap {
     position: relative;
     display: inline-block;
@@ -601,9 +610,14 @@ input:checked+.slider::before {
     }
 
     /* Photos aren't part of the Videos/QR toggle system — always show them
-       in print regardless of those toggle states. */
-    .block-row.images .col-media {
+       in print regardless of those toggle states, whether they're a
+       standalone photo item or a photo attached to a text block alongside
+       a video (e.g. a video explaining something + a photo of a related
+       temple inscription). */
+    .col-media.has-images {
         display: flex !important;
+        flex: 0 0 170px !important;
+        width: 170px !important;
     }
 
     /* Standalone image items have no text columns competing for space

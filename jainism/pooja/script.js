@@ -178,6 +178,7 @@ function renderChat(data, container, lang = 'all') {
 
             // Process Images
             if (block.images && block.images.length > 0) {
+                mediaCol.classList.add('has-images');
                 block.images.forEach(img => {
                     const capKn = (img.caption && img.caption.kn) ? img.caption.kn : "";
                     const capEn = (img.caption && img.caption.en) ? img.caption.en : "";
