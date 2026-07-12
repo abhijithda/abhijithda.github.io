@@ -397,6 +397,30 @@
     ]
   },
   {
+    "id": "i_005",
+    "type": "images",
+    "timestamp": "2026-07-11T15:32:00Z",
+    "blocks": [
+      {
+        "id": "i_005_b_1",
+        "type": "images",
+        "tags": [
+          "personal"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Vardhamanaiah-Kowsalyamma.jpg",
+            "caption": {
+              "kn": "ತಾತ ಅಜ್ಜಿ",
+              "en": "Tatha Ajji"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "q_005",
     "type": "question",
     "timestamp": "2026-06-15T10:20:00Z",

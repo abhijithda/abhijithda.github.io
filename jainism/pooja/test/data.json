@@ -1,0 +1,229 @@
+[
+  {
+    "id": "i_001",
+    "type": "images",
+    "timestamp": "2026-07-11T10:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "i_001_b_1",
+        "type": "images",
+        "content": {
+          "kn": [],
+          "en": []
+        },
+        "tags": [
+          "personal"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Bahubali Swami Charanagalu.jpeg",
+            "caption": {
+              "en": "Bahubali Swami",
+              "kn": "ಬಾಹುಬಲಿ ಸ್ವಾಮಿ"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "q_001",
+    "type": "question",
+    "timestamp": "2026-06-15T10:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_001_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಎಲ್ಲಾ ದೇವರು ಒಂದೇ (ದೇವತೆಗಳು =?= ಜಿನೇಂದ್ರ ದೇವ) ?"
+          ],
+          "en": [
+            "All are equal (Devatas =?= Jinendra deva)?"
+          ]
+        },
+        "tags": [
+          "DevaMoodhata"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_001",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:01:00Z",
+    "references": [
+      "q_001"
+    ],
+    "blocks": [
+      {
+        "id": "a_001_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಾರು ಜಿನ ಶಾಸನ ದೆವತೆಗಳನ್ನು ತೀರ್ಥಂಕರ ಭಗವಂತರ ಸಮಾನರೆಂದು ಪೂಜಿಸುತ್ತಾರೋ ಅವರು ಅಧೋ / ನರಕ ಗಾಮಿಗಳಾಗುತ್ತಾರೆ"
+          ],
+          "en": [
+            "Result of doing pooja of jina shaasana deva devi pooja thinking as bhagawan - Adho gaami / Narak gaami:"
+          ]
+        },
+        "tags": [
+          "DevaMoodhata"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=bgldj0TMZB4",
+            "youtubeId": "bgldj0TMZB4"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_002",
+    "type": "question",
+    "timestamp": "2026-06-15T10:05:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_002_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಮ್ಯಕ್ತ್ವ ಮಲಿನ"
+          ],
+          "en": [
+            "Samyaktva Malinatha"
+          ]
+        },
+        "tags": [
+          "Samyaktva"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_002",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:06:00Z",
+    "references": [
+      "q_002"
+    ],
+    "blocks": [
+      {
+        "id": "a_002_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಭಗವಂತರ ಸ್ವರೂಪ ತಿಳಿದು, ಹಾಗು ದೇವತೆಗಳನ್ನು ವೀತರಾಗ ಭಗವಂತರಲ್ಲ ಎಂದು ಅರಿತು, ದೇವೇತಗಳನ್ನು ಪೂಜೆ ಮಾಡಿದರೆ, ಸಮ್ಯಕ್ತ್ವ ನಷ್ಟವಾಗುದಿಲ್ಲ / ಮಿಥ್ಯಾತ್ವ ಎಂದು ಪರಿಗಣಿಸುವುದಿಲ್ಲ."
+          ],
+          "en": []
+        },
+        "tags": [
+          "Samyaktva"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_002_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ವರದ ಲೋಭದಿಂದ ಮಾಡಿದರೆ ಮಲಿನವಾಗುತ್ತದೆ... ಏಕೆಂದರೆ, ಇವರ ಕಾರ್ಯ ಧರ್ಮದ ರಕ್ಷಣೆ... ಇವರನ್ನು ತಮ್ಮ ಸ್ವಂತ ಕಾರ್ಯಕ್ಕೆ / ಲೋಭ ಪೂರ್ಣಗೊಳಿಸಲು ಪೂಜೆ ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ಕ ಮಲಿನವಾಗುತ್ತದೆ."
+          ],
+          "en": [
+            "Doing pooja of Jina Shaasana devata with the greed to get boon is Samyak Malinatha, because they're there for protecting shaasana/dharma, and one tries to use them for their own greed."
+          ]
+        },
+        "tags": [
+          "Samyaktva",
+          "ShasanaDevata"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_002_b_3",
+        "type": "note",
+        "content": {
+          "kn": [
+            "ವಿದ್ಯಾ ದೇವತೆಗಳ ಪೂಜೆ ವಿದ್ಯಾ ಸಿದ್ದಿ / ವರ ಪ್ರಾಪ್ತಿ ಮಾಡುಕೊಳ್ಳಲು ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ತ್ವ ಮಲಿನವಾಗುವುದು ಇಲ್ಲ ನಷ್ಟವಾಗುವುದು ಇಲ್ಲ. ಅನೇಕ ಮೋಕ್ಷ ಗಾಮಿಗಳು ವಿದ್ಯಾ ದೇವತಗಳ ಆರಾಧನೆ ವಿದ್ಯಾ ಸಿದ್ದಿಗೋಸ್ಕರ ಮಾಡಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Vidyaa devata pooja neither causes dosha in samyaktva, nor causes samyaktva to be lost. Many moksha gaami's have done aradhana of vidyaa devatas."
+          ]
+        },
+        "tags": [
+          "Samyaktva",
+          "VidyaDevata"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=u5wU3JpUrEc",
+            "youtubeId": "u5wU3JpUrEc"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_003",
+    "type": "answer",
+    "timestamp": "2026-06-16T09:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "a_003_b_1",
+        "type": "mantra",
+        "content": {
+          "kn": [
+            "ಓಂ ಹ್ರೀಂ ಶ್ರೀಂ ಕ್ಲೀಂ ಐಂ ಅರ್ಹಂ ಶ್ರೀ ವೃಷಭ ತೀರ್ಥಕರ ಪರಮ ಜಿನ ದೇವಾಯ ಗೋವದನ ಅಪ್ರತಿಚಕ್ರೇ ಯಕ್ಷ ಯಕ್ಷೀ ಸಹಿತಾಯ, ಸಮವಸರಣ ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ವಿಭೂಷಿತಾಯ ನಮಃ"
+          ],
+          "en": [
+            "Om Hreem Shreem Kleem Iyam Arham Shree Vrushabha Tirthakara Parama Jina Devaya Govadana ApratiChakre Yaksha Yakshi Sahitaya, Samavasarana Asta Pratihaarya Aadi Vibhushitaya Namah."
+          ]
+        },
+        "tags": [
+          "Mantra"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Adinatha Swami Golakot.jpg",
+            "caption": {
+              "en": "Adinatha Swami",
+              "kn": "ಆದಿನಾಥ ಸ್ವಾಮಿ"
+            }
+          }
+        ]
+      },
+      {
+        "id": "a_003_b_2",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "सर्वमंगलमांगल्यं सर्वकल्याणकारणम्"
+          ],
+          "en": [
+            "That which is auspicious among all auspicious things, the cause of all well-being."
+          ]
+        },
+        "tags": [
+          "Shloka"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  }
+]

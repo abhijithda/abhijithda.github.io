@@ -11,7 +11,8 @@
         "type": "string",
         "enum": [
           "question",
-          "answer"
+          "answer",
+          "images"
         ]
       },
       "timestamp": {
@@ -39,6 +40,7 @@
               "type": "string",
               "enum": [
                 "paragraph",
+                "images",
                 "mantra",
                 "note",
                 "shloka"
@@ -98,8 +100,16 @@
                   "src": {
                     "type": "string"
                   },
-                  "cap": {
-                    "type": "string"
+                  "caption": {
+                    "type": "object",
+                    "properties": {
+                      "kn": {
+                        "type": "string"
+                      },
+                      "en": {
+                        "type": "string"
+                      }
+                    }
                   }
                 },
                 "required": [
@@ -110,9 +120,14 @@
           },
           "required": [
             "id",
-            "type",
-            "content"
-          ]
+            "type"
+          ],
+          "if": {
+            "properties": { "type": { "const": "images" } }
+          },
+          "else": {
+            "required": ["content"]
+          }
         }
       }
     },

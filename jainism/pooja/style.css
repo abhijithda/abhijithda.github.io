@@ -13,6 +13,7 @@ body {
     flex-direction: column;
 }
 
+
 /* 2. HEADER & SEARCH */
 .app-header {
     display: flex;
@@ -35,12 +36,122 @@ body {
     outline: none;
 }
 
+.view-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-trigger {
+    padding: 8px 20px;
+    cursor: pointer;
+    background: white;
+    border: 0.8px solid #ddd;
+    border-radius: 20px;
+    font-size: 13.33px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    display: flex;
+    align-items: center;
+    height: 38px;
+}
+
+.menu-content {
+    display: none;
+    /* JS toggles this to 'block' */
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    background-color: white;
+    border: 1px solid #eee;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 220px;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.menu-section {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
 #lang-select {
     border-radius: 20px;
     padding: 5px 15px;
     border: 1px solid #ccc;
     background-color: white;
     cursor: pointer;
+}
+
+/* Settings Menu */
+.view-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-trigger {
+    padding: 8px 20px;
+    cursor: pointer;
+    background: white;
+    border: 0.8px solid #ddd;
+    border-radius: 20px;
+    font-size: 13.33px;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    height: 38px;
+}
+
+.menu-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    background-color: white;
+    border: 1px solid #eee;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 220px;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.menu-section {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* VGA Photos */
+.image-card,
+.image-card img {
+    width: 640px;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-caption {
+    font-weight: bold;
+    margin-top: 8px;
+    font-family: Arial, sans-serif;
+    color: #444;
+}
+
+@media (max-width: 700px) {
+
+    .image-card,
+    .image-card img {
+        width: 100%;
+        max-width: 640px;
+    }
 }
 
 /* 3. CARD DESIGN & BLOCK ROWS */
@@ -239,6 +350,11 @@ input:checked+.slider::before {
 .card.answer {
     background-color: #f1f8e9;
     border-left: 4px solid #4caf50;
+}
+
+.card.images {
+    background-color: #fafafa;
+    border-left: 4px solid #607d8b;
 }
 
 .block-row.mantra {
@@ -463,5 +579,27 @@ input:checked+.slider::before {
         display: flex !important;
         flex: 0 0 170px !important;
         width: 170px !important;
+    }
+
+    /* Photos aren't part of the Videos/QR toggle system — always show them
+       in print regardless of those toggle states. */
+    .block-row.images .col-media {
+        display: flex !important;
+    }
+
+    /* Standalone image items have no text columns competing for space
+       (see script.js: empty content arrays no longer create col-kn/col-en),
+       so let the photo use the full card width instead of the 170px slot
+       sized for video thumbnails/QR codes. */
+    .card.images .block-row .col-media {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+
+    .card.images .image-card,
+    .card.images .image-card img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
     }
 }
