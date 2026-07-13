@@ -136,14 +136,177 @@ function formatIdForDisplay(block) {
     return `${typeInitial}-${number}.${subNumber}`; // e.g., "Q-22.1"
 }
 
+// --- Reference resolution & jump-to-source ---
+// A reference id may point at a whole item ("q_002") or a specific block
+// within an item ("q_002_b_1"). Resolves either form to the actual block
+// object to excerpt from.
+function resolveReference(refId, blockById, itemById) {
+    if (blockById[refId]) {
+        return blockById[refId];
+    }
+    const item = itemById[refId];
+    if (item && item.blocks && item.blocks.length > 0) {
+        return item.blocks[0];
+    }
+    return null; // Dangling reference — skip gracefully rather than throw.
+}
+
+// Stack (not a single slot) so that jumping to a reference, then jumping to
+// a reference from *within* that reference, and hitting "Back" twice
+// returns you through both hops in order — a single saved position would
+// lose the first hop.
+let backStack = [];
+
+function jumpToReference(blockId) {
+    const target = document.getElementById(blockId);
+    if (!target) return;
+
+    backStack.push(window.scrollY);
+    const backBtn = document.getElementById('back-to-message');
+    if (backBtn) backBtn.style.display = 'block';
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('jump-highlight');
+    setTimeout(() => target.classList.remove('jump-highlight'), 1500);
+}
+
+function goBackToMessage() {
+    const prevY = backStack.pop();
+    if (prevY !== undefined) {
+        window.scrollTo({ top: prevY, behavior: 'smooth' });
+    }
+    const backBtn = document.getElementById('back-to-message');
+    if (backBtn && backStack.length === 0) {
+        backBtn.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const backBtn = document.getElementById('back-to-message');
+    if (backBtn) backBtn.onclick = goBackToMessage;
+});
+
+// --- Read tracking (local-only, no auth: a Set of item IDs in localStorage) ---
+const READ_ITEMS_KEY = 'readItems';
+
+function getReadItems() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(READ_ITEMS_KEY)) || []);
+    } catch (e) {
+        return new Set();
+    }
+}
+
+function saveReadItems(readSet) {
+    localStorage.setItem(READ_ITEMS_KEY, JSON.stringify([...readSet]));
+}
+
+function toggleRead(itemId, totalCount) {
+    const readSet = getReadItems();
+    if (readSet.has(itemId)) {
+        readSet.delete(itemId);
+    } else {
+        readSet.add(itemId);
+    }
+    saveReadItems(readSet);
+
+    const card = document.getElementById(itemId);
+    if (card) card.classList.toggle('read', readSet.has(itemId));
+
+    updateReadProgress(totalCount);
+}
+
+function updateReadProgress(totalCount) {
+    const el = document.getElementById('read-progress');
+    if (!el) return;
+    const readCount = getReadItems().size;
+    el.textContent = `✓ ${readCount}/${totalCount} read`;
+}
+
 function renderChat(data, container, lang = 'all') {
     if (!container) return;
     container.innerHTML = "";
 
+    // Lookup maps so a reference id ("q_002" or "q_002_b_1") can be
+    // resolved to its actual block, regardless of which granularity it
+    // points at.
+    const blockById = {};
+    const itemById = {};
+    data.forEach(item => {
+        itemById[item.id] = item;
+        item.blocks.forEach(block => {
+            blockById[block.id] = block;
+        });
+    });
+
+    const readItems = getReadItems();
+
     data.forEach(item => {
         const card = document.createElement('div');
-        card.className = `card ${item.type}`;
+        card.className = `card ${item.type}${readItems.has(item.id) ? ' read' : ''}`;
         card.id = item.id;
+
+        const readToggle = document.createElement('button');
+        readToggle.className = 'read-toggle';
+        readToggle.type = 'button';
+        readToggle.title = 'Mark as read';
+        readToggle.textContent = readItems.has(item.id) ? '✓ Read' : 'Mark read';
+        readToggle.onclick = (e) => {
+            e.stopPropagation();
+            toggleRead(item.id, data.length);
+            readToggle.textContent = card.classList.contains('read') ? '✓ Read' : 'Mark read';
+        };
+        card.appendChild(readToggle);
+
+        // Reply-excerpt: a WhatsApp-style preview of whatever this item is
+        // following up on. Must be appended before the item's own blocks —
+        // its CSS uses a negative top margin to sit flush against the
+        // card's top edge, covering the card's own top padding.
+        if (item.references && item.references.length > 0) {
+            const excerptContainer = document.createElement('div');
+            excerptContainer.className = 'reply-excerpt multi-block';
+
+            item.references.forEach(refId => {
+                const refBlock = resolveReference(refId, blockById, itemById);
+                if (!refBlock) return; // Dangling reference — skip gracefully.
+
+                const excerptRow = document.createElement('div');
+                excerptRow.className = 'excerpt-row block-row';
+
+                const idLabel = document.createElement('span');
+                idLabel.className = 'block-id';
+                idLabel.innerText = formatIdForDisplay(refBlock);
+                idLabel.onclick = (e) => {
+                    e.stopPropagation();
+                    jumpToReference(refBlock.id);
+                };
+                excerptRow.appendChild(idLabel);
+
+                const contentWrap = document.createElement('div');
+                contentWrap.className = 'excerpt-content-wrap';
+                contentWrap.onclick = () => excerptRow.classList.toggle('expanded');
+
+                if (refBlock.content?.kn?.length > 0) {
+                    const knCol = document.createElement('div');
+                    knCol.className = 'col-kn';
+                    knCol.innerHTML = `<p>${refBlock.content.kn.join(' ')}</p>`;
+                    contentWrap.appendChild(knCol);
+                }
+                if (refBlock.content?.en?.length > 0) {
+                    const enCol = document.createElement('div');
+                    enCol.className = 'col-en';
+                    enCol.innerHTML = `<p>${refBlock.content.en.join(' ')}</p>`;
+                    contentWrap.appendChild(enCol);
+                }
+
+                excerptRow.appendChild(contentWrap);
+                excerptContainer.appendChild(excerptRow);
+            });
+
+            if (excerptContainer.children.length > 0) {
+                card.appendChild(excerptContainer);
+            }
+        }
 
         item.blocks.forEach(block => {
             const row = document.createElement('div');
@@ -209,6 +372,8 @@ function renderChat(data, container, lang = 'all') {
         });
         container.appendChild(card);
     });
+
+    updateReadProgress(data.length);
 }
 
 function togglePrintMode() {
@@ -242,5 +407,11 @@ if (typeof module !== 'undefined' && module.exports) {
         createVideoCard,
         renderChat,
         updateMediaVisibility,
+        resolveReference,
+        jumpToReference,
+        goBackToMessage,
+        toggleRead,
+        getReadItems,
+        updateReadProgress,
     };
 }

@@ -1,4 +1,9 @@
-const { updateMediaVisibility, renderChat } = require('./script');
+const { updateMediaVisibility, renderChat, resolveReference, jumpToReference, goBackToMessage, toggleRead, getReadItems, updateReadProgress } = require('./script');
+
+// jsdom doesn't implement scrollIntoView — stub it so jumpToReference's
+// call doesn't log noisy "not implemented" warnings during tests.
+Element.prototype.scrollIntoView = jest.fn();
+window.scrollTo = jest.fn();
 
 describe('Display Options', () => {
     let toggleVideos, toggleQrs;
@@ -205,5 +210,277 @@ describe('renderChat', () => {
         const mediaCol = row.querySelector('.col-media');
         expect(mediaCol.classList.contains('has-images')).toBe(true);
         expect(row.classList.contains('media-only')).toBe(false); // has text, so not media-only
+    });
+});
+
+describe('resolveReference', () => {
+    const blockById = {
+        'q_001_b_1': { id: 'q_001_b_1', type: 'paragraph', content: { kn: ['ಪ್ರಶ್ನೆ'], en: ['Question'] } },
+    };
+    const itemById = {
+        'q_001': {
+            id: 'q_001',
+            blocks: [blockById['q_001_b_1']],
+        },
+    };
+
+    test('resolves a block-level reference id directly', () => {
+        const result = resolveReference('q_001_b_1', blockById, itemById);
+        expect(result).toBe(blockById['q_001_b_1']);
+    });
+
+    test('resolves an item-level reference id to that item\'s first block', () => {
+        const result = resolveReference('q_001', blockById, itemById);
+        expect(result).toBe(blockById['q_001_b_1']);
+    });
+
+    test('returns null for a dangling reference instead of throwing', () => {
+        const result = resolveReference('does_not_exist', blockById, itemById);
+        expect(result).toBeNull();
+    });
+});
+
+describe('renderChat: reply-excerpt', () => {
+    let container;
+
+    beforeEach(() => {
+        document.body.innerHTML = '<div id="chat-container"></div><button id="back-to-message" style="display:none;"></button>';
+        container = document.getElementById('chat-container');
+    });
+
+    const referencedItem = {
+        id: 'q_010',
+        type: 'question',
+        timestamp: '2026-07-12T00:00:00Z',
+        references: null,
+        blocks: [{
+            id: 'q_010_b_1',
+            type: 'paragraph',
+            content: { kn: ['ಪ್ರಶ್ನೆ ಪಠ್ಯ'], en: ['Question text'] },
+            tags: [], videos: [], images: [],
+        }],
+    };
+
+    // Regression test for: the reply-excerpt feature (WhatsApp-style
+    // "replying to" preview) existed in an earlier version of this site,
+    // was lost across branch merges, and had to be rebuilt. This asserts
+    // it's actually wired up, not just styled in CSS with nothing to
+    // generate it.
+    test('renders a reply-excerpt when an item has references', () => {
+        const followUp = {
+            id: 'a_010',
+            type: 'answer',
+            timestamp: '2026-07-12T01:00:00Z',
+            references: ['q_010_b_1'],
+            blocks: [{
+                id: 'a_010_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಉತ್ತರ'], en: ['Answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        renderChat([referencedItem, followUp], container, 'all');
+
+        const card = document.getElementById('a_010');
+        const excerpt = card.querySelector('.reply-excerpt.multi-block');
+        expect(excerpt).not.toBeNull();
+        expect(excerpt.querySelectorAll('.excerpt-row').length).toBe(1);
+        expect(excerpt.textContent).toContain('Question text');
+    });
+
+    test('resolves an item-level reference (not just block-level) in the excerpt', () => {
+        const followUp = {
+            id: 'a_011',
+            type: 'answer',
+            timestamp: '2026-07-12T01:00:00Z',
+            references: ['q_010'], // item-level, not 'q_010_b_1'
+            blocks: [{
+                id: 'a_011_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಉತ್ತರ'], en: ['Answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        renderChat([referencedItem, followUp], container, 'all');
+
+        const excerpt = document.getElementById('a_011').querySelector('.reply-excerpt.multi-block');
+        expect(excerpt.querySelectorAll('.excerpt-row').length).toBe(1);
+        expect(excerpt.textContent).toContain('Question text');
+    });
+
+    test('shows one excerpt-row per reference when an item references multiple things', () => {
+        const secondSource = {
+            id: 'a_012',
+            type: 'answer',
+            timestamp: '2026-07-12T00:30:00Z',
+            references: null,
+            blocks: [{
+                id: 'a_012_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಎರಡನೇ ಉತ್ತರ'], en: ['Second answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+        const followUp = {
+            id: 'a_013',
+            type: 'answer',
+            timestamp: '2026-07-12T02:00:00Z',
+            references: ['q_010_b_1', 'a_012_b_1'],
+            blocks: [{
+                id: 'a_013_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಮತ್ತಷ್ಟು ವಿವರ'], en: ['More detail'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        renderChat([referencedItem, secondSource, followUp], container, 'all');
+
+        const excerpt = document.getElementById('a_013').querySelector('.reply-excerpt.multi-block');
+        expect(excerpt.querySelectorAll('.excerpt-row').length).toBe(2);
+    });
+
+    test('does not render a reply-excerpt when an item has no references', () => {
+        renderChat([referencedItem], container, 'all');
+        const card = document.getElementById('q_010');
+        expect(card.querySelector('.reply-excerpt')).toBeNull();
+    });
+
+    test('a dangling reference is skipped rather than breaking the render', () => {
+        const followUp = {
+            id: 'a_014',
+            type: 'answer',
+            timestamp: '2026-07-12T02:00:00Z',
+            references: ['does_not_exist'],
+            blocks: [{
+                id: 'a_014_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಉತ್ತರ'], en: ['Answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        expect(() => renderChat([followUp], container, 'all')).not.toThrow();
+        // No valid references resolved, so no excerpt container should be added.
+        expect(document.getElementById('a_014').querySelector('.reply-excerpt')).toBeNull();
+    });
+
+    test('clicking an excerpt\'s block-id jumps to the source and shows the Back button', () => {
+        const followUp = {
+            id: 'a_015',
+            type: 'answer',
+            timestamp: '2026-07-12T02:00:00Z',
+            references: ['q_010_b_1'],
+            blocks: [{
+                id: 'a_015_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಉತ್ತರ'], en: ['Answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        renderChat([referencedItem, followUp], container, 'all');
+
+        const backBtn = document.getElementById('back-to-message');
+        expect(backBtn.style.display).toBe('none');
+
+        const idLabel = document.getElementById('a_015').querySelector('.excerpt-row .block-id');
+        idLabel.click();
+
+        expect(backBtn.style.display).toBe('block');
+        expect(document.getElementById('q_010_b_1').classList.contains('jump-highlight')).toBe(true);
+    });
+
+    test('clicking an excerpt\'s content toggles the expanded state', () => {
+        const followUp = {
+            id: 'a_016',
+            type: 'answer',
+            timestamp: '2026-07-12T02:00:00Z',
+            references: ['q_010_b_1'],
+            blocks: [{
+                id: 'a_016_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಉತ್ತರ'], en: ['Answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        renderChat([referencedItem, followUp], container, 'all');
+
+        const excerptRow = document.getElementById('a_016').querySelector('.excerpt-row');
+        const contentWrap = excerptRow.querySelector('.excerpt-content-wrap');
+
+        expect(excerptRow.classList.contains('expanded')).toBe(false);
+        contentWrap.click();
+        expect(excerptRow.classList.contains('expanded')).toBe(true);
+        contentWrap.click();
+        expect(excerptRow.classList.contains('expanded')).toBe(false);
+    });
+});
+
+describe('Read tracking', () => {
+    let container;
+
+    beforeEach(() => {
+        localStorage.clear();
+        document.body.innerHTML = '<div id="chat-container"></div><span id="read-progress"></span>';
+        container = document.getElementById('chat-container');
+    });
+
+    const sampleItem = {
+        id: 'q_020',
+        type: 'question',
+        timestamp: '2026-07-12T00:00:00Z',
+        references: null,
+        blocks: [{
+            id: 'q_020_b_1',
+            type: 'paragraph',
+            content: { kn: ['ಪಠ್ಯ'], en: ['Text'] },
+            tags: [], videos: [], images: [],
+        }],
+    };
+
+    test('a freshly rendered card is not marked read and shows a "Mark read" button', () => {
+        renderChat([sampleItem], container, 'all');
+        const card = document.getElementById('q_020');
+        expect(card.classList.contains('read')).toBe(false);
+        expect(card.querySelector('.read-toggle').textContent).toBe('Mark read');
+    });
+
+    test('clicking the read-toggle marks the card as read and updates the progress counter', () => {
+        renderChat([sampleItem], container, 'all');
+        const card = document.getElementById('q_020');
+
+        card.querySelector('.read-toggle').click();
+
+        expect(card.classList.contains('read')).toBe(true);
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 1/1 read');
+    });
+
+    test('clicking the read-toggle again un-marks it as read', () => {
+        renderChat([sampleItem], container, 'all');
+        const card = document.getElementById('q_020');
+        const toggle = card.querySelector('.read-toggle');
+
+        toggle.click();
+        toggle.click();
+
+        expect(card.classList.contains('read')).toBe(false);
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/1 read');
+    });
+
+    test('read state persists in localStorage across a re-render', () => {
+        renderChat([sampleItem], container, 'all');
+        document.getElementById('q_020').querySelector('.read-toggle').click();
+
+        // Re-render (e.g. after a language change) — the card should come
+        // back already marked as read, not reset.
+        renderChat([sampleItem], container, 'all');
+        const card = document.getElementById('q_020');
+
+        expect(card.classList.contains('read')).toBe(true);
+        expect(card.querySelector('.read-toggle').textContent).toBe('✓ Read');
     });
 });
