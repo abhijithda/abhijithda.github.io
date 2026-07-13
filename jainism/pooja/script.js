@@ -183,7 +183,7 @@ function renderChat(data, container, lang = 'all') {
                 block.images.forEach(img => {
                     const capKn = (img.caption && img.caption.kn) ? img.caption.kn : "";
                     const capEn = (img.caption && img.caption.en) ? img.caption.en : "";
-                    
+
                     let capText = "";
                     if (lang === 'all') {
                         capText = (capKn && capEn) ? `${capKn} / ${capEn}` : (capKn || capEn);

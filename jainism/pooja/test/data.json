@@ -18,10 +18,10 @@
         "videos": [],
         "images": [
           {
-            "src": "Bahubali Swami Charanagalu.jpeg",
+            "src": "Bharata Bahubali Swami.jpeg",
             "caption": {
-              "en": "Bahubali Swami",
-              "kn": "ಬಾಹುಬಲಿ ಸ್ವಾಮಿ"
+              "en": "Bharata Chakravarthi and Bahubali Swami",
+              "kn": "ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಹುಬಲಿ ಸ್ವಾಮಿ"
             }
           }
         ]
@@ -173,6 +173,27 @@
           }
         ],
         "images": []
+      },
+      {
+        "id": "a_002_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [],
+          "en": []
+        },
+        "tags": [
+          "personal"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Vardhamanaiah-Kowsalyamma.jpg",
+            "caption": {
+              "en": "Tatha Ajji",
+              "kn": "ತಾತ ಅಜ್ಜಿ"
+            }
+          }
+        ]
       }
     ]
   },
@@ -187,10 +208,14 @@
         "type": "mantra",
         "content": {
           "kn": [
-            "ಓಂ ಹ್ರೀಂ ಶ್ರೀಂ ಕ್ಲೀಂ ಐಂ ಅರ್ಹಂ ಶ್ರೀ ವೃಷಭ ತೀರ್ಥಕರ ಪರಮ ಜಿನ ದೇವಾಯ ಗೋವದನ ಅಪ್ರತಿಚಕ್ರೇ ಯಕ್ಷ ಯಕ್ಷೀ ಸಹಿತಾಯ, ಸಮವಸರಣ ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ವಿಭೂಷಿತಾಯ ನಮಃ"
+            "ಭಕ್ತಾಮರ ಸ್ತೋತ್ರದ ೪೩ನೇ ಶ್ಲೋಕದ ಮಂತ್ರ:",
+            "",
+            "ಓಂ ನಮೋ ಚಕ್ರೇಶ್ವರಿ ದೇವಿ, ಚಕ್ರ ಧಾರಿಣಿ, ಜಿನಶಾಸನ ಸೇವಾ ಕಾರಿಣಿ, ಜಿನಶಾಸನ ಕುದ್ರೋಪದ್ರವ ವಿನಾಶಿನಿ, ಧರ್ಮ ಶಾಂತಿ ಕಾರಿಣಿ ನಮಃ ಕುರು ಕುರು ಸ್ವಾಹಾ."
           ],
           "en": [
-            "Om Hreem Shreem Kleem Iyam Arham Shree Vrushabha Tirthakara Parama Jina Devaya Govadana ApratiChakre Yaksha Yakshi Sahitaya, Samavasarana Asta Pratihaarya Aadi Vibhushitaya Namah."
+            "Bhaktamara stotra's 43rd sloka's mantra:",
+            "",
+            "Om Namo Chakreshwari Devi, Chakra Dhaarini, Jina Shasana Sevaa Kaarini, Jina Shasana Kshudropadrava Vinaashini, Dharma Shaanti Kaarini Namah Kuru Kuru Swaahaa."
           ]
         },
         "tags": [
@@ -212,10 +237,30 @@
         "type": "shloka",
         "content": {
           "kn": [
-            "सर्वमंगलमांगल्यं सर्वकल्याणकारणम्"
+            "೯ ಕ್ಷಾಯಿಕ ಲಬ್ಬಿಗಳು:",
+            "",
+            "೧. ಕೇವಲ ದರ್ಶನ",
+            "೨. ಕೇವಲ ಜ್ಞಾನ",
+            "೩. ಕೇವಲ ಚರಿತ್ರೆ",
+            "೪. ಕೇವಲ ದಾನ",
+            "೫. ಕೇವಲ ಲಾಭ",
+            "೬. ಕೇವಲ ವೀರ್ಯ",
+            "೭. ಕೇವಲ ಭೋಗ",
+            "೮. ಕೇವಲ ಉಪಭೋಗ",
+            "೯. ಕೇವಲ ಸಮ್ಯಕ್ತ್ವ"
           ],
           "en": [
-            "That which is auspicious among all auspicious things, the cause of all well-being."
+            "9 kshaika labdhis:",
+            "",
+            "1. Kevala Darshana",
+            "2. Kevala Jnaana",
+            "3. Kevala Charitra",
+            "4. Kevala Daana",
+            "5. Kevala Laabha",
+            "6. Kevala Veerya",
+            "7. Kevala Bhoga",
+            "8. Kevala Upabhoga",
+            "9. Kevala Samyaktva"
           ]
         },
         "tags": [
@@ -223,6 +268,44 @@
         ],
         "videos": [],
         "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_004",
+    "type": "answer",
+    "timestamp": "2026-07-12T09:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "a_004_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ದೀಕ್ಷೆ ಪಡೆದು ಕರ್ಮ ನಷ್ಟ ಮಾಡಿದ ಮೇಲೆ, ಸಮವಸರಣ, ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ತೀರ್ಥಂಕರರಿಗೆ / ಜಿನೇಂದ್ರ ಭಗವಂತರಿಗೆ ಪ್ರಾಪ್ತವಾಗಿರುವುದು . ಅವರ ಹತ್ತಿರ ಇರುವಷ್ಟು ಮಾಹಾ ವಿಭೂತಿಗಳು ಈ ಸಂಸಾರದಲ್ಲಿ ಯಾರಿಗೂ ಪ್ರಾಪ್ತವಾಗುವದಿಲ್ಲ ."
+          ],
+          "en": [
+            "Answer: After taking deeksha and destroying karmas, Samavasarana, Ashta Pratiharya, and so on becomes Tirthankara/Jinendra Bhagawan. No one in this sansara attains so much as them."
+          ]
+        },
+        "tags": [
+          "MixedMedia"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=bgldj0TMZB4",
+            "youtubeId": "bgldj0TMZB4"
+          }
+        ],
+        "images": [
+          {
+            "src": "Vardhamanaiah-Kowsalyamma.jpg",
+            "caption": {
+              "en": "Tatha Ajji",
+              "kn": "ತಾತ ಅಜ್ಜಿ"
+            }
+          }
+        ]
       }
     ]
   }
