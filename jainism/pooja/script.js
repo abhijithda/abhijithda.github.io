@@ -147,7 +147,8 @@ function renderChat(data, container, lang = 'all') {
 
         item.blocks.forEach(block => {
             const row = document.createElement('div');
-            row.className = `block-row ${block.type}`;
+            const hasText = (block.content?.kn?.length > 0) || (block.content?.en?.length > 0);
+            row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}`;
             row.id = block.id;
 
             // ID Label (e.g. Q-1.1)
@@ -178,10 +179,11 @@ function renderChat(data, container, lang = 'all') {
 
             // Process Images
             if (block.images && block.images.length > 0) {
+                mediaCol.classList.add('has-images');
                 block.images.forEach(img => {
                     const capKn = (img.caption && img.caption.kn) ? img.caption.kn : "";
                     const capEn = (img.caption && img.caption.en) ? img.caption.en : "";
-                    
+
                     let capText = "";
                     if (lang === 'all') {
                         capText = (capKn && capEn) ? `${capKn} / ${capEn}` : (capKn || capEn);

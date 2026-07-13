@@ -17,9 +17,11 @@ const COMBINATIONS = [
 test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
 
     test.beforeEach(async ({ page }) => {
-        await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
-        });
+        if (!process.env.CI) {
+            await page.route('**/data.json', route => {
+                route.fulfill({ path: 'test/data.json' });
+            });
+        }
 
         await page.goto('/');
         await expect(page.locator('.card').first()).toBeVisible();
@@ -30,6 +32,10 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
 
     for (const combo of COMBINATIONS) {
         test(`Screen view: ${combo.name}`, async ({ page }) => {
+            // CI-only: these are preview artifacts for manual review, not a
+            // regression check, and they add real time (8 page loads against
+            // the full data.json). No point running them on every local `npm test`.
+            // test.skip(!process.env.CI, 'Preview screenshots are CI-only');
 
             // force: true — these checkboxes live inside the collapsed Settings
             // menu, and we don't need to open the menu just to toggle them.
@@ -46,6 +52,7 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
         });
 
         test(`Print view: ${combo.name}`, async ({ page }) => {
+            // test.skip(!process.env.CI, 'Preview screenshots are CI-only');
 
             await page.locator('#toggle-videos').setChecked(combo.videos, { force: true });
             await page.locator('#toggle-qrs').setChecked(combo.qrs, { force: true });
