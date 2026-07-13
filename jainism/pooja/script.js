@@ -258,56 +258,78 @@ function renderChat(data, container, lang = 'all') {
         };
         card.appendChild(readToggle);
 
-        // Reply-excerpt: a WhatsApp-style preview of whatever this item is
-        // following up on. Must be appended before the item's own blocks —
-        // its CSS uses a negative top margin to sit flush against the
-        // card's top edge, covering the card's own top padding.
+        // --- Excerpt Logic ---
         if (item.references && item.references.length > 0) {
             const excerptContainer = document.createElement('div');
-            excerptContainer.className = 'reply-excerpt multi-block';
+            excerptContainer.className = "reply-excerpt multi-block";
 
             item.references.forEach(refId => {
-                const refBlock = resolveReference(refId, blockById, itemById);
-                if (!refBlock) return; // Dangling reference — skip gracefully.
+                const isBlockRef = refId.includes('_b_');
+                const parentId = isBlockRef ? refId.split('_b_')[0] : refId;
+                const parentMatch = data.find(i => i.id === parentId);
 
-                const excerptRow = document.createElement('div');
-                excerptRow.className = 'excerpt-row block-row';
+                if (parentMatch) {
+                    const blockData = isBlockRef
+                        ? (parentMatch.blocks || []).find(b => b.id === refId)
+                        : (parentMatch.blocks || [])[0];
 
-                const idLabel = document.createElement('span');
-                idLabel.className = 'block-id';
-                idLabel.innerText = formatIdForDisplay(refBlock);
-                idLabel.onclick = (e) => {
-                    e.stopPropagation();
-                    jumpToReference(refBlock.id);
-                };
-                excerptRow.appendChild(idLabel);
+                    const shortId = blockData ? formatIdForDisplay(blockData) : parentId;
 
-                const contentWrap = document.createElement('div');
-                contentWrap.className = 'excerpt-content-wrap';
-                contentWrap.onclick = () => excerptRow.classList.toggle('expanded');
+                    const blockRow = document.createElement('div');
+                    blockRow.className = "block-row excerpt-row";
 
-                if (refBlock.content?.kn?.length > 0) {
-                    const knCol = document.createElement('div');
-                    knCol.className = 'col-kn';
-                    knCol.innerHTML = `<p>${refBlock.content.kn.join(' ')}</p>`;
-                    contentWrap.appendChild(knCol);
+                    // Nested structure for horizontal columns
+                    const knContent = (lang === 'kn' || lang === 'all')
+                        ? `<div class="col-kn"><p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p></div>`
+                        : '';
+                    const enContent = (lang === 'en' || lang === 'all')
+                        ? `<div class="col-en"><p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p></div>`
+                        : '';
+
+                    blockRow.innerHTML = `
+                        <span class="block-id" title="Jump to source">${shortId}</span>
+                        <div class="excerpt-content-wrap">
+                            ${knContent}
+                            ${enContent}
+                        </div>
+                    `;
+
+                    // Action 1: Click ID to Jump
+                    blockRow.querySelector('.block-id').onclick = (e) => {
+                        e.stopPropagation();
+                        const target = document.getElementById(refId);
+                        if (target) {
+                            window.__lastReadPos = window.scrollY; // Bookmark current position
+                            const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
+                            window.scrollTo({
+                                top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20,
+                                behavior: 'smooth'
+                            });
+
+                            const backBtn = document.getElementById('back-to-message');
+                            if (backBtn) {
+                                backBtn.style.display = 'block';
+                                backBtn.onclick = () => {
+                                    window.scrollTo({ top: window.__lastReadPos, behavior: 'smooth' });
+                                    backBtn.style.display = 'none';
+                                };
+                            }
+                        }
+                    };
+
+                    // Action 2: Click Text to Expand
+                    blockRow.querySelector('.excerpt-content-wrap').onclick = (e) => {
+                        e.stopPropagation();
+                        blockRow.classList.toggle('expanded');
+                    };
+
+                    excerptContainer.appendChild(blockRow);
                 }
-                if (refBlock.content?.en?.length > 0) {
-                    const enCol = document.createElement('div');
-                    enCol.className = 'col-en';
-                    enCol.innerHTML = `<p>${refBlock.content.en.join(' ')}</p>`;
-                    contentWrap.appendChild(enCol);
-                }
-
-                excerptRow.appendChild(contentWrap);
-                excerptContainer.appendChild(excerptRow);
             });
-
-            if (excerptContainer.children.length > 0) {
-                card.appendChild(excerptContainer);
-            }
+            card.prepend(excerptContainer);
         }
 
+        // --- Multi-Block Row Generation ---
         item.blocks.forEach(block => {
             const row = document.createElement('div');
             const hasText = (block.content?.kn?.length > 0) || (block.content?.en?.length > 0);
