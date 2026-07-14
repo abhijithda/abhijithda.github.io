@@ -186,41 +186,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backBtn) backBtn.onclick = goBackToMessage;
 });
 
-// --- Read tracking (local-only, no auth: a Set of item IDs in localStorage) ---
-const READ_ITEMS_KEY = 'readItems';
+// --- Read tracking (local-only, no auth: a Set of BLOCK ids in localStorage) ---
+// Block-level, not item-level: a video block can run over an hour, so a
+// reader may finish one block of a multi-block answer and want to mark
+// just that much as done, without claiming the whole answer is read.
+const READ_BLOCKS_KEY = 'readBlocks';
 
-function getReadItems() {
+function getReadBlocks() {
     try {
-        return new Set(JSON.parse(localStorage.getItem(READ_ITEMS_KEY)) || []);
+        return new Set(JSON.parse(localStorage.getItem(READ_BLOCKS_KEY)) || []);
     } catch (e) {
         return new Set();
     }
 }
 
-function saveReadItems(readSet) {
-    localStorage.setItem(READ_ITEMS_KEY, JSON.stringify([...readSet]));
+function saveReadBlocks(readSet) {
+    localStorage.setItem(READ_BLOCKS_KEY, JSON.stringify([...readSet]));
 }
 
-function toggleRead(itemId, totalCount) {
-    const readSet = getReadItems();
-    if (readSet.has(itemId)) {
-        readSet.delete(itemId);
+function toggleBlockRead(blockId, totalBlockCount) {
+    const readSet = getReadBlocks();
+    if (readSet.has(blockId)) {
+        readSet.delete(blockId);
     } else {
-        readSet.add(itemId);
+        readSet.add(blockId);
     }
-    saveReadItems(readSet);
+    saveReadBlocks(readSet);
 
-    const card = document.getElementById(itemId);
-    if (card) card.classList.toggle('read', readSet.has(itemId));
+    const row = document.getElementById(blockId);
+    if (row) row.classList.toggle('read', readSet.has(blockId));
 
-    updateReadProgress(totalCount);
+    updateReadProgress(totalBlockCount);
 }
 
-function updateReadProgress(totalCount) {
+function updateReadProgress(totalBlockCount) {
     const el = document.getElementById('read-progress');
     if (!el) return;
-    const readCount = getReadItems().size;
-    el.textContent = `✓ ${readCount}/${totalCount} read`;
+    const readCount = getReadBlocks().size;
+    el.textContent = `✓ ${readCount}/${totalBlockCount} read`;
 }
 
 function renderChat(data, container, lang = 'all') {
@@ -239,24 +242,13 @@ function renderChat(data, container, lang = 'all') {
         });
     });
 
-    const readItems = getReadItems();
+    const readBlocks = getReadBlocks();
+    const totalBlockCount = data.reduce((sum, item) => sum + item.blocks.length, 0);
 
     data.forEach(item => {
         const card = document.createElement('div');
-        card.className = `card ${item.type}${readItems.has(item.id) ? ' read' : ''}`;
+        card.className = `card ${item.type}`;
         card.id = item.id;
-
-        const readToggle = document.createElement('button');
-        readToggle.className = 'read-toggle';
-        readToggle.type = 'button';
-        readToggle.title = 'Mark as read';
-        readToggle.textContent = readItems.has(item.id) ? '✓ Read' : 'Mark read';
-        readToggle.onclick = (e) => {
-            e.stopPropagation();
-            toggleRead(item.id, data.length);
-            readToggle.textContent = card.classList.contains('read') ? '✓ Read' : 'Mark read';
-        };
-        card.appendChild(readToggle);
 
         // --- Excerpt Logic ---
         if (item.references && item.references.length > 0) {
