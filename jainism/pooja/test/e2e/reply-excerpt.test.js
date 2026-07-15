@@ -28,6 +28,8 @@ test.describe('Reply Excerpt - jump to source and back', () => {
     // Regression test for a real bug: the excerpt used to ignore the
     // language selector entirely and always show both columns.
     test('the excerpt respects the selected language, same as regular blocks', async ({ page }) => {
+        await page.locator('#settings-btn').click();
+        await expect(page.locator('#toggle-videos')).toBeVisible();
         await page.selectOption('#lang-select', 'kn');
         const excerpt = page.locator('#a_001 .reply-excerpt .excerpt-row').first();
         await expect(excerpt.locator('.col-kn')).toBeVisible();
