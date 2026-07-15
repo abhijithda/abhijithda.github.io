@@ -250,82 +250,65 @@ function renderChat(data, container, lang = 'all') {
         card.className = `card ${item.type}`;
         card.id = item.id;
 
-        // --- Excerpt Logic ---
+        // Reply-excerpt: a WhatsApp-style preview of whatever this item is
+        // following up on. Must be appended before the item's own blocks —
+        // its CSS uses a negative top margin to sit flush against the
+        // card's top edge, covering the card's own top padding.
         if (item.references && item.references.length > 0) {
             const excerptContainer = document.createElement('div');
-            excerptContainer.className = "reply-excerpt multi-block";
+            excerptContainer.className = 'reply-excerpt multi-block';
 
             item.references.forEach(refId => {
-                const isBlockRef = refId.includes('_b_');
-                const parentId = isBlockRef ? refId.split('_b_')[0] : refId;
-                const parentMatch = data.find(i => i.id === parentId);
+                const refBlock = resolveReference(refId, blockById, itemById);
+                if (!refBlock) return; // Dangling reference — skip gracefully.
 
-                if (parentMatch) {
-                    const blockData = isBlockRef
-                        ? (parentMatch.blocks || []).find(b => b.id === refId)
-                        : (parentMatch.blocks || [])[0];
+                const excerptRow = document.createElement('div');
+                excerptRow.className = 'excerpt-row block-row';
 
-                    const shortId = blockData ? formatIdForDisplay(blockData) : parentId;
+                const idLabel = document.createElement('span');
+                idLabel.className = 'block-id';
+                idLabel.innerText = formatIdForDisplay(refBlock);
+                idLabel.onclick = (e) => {
+                    e.stopPropagation();
+                    jumpToReference(refBlock.id);
+                };
+                excerptRow.appendChild(idLabel);
 
-                    const blockRow = document.createElement('div');
-                    blockRow.className = "block-row excerpt-row";
+                const contentWrap = document.createElement('div');
+                contentWrap.className = 'excerpt-content-wrap';
+                contentWrap.onclick = () => excerptRow.classList.toggle('expanded');
 
-                    // Nested structure for horizontal columns
-                    const knContent = (lang === 'kn' || lang === 'all')
-                        ? `<div class="col-kn"><p>${blockData?.content?.kn ? blockData.content.kn[0] : ''}</p></div>`
-                        : '';
-                    const enContent = (lang === 'en' || lang === 'all')
-                        ? `<div class="col-en"><p>${blockData?.content?.en ? blockData.content.en[0] : ''}</p></div>`
-                        : '';
-
-                    blockRow.innerHTML = `
-                        <span class="block-id" title="Jump to source">${shortId}</span>
-                        <div class="excerpt-content-wrap">
-                            ${knContent}
-                            ${enContent}
-                        </div>
-                    `;
-
-                    // Action 1: Click ID to Jump
-                    blockRow.querySelector('.block-id').onclick = (e) => {
-                        e.stopPropagation();
-                        const target = document.getElementById(refId);
-                        if (target) {
-                            window.__lastReadPos = window.scrollY; // Bookmark current position
-                            const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
-                            window.scrollTo({
-                                top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20,
-                                behavior: 'smooth'
-                            });
-
-                            const backBtn = document.getElementById('back-to-message');
-                            if (backBtn) {
-                                backBtn.style.display = 'block';
-                                backBtn.onclick = () => {
-                                    window.scrollTo({ top: window.__lastReadPos, behavior: 'smooth' });
-                                    backBtn.style.display = 'none';
-                                };
-                            }
-                        }
-                    };
-
-                    // Action 2: Click Text to Expand
-                    blockRow.querySelector('.excerpt-content-wrap').onclick = (e) => {
-                        e.stopPropagation();
-                        blockRow.classList.toggle('expanded');
-                    };
-
-                    excerptContainer.appendChild(blockRow);
+                // Gated by lang, same as every other block's content — this
+                // was the actual bug: the excerpt used to always show both
+                // languages regardless of the selected filter.
+                if ((lang === 'kn' || lang === 'all') && refBlock.content?.kn?.some(line => line.trim() !== '')) {
+                    const knCol = document.createElement('div');
+                    knCol.className = 'col-kn';
+                    knCol.innerHTML = `<p>${refBlock.content.kn.join(' ')}</p>`;
+                    contentWrap.appendChild(knCol);
                 }
+                if ((lang === 'en' || lang === 'all') && refBlock.content?.en?.some(line => line.trim() !== '')) {
+                    const enCol = document.createElement('div');
+                    enCol.className = 'col-en';
+                    enCol.innerHTML = `<p>${refBlock.content.en.join(' ')}</p>`;
+                    contentWrap.appendChild(enCol);
+                }
+
+                excerptRow.appendChild(contentWrap);
+                excerptContainer.appendChild(excerptRow);
             });
-            card.prepend(excerptContainer);
+
+            if (excerptContainer.children.length > 0) {
+                card.appendChild(excerptContainer);
+            }
         }
 
         // --- Multi-Block Row Generation ---
         item.blocks.forEach(block => {
             const row = document.createElement('div');
-            const hasText = (block.content?.kn?.length > 0) || (block.content?.en?.length > 0);
-            row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}`;
+            const hasText = (block.content?.kn?.some(line => line.trim() !== '')) || (block.content?.en?.some(line => line.trim() !== ''));
+            const isRead = readBlocks.has(block.id);
+            row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}${isRead ? ' read' : ''}`;
             row.id = block.id;
 
             // ID Label (e.g. Q-1.1)
@@ -335,7 +318,7 @@ function renderChat(data, container, lang = 'all') {
             row.appendChild(idLabel);
 
             // Kannada Column
-            if ((lang === 'kn' || lang === 'all') && block.content?.kn?.length > 0) {
+            if ((lang === 'kn' || lang === 'all') && block.content?.kn?.some(line => line.trim() !== '')) {
                 const knCol = document.createElement('div');
                 knCol.className = "col-kn";
                 knCol.innerHTML = `<p>${block.content.kn.join('<br>')}</p>`;
@@ -343,7 +326,7 @@ function renderChat(data, container, lang = 'all') {
             }
 
             // English Column
-            if ((lang === 'en' || lang === 'all') && block.content?.en?.length > 0) {
+            if ((lang === 'en' || lang === 'all') && block.content?.en?.some(line => line.trim() !== '')) {
                 const enCol = document.createElement('div');
                 enCol.className = "col-en";
                 enCol.innerHTML = `<p>${block.content.en.join('<br>')}</p>`;
@@ -382,12 +365,40 @@ function renderChat(data, container, lang = 'all') {
             }
 
             row.appendChild(mediaCol);
+
+            // Mark-as-read slider — bottom-right of the block, its own
+            // full-width line (flex-basis 100% inside the wrapping row).
+            // Block-level, not card-level: a video block can run over an
+            // hour, so a reader may finish one block without the whole
+            // multi-block answer being "done".
+            const readToggleRow = document.createElement('div');
+            readToggleRow.className = 'read-toggle-row';
+
+            const readLabel = document.createElement('span');
+            readLabel.className = 'read-toggle-label';
+            readLabel.textContent = 'Mark as read';
+            readToggleRow.appendChild(readLabel);
+
+            const switchLabel = document.createElement('label');
+            switchLabel.className = 'switch read-switch';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = isRead;
+            checkbox.onchange = () => toggleBlockRead(block.id, totalBlockCount);
+            const sliderEl = document.createElement('span');
+            sliderEl.className = 'slider';
+            switchLabel.appendChild(checkbox);
+            switchLabel.appendChild(sliderEl);
+            readToggleRow.appendChild(switchLabel);
+
+            row.appendChild(readToggleRow);
+
             card.appendChild(row);
         });
         container.appendChild(card);
     });
 
-    updateReadProgress(data.length);
+    updateReadProgress(totalBlockCount);
 }
 
 function togglePrintMode() {
@@ -424,8 +435,8 @@ if (typeof module !== 'undefined' && module.exports) {
         resolveReference,
         jumpToReference,
         goBackToMessage,
-        toggleRead,
-        getReadItems,
+        toggleBlockRead,
+        getReadBlocks,
         updateReadProgress,
     };
 }

@@ -213,25 +213,40 @@ body {
     margin-left: 10px;
 }
 
-.read-toggle {
-    float: right;
+.read-toggle-row {
+    flex: 1 0 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.read-toggle-label {
     font-size: 0.75em;
-    padding: 3px 10px;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    background: #fff;
-    cursor: pointer;
-    color: #666;
+    color: #888;
 }
 
-.card.read {
-    opacity: 0.6;
+/* Reuses the same .switch/.slider component as the Videos/QR toggles, so
+   this reads as the same kind of control rather than a third UI style. */
+.read-switch {
+    width: 32px;
+    height: 18px;
 }
 
-.card.read .read-toggle {
-    background: #4caf50;
-    border-color: #4caf50;
-    color: #fff;
+.read-switch .slider::before {
+    height: 14px;
+    width: 14px;
+}
+
+/* A subtle right-side border, not a fade — dimming was tried and dropped:
+   it makes re-reading a block you've marked done (e.g. "I don't think I
+   understood this, let me go over it again") harder than it needs to be,
+   since the text itself should stay fully legible regardless of read
+   state. Right side specifically, since the left border is already
+   spoken for by the mantra/shloka/question/answer color-coding. */
+.block-row.read {
+    border-right: 3px solid #4caf50;
 }
 
 /* Brief highlight when landing on a block via a reply-excerpt jump */
@@ -618,10 +633,48 @@ input:checked+.slider::before {
 @media print {
 
     .app-header,
-    .reply-excerpt,
-    .read-toggle,
+    .read-toggle-row,
     #back-to-message {
         display: none !important;
+    }
+
+    /* Keep the reply-excerpt itself visible in print — without it, a
+       printed follow-up gives no indication of what it's following up on,
+       which defeats the whole point of the Ref: labels. Just strip the
+       screen-only interactive affordances (link color, cursor, expand
+       arrow), since nothing is clickable on paper. */
+    .reply-excerpt {
+        cursor: default !important;
+    }
+
+    .excerpt-row .block-id {
+        color: #333 !important;
+        cursor: default !important;
+    }
+
+    .excerpt-content-wrap {
+        cursor: default !important;
+    }
+
+    .excerpt-content-wrap::after {
+        display: none !important;
+    }
+
+    /* Force the default single-line preview even if a row happens to be
+       .expanded from on-screen interaction right before printing —
+       "expanded" is an inherently screen-only, click-to-reveal concept. */
+    .excerpt-row.expanded p {
+        display: block !important;
+        white-space: nowrap !important;
+        -webkit-line-clamp: unset !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        mask-image: none !important;
+        -webkit-mask-image: none !important;
+    }
+
+    .excerpt-row.expanded .excerpt-content-wrap::after {
+        content: none !important;
     }
 
     .reply-excerpt .reference-number {

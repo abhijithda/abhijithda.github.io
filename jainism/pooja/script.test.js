@@ -1,4 +1,4 @@
-const { updateMediaVisibility, renderChat, resolveReference, jumpToReference, goBackToMessage, toggleRead, getReadItems, updateReadProgress } = require('./script');
+const { updateMediaVisibility, renderChat, resolveReference, jumpToReference, goBackToMessage, toggleBlockRead, getReadBlocks, updateReadProgress } = require('./script');
 
 // jsdom doesn't implement scrollIntoView — stub it so jumpToReference's
 // call doesn't log noisy "not implemented" warnings during tests.
@@ -137,6 +137,34 @@ describe('renderChat', () => {
 
         const row = document.getElementById('a_998_b_1');
         expect(row.classList.contains('media-only')).toBe(false);
+    });
+
+    // Regression test for a real bug: content.kn/en holding only an empty
+    // string (e.g. [""], as opposed to a fully empty array []) was still
+    // counted as "has text" by a naive .length > 0 check, so the image
+    // silently fell back to the small beside-text treatment instead of the
+    // large one — in both the on-screen layout and print.
+    test('treats an array containing only an empty/whitespace string as having no text (media-only)', () => {
+        const data = [{
+            id: 'i_999',
+            type: 'images',
+            timestamp: '2026-07-12T00:00:00Z',
+            references: null,
+            blocks: [baseBlock({
+                id: 'i_999_b_1',
+                type: 'images',
+                content: { kn: [''], en: ['   '] }, // empty / whitespace-only, not actually empty arrays
+                images: [{ src: 'test.jpg', caption: { en: 'Test', kn: 'ಪರೀಕ್ಷೆ' } }],
+            })],
+        }];
+
+        renderChat(data, container, 'all');
+
+        const row = document.getElementById('i_999_b_1');
+        expect(row.classList.contains('media-only')).toBe(true);
+        // Also shouldn't create blank kn/en columns alongside the image.
+        expect(row.querySelector('.col-kn')).toBeNull();
+        expect(row.querySelector('.col-en')).toBeNull();
     });
 
     // Regression test for: images used to disappear entirely whenever both
@@ -348,6 +376,31 @@ describe('renderChat: reply-excerpt', () => {
         expect(card.querySelector('.reply-excerpt')).toBeNull();
     });
 
+    // Regression test for a real bug: the excerpt used to always render
+    // both languages regardless of the selected lang filter, unlike every
+    // other block on the page. Switching to 'kn' should hide the English
+    // column in the excerpt too, not just in the main content.
+    test('respects the selected language filter, same as regular blocks', () => {
+        const followUp = {
+            id: 'a_017',
+            type: 'answer',
+            timestamp: '2026-07-12T01:00:00Z',
+            references: ['q_010_b_1'],
+            blocks: [{
+                id: 'a_017_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಉತ್ತರ'], en: ['Answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        renderChat([referencedItem, followUp], container, 'kn');
+
+        const excerpt = document.getElementById('a_017').querySelector('.reply-excerpt');
+        expect(excerpt.querySelector('.col-kn')).not.toBeNull();
+        expect(excerpt.querySelector('.col-en')).toBeNull();
+    });
+
     test('a dangling reference is skipped rather than breaking the render', () => {
         const followUp = {
             id: 'a_014',
@@ -365,6 +418,31 @@ describe('renderChat: reply-excerpt', () => {
         expect(() => renderChat([followUp], container, 'all')).not.toThrow();
         // No valid references resolved, so no excerpt container should be added.
         expect(document.getElementById('a_014').querySelector('.reply-excerpt')).toBeNull();
+    });
+
+    // Partial-failure case: not every reference is dangling, so the valid
+    // ones should still render — a single bad id in a list shouldn't take
+    // down the whole excerpt, only that one entry.
+    test('when some references are dangling and others are valid, only the valid ones render', () => {
+        const followUp = {
+            id: 'a_018',
+            type: 'answer',
+            timestamp: '2026-07-12T02:00:00Z',
+            references: ['q_010_b_1', 'does_not_exist', 'also_missing'],
+            blocks: [{
+                id: 'a_018_b_1',
+                type: 'paragraph',
+                content: { kn: ['ಉತ್ತರ'], en: ['Answer'] },
+                tags: [], videos: [], images: [],
+            }],
+        };
+
+        renderChat([referencedItem, followUp], container, 'all');
+
+        const excerpt = document.getElementById('a_018').querySelector('.reply-excerpt');
+        expect(excerpt).not.toBeNull();
+        expect(excerpt.querySelectorAll('.excerpt-row').length).toBe(1);
+        expect(excerpt.textContent).toContain('Question text');
     });
 
     test('clicking an excerpt\'s block-id jumps to the source and shows the Back button', () => {
@@ -442,45 +520,130 @@ describe('Read tracking', () => {
         }],
     };
 
-    test('a freshly rendered card is not marked read and shows a "Mark read" button', () => {
+    test('a freshly rendered block is not marked read and has an unchecked slider', () => {
         renderChat([sampleItem], container, 'all');
-        const card = document.getElementById('q_020');
-        expect(card.classList.contains('read')).toBe(false);
-        expect(card.querySelector('.read-toggle').textContent).toBe('Mark read');
+        const row = document.getElementById('q_020_b_1');
+        expect(row.classList.contains('read')).toBe(false);
+        expect(row.querySelector('.read-switch input').checked).toBe(false);
     });
 
-    test('clicking the read-toggle marks the card as read and updates the progress counter', () => {
+    test('toggling the slider marks the block as read and updates the progress counter', () => {
         renderChat([sampleItem], container, 'all');
-        const card = document.getElementById('q_020');
+        const row = document.getElementById('q_020_b_1');
+        const checkbox = row.querySelector('.read-switch input');
 
-        card.querySelector('.read-toggle').click();
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event('change'));
 
-        expect(card.classList.contains('read')).toBe(true);
+        expect(row.classList.contains('read')).toBe(true);
         expect(document.getElementById('read-progress').textContent).toBe('✓ 1/1 read');
     });
 
-    test('clicking the read-toggle again un-marks it as read', () => {
+    test('toggling the slider off again un-marks the block as read', () => {
         renderChat([sampleItem], container, 'all');
-        const card = document.getElementById('q_020');
-        const toggle = card.querySelector('.read-toggle');
+        const row = document.getElementById('q_020_b_1');
+        const checkbox = row.querySelector('.read-switch input');
 
-        toggle.click();
-        toggle.click();
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event('change'));
+        checkbox.checked = false;
+        checkbox.dispatchEvent(new Event('change'));
 
-        expect(card.classList.contains('read')).toBe(false);
+        expect(row.classList.contains('read')).toBe(false);
         expect(document.getElementById('read-progress').textContent).toBe('✓ 0/1 read');
     });
 
     test('read state persists in localStorage across a re-render', () => {
         renderChat([sampleItem], container, 'all');
-        document.getElementById('q_020').querySelector('.read-toggle').click();
+        const checkbox = document.getElementById('q_020_b_1').querySelector('.read-switch input');
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event('change'));
 
-        // Re-render (e.g. after a language change) — the card should come
+        // Re-render (e.g. after a language change) — the block should come
         // back already marked as read, not reset.
         renderChat([sampleItem], container, 'all');
-        const card = document.getElementById('q_020');
+        const row = document.getElementById('q_020_b_1');
 
-        expect(card.classList.contains('read')).toBe(true);
-        expect(card.querySelector('.read-toggle').textContent).toBe('✓ Read');
+        expect(row.classList.contains('read')).toBe(true);
+        expect(row.querySelector('.read-switch input').checked).toBe(true);
+    });
+
+    test('a multi-block answer only counts the specific block marked read, not the whole item', () => {
+        const multiBlockItem = {
+            id: 'a_021',
+            type: 'answer',
+            timestamp: '2026-07-12T00:00:00Z',
+            references: null,
+            blocks: [
+                { id: 'a_021_b_1', type: 'paragraph', content: { kn: ['ಒಂದು'], en: ['One'] }, tags: [], videos: [], images: [] },
+                { id: 'a_021_b_2', type: 'paragraph', content: { kn: ['ಎರಡು'], en: ['Two'] }, tags: [], videos: [], images: [] },
+            ],
+        };
+        renderChat([multiBlockItem], container, 'all');
+
+        document.getElementById('a_021_b_1').querySelector('.read-switch input').checked = true;
+        document.getElementById('a_021_b_1').querySelector('.read-switch input').dispatchEvent(new Event('change'));
+
+        expect(document.getElementById('a_021_b_1').classList.contains('read')).toBe(true);
+        expect(document.getElementById('a_021_b_2').classList.contains('read')).toBe(false);
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 1/2 read');
+    });
+});
+
+describe('renderChat: reply-excerpt against the real test/data.json fixture', () => {
+    // These tests load the actual fixture file, not a hand-written mock
+    // object — so a broken reference id introduced directly into
+    // test/data.json (a typo'd id, a renamed block, etc.) gets caught here
+    // even if every synthetic-mock test above still passes.
+    const fixtureData = require('./test/data.json');
+    let container;
+
+    beforeEach(() => {
+        document.body.innerHTML = '<div id="chat-container"></div><button id="back-to-message" style="display:none;"></button>';
+        container = document.getElementById('chat-container');
+    });
+
+    test('a_001 (real fixture) shows the expected excerpt of its real reference, q_001', () => {
+        renderChat(fixtureData, container, 'all');
+
+        const excerpt = document.getElementById('a_001').querySelector('.reply-excerpt.multi-block');
+        expect(excerpt).not.toBeNull();
+        expect(excerpt.querySelectorAll('.excerpt-row').length).toBe(1);
+        // Exact real text from test/data.json — not a paraphrase — so a
+        // future edit to that content is a deliberate, visible test change,
+        // not a silent drift.
+        expect(excerpt.textContent).toContain('All are equal (Devatas =?= Jinendra deva)?');
+    });
+
+    test('a_002 (real fixture) shows the expected excerpt of its real reference, q_002', () => {
+        renderChat(fixtureData, container, 'all');
+
+        const excerpt = document.getElementById('a_002').querySelector('.reply-excerpt.multi-block');
+        expect(excerpt).not.toBeNull();
+        expect(excerpt.querySelectorAll('.excerpt-row').length).toBe(1);
+        expect(excerpt.textContent).toContain('Samyaktva Malinatha');
+    });
+
+    test('fixture items with references: null render no excerpt at all', () => {
+        renderChat(fixtureData, container, 'all');
+
+        // i_001, q_001, q_002, a_003, a_004 all have references: null in
+        // the fixture — none of them should get a reply-excerpt.
+        ['i_001', 'q_001', 'q_002', 'a_003', 'a_004'].forEach(id => {
+            expect(document.getElementById(id).querySelector('.reply-excerpt')).toBeNull();
+        });
+    });
+
+    test('every reference in the real fixture resolves to a real block (no silent dangling refs)', () => {
+        const blockIds = new Set();
+        fixtureData.forEach(item => item.blocks.forEach(b => blockIds.add(b.id)));
+        const itemIds = new Set(fixtureData.map(item => item.id));
+
+        fixtureData.forEach(item => {
+            (item.references || []).forEach(refId => {
+                const resolvable = blockIds.has(refId) || itemIds.has(refId);
+                expect(resolvable).toBe(true);
+            });
+        });
     });
 });
