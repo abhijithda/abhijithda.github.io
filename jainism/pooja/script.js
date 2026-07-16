@@ -80,6 +80,15 @@ function updateMediaVisibility() {
     });
 }
 
+// Read-tracking is opt-in and off by default — most visitors are readers,
+// not the site author, so the tick marks and progress counter only show
+// once someone deliberately turns them on in Settings.
+function updateReadTrackingVisibility() {
+    const toggle = document.getElementById('toggle-read-tracking');
+    const show = toggle ? toggle.checked : false;
+    document.body.classList.toggle('show-read-tracking', show);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const toggleVideos = document.getElementById('toggle-videos') || document.getElementById('toggleVideos');
     const toggleQrs = document.getElementById('toggle-qrs') || document.getElementById('toggleQrs');
@@ -91,8 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleQrs.addEventListener('change', updateMediaVisibility);
     }
 
+    const toggleReadTracking = document.getElementById('toggle-read-tracking');
+    if (toggleReadTracking) {
+        toggleReadTracking.addEventListener('change', updateReadTrackingVisibility);
+    }
 
     updateMediaVisibility();
+    updateReadTrackingVisibility();
 
     fetch('data.json')
         .then(response => response.json())
@@ -366,32 +380,29 @@ function renderChat(data, container, lang = 'all') {
 
             row.appendChild(mediaCol);
 
-            // Mark-as-read slider — bottom-right of the block, its own
-            // full-width line (flex-basis 100% inside the wrapping row).
-            // Block-level, not card-level: a video block can run over an
-            // hour, so a reader may finish one block without the whole
-            // multi-block answer being "done".
-            const readToggleRow = document.createElement('div');
-            readToggleRow.className = 'read-toggle-row';
-
-            const readLabel = document.createElement('span');
-            readLabel.className = 'read-toggle-label';
-            readLabel.textContent = 'Mark as read';
-            readToggleRow.appendChild(readLabel);
-
-            const switchLabel = document.createElement('label');
-            switchLabel.className = 'switch read-switch';
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = isRead;
-            checkbox.onchange = () => toggleBlockRead(block.id, totalBlockCount);
-            const sliderEl = document.createElement('span');
-            sliderEl.className = 'slider';
-            switchLabel.appendChild(checkbox);
-            switchLabel.appendChild(sliderEl);
-            readToggleRow.appendChild(switchLabel);
-
-            row.appendChild(readToggleRow);
+            // Mark-as-read tick — a small circular button in the block's own
+            // bottom-right corner (position:relative on .block-row), not a
+            // full extra row. Block-level, not card-level: a video block can
+            // run over an hour, so a reader may finish one block without the
+            // whole multi-block answer being "done". Hidden by default —
+            // visible only once "Read tracking" is turned on in Settings
+            // (see updateReadTrackingVisibility / body.show-read-tracking).
+            const readTick = document.createElement('button');
+            readTick.type = 'button';
+            readTick.className = `read-tick${isRead ? ' read' : ''}`;
+            readTick.title = isRead ? 'Marked as read' : 'Mark as read';
+            readTick.setAttribute('aria-label', readTick.title);
+            readTick.textContent = isRead ? '✓' : '';
+            readTick.onclick = (e) => {
+                e.stopPropagation();
+                toggleBlockRead(block.id, totalBlockCount);
+                const nowRead = row.classList.contains('read');
+                readTick.classList.toggle('read', nowRead);
+                readTick.textContent = nowRead ? '✓' : '';
+                readTick.title = nowRead ? 'Marked as read' : 'Mark as read';
+                readTick.setAttribute('aria-label', readTick.title);
+            };
+            row.appendChild(readTick);
 
             card.appendChild(row);
         });
@@ -438,5 +449,6 @@ if (typeof module !== 'undefined' && module.exports) {
         toggleBlockRead,
         getReadBlocks,
         updateReadProgress,
+        updateReadTrackingVisibility,
     };
 }

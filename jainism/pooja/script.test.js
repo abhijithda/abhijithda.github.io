@@ -1,4 +1,4 @@
-const { updateMediaVisibility, renderChat, resolveReference, jumpToReference, goBackToMessage, toggleBlockRead, getReadBlocks, updateReadProgress } = require('./script');
+const { updateMediaVisibility, renderChat, resolveReference, jumpToReference, goBackToMessage, toggleBlockRead, getReadBlocks, updateReadProgress, updateReadTrackingVisibility } = require('./script');
 
 // jsdom doesn't implement scrollIntoView — stub it so jumpToReference's
 // call doesn't log noisy "not implemented" warnings during tests.
@@ -39,6 +39,37 @@ describe('Display Options', () => {
         toggleQrs.checked = false;
         updateMediaVisibility();
         expect(document.body.classList.contains('show-qrs')).toBe(false);
+    });
+});
+
+describe('updateReadTrackingVisibility', () => {
+    let toggleReadTracking;
+
+    beforeEach(() => {
+        document.body.className = '';
+        document.body.innerHTML = '<input type="checkbox" id="toggle-read-tracking">';
+        toggleReadTracking = document.getElementById('toggle-read-tracking');
+    });
+
+    // Read-tracking is opt-in and off by default — this is the mechanism
+    // that keeps the tick marks and progress counter invisible until
+    // someone deliberately turns the Settings toggle on.
+    test('toggles show-read-tracking class on body based on checkbox state', () => {
+        expect(document.body.classList.contains('show-read-tracking')).toBe(false);
+
+        toggleReadTracking.checked = true;
+        updateReadTrackingVisibility();
+        expect(document.body.classList.contains('show-read-tracking')).toBe(true);
+
+        toggleReadTracking.checked = false;
+        updateReadTrackingVisibility();
+        expect(document.body.classList.contains('show-read-tracking')).toBe(false);
+    });
+
+    test('defaults to off when the toggle element is missing', () => {
+        document.body.innerHTML = '';
+        expect(() => updateReadTrackingVisibility()).not.toThrow();
+        expect(document.body.classList.contains('show-read-tracking')).toBe(false);
     });
 });
 
@@ -520,34 +551,30 @@ describe('Read tracking', () => {
         }],
     };
 
-    test('a freshly rendered block is not marked read and has an unchecked slider', () => {
+    test('a freshly rendered block is not marked read and has an unchecked tick', () => {
         renderChat([sampleItem], container, 'all');
         const row = document.getElementById('q_020_b_1');
         expect(row.classList.contains('read')).toBe(false);
-        expect(row.querySelector('.read-switch input').checked).toBe(false);
+        expect(row.querySelector('.read-tick').classList.contains('read')).toBe(false);
     });
 
-    test('toggling the slider marks the block as read and updates the progress counter', () => {
+    test('clicking the tick marks the block as read and updates the progress counter', () => {
         renderChat([sampleItem], container, 'all');
         const row = document.getElementById('q_020_b_1');
-        const checkbox = row.querySelector('.read-switch input');
 
-        checkbox.checked = true;
-        checkbox.dispatchEvent(new Event('change'));
+        row.querySelector('.read-tick').click();
 
         expect(row.classList.contains('read')).toBe(true);
         expect(document.getElementById('read-progress').textContent).toBe('✓ 1/1 read');
     });
 
-    test('toggling the slider off again un-marks the block as read', () => {
+    test('clicking the tick again un-marks the block as read', () => {
         renderChat([sampleItem], container, 'all');
         const row = document.getElementById('q_020_b_1');
-        const checkbox = row.querySelector('.read-switch input');
+        const tick = row.querySelector('.read-tick');
 
-        checkbox.checked = true;
-        checkbox.dispatchEvent(new Event('change'));
-        checkbox.checked = false;
-        checkbox.dispatchEvent(new Event('change'));
+        tick.click();
+        tick.click();
 
         expect(row.classList.contains('read')).toBe(false);
         expect(document.getElementById('read-progress').textContent).toBe('✓ 0/1 read');
@@ -555,9 +582,7 @@ describe('Read tracking', () => {
 
     test('read state persists in localStorage across a re-render', () => {
         renderChat([sampleItem], container, 'all');
-        const checkbox = document.getElementById('q_020_b_1').querySelector('.read-switch input');
-        checkbox.checked = true;
-        checkbox.dispatchEvent(new Event('change'));
+        document.getElementById('q_020_b_1').querySelector('.read-tick').click();
 
         // Re-render (e.g. after a language change) — the block should come
         // back already marked as read, not reset.
@@ -565,7 +590,7 @@ describe('Read tracking', () => {
         const row = document.getElementById('q_020_b_1');
 
         expect(row.classList.contains('read')).toBe(true);
-        expect(row.querySelector('.read-switch input').checked).toBe(true);
+        expect(row.querySelector('.read-tick').classList.contains('read')).toBe(true);
     });
 
     test('a multi-block answer only counts the specific block marked read, not the whole item', () => {
@@ -581,8 +606,7 @@ describe('Read tracking', () => {
         };
         renderChat([multiBlockItem], container, 'all');
 
-        document.getElementById('a_021_b_1').querySelector('.read-switch input').checked = true;
-        document.getElementById('a_021_b_1').querySelector('.read-switch input').dispatchEvent(new Event('change'));
+        document.getElementById('a_021_b_1').querySelector('.read-tick').click();
 
         expect(document.getElementById('a_021_b_1').classList.contains('read')).toBe(true);
         expect(document.getElementById('a_021_b_2').classList.contains('read')).toBe(false);

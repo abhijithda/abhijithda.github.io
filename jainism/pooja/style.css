@@ -206,37 +206,51 @@ body {
     line-height: 1.5;
 }
 
+/* Read-tracking is opt-in (see the Settings toggle) — hidden entirely
+   until body.show-read-tracking is present, so the feature has zero
+   visual footprint for anyone who hasn't turned it on. */
 .read-progress {
+    display: none;
     font-size: 0.85em;
     color: #555;
     white-space: nowrap;
     margin-left: 10px;
 }
 
-.read-toggle-row {
-    flex: 1 0 100%;
+body.show-read-tracking .read-progress {
+    display: inline;
+}
+
+/* Small circular tick in the block's own bottom-right corner — sits
+   inside the row's own padding, not a separate row, so it adds no extra
+   height. White/surface fill (not transparent) so it stays visible
+   against every card color (pink, green, orange, etc.), not just one. */
+.read-tick {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid #b0b0b0;
+    background: #fff;
+    padding: 0;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    color: #fff;
+}
+
+body.show-read-tracking .read-tick {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    gap: 8px;
-    margin-top: 4px;
+    justify-content: center;
 }
 
-.read-toggle-label {
-    font-size: 0.75em;
-    color: #888;
-}
-
-/* Reuses the same .switch/.slider component as the Videos/QR toggles, so
-   this reads as the same kind of control rather than a third UI style. */
-.read-switch {
-    width: 32px;
-    height: 18px;
-}
-
-.read-switch .slider::before {
-    height: 14px;
-    width: 14px;
+.read-tick.read {
+    border: none;
+    background: #4caf50;
 }
 
 /* A subtle right-side border, not a fade — dimming was tried and dropped:
@@ -244,8 +258,9 @@ body {
    understood this, let me go over it again") harder than it needs to be,
    since the text itself should stay fully legible regardless of read
    state. Right side specifically, since the left border is already
-   spoken for by the mantra/shloka/question/answer color-coding. */
-.block-row.read {
+   spoken for by the mantra/shloka/question/answer color-coding. Also
+   gated behind the opt-in toggle, same as the tick itself. */
+body.show-read-tracking .block-row.read {
     border-right: 3px solid #4caf50;
 }
 
@@ -265,6 +280,7 @@ body {
 }
 
 .block-row {
+    position: relative;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -272,7 +288,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     margin: 5px 0;
-    padding: 8px 12px 8px 20px;
+    padding: 8px 28px 8px 20px;
     border-radius: 0 4px 4px 0;
     align-items: flex-start;
 }
@@ -633,7 +649,7 @@ input:checked+.slider::before {
 @media print {
 
     .app-header,
-    .read-toggle-row,
+    .read-tick,
     #back-to-message {
         display: none !important;
     }
@@ -693,6 +709,16 @@ input:checked+.slider::before {
         flex-flow: row !important;
         width: 100% !important;
         gap: 15px !important;
+    }
+
+    /* The generic rule above forces flex-wrap back to nowrap (flex-flow's
+       default when wrap isn't specified) — fine for normal q/a rows, but
+       it silently defeats the media-only column's ability to drop onto
+       its own full-width line, since nowrap forces it to share space with
+       the block-id label on a single line instead. Media-only rows need
+       wrapping restored specifically. */
+    .block-row.media-only {
+        flex-flow: row wrap !important;
     }
 
     .col-kn,
