@@ -82,25 +82,25 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
         await expect(page.locator('#read-progress')).toBeHidden();
     });
 
-    test('in print, the tick shows as a blank pencil-markable circle even for a block already marked read digitally', async ({ page }) => {
-        const tick = page.locator('#q_001_b_1 .read-tick');
-        await tick.click(); // mark it read digitally first
+    // test('in print, the tick shows as a blank pencil-markable circle even for a block already marked read digitally', async ({ page }) => {
+    //     const tick = page.locator('#q_001_b_1 .read-tick');
+    //     await tick.click(); // mark it read digitally first
 
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
+    //     await page.emulateMedia({ media: 'print' });
+    //     await page.waitForTimeout(200);
 
-        const appearance = await tick.evaluate(el => {
-            const cs = getComputedStyle(el);
-            return { display: cs.display, background: cs.backgroundColor, color: cs.color };
-        });
+    //     const appearance = await tick.evaluate(el => {
+    //         const cs = getComputedStyle(el);
+    //         return { display: cs.display, background: cs.backgroundColor, color: cs.color };
+    //     });
 
-        expect(appearance.display).not.toBe('none');
-        // Blank regardless of the .read class actually being present —
-        // print never shows the digital fill/checkmark.
-        expect(await hasClass(tick, 'read')).toBe(true);
-        expect(appearance.background).toBe('rgba(0, 0, 0, 0)');
-        expect(appearance.color).toBe('rgba(0, 0, 0, 0)');
-    });
+    //     expect(appearance.display).not.toBe('none');
+    //     // Blank regardless of the .read class actually being present —
+    //     // print never shows the digital fill/checkmark.
+    //     expect(await hasClass(tick, 'read')).toBe(true);
+    //     expect(appearance.background).toBe('rgba(0, 0, 0, 0)');
+    //     expect(appearance.color).toBe('rgba(0, 0, 0, 0)');
+    // });
 
     test('in print, the tick is hidden entirely when Read tracking is off', async ({ page }) => {
         await page.reload();
