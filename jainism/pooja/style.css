@@ -265,6 +265,15 @@ body.show-read-tracking .block-row.read {
     flex: 0 0 60px;
 }
 
+/* In a media-only row, the id label sits alone on its own line (col-kn/
+   col-en don't exist, and the image wraps below rather than beside it) —
+   the padding above was sized to visually balance against a tall paragraph
+   of text sitting next to it, which doesn't apply here and was reading as
+   a stray gap above the image. */
+.block-row.media-only .block-id {
+    padding: 4px 5px;
+}
+
 .col-kn,
 .col-en {
     flex: 1 1 0%;
@@ -751,17 +760,42 @@ input:checked+.slider::before {
     /* Content-less blocks (no text competing for space) let the photo use
        the full card width instead of the 170px slot sized for video
        thumbnails/QR codes — whether it's a standalone image item or a
-       photo-only block inside a text-heavy answer. */
-    .block-row.media-only .col-media {
+       photo-only block inside a text-heavy answer.
+       NOTE: 'body' prefix is deliberate, not decorative — without it, this
+       rule's specificity (3 classes) was actually LOWER than
+       'body.show-videos .col-media:not(:empty)' above (3 classes + the
+       'body' type selector = one tier higher), so that rule silently won
+       whenever Videos or QR happened to be on — which is the default
+       state, meaning standalone images broke for most users out of the
+       box. Matching the 'body' prefix here restores correct precedence,
+       with this rule winning the source-order tiebreak since it's
+       declared later. */
+    body .block-row.media-only .col-media {
         flex: 1 1 100% !important;
         width: 100% !important;
     }
 
-    .block-row.media-only .image-card,
-    .block-row.media-only .image-card img {
-        width: 100% !important;
-        max-width: 100% !important;
+    /* max-height caps a tall portrait image so the whole card (image +
+       caption) reliably fits within one printed page. Without this, a
+       full-width portrait image can end up taller than a page — .card's
+       break-inside:avoid then can't succeed (there's no single page it
+       fits on), which is what caused blank pages being pushed in before
+       it and the image itself splitting across two pages, slicing off
+       whatever caption text happened to fall right at the page boundary.
+       8.5in is a conservative estimate of usable page height after
+       margins on a standard US Letter/A4 page — width/height:auto (not
+       fixed width:100%) lets the browser fit within both the width and
+       height caps while preserving the image's aspect ratio. */
+    body .block-row.media-only .image-card,
+    body .block-row.media-only .image-card img {
+        width: auto !important;
         height: auto !important;
+        max-width: 100% !important;
+        max-height: 7.0in !important;
+    }
+
+    .block-row.media-only .image-card {
+        margin: 0 auto !important;
     }
 
     .block-row:not(.media-only) .image-card,
