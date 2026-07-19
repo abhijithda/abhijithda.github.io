@@ -80,6 +80,15 @@ function updateMediaVisibility() {
     });
 }
 
+// Read-tracking is opt-in and off by default — most visitors are readers,
+// not the site author, so the tick marks and progress counter only show
+// once someone deliberately turns them on in Settings.
+function updateReadTrackingVisibility() {
+    const toggle = document.getElementById('toggle-read-tracking');
+    const show = toggle ? toggle.checked : false;
+    document.body.classList.toggle('show-read-tracking', show);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const toggleVideos = document.getElementById('toggle-videos') || document.getElementById('toggleVideos');
     const toggleQrs = document.getElementById('toggle-qrs') || document.getElementById('toggleQrs');
@@ -91,8 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleQrs.addEventListener('change', updateMediaVisibility);
     }
 
+    const toggleReadTracking = document.getElementById('toggle-read-tracking');
+    if (toggleReadTracking) {
+        toggleReadTracking.addEventListener('change', updateReadTrackingVisibility);
+    }
 
     updateMediaVisibility();
+    updateReadTrackingVisibility();
 
     fetch('data.json')
         .then(response => response.json())
@@ -136,19 +150,179 @@ function formatIdForDisplay(block) {
     return `${typeInitial}-${number}.${subNumber}`; // e.g., "Q-22.1"
 }
 
+// --- Reference resolution & jump-to-source ---
+// A reference id may point at a whole item ("q_002") or a specific block
+// within an item ("q_002_b_1"). Resolves either form to the actual block
+// object to excerpt from.
+function resolveReference(refId, blockById, itemById) {
+    if (blockById[refId]) {
+        return blockById[refId];
+    }
+    const item = itemById[refId];
+    if (item && item.blocks && item.blocks.length > 0) {
+        return item.blocks[0];
+    }
+    return null; // Dangling reference — skip gracefully rather than throw.
+}
+
+// Stack (not a single slot) so that jumping to a reference, then jumping to
+// a reference from *within* that reference, and hitting "Back" twice
+// returns you through both hops in order — a single saved position would
+// lose the first hop.
+let backStack = [];
+
+function jumpToReference(blockId) {
+    const target = document.getElementById(blockId);
+    if (!target) return;
+
+    backStack.push(window.scrollY);
+    const backBtn = document.getElementById('back-to-message');
+    if (backBtn) backBtn.style.display = 'block';
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('jump-highlight');
+    setTimeout(() => target.classList.remove('jump-highlight'), 1500);
+}
+
+function goBackToMessage() {
+    const prevY = backStack.pop();
+    if (prevY !== undefined) {
+        window.scrollTo({ top: prevY, behavior: 'smooth' });
+    }
+    const backBtn = document.getElementById('back-to-message');
+    if (backBtn && backStack.length === 0) {
+        backBtn.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const backBtn = document.getElementById('back-to-message');
+    if (backBtn) backBtn.onclick = goBackToMessage;
+});
+
+// --- Read tracking (local-only, no auth: a Set of BLOCK ids in localStorage) ---
+// Block-level, not item-level: a video block can run over an hour, so a
+// reader may finish one block of a multi-block answer and want to mark
+// just that much as done, without claiming the whole answer is read.
+const READ_BLOCKS_KEY = 'readBlocks';
+
+function getReadBlocks() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(READ_BLOCKS_KEY)) || []);
+    } catch (e) {
+        return new Set();
+    }
+}
+
+function saveReadBlocks(readSet) {
+    localStorage.setItem(READ_BLOCKS_KEY, JSON.stringify([...readSet]));
+}
+
+function toggleBlockRead(blockId, totalBlockCount) {
+    const readSet = getReadBlocks();
+    if (readSet.has(blockId)) {
+        readSet.delete(blockId);
+    } else {
+        readSet.add(blockId);
+    }
+    saveReadBlocks(readSet);
+
+    const row = document.getElementById(blockId);
+    if (row) row.classList.toggle('read', readSet.has(blockId));
+
+    updateReadProgress(totalBlockCount);
+}
+
+function updateReadProgress(totalBlockCount) {
+    const el = document.getElementById('read-progress');
+    if (!el) return;
+    const readCount = getReadBlocks().size;
+    el.textContent = `✓ ${readCount}/${totalBlockCount} read`;
+}
+
 function renderChat(data, container, lang = 'all') {
     if (!container) return;
     container.innerHTML = "";
+
+    // Lookup maps so a reference id ("q_002" or "q_002_b_1") can be
+    // resolved to its actual block, regardless of which granularity it
+    // points at.
+    const blockById = {};
+    const itemById = {};
+    data.forEach(item => {
+        itemById[item.id] = item;
+        item.blocks.forEach(block => {
+            blockById[block.id] = block;
+        });
+    });
+
+    const readBlocks = getReadBlocks();
+    const totalBlockCount = data.reduce((sum, item) => sum + item.blocks.length, 0);
 
     data.forEach(item => {
         const card = document.createElement('div');
         card.className = `card ${item.type}`;
         card.id = item.id;
 
+        // Reply-excerpt: a WhatsApp-style preview of whatever this item is
+        // following up on. Must be appended before the item's own blocks —
+        // its CSS uses a negative top margin to sit flush against the
+        // card's top edge, covering the card's own top padding.
+        if (item.references && item.references.length > 0) {
+            const excerptContainer = document.createElement('div');
+            excerptContainer.className = 'reply-excerpt multi-block';
+
+            item.references.forEach(refId => {
+                const refBlock = resolveReference(refId, blockById, itemById);
+                if (!refBlock) return; // Dangling reference — skip gracefully.
+
+                const excerptRow = document.createElement('div');
+                excerptRow.className = 'excerpt-row block-row';
+
+                const idLabel = document.createElement('span');
+                idLabel.className = 'block-id';
+                idLabel.innerText = formatIdForDisplay(refBlock);
+                idLabel.onclick = (e) => {
+                    e.stopPropagation();
+                    jumpToReference(refBlock.id);
+                };
+                excerptRow.appendChild(idLabel);
+
+                const contentWrap = document.createElement('div');
+                contentWrap.className = 'excerpt-content-wrap';
+                contentWrap.onclick = () => excerptRow.classList.toggle('expanded');
+
+                // Gated by lang, same as every other block's content — this
+                // was the actual bug: the excerpt used to always show both
+                // languages regardless of the selected filter.
+                if ((lang === 'kn' || lang === 'all') && refBlock.content?.kn?.some(line => line.trim() !== '')) {
+                    const knCol = document.createElement('div');
+                    knCol.className = 'col-kn';
+                    knCol.innerHTML = `<p>${refBlock.content.kn.join(' ')}</p>`;
+                    contentWrap.appendChild(knCol);
+                }
+                if ((lang === 'en' || lang === 'all') && refBlock.content?.en?.some(line => line.trim() !== '')) {
+                    const enCol = document.createElement('div');
+                    enCol.className = 'col-en';
+                    enCol.innerHTML = `<p>${refBlock.content.en.join(' ')}</p>`;
+                    contentWrap.appendChild(enCol);
+                }
+
+                excerptRow.appendChild(contentWrap);
+                excerptContainer.appendChild(excerptRow);
+            });
+
+            if (excerptContainer.children.length > 0) {
+                card.appendChild(excerptContainer);
+            }
+        }
+
+        // --- Multi-Block Row Generation ---
         item.blocks.forEach(block => {
             const row = document.createElement('div');
-            const hasText = (block.content?.kn?.length > 0) || (block.content?.en?.length > 0);
-            row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}`;
+            const hasText = (block.content?.kn?.some(line => line.trim() !== '')) || (block.content?.en?.some(line => line.trim() !== ''));
+            const isRead = readBlocks.has(block.id);
+            row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}${isRead ? ' read' : ''}`;
             row.id = block.id;
 
             // ID Label (e.g. Q-1.1)
@@ -158,7 +332,7 @@ function renderChat(data, container, lang = 'all') {
             row.appendChild(idLabel);
 
             // Kannada Column
-            if ((lang === 'kn' || lang === 'all') && block.content?.kn?.length > 0) {
+            if ((lang === 'kn' || lang === 'all') && block.content?.kn?.some(line => line.trim() !== '')) {
                 const knCol = document.createElement('div');
                 knCol.className = "col-kn";
                 knCol.innerHTML = `<p>${block.content.kn.join('<br>')}</p>`;
@@ -166,7 +340,7 @@ function renderChat(data, container, lang = 'all') {
             }
 
             // English Column
-            if ((lang === 'en' || lang === 'all') && block.content?.en?.length > 0) {
+            if ((lang === 'en' || lang === 'all') && block.content?.en?.some(line => line.trim() !== '')) {
                 const enCol = document.createElement('div');
                 enCol.className = "col-en";
                 enCol.innerHTML = `<p>${block.content.en.join('<br>')}</p>`;
@@ -205,10 +379,37 @@ function renderChat(data, container, lang = 'all') {
             }
 
             row.appendChild(mediaCol);
+
+            // Mark-as-read tick — a small circular button in the block's own
+            // bottom-right corner (position:relative on .block-row), not a
+            // full extra row. Block-level, not card-level: a video block can
+            // run over an hour, so a reader may finish one block without the
+            // whole multi-block answer being "done". Hidden by default —
+            // visible only once "Read tracking" is turned on in Settings
+            // (see updateReadTrackingVisibility / body.show-read-tracking).
+            const readTick = document.createElement('button');
+            readTick.type = 'button';
+            readTick.className = `read-tick${isRead ? ' read' : ''}`;
+            readTick.title = isRead ? 'Marked as read' : 'Mark as read';
+            readTick.setAttribute('aria-label', readTick.title);
+            readTick.textContent = isRead ? '✓' : '';
+            readTick.onclick = (e) => {
+                e.stopPropagation();
+                toggleBlockRead(block.id, totalBlockCount);
+                const nowRead = row.classList.contains('read');
+                readTick.classList.toggle('read', nowRead);
+                readTick.textContent = nowRead ? '✓' : '';
+                readTick.title = nowRead ? 'Marked as read' : 'Mark as read';
+                readTick.setAttribute('aria-label', readTick.title);
+            };
+            row.appendChild(readTick);
+
             card.appendChild(row);
         });
         container.appendChild(card);
     });
+
+    updateReadProgress(totalBlockCount);
 }
 
 function togglePrintMode() {
@@ -242,5 +443,12 @@ if (typeof module !== 'undefined' && module.exports) {
         createVideoCard,
         renderChat,
         updateMediaVisibility,
+        resolveReference,
+        jumpToReference,
+        goBackToMessage,
+        toggleBlockRead,
+        getReadBlocks,
+        updateReadProgress,
+        updateReadTrackingVisibility,
     };
 }

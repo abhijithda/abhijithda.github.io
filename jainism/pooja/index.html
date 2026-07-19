@@ -9,7 +9,9 @@
 
 <body>
     <header class="app-header">
-        <input type="text" id="search-bar" placeholder="Search topics..." onkeyup="filterChat()">
+        <input type="text" id="search-bar" placeholder="Search topics - ಅಭಿಷೇಕ, Daana..." onkeyup="filterChat()">
+
+        <span id="read-progress" class="read-progress" title="Items you've marked as read"></span>
 
         <div class="view-menu-container">
             <button id="settings-btn" class="menu-trigger">Settings ⚙️</button>
@@ -36,6 +38,13 @@
                         <span class="slider"></span>
                     </label>
                 </div>
+                <div class="menu-section">
+                    <label>✓ Read tracking:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-read-tracking" onchange="updateReadTrackingVisibility()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </header>
@@ -44,7 +53,7 @@
 
     <button id="back-to-message"
         style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">
-        ↑ Back to Message
+        ← Back to Message
     </button>
 
     <script src="script.js"></script>
