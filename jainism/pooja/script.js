@@ -78,6 +78,8 @@ function updateMediaVisibility() {
     document.querySelectorAll('.qr-code').forEach(el => {
         el.style.display = showQrs ? '' : 'none';
     });
+
+    saveDisplaySettings();
 }
 
 // Read-tracking is opt-in and off by default — most visitors are readers,
@@ -87,11 +89,62 @@ function updateReadTrackingVisibility() {
     const toggle = document.getElementById('toggle-read-tracking');
     const show = toggle ? toggle.checked : false;
     document.body.classList.toggle('show-read-tracking', show);
+
+    saveDisplaySettings();
+}
+
+// --- Settings persistence (local-only, survives refresh AND full browser
+// close/reopen — same localStorage mechanism as scroll position and read
+// tracking, just for the Settings-menu controls themselves). ---
+const DISPLAY_SETTINGS_KEY = 'displaySettings';
+
+function saveDisplaySettings() {
+    const langSelect = document.getElementById('lang-select');
+    const toggleVideos = document.getElementById('toggle-videos');
+    const toggleQrs = document.getElementById('toggle-qrs');
+    const toggleReadTracking = document.getElementById('toggle-read-tracking');
+
+    const settings = {
+        lang: langSelect ? langSelect.value : 'all',
+        videos: toggleVideos ? toggleVideos.checked : true,
+        qrs: toggleQrs ? toggleQrs.checked : false,
+        readTracking: toggleReadTracking ? toggleReadTracking.checked : false,
+    };
+    localStorage.setItem(DISPLAY_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function loadDisplaySettings() {
+    try {
+        return JSON.parse(localStorage.getItem(DISPLAY_SETTINGS_KEY)) || {};
+    } catch (e) {
+        return {};
+    }
+}
+
+// Apply any saved settings to the controls themselves, before anything
+// reads their .checked/.value for the first render — otherwise the first
+// paint would briefly show the HTML defaults instead of what was saved.
+function applyDisplaySettings() {
+    const saved = loadDisplaySettings();
+    const langSelect = document.getElementById('lang-select');
+    const toggleVideos = document.getElementById('toggle-videos');
+    const toggleQrs = document.getElementById('toggle-qrs');
+    const toggleReadTracking = document.getElementById('toggle-read-tracking');
+
+    if (langSelect && typeof saved.lang === 'string') langSelect.value = saved.lang;
+    if (toggleVideos && typeof saved.videos === 'boolean') toggleVideos.checked = saved.videos;
+    if (toggleQrs && typeof saved.qrs === 'boolean') toggleQrs.checked = saved.qrs;
+    if (toggleReadTracking && typeof saved.readTracking === 'boolean') toggleReadTracking.checked = saved.readTracking;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleVideos = document.getElementById('toggle-videos') || document.getElementById('toggleVideos');
     const toggleQrs = document.getElementById('toggle-qrs') || document.getElementById('toggleQrs');
+
+    // Restore saved Language/Videos/QR/Read-tracking choices before anything
+    // reads their current value — otherwise the very first paint would
+    // briefly show the HTML defaults instead of what was saved last time.
+    applyDisplaySettings();
 
     if (toggleVideos) {
         toggleVideos.addEventListener('change', updateMediaVisibility);
@@ -123,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             langSelect.addEventListener('change', (e) => {
                 renderChat(data, container, e.target.value);
                 updateMediaVisibility();
+                saveDisplaySettings();
             });
 
             // RESTORE position AFTER rendering is done
@@ -450,5 +504,8 @@ if (typeof module !== 'undefined' && module.exports) {
         getReadBlocks,
         updateReadProgress,
         updateReadTrackingVisibility,
+        saveDisplaySettings,
+        loadDisplaySettings,
+        applyDisplaySettings,
     };
 }
