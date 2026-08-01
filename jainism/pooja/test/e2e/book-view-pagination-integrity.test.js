@@ -35,7 +35,7 @@ test.describe('Pagination Integrity — Book View', () => {
         // Collect all card ids from Continuous View
         await page.locator('[data-view="continuous"]').click();
         await page.waitForTimeout(300);
-        const continuousIds = await page.locator('.card').evaluateAll(els => els.map(e => e.id));
+        const continuousIds = await page.locator('#continuous-container .card').evaluateAll(els => els.map(e => e.id));
 
         // Collect all card ids from Book View by walking every spread
         await page.locator('[data-view="book"]').click();
@@ -43,10 +43,14 @@ test.describe('Pagination Integrity — Book View', () => {
 
         const bookIds = [];
         const nextBtn = page.locator('#book-next-btn');
-        // Capture first spread, then walk forward
+        // Capture first spread, then walk forward. Text cards use `.card`;
+        // standalone-image spreads use a plain `id` on their caption page
+        // instead (no `.card` class — see createImageSpreadElement), so
+        // both need to be queried to get full coverage.
         // eslint-disable-next-line no-constant-condition
         while (true) {
-            const idsOnSpread = await page.locator('.book-spread .card').evaluateAll(els => els.map(e => e.id));
+            const idsOnSpread = await page.locator('.book-spread .card, .book-spread .book-page[id]')
+                .evaluateAll(els => els.map(e => e.id));
             bookIds.push(...idsOnSpread);
 
             if (await nextBtn.isDisabled()) break;
@@ -94,31 +98,35 @@ test.describe('Pagination Integrity — Book View', () => {
         expect(overflowing, `Cards overflowing their page (clipped/invisible): ${overflowing.join(', ')}`).toEqual([]);
     });
 
-    test('question numbers appear with no skips', async ({ page }) => {
+    test('every question id in source data appears in book view', async ({ page }) => {
         await page.goto('/jainism/pooja/index.html');
         await page.waitForLoadState('networkidle');
+
+        const sourceQuestionIds = await page.evaluate(async () => {
+            const res = await fetch('data.json');
+            const data = await res.json();
+            return data.filter(m => m.type === 'question').map(m => m.id);
+        });
 
         const nextBtn = page.locator('#book-next-btn');
         const allQuestionIds = [];
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
-            const ids = await page.locator('.card.question').evaluateAll(els => els.map(e => e.id));
+            const ids = await page.locator('.book-spread .card.question').evaluateAll(els => els.map(e => e.id));
             allQuestionIds.push(...ids);
             if (await nextBtn.isDisabled()) break;
             await nextBtn.click();
             await page.waitForTimeout(150);
         }
 
-        const numbers = allQuestionIds
-            .map(id => parseInt(id.replace(/^q_/, ''), 10))
-            .filter(n => !isNaN(n))
-            .sort((a, b) => a - b);
-
-        for (let i = 1; i < numbers.length; i++) {
-            const gap = numbers[i] - numbers[i - 1];
-            expect(gap, `Question numbering jumped from q_${numbers[i - 1]} to q_${numbers[i]} — a question was skipped`).toBe(1);
-        }
+        // A card too tall for one page is split into fragments (e.g.
+        // "a_013__part2"); only the LAST fragment keeps the bare source id.
+        // That's expected — strip the suffix so a legitimately-split card
+        // isn't mistaken for a missing one.
+        const normalized = allQuestionIds.map(id => id.replace(/__part\d+$/, ''));
+        const missing = sourceQuestionIds.filter(id => !normalized.includes(id));
+        expect(missing, `Questions in source data missing from book view: ${missing.join(', ')}`).toEqual([]);
     });
 
     test('answer numbers appear with no skips', async ({ page }) => {
@@ -130,7 +138,7 @@ test.describe('Pagination Integrity — Book View', () => {
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
-            const ids = await page.locator('.card.answer').evaluateAll(els => els.map(e => e.id));
+            const ids = await page.locator('.book-spread .card.answer').evaluateAll(els => els.map(e => e.id));
             allAnswerIds.push(...ids);
             if (await nextBtn.isDisabled()) break;
             await nextBtn.click();
@@ -182,7 +190,7 @@ test.describe('Feature Parity — Book View matches Continuous View', () => {
         // Book view should still render without crashing
         const bookView = page.locator('#book-view');
         await expect(bookView).toBeVisible();
-        const cards = page.locator('.card');
+        const cards = page.locator('#book-view .card');
         expect(await cards.count()).toBeGreaterThan(0);
     });
 
@@ -216,7 +224,7 @@ test.describe('Feature Parity — Book View matches Continuous View', () => {
         await page.locator('#toggle-read-tracking').click();
         await page.waitForTimeout(300);
 
-        const ticks = page.locator('.read-tick');
+        const ticks = page.locator('#book-view .read-tick');
         expect(await ticks.count()).toBeGreaterThan(0);
     });
 
@@ -228,7 +236,7 @@ test.describe('Feature Parity — Book View matches Continuous View', () => {
         await page.locator('#toggle-read-tracking').click();
         await page.waitForTimeout(300);
 
-        const tick = page.locator('.read-tick').first();
+        const tick = page.locator('#book-view .read-tick').first();
         const box = await tick.boundingBox();
         expect(box).not.toBeNull();
         // Width and height must match within 1px for a true circle

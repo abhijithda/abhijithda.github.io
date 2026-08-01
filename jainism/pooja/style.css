@@ -930,6 +930,38 @@ input:checked+.slider::before {
     margin-top: 4px;
 }
 
+/* ── Book view media sizing ──────────────────────────────────────────────────
+   Continuous view constrains images/videos inside .block-row (its flex-row
+   wrapper). Book view cards don't use .block-row — text stacks vertically,
+   kn then en — so without these rules a native 1600px image renders at full
+   pixel size in the probe, making every measurement wildly wrong.           */
+.book-spread .col-media {
+    width: auto;
+    max-width: 220px;
+    margin: 8px 0 0;
+    flex: none;
+}
+
+.book-spread .image-card,
+.book-spread .image-card img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 6px;
+    display: block;
+}
+
+.book-spread .video-card,
+.book-spread .media-wrap {
+    max-width: 200px;
+}
+
+.book-spread .block-id.continued {
+    font-style: italic;
+    font-weight: normal;
+    color: #bbb;
+}
+
 /* Standalone image spread */
 .caption-page {
     display: flex;

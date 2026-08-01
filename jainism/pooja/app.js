@@ -44,8 +44,8 @@ async function initFaqBookView() {
     // Initial render
     renderContinuousView(data, container, lang);
 
-    // Build book view (hidden by default)
-    createBookView(data);
+    // Build book view (awaits image-aware height measurement before first render)
+    await createBookView(data);
 
     // Ensure media visibility applies to newly-rendered elements
     updateMediaVisibility();
