@@ -1,3 +1,9 @@
+/* SUPERSEDED — style.css has been split into:
+   media.css, read-tracking.css, header.css, continuous-view.css, book-view.css
+   index.html now loads those files directly. This file is kept for reference
+   only and is no longer loaded by the app. Safe to delete once the split is
+   verified stable. */
+
 /* 1. GENERAL & WRAPPER */
 body {
     font-family: Arial, sans-serif;

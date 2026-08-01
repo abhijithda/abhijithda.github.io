@@ -1,0 +1,284 @@
+/* continuous-view.css — Card layout, block rows, kn/en columns, card types, reply excerpts. */
+
+/* 3. CARD DESIGN & BLOCK ROWS */
+.card {
+    position: relative;
+    /* Matches padding-bottom. The reply-excerpt header (see
+       .reply-excerpt.multi-block below) uses a matching -25px top margin
+       to pull itself up and cover this padding, so it sits flush against
+       the card's rounded top corners. If this value changes, update the
+       excerpt's margin-top to match, or the excerpt will sit offset from
+       the card edge. */
+    padding-top: 25px;
+    padding-right: 25px;
+    padding-bottom: 25px;
+    padding-left: 0 !important;
+    /* Adjacent Border logic */
+    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-sizing: border-box;
+    line-height: 1.5;
+}
+
+/* Read-tracking is opt-in (see the Settings toggle) — hidden entirely
+   until body.show-read-tracking is present, so the feature has zero
+   visual footprint for anyone who hasn't turned it on. */
+
+/* Brief highlight when landing on a block via a reply-excerpt jump */
+.jump-highlight {
+    animation: jump-flash 1.5s ease-out;
+}
+
+@keyframes jump-flash {
+    0% {
+        background-color: #fff3b0;
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.block-row {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 5px 0;
+    padding: 8px 28px 8px 20px;
+    border-radius: 0 4px 4px 0;
+    align-items: flex-start;
+}
+
+/* Padding for non-row elements */
+.card>*:not(.block-row) {
+    padding-left: 25px;
+}
+
+.block-id {
+    padding: 15px 5px;
+    font-family: monospace;
+    font-weight: bold;
+    flex: 0 0 60px;
+}
+
+/* In a media-only row, the id label sits alone on its own line (col-kn/
+   col-en don't exist, and the image wraps below rather than beside it) —
+   the padding above was sized to visually balance against a tall paragraph
+   of text sitting next to it, which doesn't apply here and was reading as
+   a stray gap above the image. */
+.block-row.media-only .block-id {
+    padding: 4px 5px;
+}
+
+.col-kn,
+.col-en {
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+.col-en p {
+    color: #555;
+}
+
+
+.card.question {
+    background-color: #ffebee;
+    border-left: 4px solid #d32f2f;
+}
+
+.card.answer {
+    background-color: #f1f8e9;
+    border-left: 4px solid #4caf50;
+}
+
+.card.images {
+    background-color: #fafafa;
+    border-left: 4px solid #607d8b;
+}
+
+.block-row.mantra {
+    background-color: rgb(249, 126, 3);
+    border-left: 5px solid rgb(255, 0, 0);
+}
+
+.block-row.note {
+    background-color: #fdfaf2;
+    border-left: 5px solid #b38f4f;
+}
+
+.block-row.shloka {
+    background-color: #fff9c4;
+    border-left: 5px solid #fbc02d;
+}
+
+/* --- 1. EXCERPT CONTAINER --- */
+.reply-excerpt.multi-block {
+    background: rgba(0, 0, 0, 0.04);
+    /* Pull up to cover card padding (-25px, matches .card padding-top) and add space below (10px) */
+    margin: -25px 0 10px 0 !important;
+    padding: 0 !important;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    width: 100% !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- 2. ROW LAYOUT (STRICT COLUMNS) --- */
+.excerpt-row.block-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    /* Force columns to stay horizontal */
+    align-items: flex-start !important;
+
+    padding: 4px 15px 4px 0 !important;
+    /* Zero left padding to align ID column */
+    margin: 0 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
+    min-height: auto !important;
+    width: 100% !important;
+}
+
+.excerpt-row:last-child {
+    border-bottom: none !important;
+}
+
+.excerpt-row:nth-child(even) {
+    background: rgba(0, 0, 0, 0.015);
+}
+
+/* Zebra striping */
+
+/* --- 3. ID COLUMN (Ref: Q-0.0) --- */
+.excerpt-row .block-id {
+    flex: 0 0 60px !important;
+    /* Fixed width to match main block IDs */
+    min-width: 60px !important;
+    max-width: 60px !important;
+    margin: 0 10px 0 0 !important;
+    padding: 0 5px !important;
+
+    text-align: right;
+    font-size: 10px !important;
+    font-family: monospace;
+    font-weight: bold;
+    color: #0066cc !important;
+    /* Blue link color */
+    line-height: 1.1 !important;
+    cursor: pointer !important;
+}
+
+/* Move 'Ref:' label above the number for perfect alignment */
+.excerpt-row .block-id::before {
+    content: "Ref: ";
+    font-weight: normal;
+    color: #999;
+    font-size: 8px;
+    display: block;
+    line-height: 1;
+    margin-bottom: 1px;
+}
+
+/* --- 4. CONTENT WRAPPER --- */
+.excerpt-content-wrap {
+    display: flex !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    /* Prevents long text from breaking layout */
+    gap: 12px !important;
+    align-items: flex-start !important;
+    cursor: zoom-in !important;
+    position: relative;
+    padding-right: 20px !important;
+}
+
+/* Expand Indicator Icon */
+.excerpt-content-wrap::after {
+    content: "▼";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0.3;
+}
+
+/* Language Columns */
+.excerpt-row .col-kn,
+.excerpt-row .col-en {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.excerpt-row p {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+    color: #444 !important;
+
+    /* Default Truncation (Single Line) */
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+}
+
+/* --- 5. EXPANDED VIEW (5-Line Partial Reveal) --- */
+.excerpt-row.expanded {
+    background: rgba(255, 255, 255, 0.5) !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+.excerpt-row.expanded p {
+    white-space: normal !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    /* Limit to 5 lines */
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    cursor: zoom-out !important;
+
+    /* Fade out effect on the 5th line */
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
+}
+
+.excerpt-row.expanded .excerpt-content-wrap {
+    cursor: zoom-out !important;
+}
+
+.excerpt-row.expanded .excerpt-content-wrap::after {
+    content: "▲";
+}
+
+/* 7. RESPONSIVE & PRINT */
+@media (max-width: 768px) {
+    .block-row {
+        flex-direction: column;
+    }
+
+    .col-media {
+        width: 100%;
+        align-items: center;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
