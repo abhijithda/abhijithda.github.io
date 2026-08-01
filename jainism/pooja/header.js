@@ -1,8 +1,6 @@
 // header.js — Header UI management: language, video/QR toggles, read-tracking.
 // Persists and restores display settings via localStorage.
 
-import { updateMediaVisibility, updateReadTrackingVisibility } from './header.js';
-
 export const DISPLAY_SETTINGS_KEY = 'displaySettings';
 
 /**

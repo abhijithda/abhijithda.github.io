@@ -42,103 +42,277 @@ function shouldShowInBookView(message) {
 }
 
 function estimateCardHeight(message) {
+    // Fallback only — used in jsdom (tests) where real layout isn't available.
     let height = 60;
     if (message.blocks) {
         message.blocks.forEach((block) => {
-            if (block.type === 'paragraph') {
-                const kn = (block.content.kn || []).join(' ').length;
-                const en = (block.content.en || []).join(' ').length;
-                height += ((kn + en) / 50) * 20;
-            }
+            const kn = (block.content && block.content.kn || []).join(' ').length;
+            const en = (block.content && block.content.en || []).join(' ').length;
+            height += ((kn + en) / 50) * 20;
         });
     }
     return Math.min(height, 200);
 }
 
-export function buildSpreads(messageData) {
-    const spreads = [];
-    let currentPageHeight = 0;
-    let currentPageNumber = 1;
-    let leftPageItems = [];
-    let rightPageItems = [];
-    let pageHeight = 520;
+// ── Off-screen measurement probe ────────────────────────────────────────────
+// The probe mirrors the real two-page flex structure so the measured width
+// (~424px) matches what each column actually renders at. A single .book-page
+// child would stretch to fill the entire 960px spread; the empty sibling
+// forces the 50/50 flex split that makes text wrap the same way it will on
+// the real page.
+let _probeContent = null;
+function getProbeContainer() {
+    if (typeof document === 'undefined' || !document.body) return null;
+    if (_probeContent && document.body.contains(_probeContent)) return _probeContent;
 
-    messageData.forEach((message) => {
-        if (!shouldShowInBookView(message)) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'book-spread';
+    wrapper.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;top:-9999px;left:-9999px;height:auto;';
 
-        let cardHeight = estimateCardHeight(message);
+    const page = document.createElement('div');
+    page.className = 'book-page left';
+    page.style.height = 'auto';
 
-        if (message.type === 'images') {
-            if (leftPageItems.length > 0 || rightPageItems.length > 0) {
-                spreads.push({
-                    type: 'text',
-                    pageNumber: currentPageNumber,
-                    leftItems: leftPageItems,
-                    rightItems: rightPageItems,
-                    messageData: messageData,
-                });
-                currentPageNumber += 2;
-                leftPageItems = [];
-                rightPageItems = [];
-                currentPageHeight = 0;
+    const content = document.createElement('div');
+    content.className = 'page-content';
+    content.style.cssText = 'overflow:visible;height:auto;mask-image:none;';
+
+    page.appendChild(content);
+    wrapper.appendChild(page);
+
+    const rightPlaceholder = document.createElement('div');
+    rightPlaceholder.className = 'book-page right';
+    wrapper.appendChild(rightPlaceholder);
+
+    document.body.appendChild(wrapper);
+    _probeContent = content;
+    return _probeContent;
+}
+
+function waitForImagesToSettle(cardEl, timeoutMs = 2500) {
+    const imgs = Array.from(cardEl.querySelectorAll('img'));
+    if (imgs.length === 0) return Promise.resolve();
+    return Promise.all(imgs.map((img) => new Promise((resolve) => {
+        if (img.complete) { resolve(); return; }
+        img.addEventListener('load', resolve, { once: true });
+        img.addEventListener('error', resolve, { once: true });
+        setTimeout(resolve, timeoutMs);
+    })));
+}
+
+async function measureCardHeight(cardEl) {
+    const probe = getProbeContainer();
+    if (!probe) return null;
+    probe.appendChild(cardEl);
+    await waitForImagesToSettle(cardEl);
+    const height = cardEl.offsetHeight;
+    probe.removeChild(cardEl);
+    return height > 0 ? height : null;
+}
+
+// ── Card builder ─────────────────────────────────────────────────────────────
+function createBookCard(message, messageData, options) {
+    options = options || {};
+    const blockIndices = options.blockIndices || null;
+    const showHeader = options.showHeader !== false;
+    const showReadTick = options.showReadTick !== false;
+    const domId = options.domId || message.id;
+    const lineRange = options.lineRange || null;
+
+    const card = document.createElement('div');
+    card.className = `card ${message.type}`;
+    card.id = domId;
+
+    let html = '';
+
+    if (showHeader) {
+        if (message.references && message.references.length > 0) {
+            const refId = message.references[0];
+            let refBlock = null;
+            if (messageData) {
+                const refMessage = messageData.find(m => m.id === refId);
+                if (refMessage && refMessage.blocks && refMessage.blocks.length > 0) {
+                    refBlock = refMessage.blocks[0];
+                }
             }
-            spreads.push({
-                type: 'image',
-                pageNumber: currentPageNumber,
-                item: message,
-            });
-            currentPageNumber += 2;
-            return;
-        }
-
-        if (currentPageHeight + cardHeight <= pageHeight) {
-            leftPageItems.push(message);
-            currentPageHeight += cardHeight;
-        } else if (leftPageItems.length > 0 && rightPageItems.length === 0) {
-            if (cardHeight <= pageHeight) {
-                rightPageItems.push(message);
-                currentPageHeight += cardHeight;
-            } else {
-                spreads.push({
-                    type: 'text',
-                    pageNumber: currentPageNumber,
-                    leftItems: leftPageItems,
-                    rightItems: rightPageItems,
-                    messageData: messageData,
-                });
-                currentPageNumber += 2;
-                leftPageItems = [message];
-                rightPageItems = [];
-                currentPageHeight = cardHeight;
+            if (refBlock) {
+                const refKn = (refBlock.content && refBlock.content.kn || []).join(' ').slice(0, 80);
+                const refEn = (refBlock.content && refBlock.content.en || []).join(' ').slice(0, 80);
+                html += `<div class="reply-excerpt"><span class="ref-label">Ref: ${escapeHtml(refId)}</span> ${escapeHtml(refKn)} / ${escapeHtml(refEn)}</div>`;
             }
-        } else if (leftPageItems.length > 0 && rightPageItems.length > 0) {
-            spreads.push({
-                type: 'text',
-                pageNumber: currentPageNumber,
-                leftItems: leftPageItems,
-                rightItems: rightPageItems,
-                messageData: messageData,
-            });
-            currentPageNumber += 2;
-            leftPageItems = [message];
-            rightPageItems = [];
-            currentPageHeight = cardHeight;
-        } else {
-            leftPageItems.push(message);
-            currentPageHeight = cardHeight;
         }
-    });
+        html += `<span class="block-id">${escapeHtml(message.id)}</span>`;
+    } else {
+        html += `<span class="block-id continued">${escapeHtml(message.id)} (continued)</span>`;
+    }
 
-    if (leftPageItems.length > 0 || rightPageItems.length > 0) {
-        spreads.push({
-            type: 'text',
-            pageNumber: currentPageNumber,
-            leftItems: leftPageItems,
-            rightItems: rightPageItems,
-            messageData: messageData,
+    if (message.blocks) {
+        message.blocks.forEach((block, idx) => {
+            if (blockIndices && !blockIndices.includes(idx)) return;
+
+            const restrictLines = lineRange && lineRange.blockIndex === idx;
+            const knLines = block.content && block.content.kn || [];
+            const enLines = block.content && block.content.en || [];
+            const kn = (restrictLines ? knLines.slice(lineRange.start, lineRange.end) : knLines).join('\n');
+            const en = (restrictLines ? enLines.slice(lineRange.start, lineRange.end) : enLines).join('\n');
+
+            if (kn && kn.trim()) {
+                html += `<div class="block-kn">${linkify(escapeHtml(kn)).replace(/\n/g, '<br>')}</div>`;
+            }
+            if (en && en.trim()) {
+                html += `<div class="block-en">${linkify(escapeHtml(en)).replace(/\n/g, '<br>')}</div>`;
+            }
+
+            const includeMedia = !restrictLines || lineRange.includeMedia;
+
+            if (includeMedia && block.images && block.images.length > 0) {
+                html += `<div class="col-media has-images">`;
+                block.images.forEach((img) => {
+                    const capKn = img.caption && img.caption.kn ? img.caption.kn : '';
+                    const capEn = img.caption && img.caption.en ? img.caption.en : '';
+                    const capText = (capKn && capEn) ? `${capKn} / ${capEn}` : (capKn || capEn);
+                    html += `<div class="image-card"><img src="images/${escapeHtml(img.src)}" alt="${escapeHtml(capText)}">${capText ? `<p class="image-caption">${escapeHtml(capText)}</p>` : ''}</div>`;
+                });
+                html += `</div>`;
+            }
+
+            if (includeMedia && block.videos && block.videos.length > 0) {
+                html += `<div class="col-media has-videos">`;
+                block.videos.forEach((v) => {
+                    html += createVideoCardHtml(v.url);
+                });
+                html += `</div>`;
+            }
         });
     }
 
+    if (showReadTick) {
+        const readBlocks = getReadBlocks(localStorage);
+        const isRead = readBlocks.has(message.id);
+        html += `<div class="read-tick${isRead ? ' done' : ''}"></div>`;
+    }
+
+    card.innerHTML = html;
+    return card;
+}
+
+// Inline video card HTML — mirrors media.js createPipThumbnail but returns
+// a simple HTML string for insertion via innerHTML (no DOM methods needed).
+function createVideoCardHtml(url) {
+    if (!url) return '';
+    const videoId = extractYouTubeId ? extractYouTubeId(url) : null;
+    if (!videoId) return `<div class="video-card"><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Watch Video</a></div>`;
+    const thumb = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(url)}`;
+    return `<div class="media-wrap">
+        <div class="video-card">
+            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+                <img src="${escapeHtml(thumb)}" alt="Watch Video">
+            </a>
+        </div>
+        <div class="qr-code"><img src="${escapeHtml(qrUrl)}" alt="QR Code"></div>
+    </div>`;
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+export async function buildSpreads(messageData) {
+    const spreads = [];
+    const pageHeight = 520;
+    const CARD_MARGIN = 8;
+    let column = 'left';
+    let columnHeight = 0;
+    let leftItems = [];
+    let rightItems = [];
+    let currentPageNumber = 1;
+
+    function flushSpread() {
+        if (leftItems.length > 0 || rightItems.length > 0) {
+            spreads.push({ type: 'text', pageNumber: currentPageNumber, leftItems, rightItems, messageData });
+            currentPageNumber += 2;
+        }
+        leftItems = []; rightItems = [];
+        column = 'left'; columnHeight = 0;
+    }
+
+    function placeItem(item, itemHeight) {
+        if (columnHeight + itemHeight <= pageHeight || (column === 'left' && leftItems.length === 0)) {
+            (column === 'left' ? leftItems : rightItems).push(item);
+            columnHeight += itemHeight;
+        } else if (column === 'left') {
+            column = 'right';
+            rightItems.push(item);
+            columnHeight = itemHeight;
+        } else {
+            flushSpread();
+            leftItems.push(item);
+            columnHeight = itemHeight;
+        }
+    }
+
+    for (const message of messageData) {
+        if (!shouldShowInBookView(message)) continue;
+
+        if (message.type === 'images') {
+            flushSpread();
+            spreads.push({ type: 'image', pageNumber: currentPageNumber, item: message });
+            currentPageNumber += 2;
+            continue;
+        }
+
+        const wholeCardEl = createBookCard(message, messageData);
+        const wholeMeasured = await measureCardHeight(wholeCardEl);
+        const wholeHeight = (wholeMeasured != null ? wholeMeasured : estimateCardHeight(message)) + CARD_MARGIN;
+
+        if (wholeHeight <= pageHeight) {
+            placeItem({ ...message, __bookEl: wholeCardEl }, wholeHeight);
+            continue;
+        }
+
+        // Card doesn't fit on a full page — split at block boundaries
+        const blocks = message.blocks || [];
+        for (let bi = 0; bi < blocks.length; bi++) {
+            const isFirst = bi === 0;
+            const isLastBlock = bi === blocks.length - 1;
+            const fragEl = createBookCard(message, messageData, {
+                blockIndices: [bi], showHeader: isFirst, showReadTick: isLastBlock,
+                domId: isLastBlock ? message.id : `${message.id}__part${bi + 1}`,
+            });
+            const fragMeasured = await measureCardHeight(fragEl);
+            const fragHeight = (fragMeasured != null ? fragMeasured : 60) + CARD_MARGIN;
+
+            if (fragHeight <= pageHeight) {
+                placeItem({ ...message, id: isLastBlock ? message.id : `${message.id}__part${bi + 1}`, __bookEl: fragEl }, fragHeight);
+                continue;
+            }
+
+            // Even one block is too tall — split line by line
+            const block = blocks[bi];
+            const lineCount = Math.max((block.content && block.content.kn || []).length, (block.content && block.content.en || []).length, 1);
+            let lineStart = 0, partNum = bi + 1;
+            while (lineStart < lineCount) {
+                let end = lineStart + 1, bestEl = null, bestHeight = null;
+                while (end <= lineCount) {
+                    const isLastChunk = end === lineCount;
+                    const candidateEl = createBookCard(message, messageData, {
+                        blockIndices: [bi], showHeader: isFirst && lineStart === 0, showReadTick: isLastBlock && isLastChunk,
+                        domId: `${message.id}__part${partNum}`,
+                        lineRange: { blockIndex: bi, start: lineStart, end, includeMedia: isLastChunk },
+                    });
+                    const candidateHeight = (await measureCardHeight(candidateEl) ?? 60) + CARD_MARGIN;
+                    if (candidateHeight > pageHeight && end > lineStart + 1) break;
+                    bestEl = candidateEl; bestHeight = candidateHeight;
+                    end++;
+                    if (candidateHeight > pageHeight) break;
+                }
+                const isLastChunk = (end - 1) === lineCount;
+                const fragId = isLastBlock && isLastChunk ? message.id : `${message.id}__part${partNum}`;
+                placeItem({ ...message, id: fragId, __bookEl: bestEl }, bestHeight);
+                lineStart = end - 1; partNum++;
+            }
+        }
+    }
+
+    flushSpread();
     return spreads;
 }
 
@@ -290,61 +464,61 @@ function createImageSpreadElement(spread) {
     return spreadEl;
 }
 
-function createBookCard(message, messageData) {
-    const card = document.createElement('div');
-    card.className = `card ${message.type}`;
-    card.id = message.id;
+// function createBookCard(message, messageData) {
+//     const card = document.createElement('div');
+//     card.className = `card ${message.type}`;
+//     card.id = message.id;
 
-    let html = '';
+//     let html = '';
 
-    if (message.references && message.references.length > 0) {
-        const refId = message.references[0];
+//     if (message.references && message.references.length > 0) {
+//         const refId = message.references[0];
 
-        let refBlock = null;
-        if (messageData) {
-            const refMessage = messageData.find(m => m.id === refId);
-            if (refMessage && refMessage.blocks && refMessage.blocks.length > 0) {
-                refBlock = refMessage.blocks[0];
-            }
-        }
+//         let refBlock = null;
+//         if (messageData) {
+//             const refMessage = messageData.find(m => m.id === refId);
+//             if (refMessage && refMessage.blocks && refMessage.blocks.length > 0) {
+//                 refBlock = refMessage.blocks[0];
+//             }
+//         }
 
-        if (refBlock) {
-            const refKn = (refBlock.content && refBlock.content.kn || []).join(' ').slice(0, 80);
-            const refEn = (refBlock.content && refBlock.content.en || []).join(' ').slice(0, 80);
-            html += `
-                <div class="reply-excerpt">
-                    <span class="ref-label">Ref: ${escapeHtml(refId)}</span>
-                    ${escapeHtml(refKn)} / ${escapeHtml(refEn)}
-                </div>
-            `;
-        }
-    }
+//         if (refBlock) {
+//             const refKn = (refBlock.content && refBlock.content.kn || []).join(' ').slice(0, 80);
+//             const refEn = (refBlock.content && refBlock.content.en || []).join(' ').slice(0, 80);
+//             html += `
+//                 <div class="reply-excerpt">
+//                     <span class="ref-label">Ref: ${escapeHtml(refId)}</span>
+//                     ${escapeHtml(refKn)} / ${escapeHtml(refEn)}
+//                 </div>
+//             `;
+//         }
+//     }
 
-    html += `<span class="block-id">${escapeHtml(message.id)}</span>`;
+//     html += `<span class="block-id">${escapeHtml(message.id)}</span>`;
 
-    if (message.blocks) {
-        message.blocks.forEach((block) => {
-            if (block.type === 'paragraph' || block.type === 'note' || block.type === 'shloka') {
-                const kn = (block.content && block.content.kn || []).join('\n');
-                const en = (block.content && block.content.en || []).join('\n');
+//     if (message.blocks) {
+//         message.blocks.forEach((block) => {
+//             if (block.type === 'paragraph' || block.type === 'note' || block.type === 'shloka') {
+//                 const kn = (block.content && block.content.kn || []).join('\n');
+//                 const en = (block.content && block.content.en || []).join('\n');
 
-                if (kn && kn.trim()) {
-                    html += `<div class="block-kn">${linkify(escapeHtml(kn)).replace(/\n/g, '<br>')}</div>`;
-                }
-                if (en && en.trim()) {
-                    html += `<div class="block-en">${linkify(escapeHtml(en)).replace(/\n/g, '<br>')}</div>`;
-                }
-            }
-        });
-    }
+//                 if (kn && kn.trim()) {
+//                     html += `<div class="block-kn">${linkify(escapeHtml(kn)).replace(/\n/g, '<br>')}</div>`;
+//                 }
+//                 if (en && en.trim()) {
+//                     html += `<div class="block-en">${linkify(escapeHtml(en)).replace(/\n/g, '<br>')}</div>`;
+//                 }
+//             }
+//         });
+//     }
 
-    const readBlocks = getReadBlocks(localStorage);
-    const isRead = readBlocks.has(message.id);
-    html += `<div class="read-tick${isRead ? ' done' : ''}"></div>`;
+//     const readBlocks = getReadBlocks(localStorage);
+//     const isRead = readBlocks.has(message.id);
+//     html += `<div class="read-tick${isRead ? ' done' : ''}"></div>`;
 
-    card.innerHTML = html;
-    return card;
-}
+//     card.innerHTML = html;
+//     return card;
+// }
 
 function createBookNavigation() {
     const nav = document.createElement('div');
