@@ -282,3 +282,112 @@
     }
 }
 
+/* ── Media column — two-column layout (col-kn | col-en | col-media) ─────────
+   These rules restore the media column that master's style.css provided.
+   Videos/QR are hidden by default and shown via body class toggles set by
+   header.js. Images (has-images) are always visible. */
+
+.col-media {
+    display: none !important;
+    flex: 0 0 200px;
+    width: 200px;
+    max-width: 100%;
+    margin-left: 15px;
+    flex-direction: column;
+    align-self: flex-start;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+body.show-videos .col-media:not(:empty),
+body.show-qrs .col-media:not(:empty) {
+    display: flex !important;
+}
+
+.col-media.has-images {
+    display: flex !important;
+}
+
+/* ── PIP thumbnail inside col-media (pip-thumbnail classes from media.js) ── */
+.col-media .pip-thumbnail {
+    position: relative;
+    width: 200px;
+    line-height: 0;
+    overflow: visible;
+    display: none;
+}
+
+body.show-videos .col-media .pip-thumbnail[data-pip-type="video"] {
+    display: block;
+}
+
+body.show-qrs .col-media .pip-thumbnail__qr {
+    display: block;
+}
+
+body:not(.show-videos).show-qrs .col-media .pip-thumbnail__qr {
+    position: static;
+    width: 120px;
+    height: 120px;
+    margin: 10px auto;
+}
+
+/* ── Legacy .video-card / .qr-code / .media-wrap for backward compat ─────── */
+.media-wrap {
+    position: relative;
+    display: inline-block;
+    width: 200px;
+    line-height: 0;
+    vertical-align: top;
+    overflow: visible;
+}
+
+.video-card {
+    display: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.video-card img {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+}
+
+.qr-code {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 85px;
+    height: 85px;
+    background: white;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 0 0 8px 0;
+    z-index: 100;
+    box-sizing: border-box;
+}
+
+.qr-code img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+body.show-videos .video-card {
+    display: block;
+}
+
+body.show-qrs .qr-code {
+    display: block;
+}
+
+body:not(.show-videos).show-qrs .qr-code {
+    position: static;
+    width: 120px;
+    height: 120px;
+    margin: 10px auto;
+    border-radius: 4px;
+}

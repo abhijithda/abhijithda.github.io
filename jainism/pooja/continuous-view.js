@@ -97,17 +97,10 @@ export function filterContinuous(query) {
 
 /**
  * Build the PIP thumbnail HTML for a block's videos and images.
- * Only called for blocks that have text content — standalone image blocks
- * (no kn/en text) get full-width image-card rendering instead, so calling
- * this on them would produce a duplicate second rendering of the same image.
  * @param {Object} block - FAQ block with videos/images arrays
- * @param {boolean} hasText - whether this block has any kn or en text
  * @returns {string} HTML string (may be empty)
  */
-function buildBlockPip(block, hasText) {
-    // Never create a PIP for standalone image blocks — they render full-width below
-    if (!hasText) return '';
-
+function buildBlockPip(block) {
     // If the block has videos, create a video PIP
     if (block.videos && block.videos.length > 0) {
         const v = block.videos[0];
@@ -234,43 +227,29 @@ export function renderContinuousView(data, container, lang = 'all') {
             idLabel.innerText = formatIdForDisplay(block);
             row.appendChild(idLabel);
 
-            // ── Block content: kn content, divider, en content ──
-            const blockContent = document.createElement('div');
-            blockContent.className = 'block-content';
-
-            // Build PIP thumbnail for this block (video or image) — only for text blocks
-            const pipHtml = buildBlockPip(block, hasText);
-
-            // Kannada column — PIP floated right inside this column
+            // Kannada Column
             if ((lang === 'kn' || lang === 'all') && block.content?.kn?.some(line => line.trim() !== '')) {
                 const knCol = document.createElement('div');
                 knCol.className = 'col-kn';
-                knCol.innerHTML = pipHtml + `<p>${linkify(escapeHtml(block.content.kn.join('<br>')))}</p>`;
-                blockContent.appendChild(knCol);
-            } else if (pipHtml) {
-                // No Kannada text but PIP exists — put PIP in kn col anyway
-                const knCol = document.createElement('div');
-                knCol.className = 'col-kn';
-                knCol.innerHTML = pipHtml;
-                blockContent.appendChild(knCol);
+                knCol.innerHTML = `<p>${linkify(escapeHtml(block.content.kn.join('<br>')))}</p>`;
+                row.appendChild(knCol);
             }
 
-            // Kn/En divider — clears the floated PIP
-            const divider = document.createElement('div');
-            divider.className = 'kn-en-divider';
-            blockContent.appendChild(divider);
-
-            // English column
+            // English Column
             if ((lang === 'en' || lang === 'all') && block.content?.en?.some(line => line.trim() !== '')) {
                 const enCol = document.createElement('div');
                 enCol.className = 'col-en';
                 enCol.innerHTML = `<p>${linkify(escapeHtml(block.content.en.join('<br>')))}</p>`;
-                blockContent.appendChild(enCol);
+                row.appendChild(enCol);
             }
 
-            // For media-only blocks (standalone images), render the image full-width
-            if (!hasText && block.images && block.images.length > 0) {
-                blockContent.classList.add('media-only-content');
+            // Media Column — always appended so CSS toggle (show-videos, show-qrs) works
+            const mediaCol = document.createElement('div');
+            mediaCol.className = 'col-media';
+
+            // Images
+            if (block.images && block.images.length > 0) {
+                mediaCol.classList.add('has-images');
                 block.images.forEach(img => {
                     const src = img.src.includes('://') ? img.src : `images/${img.src}`;
                     const capKn = (img.caption && img.caption.kn) ? img.caption.kn : '';
@@ -281,7 +260,7 @@ export function renderContinuousView(data, container, lang = 'all') {
                     } else {
                         capText = (lang === 'kn') ? capKn : capEn;
                     }
-                    blockContent.innerHTML += `
+                    mediaCol.innerHTML += `
                         <div class="image-card">
                             <img src="${escapeHtml(src)}" alt="${escapeHtml(capText)}">
                             ${capText ? `<p class="image-caption">${escapeHtml(capText)}</p>` : ''}
@@ -289,7 +268,15 @@ export function renderContinuousView(data, container, lang = 'all') {
                 });
             }
 
-            row.appendChild(blockContent);
+            // Videos — PIP thumbnail in the media column (not floated inside col-kn)
+            if (block.videos && block.videos.length > 0) {
+                mediaCol.classList.add('has-videos');
+                block.videos.forEach(v => {
+                    mediaCol.innerHTML += createPipThumbnail({ type: 'video', url: v.url });
+                });
+            }
+
+            row.appendChild(mediaCol);
 
             // ── Read tick — interactive button ──
             const readTick = document.createElement('button');
