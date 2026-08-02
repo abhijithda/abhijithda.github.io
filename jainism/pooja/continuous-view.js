@@ -97,10 +97,17 @@ export function filterContinuous(query) {
 
 /**
  * Build the PIP thumbnail HTML for a block's videos and images.
+ * Only called for blocks that have text content — standalone image blocks
+ * (no kn/en text) get full-width image-card rendering instead, so calling
+ * this on them would produce a duplicate second rendering of the same image.
  * @param {Object} block - FAQ block with videos/images arrays
+ * @param {boolean} hasText - whether this block has any kn or en text
  * @returns {string} HTML string (may be empty)
  */
-function buildBlockPip(block) {
+function buildBlockPip(block, hasText) {
+    // Never create a PIP for standalone image blocks — they render full-width below
+    if (!hasText) return '';
+
     // If the block has videos, create a video PIP
     if (block.videos && block.videos.length > 0) {
         const v = block.videos[0];
@@ -216,7 +223,7 @@ export function renderContinuousView(data, container, lang = 'all') {
         item.blocks.forEach(block => {
             const row = document.createElement('div');
             const hasText = (block.content?.kn?.some(line => line.trim() !== '')) ||
-                           (block.content?.en?.some(line => line.trim() !== ''));
+                (block.content?.en?.some(line => line.trim() !== ''));
             const isRead = readBlocks.has(block.id);
             row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}${isRead ? ' read' : ''}`;
             row.id = block.id;
@@ -231,8 +238,8 @@ export function renderContinuousView(data, container, lang = 'all') {
             const blockContent = document.createElement('div');
             blockContent.className = 'block-content';
 
-            // Build PIP thumbnail for this block (video or image)
-            const pipHtml = buildBlockPip(block);
+            // Build PIP thumbnail for this block (video or image) — only for text blocks
+            const pipHtml = buildBlockPip(block, hasText);
 
             // Kannada column — PIP floated right inside this column
             if ((lang === 'kn' || lang === 'all') && block.content?.kn?.some(line => line.trim() !== '')) {
