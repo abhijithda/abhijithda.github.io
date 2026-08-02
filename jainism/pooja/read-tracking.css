@@ -1,0 +1,86 @@
+/* read-tracking.css — Read-progress counter and per-block read tick. */
+
+.read-progress {
+    display: none;
+    font-size: 0.85em;
+    color: #555;
+    white-space: nowrap;
+    margin-left: 10px;
+    margin-right: 15px;
+}
+
+body.show-read-tracking .read-progress {
+    display: inline;
+}
+
+/* Small circular tick in the block's own bottom-right corner — sits
+   inside the row's own padding, not a separate row, so it adds no extra
+   height. White/surface fill (not transparent) so it stays visible
+   against every card color (pink, green, orange, etc.), not just one. */
+.read-tick {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid #b0b0b0;
+    background: #fff;
+    padding: 0;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    color: #fff;
+}
+
+body.show-read-tracking .read-tick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.read-tick.read {
+    border: none;
+    background: #4caf50;
+}
+
+body.show-read-tracking .block-row.read {
+    border-right: 3px solid #4caf50;
+}
+
+/* Brief highlight when landing on a block via a reply-excerpt jump */
+.jump-highlight {
+    animation: jump-flash 1.5s ease-out;
+}
+
+@keyframes jump-flash {
+    0%   { background-color: #fff3b0; }
+    100% { background-color: transparent; }
+}
+
+/* Print */
+@media print {
+    .read-tick {
+        display: none !important;
+    }
+
+    body.show-read-tracking .read-tick {
+        display: inline-block !important;
+        position: absolute !important;
+        bottom: 8px !important;
+        right: 8px !important;
+        width: 22px !important;
+        height: 22px !important;
+        border-radius: 50% !important;
+        border: 1.5px solid #555 !important;
+        background: transparent !important;
+        color: transparent !important;
+    }
+
+    body.show-read-tracking .read-tick.read {
+        background: #4caf50 !important;
+        border-color: #4caf50 !important;
+        color: #fff !important;
+    }
+}

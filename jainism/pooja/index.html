@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Jaina Pooja FAQ</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="media.css">
+    <link rel="stylesheet" href="read-tracking.css">
+    <link rel="stylesheet" href="continuous-view.css">
 </head>
 
 <body>
@@ -27,21 +30,21 @@
                 <div class="menu-section">
                     <label>🎬 Videos:</label>
                     <label class="switch">
-                        <input type="checkbox" id="toggle-videos" checked="" onchange="updateMediaVisibility()">
+                        <input type="checkbox" id="toggle-videos" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div class="menu-section">
                     <label>📱 QR Codes:</label>
                     <label class="switch">
-                        <input type="checkbox" id="toggle-qrs" onchange="updateMediaVisibility()">
+                        <input type="checkbox" id="toggle-qrs">
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div class="menu-section">
                     <label>✓ Read tracking:</label>
                     <label class="switch">
-                        <input type="checkbox" id="toggle-read-tracking" onchange="updateReadTrackingVisibility()">
+                        <input type="checkbox" id="toggle-read-tracking">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -49,14 +52,14 @@
         </div>
     </header>
 
-    <div id="chat-container"></div>
+    <div id="continuous-container" style="display:flex"></div>
 
     <button id="back-to-message"
         style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">
         ← Back to Message
     </button>
 
-    <script src="script.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>
