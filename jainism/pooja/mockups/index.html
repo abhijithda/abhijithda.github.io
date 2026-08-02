@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book View Mockup v2 — Jaina Pooja Vichara Sankalana</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Arial, sans-serif;
+  background: #8c7b6b;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.app-header {
+  background: white;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.view-toggle {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.view-toggle button {
+  padding: 5px 14px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  color: #555;
+}
+.view-toggle button.active {
+  background: #333;
+  color: white;
+}
+#search-bar {
+  flex-grow: 1;
+  max-width: 400px;
+  padding: 7px 16px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  font-size: 13px;
+}
+.settings-btn {
+  padding: 6px 16px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ── Book shell ── */
+.book-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px 20px;
+  gap: 18px;
+}
+
+/* ── Spread label (above the spread) ── */
+.spread-label {
+  color: rgba(255,255,255,0.6);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Open book spread ── */
+.book-spread {
+  display: flex;
+  width: 100%;
+  max-width: 960px;
+  background: #f9f6f1;
+  border-radius: 2px;
+  box-shadow:
+    -8px 8px 24px rgba(0,0,0,0.4),
+    8px 8px 24px rgba(0,0,0,0.4),
+    inset 0 0 60px rgba(0,0,0,0.03);
+  min-height: 620px;
+  position: relative;
+}
+
+/* Spine */
+.book-spread::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 3px;
+  transform: translateX(-50%);
+  background: linear-gradient(to right,
+    rgba(0,0,0,0.15),
+    rgba(255,255,255,0.6) 40%,
+    rgba(255,255,255,0.6) 60%,
+    rgba(0,0,0,0.12));
+  pointer-events: none;
+  z-index: 10;
+}
+
+.book-page {
+  flex: 1;
+  padding: 30px 28px 44px;
+  position: relative;
+  min-height: 620px;
+  overflow: hidden;
+}
+
+/* Subtle page texture */
+.book-page.left  { border-right: none; }
+.book-page.right { border-left: none; }
+
+/* Running headers */
+.running-head {
+  font-size: 9px;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+  font-family: Georgia, serif;
+  border-bottom: 0.5px solid #e8e8e8;
+  padding-bottom: 6px;
+}
+.book-page.left  .running-head { text-align: left; }
+.book-page.right .running-head { text-align: right; }
+
+/* Page numbers */
+.page-num {
+  position: absolute;
+  bottom: 16px;
+  font-size: 11px;
+  color: #bbb;
+  font-family: Georgia, serif;
+}
+.book-page.left  .page-num { left: 28px; }
+.book-page.right .page-num { right: 28px; }
+
+/* ── Cards ── */
+.card {
+  border-radius: 5px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  position: relative;
+  background: white;
+}
+.card.question { background: #fff5f5; border-left: 3px solid #d32f2f; }
+.card.answer   { background: #f4faf0; border-left: 3px solid #4caf50; }
+.card.shloka   { background: #fffde7; border-left: 3px solid #f9a825; }
+.card.note     { background: #e8f5e9; border-left: 3px solid #66bb6a; }
+
+.block-id {
+  font-family: monospace;
+  font-size: 9.5px;
+  font-weight: bold;
+  color: #aaa;
+  display: block;
+  margin-bottom: 3px;
+}
+
+/* kn block then en block */
+.block-kn {
+  margin-bottom: 4px;
+  color: #222;
+  font-size: 12.5px;
+}
+.block-en {
+  color: #666;
+  font-size: 12px;
+  border-top: 0.5px solid #ebebeb;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+/* Reply excerpt */
+.reply-excerpt {
+  background: rgba(0,0,0,0.04);
+  border-radius: 4px 4px 0 0;
+  padding: 5px 10px;
+  font-size: 10.5px;
+  color: #777;
+  margin: -10px -12px 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ref-label {
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  color: #1976d2;
+  margin-right: 5px;
+}
+
+/* Read tick */
+.read-tick {
+  position: absolute;
+  bottom: 7px; right: 7px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #ccc;
+  background: white;
+}
+.read-tick.done {
+  background: #4caf50;
+  border-color: #4caf50;
+}
+
+/* ── Standalone image spread ── */
+/* Caption page (left) */
+.caption-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+.caption-block-id {
+  font-family: monospace;
+  font-size: 9.5px;
+  font-weight: bold;
+  color: #bbb;
+}
+.caption-rule {
+  width: 40px;
+  height: 1px;
+  background: #ccc;
+}
+.caption-kn {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.7;
+}
+.caption-en {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+}
+
+/* Image page (right) */
+.image-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.image-page img {
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 3px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+/* ── Navigation ── */
+.book-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-btn {
+  padding: 8px 24px;
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  font-size: 13px;
+  color: white;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.25); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.page-indicator {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  font-family: Georgia, serif;
+}
+
+/* ── Spread selector tabs (for mockup) ── */
+.spread-tabs {
+  display: flex;
+  gap: 8px;
+}
+.spread-tab {
+  padding: 5px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-size: 11px;
+}
+.spread-tab.active {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border-color: rgba(255,255,255,0.5);
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="view-toggle">
+    <button>💬 Chat</button>
+    <button class="active">📖 Book</button>
+  </div>
+  <input id="search-bar" type="text" placeholder="Search topics - ಅಭಿಷೇಕ, Daana...">
+  <button class="settings-btn">Settings ⚙️ &nbsp; | &nbsp; ✓ 7/131 read</button>
+</header>
+
+<div class="book-shell">
+
+  <!-- Spread selector (mockup only — shows two different spread types) -->
+  <div class="spread-tabs">
+    <div class="spread-tab active" onclick="show('text')">Text spread (pp 4–5)</div>
+    <div class="spread-tab" onclick="show('image')">Image spread (pp 10–11)</div>
+  </div>
+
+  <!-- ══ SPREAD A: Text content flowing across both pages ══ -->
+  <div class="book-spread" id="spread-text">
+
+    <!-- LEFT PAGE -->
+    <div class="book-page left">
+      <div class="running-head">ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ</div>
+
+      <!-- Q-1.1 -->
+      <div class="card question">
+        <span class="block-id">Q-1.1</span>
+        <div class="block-kn">ಎಲ್ಲಾ ದೇವರು ಒಂದೇ (ದೇವತೆಗಳು =?= ಜಿನೇಂದ್ರ ದೇವ) ?</div>
+        <div class="block-en">All are equal (Devatas =?= Jinendra deva)?</div>
+        <div class="read-tick done"></div>
+      </div>
+
+      <!-- A-1.1 -->
+      <div class="card answer">
+        <div class="reply-excerpt">
+          <span class="ref-label">Ref: Q-1.1</span>
+          ಎಲ್ಲಾ ದೇವರು ಒಂದೇ... / All are equal...
+        </div>
+        <span class="block-id">A-1.1</span>
+        <div class="block-kn">ಯಾರು ಜಿನ ಶಾಸನ ದೇವತೆಗಳನ್ನು ತೀರ್ಥಂಕರ ಭಗವಂತರ ಸಮಾನರೆಂದು ಪೂಜಿಸುತ್ತಾರೋ ಅವರು ಅಧೋ / ನರಕ ಗಾಮಿಗಳಾಗುತ್ತಾರೆ</div>
+        <div class="block-en">Result of doing pooja of jina shaasana deva devi thinking as bhagawan — Adho gaami / Narak gaami.</div>
+        <div class="read-tick done"></div>
+      </div>
+
+      <!-- Q-2.1 -->
+      <div class="card question">
+        <span class="block-id">Q-2.1</span>
+        <div class="block-kn">ಸಮ್ಯಕ್ತ್ವ ಮಲಿನ</div>
+        <div class="block-en">Samyaktva Malinatha</div>
+        <div class="read-tick"></div>
+      </div>
+
+      <div class="page-num">4</div>
+    </div>
+
+    <!-- RIGHT PAGE — content continues -->
+    <div class="book-page right">
+      <div class="running-head">Jaina Pooja Vichara Sankalana</div>
+
+      <!-- A-2.1 -->
+      <div class="card answer">
+        <div class="reply-excerpt">
+          <span class="ref-label">Ref: Q-2.1</span>
+          ಸಮ್ಯಕ್ತ್ವ ಮಲಿನ / Samyaktva Malinatha
+        </div>
+        <span class="block-id">A-2.1</span>
+        <div class="block-kn">ಭಗವಂತರ ಸ್ವರೂಪ ತಿಳಿದು, ಹಾಗು ದೇವತೆಗಳನ್ನು ವೀತರಾಗ ಭಗವಂತರಲ್ಲ ಎಂದು ಅರಿತು, ದೇವೇತೆಗಳನ್ನು ಪೂಜೆ ಮಾಡಿದರೆ, ಸಮ್ಯಕ್ತ್ವ ನಷ್ಟವಾಗುದಿಲ್ಲ.</div>
+        <div class="block-en">Knowing Bhagawan's true nature, and knowing Devatas are not Veetaraga Bhagawan — doing their pooja does not lose Samyaktva.</div>
+        <div class="read-tick"></div>
+      </div>
+
+      <!-- A-2.2 -->
+      <div class="card answer">
+        <span class="block-id">A-2.2</span>
+        <div class="block-kn">ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ವರದ ಲೋಭದಿಂದ ಮಾಡಿದರೆ ಮಲಿನವಾಗುತ್ತದೆ.</div>
+        <div class="block-en">Doing pooja of Jina Shaasana devata with the greed to get boon is Samyak Malinatha.</div>
+        <div class="read-tick"></div>
+      </div>
+
+      <!-- N-2.3 -->
+      <div class="card note">
+        <span class="block-id">N-2.3</span>
+        <div class="block-kn">ವಿದ್ಯಾ ದೇವತೆಗಳ ಪೂಜೆ ವಿದ್ಯಾ ಸಿದ್ಧಿ ಮಾಡುಕೊಳ್ಳಲು ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ತ್ವ ಮಲಿನವಾಗುವುದು ಇಲ್ಲ.</div>
+        <div class="block-en">Vidyaa devata pooja neither causes dosha in samyaktva, nor causes samyaktva to be lost.</div>
+        <div class="read-tick"></div>
+      </div>
+
+      <div class="page-num">5</div>
+    </div>
+  </div>
+
+  <!-- ══ SPREAD B: Standalone image — caption left, image right ══ -->
+  <div class="book-spread" id="spread-image" style="display:none">
+
+    <!-- LEFT PAGE: caption centered -->
+    <div class="book-page left">
+      <div class="running-head">ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ</div>
+      <div class="caption-page" style="height:calc(100% - 60px)">
+        <div class="caption-block-id">I-1.1</div>
+        <div class="caption-rule"></div>
+        <div class="caption-kn">ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಾಹುಬಲಿ ಸ್ವಾಮಿ</div>
+        <div class="caption-rule"></div>
+        <div class="caption-en">Bharata Chakravarthi and Bahubali Swami</div>
+      </div>
+      <div class="page-num">10</div>
+    </div>
+
+    <!-- RIGHT PAGE: image fills the page -->
+    <div class="book-page right">
+      <div class="running-head">Jaina Pooja Vichara Sankalana</div>
+      <div class="image-page" style="height:calc(100% - 60px)">
+        <!-- Using a placeholder since the real image can't load here -->
+        <div style="width:100%;max-height:500px;background:linear-gradient(160deg,#c8d8e8,#a0b8c8);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#6a8a9a;font-size:13px;padding:40px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.15);min-height:420px;">
+          [ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಾಹುಬಲಿ ಸ್ವಾಮಿ<br><br>
+          Bharata Chakravarthi &amp; Bahubali Swami<br><br>
+          <em style="font-size:11px">— actual image renders here —</em>]
+        </div>
+      </div>
+      <div class="page-num">11</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="book-nav">
+    <button class="nav-btn" id="prev-btn" onclick="prevSpread()" disabled>← Previous</button>
+    <span class="page-indicator" id="page-indicator">Pages 4–5 of 84</span>
+    <button class="nav-btn" id="next-btn" onclick="nextSpread()">Next →</button>
+  </div>
+
+</div><!-- /book-shell -->
+
+<script>
+  const spreads = [
+    { id: 'spread-text',  label: 'Pages 4–5 of 84',  tab: 0 },
+    { id: 'spread-image', label: 'Pages 10–11 of 84', tab: 1 },
+  ];
+  let current = 0;
+
+  function show(type) {
+    const idx = type === 'text' ? 0 : 1;
+    switchTo(idx);
+  }
+
+  function switchTo(idx) {
+    spreads.forEach((s, i) => {
+      document.getElementById(s.id).style.display = i === idx ? 'flex' : 'none';
+      document.querySelectorAll('.spread-tab')[i].classList.toggle('active', i === idx);
+    });
+    document.getElementById('page-indicator').textContent = spreads[idx].label;
+    document.getElementById('prev-btn').disabled = idx === 0;
+    document.getElementById('next-btn').disabled = idx === spreads.length - 1;
+    current = idx;
+  }
+
+  function prevSpread() { if (current > 0) switchTo(current - 1); }
+  function nextSpread() { if (current < spreads.length - 1) switchTo(current + 1); }
+</script>
+</body>
+</html>

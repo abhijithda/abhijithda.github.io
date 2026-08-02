@@ -1,0 +1,196 @@
+/* media.css — Video/QR PIP thumbnails and inline image cards.
+   Shared between continuous-view and book-view. */
+
+/* Content-less image blocks (no text to sit beside) get the large,
+   prominent treatment — whether it's a standalone "images"-type item or
+   just a photo-only block inside an otherwise text-heavy answer. */
+.block-row.media-only .col-media {
+    flex: 1 1 100%;
+    width: 100%;
+}
+
+.block-row.media-only .image-card,
+.block-row.media-only .image-card img {
+    width: 640px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Photos attached to a block that also has text sit inside the slim
+   .col-media column next to the text — they must stay contained to that
+   column's width, or (since .col-media uses overflow: visible for the
+   QR-over-video PIP effect) a wide image just spills out past its box and
+   drags the row's background along with it. Match the video-thumbnail's
+   existing size instead of the large "content-less" treatment. */
+.block-row:not(.media-only) .image-card,
+.block-row:not(.media-only) .image-card img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-caption {
+    font-weight: bold;
+    margin-top: 8px;
+    font-family: Arial, sans-serif;
+    color: #444;
+}
+
+@media (max-width: 700px) {
+
+    .block-row.media-only .image-card,
+    .block-row.media-only .image-card img {
+        width: 100%;
+        max-width: 640px;
+    }
+}
+
+
+/* 4. PIP THUMBNAIL & MEDIA OVERLAY */
+/* PIP (Picture-in-Picture) thumbnail: combined video/graphic + QR inset.
+   Uses CSS float — no JS measurement. Floated right inside the Kannada
+   column; the .kn-en-divider clears the float so the thumbnail sits
+   against the kn/en boundary, feeling equally close to both languages. */
+.pip-thumbnail {
+    position: relative;
+    display: inline-block;
+    width: 200px;
+    line-height: 0;
+    vertical-align: top;
+    overflow: visible;
+    float: right;
+    margin: 0 0 8px 12px;
+    flex-shrink: 0;
+}
+
+.pip-thumbnail__media img,
+.pip-thumbnail__media {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+}
+
+.pip-thumbnail__qr {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 85px;
+    height: 85px;
+    background: white;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 0 0 8px 0;
+    z-index: 100;
+    box-sizing: border-box;
+}
+
+.pip-thumbnail__qr img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Show video media only when Videos toggle is on */
+body.show-videos .pip-thumbnail[data-pip-type="video"] .pip-thumbnail__media {
+    display: block;
+}
+body:not(.show-videos) .pip-thumbnail[data-pip-type="video"] .pip-thumbnail__media {
+    display: none;
+}
+
+/* Show QR only when QR toggle is on */
+body.show-qrs .pip-thumbnail__qr {
+    display: block;
+}
+
+/* QR-only view (non-overlay, when videos off but QR on) */
+body:not(.show-videos).show-qrs .pip-thumbnail__qr {
+    position: static;
+    width: 120px;
+    height: 120px;
+    margin: 10px auto;
+    border-radius: 4px;
+}
+
+/* Graphic (image) PIPs are always visible — not part of video/QR toggle */
+.pip-thumbnail[data-pip-type="graphic"] .pip-thumbnail__media {
+    display: block !important;
+}
+
+/* Kn/En divider — clears the floated PIP so it sits against the border */
+.kn-en-divider {
+    clear: right;
+    border-top: 1px solid #ddd;
+    margin: 8px 0;
+}
+
+/* Block content container: holds kn, divider, en in a column */
+.block-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.block-content .col-kn,
+.block-content .col-en {
+    min-width: 0;
+}
+
+.block-content .col-kn p {
+    color: #222;
+    margin: 0 0 4px 0;
+}
+
+.block-content .col-en p {
+    color: #555;
+    margin: 4px 0 0 0;
+}
+
+/* Media-only content (standalone images, no text) */
+.block-content.media-only-content {
+    align-items: center;
+}
+
+.block-content.media-only-content .image-card,
+.block-content.media-only-content .image-card img {
+    width: 640px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-caption {
+    font-weight: bold;
+    margin-top: 8px;
+    font-family: Arial, sans-serif;
+    color: #444;
+}
+
+@media (max-width: 700px) {
+    .pip-thumbnail {
+        float: none;
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto 12px;
+    }
+
+    .block-content.media-only-content .image-card,
+    .block-content.media-only-content .image-card img {
+        width: 100%;
+        max-width: 640px;
+    }
+}
+
