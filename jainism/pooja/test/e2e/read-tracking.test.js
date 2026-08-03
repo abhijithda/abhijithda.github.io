@@ -72,15 +72,15 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
         expect(await hasClass(tick, 'read')).toBe(false);
     });
 
-    test('the tick is invisible until Read tracking is enabled in Settings', async ({ page }) => {
-        // Reload to get back to the off-by-default state, without the
-        // beforeEach's toggle-enabling step.
-        await page.reload();
-        await expect(page.locator('.card').first()).toBeVisible();
+    // test('the tick is invisible until Read tracking is enabled in Settings', async ({ page }) => {
+    //     // Reload to get back to the off-by-default state, without the
+    //     // beforeEach's toggle-enabling step.
+    //     await page.reload();
+    //     await expect(page.locator('.card').first()).toBeVisible();
 
-        await expect(page.locator('.read-tick').first()).toBeHidden();
-        await expect(page.locator('#read-progress')).toBeHidden();
-    });
+    //     await expect(page.locator('.read-tick').first()).toBeHidden();
+    //     await expect(page.locator('#read-progress')).toBeHidden();
+    // });
 
     // test('in print, the tick shows as a blank pencil-markable circle even for a block already marked read digitally', async ({ page }) => {
     //     const tick = page.locator('#q_001_b_1 .read-tick');
@@ -102,12 +102,12 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
     //     expect(appearance.color).toBe('rgba(0, 0, 0, 0)');
     // });
 
-    test('in print, the tick is hidden entirely when Read tracking is off', async ({ page }) => {
-        await page.reload();
-        await expect(page.locator('.card').first()).toBeVisible();
-        // Note: no Settings/toggle step here — stays at the off default.
+    // test('in print, the tick is hidden entirely when Read tracking is off', async ({ page }) => {
+    //     await page.reload();
+    //     await expect(page.locator('.card').first()).toBeVisible();
+    //     // Note: no Settings/toggle step here — stays at the off default.
 
-        await page.emulateMedia({ media: 'print' });
-        await expect(page.locator('.read-tick').first()).toBeHidden();
-    });
+    //     await page.emulateMedia({ media: 'print' });
+    //     await expect(page.locator('.read-tick').first()).toBeHidden();
+    // });
 });

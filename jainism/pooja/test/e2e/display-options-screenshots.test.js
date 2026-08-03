@@ -17,10 +17,10 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     test('Screenshot: Default state (Videos ON, QR OFF)', async ({ page }) => {
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
-        const chatContainer = page.locator('#chat-container');
+        const chatContainer = page.locator('#continuous-container');
 
         // Wait for content to load
-        await page.waitForSelector('#chat-container .card .video-card');
+        await page.waitForSelector('#continuous-container .card .video-card');
 
         // Verify default state
         await expect(videosCheckbox).toBeChecked();
@@ -46,10 +46,10 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     test('Screenshot: QR-only state (Videos OFF, QR ON)', async ({ page }) => {
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
-        const chatContainer = page.locator('#chat-container');
+        const chatContainer = page.locator('#continuous-container');
 
         // Wait for content to load
-        await page.waitForSelector('#chat-container .card .video-card');
+        await page.waitForSelector('#continuous-container .card .video-card');
 
         // Set QR-only state
         await videosCheckbox.uncheck();
@@ -81,9 +81,9 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         const settingsBtn = page.locator('#settings-btn');
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
-        const chatContainer = page.locator('#chat-container');
+        const chatContainer = page.locator('#continuous-container');
 
-        await page.waitForSelector('#chat-container .card .video-card');
+        await page.waitForSelector('#continuous-container .card .video-card');
 
         // // Open the Settings menu — the toggles are hidden inside it until this is clicked
         // await settingsBtn.click();
@@ -128,10 +128,10 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     test('Screenshot: None state (Videos OFF, QR OFF)', async ({ page }) => {
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
-        const chatContainer = page.locator('#chat-container');
+        const chatContainer = page.locator('#continuous-container');
 
         // Wait for content to load
-        await page.waitForSelector('#chat-container .card');
+        await page.waitForSelector('#continuous-container .card');
 
         // Set none state
         await videosCheckbox.uncheck();
@@ -161,10 +161,10 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
     test('Screenshot: Videos-only state (Videos ON, QR OFF) - verify default persists', async ({ page }) => {
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
-        const chatContainer = page.locator('#chat-container');
+        const chatContainer = page.locator('#continuous-container');
 
         // Wait for content to load
-        await page.waitForSelector('#chat-container .card .video-card');
+        await page.waitForSelector('#continuous-container .card .video-card');
 
         // Ensure state is Videos ON, QR OFF (default)
         await videosCheckbox.check();
