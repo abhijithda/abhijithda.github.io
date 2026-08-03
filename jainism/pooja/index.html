@@ -12,7 +12,12 @@
 
 <body>
     <header class="app-header">
-        <input type="text" id="search-bar" placeholder="Search topics - ಅಭಿಷೇಕ, Daana..." onkeyup="filterChat()">
+        <div class="view-toggle">
+            <button class="view-toggle-btn active" data-view="book" title="Book spread view">📖 Book</button>
+            <button class="view-toggle-btn" data-view="continuous" title="Continuous scrolling view">☰ Continuous</button>
+        </div>
+
+        <input type="text" id="search-bar" placeholder="Search topics - ಅಭಿಷೇಕ, Daana...">
 
         <span id="read-progress" class="read-progress" title="Items you've marked as read"></span>
 
