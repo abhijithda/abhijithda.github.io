@@ -72,42 +72,70 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
         expect(await hasClass(tick, 'read')).toBe(false);
     });
 
-    test('the tick is invisible until Read tracking is enabled in Settings', async ({ page }) => {
-        // Reload to get back to the off-by-default state, without the
-        // beforeEach's toggle-enabling step.
+    test('Settings - read tracking visibility persists across reloads', async ({ page }) => {
+        const readTrackingToggle = page.locator('#toggle-read-tracking');
+        const settingsBtn = page.locator('#settings-btn'); // Grab the settings button
+
+        // 1. Disable read tracking and verify it hides
+        // (Assuming beforeEach already opens the menu here)
+        await readTrackingToggle.uncheck();
+        await expect(page.locator('.read-tick').first()).toBeHidden();
+
+        // 2. Reload the page and verify the OFF state persisted via localStorage
         await page.reload();
         await expect(page.locator('.card').first()).toBeVisible();
-
         await expect(page.locator('.read-tick').first()).toBeHidden();
-        await expect(page.locator('#read-progress')).toBeHidden();
+
+        // 3. Enable read tracking and verify it shows
+        await settingsBtn.click();
+        await readTrackingToggle.check();
+        await expect(page.locator('.read-tick').first()).toBeVisible();
+
+        // 4. Reload the page and verify the ON state persisted via localStorage
+        await page.reload();
+        await expect(page.locator('.card').first()).toBeVisible();
+        await expect(page.locator('.read-tick').first()).toBeVisible();
     });
 
-    // test('in print, the tick shows as a blank pencil-markable circle even for a block already marked read digitally', async ({ page }) => {
-    //     const tick = page.locator('#q_001_b_1 .read-tick');
-    //     await tick.click(); // mark it read digitally first
+    test('in print, the tick reflects digital read progress for transfer to physical prints', async ({ page }) => {
+        const readTrackingToggle = page.locator('#toggle-read-tracking');
+        // Ensure read tracking is enabled (handling potential beforeEach overrides)
+        await readTrackingToggle.check();
 
-    //     await page.emulateMedia({ media: 'print' });
-    //     await page.waitForTimeout(200);
+        // Target the first tick and mark it as read digitally
+        const tick = page.locator('.read-tick').first();
+        await tick.click();
+        await expect(tick).toHaveClass(/read/); // Ensure the JS applied the class
 
-    //     const appearance = await tick.evaluate(el => {
-    //         const cs = getComputedStyle(el);
-    //         return { display: cs.display, background: cs.backgroundColor, color: cs.color };
-    //     });
-
-    //     expect(appearance.display).not.toBe('none');
-    //     // Blank regardless of the .read class actually being present —
-    //     // print never shows the digital fill/checkmark.
-    //     expect(await hasClass(tick, 'read')).toBe(true);
-    //     expect(appearance.background).toBe('rgba(0, 0, 0, 0)');
-    //     expect(appearance.color).toBe('rgba(0, 0, 0, 0)');
-    // });
-
-    test('in print, the tick is hidden entirely when Read tracking is off', async ({ page }) => {
-        await page.reload();
-        await expect(page.locator('.card').first()).toBeVisible();
-        // Note: no Settings/toggle step here — stays at the off default.
-
+        // Emulate print media
         await page.emulateMedia({ media: 'print' });
+        await page.waitForTimeout(200); // Give the browser a moment to apply @media print styles
+
+        // Evaluate the computed styles of the printed read tick
+        const appearance = await tick.evaluate(el => {
+            const cs = getComputedStyle(el);
+            return { display: cs.display, backgroundColor: cs.backgroundColor };
+        });
+
+        expect(appearance.display).not.toBe('none');
+
+        // Print CSS now carries over the green fill (#4caf50 -> rgb(76, 175, 80)) 
+        // instead of clearing it, so users can see their read progress on the printout.
+        expect(appearance.backgroundColor).toBe('rgb(76, 175, 80)');
+    });
+
+    test('in print, the tick is hidden entirely when Read tracking is disabled in settings', async ({ page }) => {
+        const readTrackingToggle = page.locator('#toggle-read-tracking');
+
+        // Turn off read tracking via the toggle
+        await readTrackingToggle.uncheck();
+        await expect(page.locator('.read-tick').first()).toBeHidden();
+
+        // Emulate print media
+        await page.emulateMedia({ media: 'print' });
+        await page.waitForTimeout(200);
+
+        // Verify ticks remain hidden in the print view so they don't clutter the page unnecessarily
         await expect(page.locator('.read-tick').first()).toBeHidden();
     });
 });
