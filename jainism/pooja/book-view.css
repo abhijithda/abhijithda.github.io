@@ -1,0 +1,536 @@
+/* book-view.css — Book spread layout, fixed-height pages, media, nav, print. */
+
+/* ── Book container ──────────────────────────────────────────────────────── */
+#book-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 20px 32px;
+    min-height: calc(100vh - 60px);
+    background: #7a6a58;
+}
+
+#book-container.active {
+    display: flex;
+}
+
+.book-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 960px;
+    gap: 14px;
+}
+
+/* ── Spread ──────────────────────────────────────────────────────────────── */
+.book-spread {
+    display: flex;
+    width: 100%;
+    background: #f8f5f0;
+    border-radius: 2px;
+    position: relative;
+    /*
+     * Fixed height so both pages are the same size regardless of content.
+     * Breakdown of what surrounds the spread:
+     *   header:               60px
+     *   #book-container pt:   20px
+     *   .book-shell gap:      14px  (between spread and nav)
+     *   .book-nav height:     ~46px (buttons at 7px padding + ~18px line + 7px padding + 4px margin)
+     *   #book-container pb:   32px
+     *   subtotal:            172px  + 10px safety buffer = 182px
+     */
+    height: calc(100vh - 182px);
+    min-height: 480px;
+    box-shadow:
+        -6px 6px 22px rgba(0, 0, 0, 0.5),
+        6px 6px 22px rgba(0, 0, 0, 0.5);
+}
+
+.book-spine {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transform: translateX(-50%);
+    background: linear-gradient(to right,
+            rgba(0, 0, 0, 0.22),
+            rgba(255, 255, 255, 0.55) 40%,
+            rgba(255, 255, 255, 0.55) 60%,
+            rgba(0, 0, 0, 0.18));
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* ── Page ────────────────────────────────────────────────────────────────── */
+/* overflow:hidden clips content that exceeds the page height — intentional.
+   Pagination keeps pages balanced; clipping only catches edge cases. */
+.book-page {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    /* No bottom padding — the page-number is position:absolute so it doesn't
+       need flow space. Removing it gives ~28px more content area per page. */
+    padding: 14px 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+    /* fixed height — content that overflows is clipped */
+    box-sizing: border-box;
+}
+
+/* ── Running head ────────────────────────────────────────────────────────── */
+.book-running-head {
+    font-family: Georgia, serif;
+    font-size: 8px;
+    color: #bbb;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 0.5px solid #ddd;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.book-running-head.left {
+    text-align: left;
+}
+
+.book-running-head.right {
+    text-align: right;
+}
+
+/* ── Page number ─────────────────────────────────────────────────────────── */
+.book-page-num {
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    /* Footer rule — mirrors the running head border at top */
+    border-top: 0.5px solid #ddd;
+    padding-top: 5px;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: Georgia, serif;
+    font-size: 10px;
+    color: #bbb;
+}
+
+/* Override: left page shows number on left, right page on right */
+.book-page.left .book-page-num {
+    justify-content: flex-start;
+}
+
+.book-page.right .book-page-num {
+    justify-content: flex-end;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.book-card {
+    background: white;
+    border-left: 3px solid #ccc;
+    border-top: 0.5px solid #eee;
+    border-right: 0.5px solid #eee;
+    border-bottom: 0.5px solid #eee;
+    padding: 5px 7px 6px;
+    margin-bottom: 4px;
+    font-size: 11px;
+    line-height: 1.5;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Card type colours moved to card-types.css */
+
+.book-bid {
+    display: block;
+    font-family: monospace;
+    font-size: 8px;
+    font-weight: bold;
+    color: #bbb;
+    margin-bottom: 3px;
+}
+
+/* ── Language lines ──────────────────────────────────────────────────────── */
+.book-lang-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.book-lang-line.lang-kn {
+    color: #111;
+    font-size: 11px;
+}
+
+.book-lang-line.lang-en {
+    color: #555;
+    font-size: 10.5px;
+}
+
+.book-lang-sep {
+    height: 0.5px;
+    background: #ebebeb;
+    margin: 3px 0;
+}
+
+/* ── Excerpt strip ───────────────────────────────────────────────────────── */
+.book-excerpt {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 3px 8px;
+    margin: -6px -8px 6px;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.07);
+    font-size: 9px;
+    color: #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+}
+
+.book-ref {
+    font-family: monospace;
+    font-size: 8.5px;
+    font-weight: bold;
+    color: #1565c0;
+    flex-shrink: 0;
+}
+
+.book-excerpt-preview {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Video rows ──────────────────────────────────────────────────────────── */
+.book-vid-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
+.book-vid-thumb {
+    position: relative;
+    flex-shrink: 0;
+    height: 60px;
+    /* match QR height so row stays compact */
+    width: auto;
+}
+
+.book-vid-img {
+    height: 60px;
+    width: auto;
+    /* proportional to 16:9 = ~107px wide at 60px tall */
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    border-radius: 3px;
+    border: 0.5px solid #ddd;
+}
+
+.book-vid-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.book-vid-play::before {
+    content: '▶';
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    color: white;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 2px;
+}
+
+.book-vid-qr {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+/* 60px on screen ≈ 1.5cm printed — scannable */
+.book-qr-img {
+    width: 60px;
+    height: 60px;
+    display: block;
+    border: 0.5px solid #ddd;
+    border-radius: 2px;
+}
+
+/* .book-qr-label removed — "Scan to watch" text is gone */
+
+/* ── Images ──────────────────────────────────────────────────────────────── */
+/* ── General image wrap (inline images in answer/question cards) ─────────── */
+/* ── Inline image wrap (image inside any non-images-type card) ───────────── */
+/* No centering — image flows naturally in the card at full card width */
+.book-image-wrap {
+    width: 100%;
+    margin-top: 6px;
+}
+
+/* Full card width, natural aspect ratio, no artificial height cap */
+.book-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 3px;
+    border: 0.5px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    object-fit: contain;
+}
+
+.book-image-caption {
+    font-size: 9px;
+    color: #777;
+    text-align: center;
+    font-style: italic;
+    margin: 4px 0 0;
+}
+
+/* ── Standalone image page (item.type==='images' OR image-only block) ────── */
+/* Page contains only the image and caption — card fills the full page,        */
+/* image fills full card width, caption sits immediately below. No centering.  */
+#book-container .book-page .book-card.images {
+    flex: 1;
+    /* fill all available page space below running head */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    /* image stretches to full card width */
+    padding: 8px;
+    min-height: 0;
+    border-left-width: 2px;
+}
+
+#book-container .book-page .book-card.images .book-image-wrap {
+    flex: 1;
+    /* image wrap takes all card space above caption */
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Image fills wrap width at natural aspect ratio */
+#book-container .book-page .book-card.images .book-image {
+    width: 100%;
+    height: 100%;
+    /* fill the flex wrap height */
+    max-height: 100%;
+    object-fit: contain;
+    /* preserves aspect ratio within the available height */
+    border-radius: 3px;
+    border: 0.5px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Caption sits immediately below the image, not at bottom of page */
+#book-container .book-page .book-card.images .book-image-caption {
+    flex-shrink: 0;
+    margin-top: 6px;
+    font-size: 10px;
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+/* ── Nav bar ─────────────────────────────────────────────────────────────── */
+.book-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 960px;
+    gap: 12px;
+}
+
+.book-nav-btn {
+    padding: 7px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    font-size: 12px;
+    color: white;
+    transition: background 0.15s;
+}
+
+.book-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.book-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.book-jump {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 10px;
+    padding: 6px 14px;
+}
+
+.book-jump-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.65);
+    white-space: nowrap;
+}
+
+#book-jump-input {
+    width: 48px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+#book-jump-input::-webkit-outer-spin-button,
+#book-jump-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+#book-jump-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.book-jump-go {
+    padding: 3px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.14);
+    cursor: pointer;
+    font-size: 11px;
+    color: white;
+}
+
+.book-jump-go:hover {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .book-spread {
+        flex-direction: column;
+        height: auto;
+        /* on mobile, stack pages vertically and let them flow */
+    }
+
+    .book-spine {
+        left: 0;
+        right: 0;
+        top: 50%;
+        bottom: auto;
+        width: 100%;
+        height: 3px;
+        transform: translateY(-50%);
+        background: linear-gradient(to bottom,
+                rgba(0, 0, 0, 0.22),
+                rgba(255, 255, 255, 0.55) 40%,
+                rgba(255, 255, 255, 0.55) 60%,
+                rgba(0, 0, 0, 0.18));
+    }
+
+    .book-page {
+        height: auto;
+        overflow: visible;
+    }
+}
+
+/* ── Print — entire book ─────────────────────────────────────────────────── */
+/* The interactive spread is hidden; book-print-container shows all pages.   */
+@media print {
+
+    /* Hide everything except the print book */
+    .app-header,
+    #continuous-container,
+    #book-container,
+    #back-to-message {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    /* Each print spread is a separate printed page */
+    .book-print-container {
+        display: block !important;
+    }
+
+    .book-print-spread {
+        display: flex;
+        width: 100%;
+        page-break-after: always;
+        break-after: page;
+        min-height: 24cm;
+        /* A4 content height */
+        border: none;
+        box-shadow: none;
+    }
+
+    .book-print-spread .book-page {
+        flex: 1;
+        min-width: 0;
+        height: auto;
+        /* print pages flow naturally */
+        overflow: visible;
+        /* no clipping in print */
+        padding: 1.5cm 1.2cm 2cm;
+        box-sizing: border-box;
+        border: none;
+    }
+
+    /* Wider QR for scanning from a printed page */
+    .book-qr-img {
+        width: 80px !important;
+        height: 80px !important;
+    }
+
+    /* Greyscale thumbnails save ink */
+    .book-vid-img {
+        filter: grayscale(100%);
+    }
+
+    .book-running-head {
+        color: #333;
+        border-bottom-color: #999;
+    }
+
+    .book-page-num {
+        color: #333;
+    }
+
+    .book-nav {
+        display: none;
+    }
+}
+
+/* Hidden on screen — only shows at print time */
+.book-print-container {
+    display: none;
+}

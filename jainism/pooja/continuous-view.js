@@ -57,13 +57,13 @@ export function renderContinuousView(data, container, lang = 'all') {
     backStack = [];
 
     const blockById = {};
-    const itemById  = {};
+    const itemById = {};
     data.forEach(item => {
         itemById[item.id] = item;
         item.blocks.forEach(block => { blockById[block.id] = block; });
     });
 
-    const readBlocks      = getReadBlocks(localStorage);
+    const readBlocks = getReadBlocks(localStorage);
     const totalBlockCount = data.reduce((sum, item) => sum + item.blocks.length, 0);
 
     data.forEach(item => {
@@ -117,8 +117,8 @@ export function renderContinuousView(data, container, lang = 'all') {
         item.blocks.forEach(block => {
             const row = document.createElement('div');
             const hasText = block.content?.kn?.some(l => l.trim() !== '') ||
-                            block.content?.en?.some(l => l.trim() !== '');
-            const isRead  = readBlocks.has(block.id);
+                block.content?.en?.some(l => l.trim() !== '');
+            const isRead = readBlocks.has(block.id);
             row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}${isRead ? ' read' : ''}`;
             row.id = block.id;
 
@@ -155,7 +155,7 @@ export function renderContinuousView(data, container, lang = 'all') {
                     const capEn = img.caption?.en || '';
                     let capText = '';
                     if (lang === 'all') capText = (capKn && capEn) ? `${capKn} / ${capEn}` : (capKn || capEn);
-                    else                capText = (lang === 'kn') ? capKn : capEn;
+                    else capText = (lang === 'kn') ? capKn : capEn;
                     mediaCol.innerHTML += `
                         <div class="image-card">
                             <img src="images/${img.src}" alt="${capText}">

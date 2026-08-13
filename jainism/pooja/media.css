@@ -3,13 +3,13 @@
 
 /* Content-less image blocks (no text to sit beside) get the large,
    prominent treatment. */
-.block-row.media-only .col-media {
+#continuous-container .block-row.media-only .col-media {
     flex: 1 1 100%;
     width: 100%;
 }
 
-.block-row.media-only .image-card,
-.block-row.media-only .image-card img {
+#continuous-container .block-row.media-only .image-card,
+#continuous-container .block-row.media-only .image-card img {
     width: 640px;
     max-width: 100%;
     height: auto;
@@ -21,8 +21,8 @@
 
 /* Photos attached to a block that also has text sit inside the slim
    .col-media column next to the text. */
-.block-row:not(.media-only) .image-card,
-.block-row:not(.media-only) .image-card img {
+#continuous-container .block-row:not(.media-only) .image-card,
+#continuous-container .block-row:not(.media-only) .image-card img {
     width: 100%;
     max-width: 200px;
     height: auto;
@@ -32,7 +32,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.image-caption {
+#continuous-container .image-caption {
     font-weight: bold;
     margin-top: 8px;
     font-family: Arial, sans-serif;
@@ -48,7 +48,7 @@
 }
 
 /* 4. MEDIA & QR OVERLAY */
-.col-media {
+#continuous-container .col-media {
     display: none !important;
     flex: 0 0 200px;
     width: 200px;
@@ -61,17 +61,17 @@
 }
 
 /* Show only if content exists and toggles are on */
-body.show-videos .col-media:not(:empty),
-body.show-qrs .col-media:not(:empty) {
+body.show-videos #continuous-container .col-media:not(:empty),
+body.show-qrs #continuous-container .col-media:not(:empty) {
     display: flex !important;
 }
 
 /* Photos are independent — always visible regardless of video/QR toggles */
-.col-media.has-images {
+#continuous-container .col-media.has-images {
     display: flex !important;
 }
 
-.media-wrap {
+#continuous-container .media-wrap {
     position: relative;
     display: inline-block;
     width: 200px;
@@ -80,20 +80,20 @@ body.show-qrs .col-media:not(:empty) {
     overflow: visible;
 }
 
-.video-card {
+#continuous-container .video-card {
     display: none;
     width: 100%;
     margin: 0;
     padding: 0;
 }
 
-.video-card img {
+#continuous-container .video-card img {
     width: 100%;
     display: block;
     border-radius: 8px;
 }
 
-.qr-code {
+#continuous-container .qr-code {
     display: none;
     position: absolute;
     bottom: 0;
@@ -108,23 +108,23 @@ body.show-qrs .col-media:not(:empty) {
     box-sizing: border-box;
 }
 
-.qr-code img {
+#continuous-container .qr-code img {
     width: 100%;
     height: 100%;
     display: block;
 }
 
 /* 5. TOGGLE SYSTEM */
-body.show-videos .video-card {
+body.show-videos #continuous-container .video-card {
     display: block;
 }
 
-body.show-qrs .qr-code {
+body.show-qrs #continuous-container .qr-code {
     display: block;
 }
 
 /* QR-only view (non-overlay) */
-body:not(.show-videos).show-qrs .qr-code {
+body:not(.show-videos).show-qrs #continuous-container .qr-code {
     position: static;
     width: 120px;
     height: 120px;
@@ -134,46 +134,46 @@ body:not(.show-videos).show-qrs .qr-code {
 
 /* Print */
 @media print {
-    .col-media {
+    #continuous-container .col-media {
         display: none;
     }
 
-    body.show-videos .col-media:not(:empty),
-    body.show-qrs .col-media:not(:empty) {
+    body.show-videos #continuous-container .col-media:not(:empty),
+    body.show-qrs #continuous-container .col-media:not(:empty) {
         display: flex !important;
         flex: 0 0 170px !important;
         width: 170px !important;
     }
 
-    .col-media.has-images {
+    #continuous-container .col-media.has-images {
         display: flex !important;
         flex: 0 0 170px !important;
         width: 170px !important;
     }
 
-    body .block-row.media-only .col-media {
+    body #continuous-container .block-row.media-only .col-media {
         flex: 1 1 100% !important;
         width: 100% !important;
     }
 
-    body .block-row.media-only .image-card,
-    body .block-row.media-only .image-card img {
+    body #continuous-container .block-row.media-only .image-card,
+    body #continuous-container .block-row.media-only .image-card img {
         width: auto !important;
         height: auto !important;
         max-width: 100% !important;
         max-height: 7.0in !important;
     }
 
-    .block-row.media-only .image-card {
+    #continuous-container .block-row.media-only .image-card {
         margin: 0 auto !important;
     }
 
-    .block-row:not(.media-only) .image-card,
-    .block-row:not(.media-only) .image-card img {
+    #continuous-container .block-row:not(.media-only) .image-card,
+    #continuous-container .block-row:not(.media-only) .image-card img {
         max-width: 170px !important;
     }
 
-    .qr-code {
+    #continuous-container .qr-code {
         border: 1px solid #000 !important;
         bottom: 0 !important;
         right: 0 !important;
