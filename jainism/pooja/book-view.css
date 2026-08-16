@@ -1,0 +1,520 @@
+/* book-view.css — Book spread layout using CSS Columns, media, nav, print. */
+
+#book-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 20px 32px;
+    min-height: calc(100vh - 60px);
+    background: #7a6a58;
+}
+
+#book-container.active {
+    display: flex;
+}
+
+.book-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 960px;
+    gap: 14px;
+}
+
+/* ── Spread & CSS Column Engine ──────────────────────────────────────────── */
+.book-spread {
+    width: 100%;
+    aspect-ratio: 420 / 297;
+    /* Exact A4 proportions */
+    height: auto;
+
+    /* ESTABLISH CONTAINER FOR CQI SCALING */
+    container-type: inline-size;
+
+    background: #f8f5f0;
+    border-radius: 2px;
+    position: relative;
+    box-shadow: -6px 6px 22px rgba(0, 0, 0, 0.5), 6px 6px 22px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.book-spine {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.22), rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.55) 60%, rgba(0, 0, 0, 0.18));
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Static Headers & Footers */
+.book-static-head,
+.book-static-foot {
+    position: absolute;
+    z-index: 5;
+    font-family: Georgia, serif;
+    /* CQI scaling: shrinks and grows, but never gets smaller than 7px or larger than 10px */
+    font-size: clamp(7px, 1cqi, 10px);
+    color: #bbb;
+    letter-spacing: 0.1em;
+}
+
+.book-static-head {
+    top: 14px;
+    text-transform: uppercase;
+    border-bottom: 0.5px solid #ddd;
+    padding-bottom: 4px;
+}
+
+.book-static-foot {
+    bottom: 14px;
+    border-top: 0.5px solid #ddd;
+    padding-top: 5px;
+}
+
+.book-static-head.left,
+.book-static-foot.left {
+    left: 28px;
+    width: calc(50% - 56px);
+    text-align: left;
+}
+
+.book-static-head.right,
+.book-static-foot.right {
+    right: 28px;
+    width: calc(50% - 56px);
+    text-align: right;
+}
+
+.book-columns {
+    column-count: 2;
+    column-gap: 56px;
+    /* Gutter space between left and right pages */
+    column-fill: auto;
+    height: 100%;
+    /* Added bottom padding to clear the new footer! */
+    padding: 35px 28px 35px;
+    box-sizing: border-box;
+    transition: transform 0.4s ease-in-out;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.book-card {
+    /* CRITICAL: Allows cards to cleanly split across pages without gaps! */
+    break-inside: auto;
+    page-break-inside: auto;
+
+    background: white;
+    border-left: 3px solid #ccc;
+    border-top: 0.5px solid #eee;
+    border-right: 0.5px solid #eee;
+    border-bottom: 0.5px solid #eee;
+    padding: 5px 7px 6px;
+    margin-bottom: 4px;
+    font-size: 11px;
+    line-height: 1.5;
+    position: relative;
+}
+
+/* ── Card Typography with CQI Scaling ── */
+.book-bid {
+    display: block;
+    font-family: monospace;
+    font-weight: bold;
+    color: #bbb;
+    margin-bottom: 3px;
+    font-size: clamp(7px, 1cqi, 10px);
+}
+
+.book-lang-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.book-lang-line.lang-kn {
+    color: #111;
+    font-size: clamp(10px, 1.35cqi, 14px);
+}
+
+.book-lang-line.lang-en {
+    color: #555;
+    font-size: clamp(9.5px, 1.25cqi, 13px);
+}
+
+.book-lang-sep {
+    height: 0.5px;
+    background: #ebebeb;
+    margin: 3px 0;
+}
+
+.book-excerpt {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 3px 8px;
+    margin: -6px -8px 6px;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.07);
+    color: #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+    font-size: clamp(8px, 1.1cqi, 12px);
+}
+
+.book-ref {
+    font-family: monospace;
+    font-weight: bold;
+    color: #1565c0;
+    flex-shrink: 0;
+    font-size: clamp(7.5px, 1cqi, 11px);
+}
+
+.book-excerpt-preview {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* CRITICAL: Keep Titles, Excerpts, and IDs attached to the text below them */
+.card-title,
+.book-excerpt,
+.book-bid {
+    break-after: avoid;
+    page-break-after: avoid;
+    -webkit-column-break-after: avoid;
+}
+
+/* ── Media ───────────────────────────────────────────────────────────────── */
+.book-vid-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
+.book-vid-thumb {
+    position: relative;
+    flex-shrink: 0;
+    height: 60px;
+    width: auto;
+}
+
+.book-vid-img {
+    height: 60px;
+    width: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    border-radius: 3px;
+    border: 0.5px solid #ddd;
+}
+
+.book-vid-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.book-vid-play::before {
+    content: '▶';
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    color: white;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 2px;
+}
+
+.book-vid-qr {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.book-qr-img {
+    width: 60px;
+    height: 60px;
+    display: block;
+    border: 0.5px solid #ddd;
+    border-radius: 2px;
+}
+
+/* ── Inline Images (Inside standard Q&A cards) ── */
+.book-image-wrap {
+    width: 100%;
+    margin-top: 6px;
+    break-inside: avoid;
+    /* Keeps image and ALL captions bundled together */
+    page-break-inside: avoid;
+    /* inline-block forces Chrome to treat the image and 
+       captions as a single, unbreakable brick in CSS columns */
+    display: inline-block;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+}
+
+.book-image {
+    width: 100%;
+    height: auto;
+
+    /* CRITICAL FIX FOR YOUR SCREENSHOT: Caps inline images so they don't 
+       get so tall that they force massive blank gaps on the previous page! */
+    max-height: 70cqh;
+
+    display: block;
+    border-radius: 3px;
+    border: 0.5px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    object-fit: contain;
+
+    /* Extra safeguard: explicitly forbid breaks right after the image */
+    break-after: avoid; 
+    page-break-after: avoid;
+    -webkit-column-break-after: avoid;
+}
+
+.book-image-caption {
+    font-size: 9px;
+    color: #777;
+    text-align: center;
+    font-style: italic;
+    margin: 2px 0 0 0;
+
+    /* Extra safeguard: explicitly forbid breaks before or between captions */
+    break-before: avoid;
+    break-inside: avoid;    
+}
+
+
+/* ── Standalone Image Pages (Takes full card width, isolated on own page) ── */
+.book-columns .standalone-image {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: column;
+    page-break-after: always;
+    -webkit-column-break-after: always;
+
+    /* Keeps the white card background and border styling you wanted */
+    background: white;
+    border-left: 3px solid #607d8b;
+    border-top: 0.5px solid #eee;
+    border-right: 0.5px solid #eee;
+    border-bottom: 0.5px solid #eee;
+    padding: 8px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Force a new page BEFORE the image, UNLESS it is the very first card */
+.book-columns .standalone-image:not(:first-child) {
+    break-before: column;
+    page-break-before: always;
+    -webkit-column-break-before: always;
+}
+
+/* Hide the block ID and Read Tick so the image page is clean */
+.book-columns .standalone-image .book-bid,
+.book-columns .standalone-image .read-tick {
+    display: none !important;
+}
+
+.book-columns .standalone-image .book-image-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0;
+}
+
+.book-columns .standalone-image .book-image {
+    width: 100%;
+    height: auto;
+
+    /* Lets the standalone image grow much taller than inline images */
+    max-height: 75cqh;
+
+    object-fit: contain;
+    border: none;
+    box-shadow: none;
+}
+
+.book-columns .standalone-image .book-image-caption {
+    margin-top: 8px;
+    font-size: 11px;
+    text-align: center;
+    color: #555;
+}
+
+/* ── Nav bar ─────────────────────────────────────────────────────────────── */
+.book-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 960px;
+    gap: 12px;
+}
+
+.book-nav-btn {
+    padding: 7px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    font-size: 12px;
+    color: white;
+    transition: background 0.15s;
+}
+
+.book-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.book-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.book-jump {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 10px;
+    padding: 6px 14px;
+}
+
+.book-jump-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.65);
+    white-space: nowrap;
+}
+
+#book-jump-input {
+    width: 48px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+#book-jump-input::-webkit-outer-spin-button,
+#book-jump-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.book-jump-go {
+    padding: 3px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.14);
+    cursor: pointer;
+    font-size: 11px;
+    color: white;
+}
+
+/* ── Print — entire book ─────────────────────────────────────────────────── */
+@media print {
+
+    /* Force the physical printer/PDF to use A4 paper */
+    @page {
+        size: A4 portrait;
+        /* RESTORED PRINT MARGINS: Standard 15mm margins on paper */
+        margin: 15mm;
+    }
+
+    .app-header,
+    #continuous-container,
+    #back-to-message,
+    .book-nav {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    #book-container {
+        display: flex !important;
+        padding: 0 !important;
+    }
+
+    .book-shell {
+        max-width: none;
+        width: 100%;
+    }
+
+    /* Hide the fake screen headers/footers so they don't overlap physical printed text */
+    .book-spine,
+    .book-static-head,
+    .book-static-foot {
+        display: none !important;
+    }
+
+    .book-spread {
+        width: 100%;
+        height: auto !important;
+        aspect-ratio: auto;
+        border: none;
+        box-shadow: none;
+        background: transparent !important;
+        overflow: visible;
+        container-type: normal !important;
+        /* Disables CQI scaling for print so text stays legible */
+    }
+
+    .book-columns {
+        column-count: 1 !important;
+        transform: none !important;
+        padding: 0 !important;
+        height: auto !important;
+    }
+
+    .book-qr-img {
+        width: 80px !important;
+        height: 80px !important;
+    }
+
+    .book-vid-img {
+        filter: grayscale(100%);
+    }
+
+    .standalone-image {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        break-after: page;
+
+        /* Fits safely inside A4 print margins */
+        height: auto !important;
+        max-height: 250mm !important;
+    }
+
+    .standalone-image:not(:first-child) {
+        break-before: page;
+    }
+}
