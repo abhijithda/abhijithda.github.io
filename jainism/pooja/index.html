@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="media.css">
     <link rel="stylesheet" href="read-tracking.css">
+    <link rel="stylesheet" href="card-types.css">
     <link rel="stylesheet" href="continuous-view.css">
 </head>
 
@@ -24,13 +25,23 @@
         <div class="view-menu-container">
             <button id="settings-btn" class="menu-trigger">Settings ⚙️</button>
             <div id="settings-menu" class="menu-content">
-                <div class="menu-section">
-                    <label for="lang-select">Language</label>
-                    <select id="lang-select">
-                        <option value="all">All</option>
-                        <option value="kn">ಕನ್ನಡ</option>
-                        <option value="en">English</option>
-                    </select>
+                <!-- Language: searchable multi-select, collapsed by default.
+                     Was a single <select id="lang-select"> (All/kn/en); this scales
+                     to a long language list without a wall of checkboxes. -->
+                <div class="menu-section menu-section--lang">
+                    <span class="menu-label">🌐 Language:</span>
+                    <div class="lang-picker">
+                        <button type="button" id="lang-trigger" class="lang-trigger" aria-expanded="false">
+                            <span id="lang-summary" class="lang-summary"></span>
+                            <span class="lang-chevron" aria-hidden="true">▾</span>
+                        </button>
+                        <div id="lang-panel" class="lang-panel" hidden>
+                            <input type="text" id="lang-search" class="lang-search" placeholder="Search languages">
+                            <div id="lang-list" class="lang-list">
+                                <!-- built by header.js from KNOWN_LANGS -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="menu-section">
                     <label>🎬 Videos:</label>

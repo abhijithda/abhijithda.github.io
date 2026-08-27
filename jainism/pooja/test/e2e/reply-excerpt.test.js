@@ -29,7 +29,8 @@ test.describe('Reply Excerpt - jump to source and back', () => {
     // language selector entirely and always show both columns.
     test('the excerpt respects the selected language, same as regular blocks', async ({ page }) => {
         await page.locator('#settings-btn').click();
-        await page.selectOption('#lang-select', 'kn');
+        await page.locator('#lang-trigger').click();
+        await page.locator('#lang-chk-en').uncheck(); // leaves only Kannada active
         const excerpt = page.locator('#a_001 .reply-excerpt .excerpt-row').first();
         await expect(excerpt.locator('.col-kn')).toBeVisible();
         await expect(excerpt.locator('.col-en')).toHaveCount(0);

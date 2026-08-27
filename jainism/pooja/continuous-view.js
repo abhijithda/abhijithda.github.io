@@ -3,26 +3,18 @@
 // Imports from media.js and read-tracking.js for clean separation.
 
 import { createVideoCard } from './media.js';
-import { getReadBlocks, saveReadBlocks, toggleBlockRead, computeProgress } from './read-tracking.js';
+import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, computeProgress } from './read-tracking.js';
+import { formatIdForDisplay, buildBlockIndex, resolveReference } from './blocks.js';
 
 // ── Back-navigation stack (verbatim from master) ──────────────────────────
 let backStack = [];
 
-export function formatIdForDisplay(block) {
-    let typeInitial = block.id[0].toUpperCase();
-    if (block.type === 'shloka') typeInitial = 'S';
-    else if (block.type === 'note') typeInitial = 'N';
-    const parts = block.id.split('_');
-    const number = parseInt(parts[1], 10);
-    const subNumber = parts[3];
-    return `${typeInitial}-${number}.${subNumber}`;
-}
-
-export function resolveReference(refId, blockById, itemById) {
-    if (blockById[refId]) return blockById[refId];
-    const item = itemById[refId];
-    if (item && item.blocks && item.blocks.length > 0) return item.blocks[0];
-    return null;
+// Purely presentational: whether a block has any text, for the .media-only
+// CSS class. Distinct from read-tracking.js's isBlockTrackable — a
+// video-only block has no text (gets this class) but IS trackable.
+function hasTextContent(block) {
+    return block.content?.kn?.some(l => l.trim() !== '') ||
+           block.content?.en?.some(l => l.trim() !== '');
 }
 
 export function jumpToReference(blockId) {
@@ -56,15 +48,11 @@ export function renderContinuousView(data, container, lang = 'all') {
     container.innerHTML = '';
     backStack = [];
 
-    const blockById = {};
-    const itemById  = {};
-    data.forEach(item => {
-        itemById[item.id] = item;
-        item.blocks.forEach(block => { blockById[block.id] = block; });
-    });
+    const { blockById, itemById } = buildBlockIndex(data);
 
     const readBlocks      = getReadBlocks(localStorage);
-    const totalBlockCount = data.reduce((sum, item) => sum + item.blocks.length, 0);
+    const totalBlockCount = data.reduce((sum, item) =>
+        sum + item.blocks.filter(isBlockTrackable).length, 0);
 
     data.forEach(item => {
         const card = document.createElement('div');
@@ -116,9 +104,9 @@ export function renderContinuousView(data, container, lang = 'all') {
         // Blocks (verbatim from master's renderChat block loop)
         item.blocks.forEach(block => {
             const row = document.createElement('div');
-            const hasText = block.content?.kn?.some(l => l.trim() !== '') ||
-                            block.content?.en?.some(l => l.trim() !== '');
-            const isRead  = readBlocks.has(block.id);
+            const hasText   = hasTextContent(block);
+            const trackable = isBlockTrackable(block);
+            const isRead    = trackable && readBlocks.has(block.id);
             row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}${isRead ? ' read' : ''}`;
             row.id = block.id;
 
@@ -170,28 +158,31 @@ export function renderContinuousView(data, container, lang = 'all') {
 
             row.appendChild(mediaCol);
 
-            // Read tick (verbatim from master)
-            const readTick = document.createElement('button');
-            readTick.type = 'button';
-            readTick.className = `read-tick${isRead ? ' read' : ''}`;
-            readTick.title = isRead ? 'Marked as read' : 'Mark as read';
-            readTick.setAttribute('aria-label', readTick.title);
-            readTick.textContent = isRead ? '✓' : '';
-            readTick.onclick = (e) => {
-                e.stopPropagation();
-                const newSet = toggleBlockRead(block.id, getReadBlocks(localStorage));
-                saveReadBlocks(newSet, localStorage);
-                const nowRead = newSet.has(block.id);
-                row.classList.toggle('read', nowRead);
-                readTick.classList.toggle('read', nowRead);
-                readTick.textContent = nowRead ? '✓' : '';
-                readTick.title = nowRead ? 'Marked as read' : 'Mark as read';
+            // Read tick — skipped only for a block with neither text nor
+            // video (e.g. a standalone image); nothing to read or watch.
+            if (trackable) {
+                const readTick = document.createElement('button');
+                readTick.type = 'button';
+                readTick.className = `read-tick${isRead ? ' read' : ''}`;
+                readTick.title = isRead ? 'Marked as read' : 'Mark as read';
                 readTick.setAttribute('aria-label', readTick.title);
-                const { read, total } = computeProgress(newSet, totalBlockCount);
-                const el = document.getElementById('read-progress');
-                if (el) el.textContent = `✓ ${read}/${total} read`;
-            };
-            row.appendChild(readTick);
+                readTick.textContent = isRead ? '✓' : '';
+                readTick.onclick = (e) => {
+                    e.stopPropagation();
+                    const newSet = toggleBlockRead(block.id, getReadBlocks(localStorage));
+                    saveReadBlocks(newSet, localStorage);
+                    const nowRead = newSet.has(block.id);
+                    row.classList.toggle('read', nowRead);
+                    readTick.classList.toggle('read', nowRead);
+                    readTick.textContent = nowRead ? '✓' : '';
+                    readTick.title = nowRead ? 'Marked as read' : 'Mark as read';
+                    readTick.setAttribute('aria-label', readTick.title);
+                    const { read, total } = computeProgress(newSet, totalBlockCount);
+                    const el = document.getElementById('read-progress');
+                    if (el) el.textContent = `✓ ${read}/${total} read`;
+                };
+                row.appendChild(readTick);
+            }
 
             card.appendChild(row);
         });
@@ -208,7 +199,7 @@ export function renderContinuousView(data, container, lang = 'all') {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        formatIdForDisplay, resolveReference, jumpToReference, goBackToMessage,
+        jumpToReference, goBackToMessage,
         filterContinuous, renderContinuousView,
     });
 }
