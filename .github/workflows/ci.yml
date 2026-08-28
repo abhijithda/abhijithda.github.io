@@ -5,6 +5,7 @@ on:
     branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
+  workflow_dispatch:
 
 jobs:
   build-and-test:
@@ -43,7 +44,7 @@ jobs:
         name: playwright-html-report
         path: jainism/pooja/playwright-report/
         retention-days: 30
-              
+
     - name: Upload Playwright Test Results
       if: always()
       uses: actions/upload-artifact@v4
