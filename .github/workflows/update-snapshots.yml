@@ -1,30 +1,18 @@
-name: Update Playwright Snapshots
+name: CI Pipeline
 
-# Manual only — never runs on push/PR, unlike ci.yml. Trigger it from the
-# Actions tab ("Run workflow"), pick the branch and a delivery mode:
-#   commit   — pushes the new baselines straight to the branch
-#   artifact — uploads them as a downloadable zip for you to review first,
-#              nothing is committed
 on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
   workflow_dispatch:
-    inputs:
-      delivery:
-        description: 'How to deliver the updated snapshots'
-        required: true
-        type: choice
-        default: commit
-        options:
-          - commit
-          - artifact
-
-permissions:
-  contents: write
 
 jobs:
-  update-snapshots:
+  build-and-test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
+    
+    # TELL GITHUB ACTIONS WHERE YOUR NODE APP LIVES
     defaults:
       run:
         working-directory: ./jainism/pooja
@@ -38,42 +26,21 @@ jobs:
       with:
         node-version: 20
         cache: 'npm'
-        cache-dependency-path: './jainism/pooja/package-lock.json'
+        cache-dependency-path: './jainism/pooja/package-lock.json' # Point cache to the right folder
 
     - name: 📦 Install dependencies
-      run: npm ci
+      run: npm ci 
 
     - name: 🌐 Install Playwright Browsers & OS Dependencies
       run: npx playwright install --with-deps
 
-    - name: 📸 Regenerate snapshots (Linux baselines)
-      run: npm run test:update-snapshots
+    - name: 🧪 Run Test Suite (Ajv, Jest, Playwright)
+      run: npm test
 
-    - name: 🧹 Remove stray non-Linux baselines
-      # Only -linux.png is meaningful going forward — this runner only ever
-      # produces those. Any leftover -win32.png/-darwin.png from earlier
-      # local runs on other OSes gets removed here so the branch converges
-      # on one canonical baseline set instead of accumulating both.
-      run: find test/e2e -name "*-win32.png" -o -name "*-darwin.png" | xargs -r rm -f
-
-    - name: 💾 Commit updated snapshots
-      if: inputs.delivery == 'commit'
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add -A test/e2e
-        if git diff --cached --quiet; then
-          echo "No snapshot changes to commit."
-        else
-          git commit -m "chore: update Playwright snapshots (Linux baselines) [skip ci]"
-          git push
-        fi
-
-    - name: 📦 Upload snapshots as an artifact for review
-      if: inputs.delivery == 'artifact'
+    - name: Upload Playwright Test Results
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: playwright-snapshots-linux
-        path: jainism/pooja/test/e2e/**/*-linux.png
-        retention-days: 14
-        if-no-files-found: warn
+        name: playwright-test-results
+        path: jainism/pooja/test-results/
+        retention-days: 30
