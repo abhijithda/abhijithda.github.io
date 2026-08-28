@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // This feature (WhatsApp-style "replying to" preview, jump-to-source, and a
 // Back button) was lost once already across branch merges/manual reverts —
@@ -7,7 +8,9 @@ test.describe('Reply Excerpt - jump to source and back', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
 
         await page.goto('/');
@@ -29,7 +32,8 @@ test.describe('Reply Excerpt - jump to source and back', () => {
     // language selector entirely and always show both columns.
     test('the excerpt respects the selected language, same as regular blocks', async ({ page }) => {
         await page.locator('#settings-btn').click();
-        await page.selectOption('#lang-select', 'kn');
+        await page.locator('#lang-trigger').click();
+        await page.locator('#lang-chk-en').uncheck(); // leaves only Kannada active
         const excerpt = page.locator('#a_001 .reply-excerpt .excerpt-row').first();
         await expect(excerpt.locator('.col-kn')).toBeVisible();
         await expect(excerpt.locator('.col-en')).toHaveCount(0);

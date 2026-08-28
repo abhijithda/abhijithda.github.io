@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // This is NOT a regression test — it makes no assertions and never fails on
 // content changes. It exists purely to produce always-current screenshots of
@@ -19,7 +20,9 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
     test.beforeEach(async ({ page }) => {
         if (!process.env.CI) {
             await page.route('**/data.json', route => {
-                route.fulfill({ path: 'test/data.json' });
+                route.fulfill({
+                    path: path.join(__dirname, '..', 'data.json')
+                });
             });
         }
 

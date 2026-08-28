@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // Regression coverage for a real bug: .col-media's visibility used to be
 // gated entirely on the Videos/QR toggles, so any photo (standalone item,
@@ -12,7 +13,9 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
 
         await page.goto('/');

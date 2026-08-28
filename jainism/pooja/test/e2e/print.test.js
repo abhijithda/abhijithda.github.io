@@ -1,10 +1,13 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 test.describe('Jaina Pooja WebUI - Print Mode Validation', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
 
         await page.goto('/');

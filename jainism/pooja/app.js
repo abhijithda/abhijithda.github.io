@@ -3,7 +3,7 @@
 // book-view.js is a future addition — import and wire it here when ready.
 
 import { renderContinuousView, filterContinuous, goBackToMessage } from './continuous-view.js';
-import { initHeaderControls, applyDisplaySettings, updateMediaVisibility } from './header.js';
+import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs } from './header.js';
 
 function setViewMode(mode) {
     const continuous = document.getElementById('continuous-container');
@@ -16,8 +16,8 @@ function setViewMode(mode) {
 }
 
 async function init() {
-    // Restore saved settings before reading lang (so langSelect.value is correct)
-    applyDisplaySettings();
+    // Restore saved settings (langs/videos/QR/read-tracking all live under one key)
+    applySettings();
 
     let data;
     try {
@@ -28,12 +28,15 @@ async function init() {
     }
 
     const container  = document.getElementById('continuous-container');
-    const langSelect = document.getElementById('lang-select');
-    const lang       = langSelect ? langSelect.value : 'all';
+    const activeLangs = getActiveLangs(); // restored from localStorage
+    // Continuous view takes a single lang string ('kn'/'en'/'all'); when more
+    // than one language is active, show 'all' (both columns).
+    const lang = activeLangs.length === 1 ? activeLangs[0] : 'all';
 
     // Wire header controls
     initHeaderControls(
-        (newLang) => {
+        (newActiveLangs) => {
+            const newLang = newActiveLangs.length === 1 ? newActiveLangs[0] : 'all';
             renderContinuousView(data, container, newLang);
             updateMediaVisibility();
         },
