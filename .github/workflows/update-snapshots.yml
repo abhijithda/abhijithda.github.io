@@ -65,7 +65,7 @@ jobs:
         if git diff --cached --quiet; then
           echo "No snapshot changes to commit."
         else
-          git commit -m "chore: update Playwright snapshots (Linux baselines) [skip ci]"
+          git commit -m "chore: update Playwright snapshots (Linux baselines)"
           git push
         fi
 
