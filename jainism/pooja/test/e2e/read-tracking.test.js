@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // Helper: precise classList check, since '.read-tick' is itself a base
 // class name containing the substring "read" — a naive /read/ regex
@@ -11,7 +12,9 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
 
         await page.goto('/');

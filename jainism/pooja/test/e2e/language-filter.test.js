@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // The language picker was a single-select <select id="lang-select">
 // (All/kn/en); it's now a collapsed "Kannada, English" summary that expands
@@ -8,7 +9,9 @@ const { test, expect } = require('@playwright/test');
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/data.json', route => {
-    route.fulfill({ path: 'test/data.json' });
+    route.fulfill({
+      path: path.join(__dirname, '..', 'data.json')
+    });
   });
 
   await page.goto('/');

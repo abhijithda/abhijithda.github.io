@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // This feature (WhatsApp-style "replying to" preview, jump-to-source, and a
 // Back button) was lost once already across branch merges/manual reverts —
@@ -7,7 +8,9 @@ test.describe('Reply Excerpt - jump to source and back', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
 
         await page.goto('/');
