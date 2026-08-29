@@ -69,10 +69,26 @@ export function computeProgress(readSet, totalBlockCount) {
     return { read, total, percentage };
 }
 
+/**
+ * Compute progress and write it into the header's #read-progress element.
+ * Shared by both views so the "find the element, format the text" logic
+ * only exists once, and so a view can't silently forget to call it — book
+ * view originally only updated this on each tick click, never on its
+ * initial render, unlike continuous view; that gap is why this exists as
+ * a single function both views call from both places.
+ * @param {Set<string>} readSet
+ * @param {number} totalBlockCount
+ */
+export function updateProgressDisplay(readSet, totalBlockCount) {
+    const { read, total } = computeProgress(readSet, totalBlockCount);
+    const el = document.getElementById('read-progress');
+    if (el) el.textContent = `✓ ${read}/${total} read`;
+}
+
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
         READ_BLOCKS_KEY, getReadBlocks, saveReadBlocks, toggleBlockRead,
-        isBlockTrackable, computeProgress,
+        isBlockTrackable, computeProgress, updateProgressDisplay,
     });
 }

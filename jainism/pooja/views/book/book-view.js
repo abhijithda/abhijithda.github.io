@@ -1,7 +1,7 @@
 // book-view.js — Book spread view powered by CSS Multi-column Layout.
 
 import { extractYouTubeId, buildYouTubeThumbnailUrl, buildQrUrl } from '../../core/media.js';
-import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, computeProgress } from '../../core/read-tracking.js';
+import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, updateProgressDisplay } from '../../core/read-tracking.js';
 import { formatIdForDisplay, resolveReference } from '../../core/blocks.js';
 
 const state = {
@@ -145,9 +145,7 @@ function createBookCard(entry, activeLangs, readBlocks) {
             tick.textContent = nowRead ? '✓' : '';
             tick.title = nowRead ? 'Marked as read' : 'Mark as read';
             tick.setAttribute('aria-label', tick.title);
-            const { read, total } = computeProgress(newSet, state.totalBlockCount);
-            const el = document.getElementById('read-progress');
-            if (el) el.textContent = `✓ ${read}/${total} read`;
+            updateProgressDisplay(newSet, state.totalBlockCount);
         };
         card.appendChild(tick);
     }
@@ -385,6 +383,7 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     });
 
     populateBookColumns();
+    updateProgressDisplay(getReadBlocks(localStorage), state.totalBlockCount);
     state.currentSpread = parseInt(localStorage.getItem('bookSpread') || '0', 10);
 
     setTimeout(renderCurrentSpread, 150);

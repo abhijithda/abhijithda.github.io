@@ -261,13 +261,9 @@ describe('initBookView: read tracking (isBlockTrackable)', () => {
         expect(document.getElementById('book-a_014_b_1').querySelector('.read-tick')).not.toBeNull();
     });
 
-    // The progress denominator should only count trackable blocks — clicking
-    // the one trackable block should read "1/1", not "1/2" (which it would
-    // if the image-only block were wrongly counted). initBookView itself
-    // doesn't write #read-progress's initial text (only the tick's click
-    // handler does — continuous view's render call is what normally sets
-    // it on a real page load), so this test drives it via a click instead
-    // of checking the untouched initial state.
+    // The progress denominator should only count trackable blocks — an
+    // image-only block mixed in should read "0/1" (on initial render, now
+    // that initBookView itself calls updateProgressDisplay), not "0/2".
     test('progress total only counts trackable blocks when an image-only block is mixed in', () => {
         const data = [{
             id: 'mix_001', type: 'answer', references: null,
@@ -277,8 +273,16 @@ describe('initBookView: read tracking (isBlockTrackable)', () => {
             ],
         }];
         initBookView(data, ['kn', 'en']);
-        document.getElementById('book-mix_001_b_1').querySelector('.read-tick').click();
-        expect(document.getElementById('read-progress').textContent).toBe('✓ 1/1 read');
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/1 read');
+    });
+
+    // initBookView must set the initial progress text itself, not rely on
+    // continuous view's render having already done it (which is how this
+    // worked, by coincidence, before updateProgressDisplay existed).
+    test('initBookView sets the initial progress text on its own, without any tick being clicked', () => {
+        const data = [{ id: 'q_050', type: 'question', references: null, blocks: [baseBlock({ id: 'q_050_b_1', content: { kn: ['ಪಠ್ಯ'], en: ['Text'] } })] }];
+        initBookView(data, ['kn', 'en']);
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/1 read');
     });
 });
 
