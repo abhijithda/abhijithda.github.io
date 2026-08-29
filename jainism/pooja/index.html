@@ -4,43 +4,46 @@
 <head>
     <meta charset="UTF-8">
     <title>Jaina Pooja FAQ</title>
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="media.css">
-    <link rel="stylesheet" href="read-tracking.css">
-    <link rel="stylesheet" href="card-types.css">
-    <link rel="stylesheet" id="css-continuous" href="continuous-view.css">
-    <link rel="stylesheet" id="css-book"       href="book-view.css">
+    <link rel="stylesheet" href="header/header.css">
+    <link rel="stylesheet" href="core/media.css">
+    <link rel="stylesheet" href="core/read-tracking.css">
+    <link rel="stylesheet" href="core/card-types.css">
+    <link rel="stylesheet" id="css-continuous" href="views/continuous/continuous-view.css">
+    <link rel="stylesheet" id="css-book"       href="views/book/book-view.css">
 </head>
 
 <body>
     <header class="app-header">
-        <!-- View toggle -->
         <div class="view-toggle">
-            <button class="view-toggle-btn active" data-view="book">📖 Book</button>
-            <button class="view-toggle-btn" data-view="continuous">☰ Continuous</button>
+            <button class="view-toggle-btn active" data-view="book" title="Book spread view">📖 Book</button>
+            <button class="view-toggle-btn" data-view="continuous" title="Continuous scrolling view">☰ Continuous</button>
         </div>
 
-        <!-- Search bar — always visible; in book view it searches across all pages -->
         <input type="text" id="search-bar" placeholder="Search topics - ಅಭಿಷೇಕ, Daana...">
 
-        <!-- Read progress -->
         <span id="read-progress" class="read-progress" title="Items you've marked as read"></span>
 
-        <!-- Settings — identical for both views -->
         <div class="view-menu-container">
             <button id="settings-btn" class="menu-trigger">Settings ⚙️</button>
             <div id="settings-menu" class="menu-content">
-
-                <!-- Language: multi-checkbox picker (works for both views) -->
+                <!-- Language: searchable multi-select, collapsed by default.
+                     Was a single <select id="lang-select"> (All/kn/en); this scales
+                     to a long language list without a wall of checkboxes. -->
                 <div class="menu-section menu-section--lang">
                     <span class="menu-label">🌐 Language:</span>
-                    <div id="lang-checkboxes" class="lang-checkboxes">
-                        <!-- built by header.js from KNOWN_LANGS -->
+                    <div class="lang-picker">
+                        <button type="button" id="lang-trigger" class="lang-trigger" aria-expanded="false">
+                            <span id="lang-summary" class="lang-summary"></span>
+                            <span class="lang-chevron" aria-hidden="true">▾</span>
+                        </button>
+                        <div id="lang-panel" class="lang-panel" hidden>
+                            <input type="text" id="lang-search" class="lang-search" placeholder="Search languages">
+                            <div id="lang-list" class="lang-list">
+                                <!-- built by header.js from KNOWN_LANGS -->
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="menu-divider"></div>
-
                 <div class="menu-section">
                     <label>🎬 Videos:</label>
                     <label class="switch">
@@ -66,21 +69,14 @@
         </div>
     </header>
 
-    <!-- Continuous view -->
-    <div id="continuous-container" style="display:flex"></div>
+    <div id="continuous-container" style="display:none"></div>
 
-    <!-- Book view -->
-    <div id="book-container"></div>
+    <div id="book-container" class="active"></div>
 
-    <!-- Back-to-message (continuous view only) -->
     <button id="back-to-message"
-        style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff;
-               border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">
+        style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">
         ← Back to Message
     </button>
-
-    <!-- Print-only: all book pages rendered here for full-book printing -->
-    <div id="book-print-container" class="book-print-container"></div>
 
     <script type="module" src="app.js"></script>
 </body>

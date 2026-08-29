@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // Helper: precise classList check, since '.read-tick' is itself a base
 // class name containing the substring "read" — a naive /read/ regex
@@ -11,10 +12,16 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
 
         await page.goto('/');
+        // Book view is the default on a fresh load — switch to continuous
+        // view explicitly before waiting on .card, since these tests are
+        // continuous-view-specific.
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
 
         // Read tracking is opt-in and off by default — the tick marks are

@@ -116,8 +116,6 @@ input:checked + .slider::before {
     transform: translateX(20px);
 }
 
-/* Card type colours moved to card-types.css */
-
 /* --- EXCERPT CONTAINER --- */
 .reply-excerpt.multi-block {
     background: rgba(0, 0, 0, 0.04);

@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // This is NOT a regression test — it makes no assertions and never fails on
 // content changes. It exists purely to produce always-current screenshots of
@@ -19,11 +20,16 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
     test.beforeEach(async ({ page }) => {
         if (!process.env.CI) {
             await page.route('**/data.json', route => {
-                route.fulfill({ path: 'test/data.json' });
+                route.fulfill({
+                    path: path.join(__dirname, '..', 'data.json')
+                });
             });
         }
 
         await page.goto('/');
+        // Book view is the default on a fresh load — switch to continuous
+        // view explicitly, since this file previews continuous view.
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
 
         await page.locator('#settings-btn').click();

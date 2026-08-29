@@ -39,6 +39,24 @@ export function toggleBlockRead(blockId, readSet) {
 }
 
 /**
+ * Whether a block has anything worth marking read/watched at all.
+ * A block with no text AND no video (e.g. a standalone image) isn't
+ * trackable — it gets no tick and doesn't count toward the total in
+ * computeProgress. A video-only block IS trackable: videos can run long,
+ * so marking one "watched" is meaningful even with no accompanying text.
+ * Shared across every view (continuous, book, or any future one) so the
+ * rule for what counts as "readable" lives in exactly one place.
+ * @param {Object} block
+ * @returns {boolean}
+ */
+export function isBlockTrackable(block) {
+    const hasText = !!(block.content?.kn?.some(l => l.trim() !== '') ||
+                       block.content?.en?.some(l => l.trim() !== ''));
+    const hasVideo = !!(block.videos && block.videos.length > 0);
+    return hasText || hasVideo;
+}
+
+/**
  * Compute progress metrics for the header progress indicator.
  * @param {Set<string>} readSet
  * @param {number} totalBlockCount
@@ -54,6 +72,7 @@ export function computeProgress(readSet, totalBlockCount) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        READ_BLOCKS_KEY, getReadBlocks, saveReadBlocks, toggleBlockRead, computeProgress,
+        READ_BLOCKS_KEY, getReadBlocks, saveReadBlocks, toggleBlockRead,
+        isBlockTrackable, computeProgress,
     });
 }

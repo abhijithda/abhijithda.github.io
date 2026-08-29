@@ -1,9 +1,10 @@
 // app.js — Entry point. Composes all modules.
+// Loaded via <script type="module" src="app.js"> in index.html.
 // Both views share the same header; settings apply to whichever view is active.
 
-import { renderContinuousView, filterContinuous, goBackToMessage } from './continuous-view.js';
-import { initBookView, onBookLangChange, applyBookMediaVisibility, searchBookView } from './book-view.js';
-import { initHeaderControls, applyDisplaySettings, updateMediaVisibility, getActiveLangs } from './header.js';
+import { renderContinuousView, filterContinuous, goBackToMessage } from './views/continuous/continuous-view.js';
+import { initBookView, onBookLangChange, applyBookMediaVisibility, searchBookView } from './views/book/book-view.js';
+import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs } from './header/header.js';
 
 // ── View mode ─────────────────────────────────────────────────────────────
 function setViewMode(mode) {
@@ -32,13 +33,14 @@ function setViewMode(mode) {
 
 // ── Boot ──────────────────────────────────────────────────────────────────
 async function init() {
-    applyDisplaySettings();
+    // Restore saved settings (langs/videos/QR/read-tracking all live under one key)
+    applySettings();
 
     let data;
     try {
         data = await fetch('data.json').then(r => r.json());
     } catch (err) {
-        console.error('Error loading FAQ data:', err);
+        console.error('Error loading data:', err);
         return;
     }
 
@@ -84,7 +86,7 @@ async function init() {
     if (searchBar) {
         searchBar.addEventListener('keyup', () => {
             const q = searchBar.value;
-            const mode = localStorage.getItem('viewMode') || 'continuous';
+            const mode = localStorage.getItem('viewMode') || 'book';
             if (mode === 'book') {
                 searchBookView(q);   // jumps to first matching spread
             } else {
@@ -104,7 +106,7 @@ async function init() {
     }, 100);
 
     // ── Restore view mode ─────────────────────────────────────────────────
-    setViewMode(localStorage.getItem('viewMode') || 'continuous');
+    setViewMode(localStorage.getItem('viewMode') || 'book');
 }
 
 window.addEventListener('scroll', () => {

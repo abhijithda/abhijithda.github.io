@@ -71,9 +71,7 @@ body {
     gap: 10px;
 }
 
-/* TODO: lang-select — Dropdown lang picker multi-checkbox need to added at common place */
-
-/* ── Lang picker inside Settings ─────────────────────────────────────────── */
+/* ── Lang picker inside Settings — searchable, collapsible multi-select ──── */
 .menu-section--lang {
     flex-direction: column;
     align-items: flex-start;
@@ -83,34 +81,80 @@ body {
     font-size: 12px;
     color: #555;
 }
-.lang-checkboxes {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+.lang-picker {
     width: 100%;
+    position: relative;
 }
-.lang-opt {
+.lang-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px;
+    font-size: 12px;
+    color: #333;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+}
+.lang-trigger:hover { border-color: #bbb; }
+.lang-summary {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.lang-chevron { color: #888; font-size: 10px; }
+.lang-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1;
+}
+.lang-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    font-size: 12px;
+    border: none;
+    border-bottom: 1px solid #eee;
+    outline: none;
+    border-radius: 6px 6px 0 0;
+}
+.lang-list {
+    max-height: 160px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+.lang-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 5px 4px;
+    padding: 5px 8px;
     cursor: pointer;
-    border-radius: 6px;
     font-size: 12px;
     color: #333;
 }
-.lang-opt:hover { background: #f5f5f5; }
-.lang-opt input[type="checkbox"] {
+.lang-row:hover { background: #f5f5f5; }
+.lang-row input[type="checkbox"] {
     width: 14px;
     height: 14px;
     cursor: pointer;
     accent-color: #27ae60;
     flex-shrink: 0;
 }
-.lang-opt-label { flex: 1; cursor: pointer; }
-.lang-opt-name  { font-size: 10px; color: #aaa; }
+.lang-row-label { flex: 1; cursor: pointer; }
+.lang-row-name  { font-size: 10px; color: #aaa; }
 .lang-divider   { height: 0.5px; background: #eee; margin: 4px 0; }
-.menu-divider   { height: 0.5px; background: #eee; margin: 8px 0; }
+.lang-empty     { padding: 10px 8px; font-size: 12px; color: #999; text-align: center; }
 
 /* View toggle — Book / Continuous switcher */
 .view-toggle {

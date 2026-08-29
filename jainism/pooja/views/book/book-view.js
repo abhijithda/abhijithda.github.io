@@ -1,13 +1,8 @@
 // book-view.js — Book spread view powered by CSS Multi-column Layout.
 
-import { extractYouTubeId, buildYouTubeThumbnailUrl, buildQrUrl } from './media.js';
-import { getReadBlocks, saveReadBlocks, toggleBlockRead, computeProgress } from './read-tracking.js';
-import { formatIdForDisplay, resolveReference } from './continuous-view.js';
-
-export const KNOWN_LANGS = [
-    { code: 'kn', label: 'ಕನ್ನಡ', name: 'Kannada' },
-    { code: 'en', label: 'English', name: 'English' },
-];
+import { extractYouTubeId, buildYouTubeThumbnailUrl, buildQrUrl } from '../../core/media.js';
+import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, computeProgress } from '../../core/read-tracking.js';
+import { formatIdForDisplay, resolveReference } from '../../core/blocks.js';
 
 const state = {
     data: [],
@@ -130,27 +125,32 @@ function createBookCard(entry, activeLangs, readBlocks) {
         });
     }
 
-    const isRead = readBlocks.has(block.id);
-    const tick = document.createElement('button');
-    tick.type = 'button';
-    tick.className = `read-tick${isRead ? ' read' : ''}`;
-    tick.title = isRead ? 'Marked as read' : 'Mark as read';
-    tick.setAttribute('aria-label', tick.title);
-    tick.textContent = isRead ? '✓' : '';
-    tick.onclick = (e) => {
-        e.stopPropagation();
-        const newSet = toggleBlockRead(block.id, getReadBlocks(localStorage));
-        saveReadBlocks(newSet, localStorage);
-        const nowRead = newSet.has(block.id);
-        tick.classList.toggle('read', nowRead);
-        tick.textContent = nowRead ? '✓' : '';
-        tick.title = nowRead ? 'Marked as read' : 'Mark as read';
+    // Read tick — only for trackable blocks (has text or video). A block
+    // with neither (e.g. an inline image-only block) has nothing to mark
+    // read; see read-tracking.js's isBlockTrackable for the shared rule.
+    if (isBlockTrackable(block)) {
+        const isRead = readBlocks.has(block.id);
+        const tick = document.createElement('button');
+        tick.type = 'button';
+        tick.className = `read-tick${isRead ? ' read' : ''}`;
+        tick.title = isRead ? 'Marked as read' : 'Mark as read';
         tick.setAttribute('aria-label', tick.title);
-        const { read, total } = computeProgress(newSet, state.totalBlockCount);
-        const el = document.getElementById('read-progress');
-        if (el) el.textContent = `✓ ${read}/${total} read`;
-    };
-    card.appendChild(tick);
+        tick.textContent = isRead ? '✓' : '';
+        tick.onclick = (e) => {
+            e.stopPropagation();
+            const newSet = toggleBlockRead(block.id, getReadBlocks(localStorage));
+            saveReadBlocks(newSet, localStorage);
+            const nowRead = newSet.has(block.id);
+            tick.classList.toggle('read', nowRead);
+            tick.textContent = nowRead ? '✓' : '';
+            tick.title = nowRead ? 'Marked as read' : 'Mark as read';
+            tick.setAttribute('aria-label', tick.title);
+            const { read, total } = computeProgress(newSet, state.totalBlockCount);
+            const el = document.getElementById('read-progress');
+            if (el) el.textContent = `✓ ${read}/${total} read`;
+        };
+        card.appendChild(tick);
+    }
 
     return card;
 }
@@ -331,7 +331,7 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
         state.itemById[item.id] = item;
         item.blocks.forEach(b => { state.blockById[b.id] = b; });
     });
-    state.totalBlockCount = data.reduce((s, item) => s + item.blocks.length, 0);
+    state.totalBlockCount = data.reduce((s, item) => s + item.blocks.filter(isBlockTrackable).length, 0);
 
     // Added the static footers to the HTML!
     container.innerHTML = `
@@ -397,7 +397,7 @@ window.addEventListener('resize', () => {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        KNOWN_LANGS, initBookView, renderCurrentSpread,
+        initBookView, renderCurrentSpread,
         goToPrevSpread, goToNextSpread, jumpToPage, searchBookView,
         applyBookMediaVisibility, onBookLangChange, renderPrintBook,
     });

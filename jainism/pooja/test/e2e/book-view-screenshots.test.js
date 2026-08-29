@@ -14,7 +14,10 @@ test.describe('Book View - Display Options (Screenshots)', () => {
         });
 
         await page.goto('/');
-        await expect(page.locator('#continuous-container .card').first()).toBeVisible();
+        // Book view is the default on a fresh load — wait for its content
+        // (rather than continuous view's, which is rendered but hidden)
+        // as the "data has loaded" signal.
+        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
 
         await openBookView(page);
 
@@ -125,7 +128,10 @@ test.describe('Book View - Print Mode (Screenshots)', () => {
         });
 
         await page.goto('/');
-        await expect(page.locator('#continuous-container .card').first()).toBeVisible();
+        // Book view is the default on a fresh load — wait for its content
+        // (rather than continuous view's, which is rendered but hidden)
+        // as the "data has loaded" signal.
+        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
 
         await openBookView(page);
 

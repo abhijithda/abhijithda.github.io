@@ -16,7 +16,10 @@ test.describe('Book View — using the small controlled fixture', () => {
             route.fulfill({ path: 'test/data.json' });
         });
         await page.goto('/');
-        await expect(page.locator('#continuous-container .card').first()).toBeVisible();
+        // Book view is the default on a fresh load — wait for its content
+        // (rather than continuous view's, which is rendered but hidden)
+        // as the "data has loaded" signal.
+        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
     });
 
     test('the view-toggle button switches from continuous to book view', async ({ page }) => {
@@ -47,6 +50,7 @@ test.describe('Book View — using the small controlled fixture', () => {
         await openBookView(page);
 
         await page.locator('#settings-btn').click();
+        await page.locator('#lang-trigger').click();
         // Uncheck Kannada, leaving only English active.
         await page.locator('#lang-chk-kn').uncheck();
 
