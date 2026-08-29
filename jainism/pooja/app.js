@@ -78,7 +78,24 @@ async function init() {
 
     // ── View toggle ───────────────────────────────────────────────────────
     document.querySelectorAll('.view-toggle-btn').forEach(btn =>
-        btn.addEventListener('click', () => setViewMode(btn.dataset.view))
+        btn.addEventListener('click', () => {
+            const mode = btn.dataset.view;
+            // Re-render the view being switched TO, so it picks up any
+            // state changes (read-tracking, in particular) made while the
+            // other view was active. Without this, a block marked read in
+            // book view wouldn't show as read after switching to continuous
+            // view — each view's DOM is only built once at boot otherwise,
+            // and doesn't know the other view changed anything meanwhile.
+            const currentActiveLangs = getActiveLangs();
+            if (mode === 'book') {
+                initBookView(data, currentActiveLangs);
+            } else {
+                const cLang = currentActiveLangs.length === 1 ? currentActiveLangs[0] : 'all';
+                renderContinuousView(data, continuous, cLang);
+                updateMediaVisibility();
+            }
+            setViewMode(mode);
+        })
     );
 
     // ── Search — works in both views ──────────────────────────────────────
