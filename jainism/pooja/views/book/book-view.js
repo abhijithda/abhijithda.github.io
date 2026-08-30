@@ -323,6 +323,7 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
 
     state.data = data;
     state.activeLangs = activeLangs;
+    state.containerId = containerId;
     state.blockById = {};
     state.itemById = {};
     data.forEach(item => {
@@ -375,13 +376,6 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
         }
     });
 
-    document.addEventListener('keydown', e => {
-        const c = document.getElementById(containerId);
-        if (!c || !c.classList.contains('active')) return;
-        if (e.key === 'ArrowLeft' || e.key === 'PageUp') goToPrevSpread();
-        if (e.key === 'ArrowRight' || e.key === 'PageDown') goToNextSpread();
-    });
-
     populateBookColumns();
     updateProgressDisplay(getReadBlocks(localStorage), state.totalBlockCount);
     state.currentSpread = parseInt(localStorage.getItem('bookSpread') || '0', 10);
@@ -393,6 +387,22 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
 window.addEventListener('resize', () => {
     setTimeout(renderCurrentSpread, 150);
 });
+
+// Registered once, at module scope — NOT inside initBookView. That function
+// can run more than once in a session (e.g. re-rendering on every view-toggle
+// click, so read-state stays in sync between views — see app.js), and a
+// listener registered inside it would stack a new one on every call instead
+// of replacing the last, causing a single arrow-key press to advance
+// multiple spreads at once. state.containerId is set by the most recent
+// initBookView call; checked dynamically here rather than captured in a
+// closure at registration time, for the same reason.
+document.addEventListener('keydown', e => {
+    const c = document.getElementById(state.containerId || 'book-container');
+    if (!c || !c.classList.contains('active')) return;
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') goToPrevSpread();
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') goToNextSpread();
+});
+
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {

@@ -325,6 +325,35 @@ describe('Navigation: goToPrevSpread / goToNextSpread', () => {
         expect(document.getElementById('book-page-num-left').textContent).toBe('1');
         expect(localStorage.getItem('bookSpread')).toBe('0');
     });
+
+    // Regression test: initBookView used to register a fresh document-level
+    // keydown listener on every call, without removing the previous one.
+    // Since app.js now re-calls initBookView on every view-toggle click (to
+    // keep read-state in sync between views), that meant re-entering book
+    // view N times made a single arrow-key press advance N spreads at once.
+    // The listener now lives at module scope, registered exactly once.
+    test('re-initializing book view does not cause a single ArrowRight press to advance more than one spread', () => {
+        const threeSpreadData = [{
+            id: 'a_101', type: 'answer', references: null,
+            blocks: [baseBlock({ id: 'a_101_b_1' })],
+        }];
+
+        // Simulate book view being (re-)entered multiple times in one
+        // session, as app.js's toggle-click handler now does.
+        initBookView(threeSpreadData, ['kn', 'en']);
+        initBookView(threeSpreadData, ['kn', 'en']);
+        initBookView(threeSpreadData, ['kn', 'en']);
+        mockSpreadLayout({ spreadWidth: 800, columnsScrollWidth: 2400 }); // 3 spreads
+        renderCurrentSpread();
+        // The keydown listener only acts while book view is the active
+        // view (checked via this class) — app.js normally sets it, not
+        // book-view.js itself, so this unit test sets it manually.
+        document.getElementById('book-container').classList.add('active');
+
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+
+        expect(document.getElementById('book-page-num-left').textContent).toBe('3'); // spread 1, not spread 2 (page 5)
+    });
 });
 
 describe('Navigation: jumpToPage', () => {

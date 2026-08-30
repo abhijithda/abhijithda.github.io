@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // Switches into book view and waits for the first spread to actually render
 // (initBookView populates cards synchronously, but the first
@@ -13,7 +14,9 @@ async function openBookView(page) {
 test.describe('Book View — using the small controlled fixture', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
         await page.goto('/');
         // Book view is the default on a fresh load — wait for its content
