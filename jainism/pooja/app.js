@@ -11,21 +11,34 @@ const continuous = () => document.getElementById('continuous-container');
 
 // ── View mode ─────────────────────────────────────────────────────────────
 function setViewMode(mode) {
-    const cont    = continuous();
-    const book    = document.getElementById('book-container');
-    const backBtn = document.getElementById('back-to-message');
+    const continuous = document.getElementById('continuous-container');
+    const book       = document.getElementById('book-container');
+    const backBtn    = document.getElementById('back-to-message');
 
     const isBook = mode === 'book';
-    if (cont) cont.style.display = isBook ? 'none' : 'flex';
-    if (book) book.classList.toggle('active', isBook);
+    
+    // Explicitly toggle inline display for BOTH containers so they stay hidden 
+    // even when their respective CSS stylesheets are disabled!
+    if (continuous) continuous.style.display = isBook ? 'none' : 'flex';
+    if (book)       book.style.display = isBook ? 'flex' : 'none';
+
+    if (book)       book.classList.toggle('active', isBook);
     if (backBtn && isBook) backBtn.style.display = 'none';
 
-    // Swap view-specific stylesheets — each view only loads its own CSS.
-    // card-types.css stays loaded always (scoped selectors handle both).
+    // Swap view-specific stylesheets
     const cssContinuous = document.getElementById('css-continuous');
     const cssBook       = document.getElementById('css-book');
     if (cssContinuous) cssContinuous.disabled = isBook;
     if (cssBook)       cssBook.disabled       = !isBook;
+
+    // Dynamically swap the <title> for perfect printing!
+    if (isBook) {
+        // Book View (Landscape): Uses Unicode Em Spaces (\u2003) to push English to the right
+        document.title = "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ \u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003 Jaina Pooja Vichara Sankalana";
+    } else {
+        // Continuous View (Portrait): Uses a clean pipe separator for narrower paper
+        document.title = "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ | Jaina Pooja Vichara Sankalana";
+    }
 
     document.querySelectorAll('.view-toggle-btn').forEach(btn =>
         btn.classList.toggle('active', btn.dataset.view === mode)

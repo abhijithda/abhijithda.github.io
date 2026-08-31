@@ -440,11 +440,9 @@
 
 /* ── Print — entire book ─────────────────────────────────────────────────── */
 @media print {
-
-    /* Force the physical printer/PDF to use A4 paper */
+    /* Set to landscape so the 2-column spread fits perfectly on the paper */
     @page {
-        size: A4 portrait;
-        /* RESTORED PRINT MARGINS: Standard 15mm margins on paper */
+        size: A4 landscape;
         margin: 15mm;
     }
 
@@ -456,20 +454,23 @@
     }
 
     body {
-        background: white;
+        background: white !important;
     }
 
+    /* Convert flex containers to block so print engines don't panic */
     #book-container {
-        display: flex !important;
+        display: block !important;
+        background: white !important;
         padding: 0 !important;
     }
 
     .book-shell {
+        display: block !important;
         max-width: none;
         width: 100%;
     }
 
-    /* Hide the fake screen headers/footers so they don't overlap physical printed text */
+    /* Hide the fake screen headers/footers so they don't overlap printed text */
     .book-spine,
     .book-static-head,
     .book-static-foot {
@@ -477,22 +478,36 @@
     }
 
     .book-spread {
+        display: block !important;
         width: 100%;
-        height: auto !important;
+        height: auto !important; /* Unlocks the height to allow infinite scrolling on paper */
         aspect-ratio: auto;
         border: none;
         box-shadow: none;
         background: transparent !important;
-        overflow: visible;
-        container-type: normal !important;
-        /* Disables CQI scaling for print so text stays legible */
+        overflow: visible !important; /* Prevents the clipping you saw */
+        container-type: normal !important; /* Disables CQI scaling for print */
+    }
+
+    /* --- OVERRIDE SCREEN HEIGHT LIMITS FOR PRINT --- */
+    .book-columns .standalone-image .book-image {
+        /* Lets the standalone image stretch to fill the printable A4 height */
+        max-height: 165mm !important; 
+    }
+
+    .book-image {
+        /* Safe fallback for inline images so they don't break pages */
+        max-height: 140mm !important; 
     }
 
     .book-columns {
-        column-count: 1 !important;
-        transform: none !important;
+        display: block !important;
+        column-count: 2 !important; /* Retains your exact book layout */
+        column-gap: 25mm !important; /* Creates a clean physical gutter */
+        transform: none !important; /* Stops the JS from sliding pages off the paper */
         padding: 0 !important;
-        height: auto !important;
+        height: auto !important; /* Lets the columns flow to the next sheet of paper */
+        overflow: visible !important;
     }
 
     .book-qr-img {
