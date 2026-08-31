@@ -125,6 +125,15 @@ to a real file) as part of building this structure.
   `<link id="css-continuous">`/`<link id="css-book">` stylesheet, so only the
   active view's CSS is parsed at a time. `card-types.css` is loaded
   unconditionally (both views need it, always).
+- Views are activated lazily, not both rendered eagerly at boot: `app.js`'s
+  `activateView(mode)` is the single render path, called once for the
+  initial view on boot and again on every toggle click — a view not yet
+  opened simply hasn't rendered anything yet, and gets built fresh (with
+  current data/settings) the first time it's switched to. This replaced an
+  earlier design that rendered both views unconditionally at boot — once
+  every toggle click re-renders fresh anyway (see the read-tracking
+  cross-view-sync fix below), eagerly building the inactive view at boot
+  was wasted work that got thrown away the moment (if ever) it was opened.
 - Default view on first load is **book** — `app.js` falls back to
   `localStorage.getItem('viewMode') || 'book'`, and the static HTML
   (`#book-container` starts with `class="active"`, `#continuous-container`
@@ -169,7 +178,8 @@ All settings — languages, videos, QR codes, read-tracking — live under one
 - `getActiveLangs()`/`saveActiveLangs()` and `applySettings()` are thin
   wrappers over this for callers that only care about one slice.
 - Book view doesn't read `settings` directly — `app.js` calls
-  `getActiveLangs()` once at boot and passes the result into `initBookView`,
+  `getActiveLangs()` fresh each time a view is activated (boot or toggle
+  click) and passes the result into `initBookView`/`renderContinuousView`,
   and both views' media toggles wire through the same `toggle-videos`/
   `toggle-qrs` checkboxes (book view additionally listens for their
   `change` event to call `applyBookMediaVisibility()`).

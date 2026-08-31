@@ -6,15 +6,18 @@ import { renderContinuousView, filterContinuous, goBackToMessage } from './views
 import { initBookView, onBookLangChange, applyBookMediaVisibility, searchBookView } from './views/book/book-view.js';
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs } from './header/header.js';
 
+let data;
+const continuous = () => document.getElementById('continuous-container');
+
 // ── View mode ─────────────────────────────────────────────────────────────
 function setViewMode(mode) {
-    const continuous = document.getElementById('continuous-container');
-    const book       = document.getElementById('book-container');
-    const backBtn    = document.getElementById('back-to-message');
+    const cont    = continuous();
+    const book    = document.getElementById('book-container');
+    const backBtn = document.getElementById('back-to-message');
 
     const isBook = mode === 'book';
-    if (continuous) continuous.style.display = isBook ? 'none' : 'flex';
-    if (book)       book.classList.toggle('active', isBook);
+    if (cont) cont.style.display = isBook ? 'none' : 'flex';
+    if (book) book.classList.toggle('active', isBook);
     if (backBtn && isBook) backBtn.style.display = 'none';
 
     // Swap view-specific stylesheets — each view only loads its own CSS.
@@ -31,12 +34,31 @@ function setViewMode(mode) {
     localStorage.setItem('viewMode', mode);
 }
 
+// Renders whichever view is being switched TO, using current data/settings,
+// then makes it visible. Used both for the initial view on boot and for
+// every subsequent toggle click — there's exactly one render path, not a
+// separate "eager render both at boot" step plus a second "re-render on
+// switch" step. Rendering the OTHER view eagerly at boot used to be needed
+// because nothing else kept a not-yet-opened view in sync; now that
+// switching always re-renders fresh, that eager work was just being
+// thrown away and rebuilt the moment (if ever) the user opened it.
+function activateView(mode) {
+    const activeLangs = getActiveLangs();
+    if (mode === 'book') {
+        initBookView(data, activeLangs);
+    } else {
+        const cLang = activeLangs.length === 1 ? activeLangs[0] : 'all';
+        renderContinuousView(data, continuous(), cLang);
+        updateMediaVisibility();
+    }
+    setViewMode(mode);
+}
+
 // ── Boot ──────────────────────────────────────────────────────────────────
 async function init() {
     // Restore saved settings (langs/videos/QR/read-tracking all live under one key)
     applySettings();
 
-    let data;
     try {
         data = await fetch('data.json').then(r => r.json());
     } catch (err) {
@@ -44,33 +66,28 @@ async function init() {
         return;
     }
 
-    const continuous = document.getElementById('continuous-container');
-    const activeLangs = getActiveLangs(); // restored from localStorage
-
-    // ── Continuous view ───────────────────────────────────────────────────
-    // Continuous view uses the first active lang ('kn', 'en', or 'all').
-    // When multiple langs are selected, it shows 'all'.
-    const continuousLang = activeLangs.length === 1 ? activeLangs[0] : 'all';
-    renderContinuousView(data, continuous, continuousLang);
-    updateMediaVisibility();
-
-    // ── Book view ─────────────────────────────────────────────────────────
-    initBookView(data, activeLangs);
-
     // ── Header controls — shared by both views ────────────────────────────
     initHeaderControls(
-        // Lang change: update both views
+        // Lang change: update both views. Only the currently-visible one
+        // needs re-rendering now (not-yet-opened views pick up the new
+        // lang the same way they pick up everything else — the first time
+        // they're activated).
         (newActiveLangs) => {
-            const cLang = newActiveLangs.length === 1 ? newActiveLangs[0] : 'all';
-            renderContinuousView(data, continuous, cLang);
-            updateMediaVisibility();
-            onBookLangChange(newActiveLangs);
+            const mode = localStorage.getItem('viewMode') || 'book';
+            if (mode === 'book') {
+                onBookLangChange(newActiveLangs);
+            } else {
+                const cLang = newActiveLangs.length === 1 ? newActiveLangs[0] : 'all';
+                renderContinuousView(data, continuous(), cLang);
+                updateMediaVisibility();
+            }
         },
         // Read-tracking toggle — no re-render needed (CSS class handles visibility)
         () => {},
     );
 
-    // Media toggles also refresh book view
+    // Media toggles also refresh book view (safe even if book hasn't been
+    // opened yet — it just no-ops over an empty #book-container).
     ['toggle-videos', 'toggle-qrs'].forEach(id => {
         document.getElementById(id)
             ?.addEventListener('change', applyBookMediaVisibility);
@@ -78,24 +95,7 @@ async function init() {
 
     // ── View toggle ───────────────────────────────────────────────────────
     document.querySelectorAll('.view-toggle-btn').forEach(btn =>
-        btn.addEventListener('click', () => {
-            const mode = btn.dataset.view;
-            // Re-render the view being switched TO, so it picks up any
-            // state changes (read-tracking, in particular) made while the
-            // other view was active. Without this, a block marked read in
-            // book view wouldn't show as read after switching to continuous
-            // view — each view's DOM is only built once at boot otherwise,
-            // and doesn't know the other view changed anything meanwhile.
-            const currentActiveLangs = getActiveLangs();
-            if (mode === 'book') {
-                initBookView(data, currentActiveLangs);
-            } else {
-                const cLang = currentActiveLangs.length === 1 ? currentActiveLangs[0] : 'all';
-                renderContinuousView(data, continuous, cLang);
-                updateMediaVisibility();
-            }
-            setViewMode(mode);
-        })
+        btn.addEventListener('click', () => activateView(btn.dataset.view))
     );
 
     // ── Search — works in both views ──────────────────────────────────────
@@ -122,8 +122,8 @@ async function init() {
         if (saved) window.scrollTo(0, parseInt(saved));
     }, 100);
 
-    // ── Restore view mode ─────────────────────────────────────────────────
-    setViewMode(localStorage.getItem('viewMode') || 'book');
+    // ── Activate the initial view ────────────────────────────────────────
+    activateView(localStorage.getItem('viewMode') || 'book');
 }
 
 window.addEventListener('scroll', () => {
