@@ -2,9 +2,9 @@
 // Rendering logic is verbatim from master's script.js renderChat().
 // Imports from media.js and read-tracking.js for clean separation.
 
-import { createVideoCard } from './media.js';
-import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, computeProgress } from './read-tracking.js';
-import { formatIdForDisplay, buildBlockIndex, resolveReference } from './blocks.js';
+import { createVideoCard } from '../../core/media.js';
+import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, updateProgressDisplay } from '../../core/read-tracking.js';
+import { formatIdForDisplay, buildBlockIndex, resolveReference } from '../../core/blocks.js';
 
 // ── Back-navigation stack (verbatim from master) ──────────────────────────
 let backStack = [];
@@ -177,9 +177,7 @@ export function renderContinuousView(data, container, lang = 'all') {
                     readTick.textContent = nowRead ? '✓' : '';
                     readTick.title = nowRead ? 'Marked as read' : 'Mark as read';
                     readTick.setAttribute('aria-label', readTick.title);
-                    const { read, total } = computeProgress(newSet, totalBlockCount);
-                    const el = document.getElementById('read-progress');
-                    if (el) el.textContent = `✓ ${read}/${total} read`;
+                    updateProgressDisplay(newSet, totalBlockCount);
                 };
                 row.appendChild(readTick);
             }
@@ -191,9 +189,7 @@ export function renderContinuousView(data, container, lang = 'all') {
     });
 
     // Update progress counter
-    const { read, total } = computeProgress(readBlocks, totalBlockCount);
-    const el = document.getElementById('read-progress');
-    if (el) el.textContent = `✓ ${read}/${total} read`;
+    updateProgressDisplay(readBlocks, totalBlockCount);
 }
 
 // CommonJS shim for Jest

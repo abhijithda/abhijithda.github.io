@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // Switches into book view and waits for the first spread to actually render
 // (initBookView populates cards synchronously, but the first
@@ -13,10 +14,15 @@ async function openBookView(page) {
 test.describe('Book View — using the small controlled fixture', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: 'test/data.json' });
+            route.fulfill({
+                path: path.join(__dirname, '..', 'data.json')
+            });
         });
         await page.goto('/');
-        await expect(page.locator('#continuous-container .card').first()).toBeVisible();
+        // Book view is the default on a fresh load — wait for its content
+        // (rather than continuous view's, which is rendered but hidden)
+        // as the "data has loaded" signal.
+        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
     });
 
     test('the view-toggle button switches from continuous to book view', async ({ page }) => {
@@ -38,15 +44,19 @@ test.describe('Book View — using the small controlled fixture', () => {
         await openBookView(page);
 
         // a_001 references q_001 in the fixture (same relationship reply-excerpt.test.js checks in continuous view).
+        // Preview uses the first active language (kn here) — same fix as
+        // applied to the unit test earlier; this e2e test had the same
+        // English-text assumption and was never corrected.
         const excerpt = page.locator('#book-a_001_b_1 .book-excerpt');
         await expect(excerpt).toBeVisible();
-        await expect(excerpt).toContainText(/All are equal/i);
+        await expect(excerpt).toContainText(/ಎಲ್ಲಾ ದೇವರು ಒಂದೇ/);
     });
 
     test('switching to a single language hides the other language\'s lines in book view', async ({ page }) => {
         await openBookView(page);
 
         await page.locator('#settings-btn').click();
+        await page.locator('#lang-trigger').click();
         // Uncheck Kannada, leaving only English active.
         await page.locator('#lang-chk-kn').uncheck();
 

@@ -5,6 +5,7 @@ const {
     toggleBlockRead,
     isBlockTrackable,
     computeProgress,
+    updateProgressDisplay,
 } = require('./read-tracking');
 
 function fakeStorage() {
@@ -89,5 +90,29 @@ describe('computeProgress', () => {
 
     test('rounds the percentage', () => {
         expect(computeProgress(new Set(['a']), 3).percentage).toBe(33);
+    });
+});
+
+// Shared by both views specifically so a view can't forget to call it on
+// its own initial render — book view originally only updated the counter
+// reactively (on tick click), never on load, which this centralizes and fixes.
+describe('updateProgressDisplay', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '<span id="read-progress"></span>';
+    });
+
+    test('writes the formatted read/total text into #read-progress', () => {
+        updateProgressDisplay(new Set(['a', 'b']), 4);
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 2/4 read');
+    });
+
+    test('handles zero total without throwing', () => {
+        expect(() => updateProgressDisplay(new Set(), 0)).not.toThrow();
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
+    });
+
+    test('does nothing (no throw) when #read-progress is not present in the DOM', () => {
+        document.body.innerHTML = '';
+        expect(() => updateProgressDisplay(new Set(), 1)).not.toThrow();
     });
 });

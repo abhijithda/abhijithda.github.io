@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-test.describe('Display Options - Visual Validation (Screenshots)', () => {
+test.describe('Continuous View - Screenshot Tests (Display Options)', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
@@ -11,6 +11,10 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         });
 
         await page.goto('/');
+        // Book view is the default on a fresh load — switch to continuous
+        // view explicitly before waiting on .card, since these tests are
+        // continuous-view-specific.
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
 
         await page.locator('#settings-btn').click();
@@ -38,7 +42,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         await expect(qrInCard).toBeHidden();
 
         // Capture visual snapshot for comparison (viewport only for consistency)
-        await expect(page).toHaveScreenshot('screenshot-default-state-videos-on-qr-off.png', {
+        await expect(page).toHaveScreenshot('continuous-screenshot-default-state-videos-on-qr-off.png', {
             fullPage: true, // Optional: captures the entire scrollable page
             timeout: 20000
         });
@@ -70,7 +74,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         await expect(qrInCard).toBeVisible();
 
         // Capture visual snapshot for comparison (viewport only for consistency)
-        await expect(page).toHaveScreenshot('screenshot-qr-only-state-videos-off-qr-on.png', {
+        await expect(page).toHaveScreenshot('continuous-screenshot-qr-only-state-videos-off-qr-on.png', {
             fullPage: true, // Optional: captures the entire scrollable page
             timeout: 20000
             //fullPage: false,
@@ -118,7 +122,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         }
 
         // Capture visual snapshot for comparison (viewport only for consistency)
-        await expect(page).toHaveScreenshot('screenshot-both-state-videos-on-qr-on.png', {
+        await expect(page).toHaveScreenshot('continuous-screenshot-both-state-videos-on-qr-on.png', {
             // fullPage: false,
             // maxDiffPixels: 1000
             fullPage: true, // Optional: captures the entire scrollable page
@@ -153,7 +157,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         await expect(qrInCard).toBeHidden();
 
         // Capture visual snapshot for comparison (viewport only for consistency)
-        await expect(page).toHaveScreenshot('screenshot-none-state-videos-off-qr-off.png', {
+        await expect(page).toHaveScreenshot('continuous-screenshot-none-state-videos-off-qr-off.png', {
             fullPage: false,
             maxDiffPixels: 1000
         });
@@ -185,7 +189,7 @@ test.describe('Display Options - Visual Validation (Screenshots)', () => {
         await expect(qrInCard).toBeHidden();
 
         // Capture visual snapshot for comparison (viewport only for consistency)
-        await expect(page).toHaveScreenshot('screenshot-videos-only-state-videos-on-qr-off.png', {
+        await expect(page).toHaveScreenshot('continuous-screenshot-videos-only-state-videos-on-qr-off.png', {
             // fullPage: false,
             // maxDiffPixels: 1000
             fullPage: true, // Optional: captures the entire scrollable page

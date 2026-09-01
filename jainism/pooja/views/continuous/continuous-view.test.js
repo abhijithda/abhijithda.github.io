@@ -175,7 +175,7 @@ describe('renderContinuousView', () => {
 });
 
 describe('renderContinuousView against the real test/data.json fixture', () => {
-    const fixtureData = require('./test/data.json');
+    const fixtureData = require('../../test/data.json');
 
     test('renders without throwing and resolves a_001\'s reference to q_001', () => {
         const container = document.getElementById('continuous-container');

@@ -27,6 +27,9 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
         }
 
         await page.goto('/');
+        // Book view is the default on a fresh load — switch to continuous
+        // view explicitly, since this file previews continuous view.
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
 
         await page.locator('#settings-btn').click();

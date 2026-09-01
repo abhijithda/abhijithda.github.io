@@ -18,6 +18,10 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
         });
 
         await page.goto('/');
+        // Book view is the default on a fresh load — switch to continuous
+        // view explicitly before waiting on .card, since these tests are
+        // continuous-view-specific.
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
 
         // Read tracking is opt-in and off by default — the tick marks are

@@ -4,7 +4,7 @@
 // caller can save "everything" — or just the one field it changed — with a
 // single function call instead of juggling separate keys per setting.
 
-import { KNOWN_LANGS } from './langs.js';
+import { KNOWN_LANGS } from '../core/langs.js';
 
 export const SETTINGS_KEY = 'settings';
 

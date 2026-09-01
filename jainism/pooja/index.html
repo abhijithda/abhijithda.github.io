@@ -3,12 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Jaina Pooja FAQ</title>
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="media.css">
-    <link rel="stylesheet" href="read-tracking.css">
-    <link rel="stylesheet" href="card-types.css">
-    <link rel="stylesheet" href="continuous-view.css">
+    <title>ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ | Jaina Pooja Vichara Sankalana</title>
+    <link rel="stylesheet" href="header/header.css">
+    <link rel="stylesheet" href="core/media.css">
+    <link rel="stylesheet" href="core/read-tracking.css">
+    <link rel="stylesheet" href="core/card-types.css">
+    <link rel="stylesheet" id="css-continuous" href="views/continuous/continuous-view.css">
+    <link rel="stylesheet" id="css-book"       href="views/book/book-view.css">
 </head>
 
 <body>
@@ -68,7 +69,9 @@
         </div>
     </header>
 
-    <div id="continuous-container" style="display:flex"></div>
+    <div id="continuous-container" style="display:none"></div>
+
+    <div id="book-container" class="active"></div>
 
     <button id="back-to-message"
         style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">

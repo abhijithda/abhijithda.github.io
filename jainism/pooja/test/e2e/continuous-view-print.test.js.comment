@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-test.describe('Jaina Pooja WebUI - Print Mode Validation', () => {
+test.describe('Continuous View - Print Mode Validation', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
@@ -11,6 +11,10 @@ test.describe('Jaina Pooja WebUI - Print Mode Validation', () => {
         });
 
         await page.goto('/');
+        // Book view is the default on a fresh load — switch to continuous
+        // view explicitly before waiting on .card, since these tests are
+        // continuous-view-specific.
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
 
         await page.locator('#settings-btn').click();
@@ -21,7 +25,7 @@ test.describe('Jaina Pooja WebUI - Print Mode Validation', () => {
         // Default state: Videos are checked, QRs are unchecked
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(500); // Allow fonts/layout to settle
-        await expect(page).toHaveScreenshot('print-default-state.png', { fullPage: true, timeout: 15000 });
+        await expect(page).toHaveScreenshot('continuous-print-default-state.png', { fullPage: true, timeout: 15000 });
     });
 
     test('Print Mode - Both State (Videos ON, QR ON)', async ({ page }) => {
@@ -30,7 +34,7 @@ test.describe('Jaina Pooja WebUI - Print Mode Validation', () => {
 
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(500);
-        await expect(page).toHaveScreenshot('print-both-state.png', { fullPage: true, timeout: 15000 });
+        await expect(page).toHaveScreenshot('continuous-print-both-state.png', { fullPage: true, timeout: 15000 });
     });
 
     test('Print Mode - QR-only State (Videos OFF, QR ON)', async ({ page }) => {
@@ -40,7 +44,7 @@ test.describe('Jaina Pooja WebUI - Print Mode Validation', () => {
 
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(500);
-        await expect(page).toHaveScreenshot('print-qr-only-state.png', {
+        await expect(page).toHaveScreenshot('continuous-print-qr-only-state.png', {
             fullPage: true, timeout: 15000,
             maxDiffPixelRatio: 0.02 // Allows up to a 2% variance 
         });
@@ -52,6 +56,6 @@ test.describe('Jaina Pooja WebUI - Print Mode Validation', () => {
 
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(500);
-        await expect(page).toHaveScreenshot('print-none-state.png', { fullPage: true, timeout: 15000 });
+        await expect(page).toHaveScreenshot('continuous-print-none-state.png', { fullPage: true, timeout: 15000 });
     });
 });

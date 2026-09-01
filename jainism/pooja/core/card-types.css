@@ -1,0 +1,42 @@
+/* card-types.css — Card/block type colours shared by both continuous and book views.
+   Single source of truth. No container scoping needed: continuous view's
+   `.card.X`/`.block-row.X` and book view's `.book-card.X` are already
+   distinct class names, so there's no collision to guard against — and
+   only one view's own stylesheet is even live at a time anyway, via
+   setViewMode() disabling the inactive one's <link>. */
+
+/* ── Continuous view ─────────────────────────────────────────────────────── */
+.card.question {
+    background-color: #ffebee;
+    border-left: 4px solid #d32f2f;
+}
+.card.answer {
+    background-color: #f1f8e9;
+    border-left: 4px solid #4caf50;
+}
+.card.images {
+    background-color: #fafafa;
+    border-left: 4px solid #607d8b;
+}
+.block-row.mantra {
+    background-color: rgb(249, 126, 3);
+    border-left: 5px solid rgb(255, 0, 0);
+}
+.block-row.note {
+    background-color: #fdfaf2;
+    border-left: 5px solid #b38f4f;
+}
+.block-row.shloka {
+    background-color: #fff9c4;
+    border-left: 5px solid #fbc02d;
+}
+
+/* ── Book view ───────────────────────────────────────────────────────────── */
+/* Book view uses lighter tints so colour survives printing without
+   overwhelming the text. Borders are thinner (3px vs 4-5px, set in book-view.css). */
+.book-card.question { border-left-color: #c0392b; }
+.book-card.answer   { border-left-color: #27ae60; }
+.book-card.images   { border-left-color: #607d8b; }
+.book-card.note     { border-left-color: #b38f4f; background: #fdfaf2; }
+.book-card.mantra   { border-left-color: #e65100; background: #fff3e0; }
+.book-card.shloka   { border-left-color: #d4a017; background: #fffde7; }
