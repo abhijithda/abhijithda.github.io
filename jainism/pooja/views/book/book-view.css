@@ -489,12 +489,6 @@
         container-type: normal !important; /* Disables CQI scaling for print */
     }
 
-    /* --- OVERRIDE SCREEN HEIGHT LIMITS FOR PRINT --- */
-    .book-columns .standalone-image .book-image {
-        /* Lets the standalone image stretch to fill the printable A4 height */
-        max-height: 165mm !important; 
-    }
-
     .book-image {
         /* Safe fallback for inline images so they don't break pages */
         max-height: 140mm !important; 
