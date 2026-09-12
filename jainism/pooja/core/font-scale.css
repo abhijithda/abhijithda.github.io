@@ -1,0 +1,10 @@
+/* font-scale.css — Single source of truth for the font-size multiplier.
+   Set once here (default) and updated only by header.js's applyFontScale();
+   both continuous-view.css and book-view.css read this same custom
+   property in their screen AND @media print rules, so the two can never
+   drift out of sync with each other. Lives in core/, not header.css,
+   because — like card-types.css and read-tracking.css — it's a concern
+   shared by both views' content, not header/chrome styling. */
+:root {
+    --font-scale: 1;
+}

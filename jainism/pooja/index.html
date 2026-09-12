@@ -8,8 +8,14 @@
     <link rel="stylesheet" href="core/media.css">
     <link rel="stylesheet" href="core/read-tracking.css">
     <link rel="stylesheet" href="core/card-types.css">
+    <link rel="stylesheet" href="core/font-scale.css">
     <link rel="stylesheet" id="css-continuous" href="views/continuous/continuous-view.css">
     <link rel="stylesheet" id="css-book"       href="views/book/book-view.css">
+    <!-- @page can't be scoped to a body attribute/class in plain CSS, so the
+         effective print paper size + orientation is written here as text by
+         header.js's applyPaperSize() — kept last in <head> so it wins over
+         the (unscoped) view stylesheets on any property overlap. -->
+    <style id="print-page-size"></style>
 </head>
 
 <body>
@@ -64,6 +70,22 @@
                         <input type="checkbox" id="toggle-read-tracking">
                         <span class="slider"></span>
                     </label>
+                </div>
+                <div class="menu-section">
+                    <label for="paper-size-select">🖨️ Paper size:</label>
+                    <select id="paper-size-select">
+                        <option value="dynamic">Dynamic</option>
+                        <option value="a4">A4</option>
+                        <option value="a3">A3</option>
+                    </select>
+                </div>
+                <div class="menu-section">
+                    <label>🔤 Font size:</label>
+                    <div class="font-scale-control">
+                        <button type="button" id="font-scale-decrease" title="Decrease font size" aria-label="Decrease font size">A−</button>
+                        <span id="font-scale-display">100%</span>
+                        <button type="button" id="font-scale-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+                    </div>
                 </div>
             </div>
         </div>

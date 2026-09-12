@@ -4,7 +4,7 @@
 
 import { renderContinuousView, filterContinuous, goBackToMessage } from './views/continuous/continuous-view.js';
 import { initBookView, onBookLangChange, applyBookMediaVisibility, searchBookView } from './views/book/book-view.js';
-import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs } from './header/header.js';
+import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
 
 let data;
 const continuous = () => document.getElementById('continuous-container');
@@ -45,6 +45,11 @@ function setViewMode(mode) {
     );
 
     localStorage.setItem('viewMode', mode);
+
+    // The printed page's orientation follows whichever view is active (book
+    // = landscape spread, continuous = portrait column); re-derive the
+    // dynamic @page rule now that viewMode has just changed.
+    applyPaperSize();
 }
 
 // Renders whichever view is being switched TO, using current data/settings,

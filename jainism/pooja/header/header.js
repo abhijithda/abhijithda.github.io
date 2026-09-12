@@ -8,8 +8,28 @@ import { KNOWN_LANGS } from '../core/langs.js';
 
 export const SETTINGS_KEY = 'settings';
 
+// Paper-size options for the Settings dropdown. 'dynamic' is the
+// current/default behavior (fully responsive on screen, always prints A4 —
+// see applyPaperSize()); 'a4'/'a3' cap on-screen sizing to that paper's
+// physical proportions too.
+export const PAPER_SIZES = ['dynamic', 'a4', 'a3'];
+const DEFAULT_PAPER_SIZE = 'dynamic';
+
+// Font-scale multiplier bounds/step for the increase/decrease control.
+// Applied as a multiplier (via the --font-scale CSS custom property), not
+// an absolute override, so it composes with paper-size width capping.
+export const FONT_SCALE_MIN = 0.8;
+export const FONT_SCALE_MAX = 1.6;
+export const FONT_SCALE_STEP = 0.1;
+const DEFAULT_FONT_SCALE = 1;
+
 function defaultLangs() {
     return KNOWN_LANGS.slice(0, 2).map(l => l.code); // Kannada + English
+}
+
+function round1(n) {
+    // Avoids float drift (e.g. 1 + 0.1 + 0.1 !== 1.2) across repeated clicks.
+    return Math.round(n * 10) / 10;
 }
 
 /** Reads the full settings object, filling in defaults for anything missing/invalid. */
@@ -19,11 +39,20 @@ export function loadSettings() {
 
     const langs = Array.isArray(saved?.langs) ? saved.langs.filter(c => KNOWN_LANGS.some(l => l.code === c)) : [];
 
+    const paperSize = PAPER_SIZES.includes(saved?.paperSize) ? saved.paperSize : DEFAULT_PAPER_SIZE;
+
+    const fontScale = typeof saved?.fontScale === 'number' &&
+        saved.fontScale >= FONT_SCALE_MIN && saved.fontScale <= FONT_SCALE_MAX
+        ? round1(saved.fontScale)
+        : DEFAULT_FONT_SCALE;
+
     return {
         langs:        langs.length ? langs : defaultLangs(),
         videos:       typeof saved?.videos       === 'boolean' ? saved.videos       : true,
         qrs:          typeof saved?.qrs          === 'boolean' ? saved.qrs          : false,
         readTracking: typeof saved?.readTracking === 'boolean' ? saved.readTracking : false,
+        paperSize,
+        fontScale,
     };
 }
 
@@ -49,6 +78,101 @@ export function applySettings() {
     if (toggleQrs)          toggleQrs.checked          = saved.qrs;
     if (toggleReadTracking) toggleReadTracking.checked = saved.readTracking;
     // Lang checkboxes are built by initLangPicker itself, reading loadSettings().langs.
+
+    applyPaperSize();
+    applyFontScale();
+}
+
+// ── Paper size ───────────────────────────────────────────────────────────
+// A change here changes the *physical dimensions* book view paginates
+// against, but book view only re-measures on the browser's native 'resize'
+// event — a CSS attribute change alone doesn't fire one. notifyLayoutChanged()
+// fires a custom event book-view.js listens for alongside 'resize', so a
+// paper-size or font-scale change reliably re-triggers its pagination
+// re-measure too. Dispatched here rather than header.js importing
+// book-view.js directly, to keep the two decoupled.
+function notifyLayoutChanged() {
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+        window.dispatchEvent(new Event('pooja:layout-changed'));
+    }
+}
+
+// Continuous view: a live width cap previewing print width only — no real
+// pagination (no page numbers/breaks on screen). Book view: real physical
+// pagination — page dimensions and count actually change (see
+// views/book/book-view.css). Both read the same `data-paper-size` attribute
+// on <body>, set here.
+//
+// Print is handled separately from screen sizing: a printer can't be handed
+// "whatever fits your screen", so 'dynamic' always prints as A4, same as an
+// explicit 'a4' choice — only 'a3' changes the printed sheet. Since @page
+// can't be scoped to a class/attribute selector in plain CSS, the effective
+// size+orientation is written as text into the #print-page-size <style>
+// element (orientation follows whichever view is currently active — book is
+// a landscape two-page spread, continuous is a portrait single column).
+export function applyPaperSize() {
+    const { paperSize } = loadSettings();
+
+    if (document.body) document.body.dataset.paperSize = paperSize;
+
+    const select = document.getElementById('paper-size-select');
+    if (select) select.value = paperSize;
+
+    const printSize   = paperSize === 'a3' ? 'A3' : 'A4';
+    const mode        = (typeof localStorage !== 'undefined' && localStorage.getItem('viewMode')) || 'book';
+    const orientation = mode === 'book' ? 'landscape' : 'portrait';
+
+    const pageStyle = document.getElementById('print-page-size');
+    if (pageStyle) pageStyle.textContent = `@page { size: ${printSize} ${orientation}; margin: 15mm; }`;
+
+    notifyLayoutChanged();
+    return paperSize;
+}
+
+export function initPaperSizeControl() {
+    const select = document.getElementById('paper-size-select');
+    if (select) {
+        select.addEventListener('change', () => {
+            saveSettings({ paperSize: select.value });
+            applyPaperSize();
+        });
+    }
+    applyPaperSize();
+}
+
+// ── Font-size scaling ──────────────────────────────────────────────────────
+// A multiplier (not an absolute override) shared identically between screen
+// and print via the single --font-scale custom property, so print can't
+// silently drift out of sync with what's shown on screen. Shared across
+// both views (continuous and book) — not per-view.
+export function applyFontScale() {
+    const { fontScale } = loadSettings();
+
+    if (document.documentElement) {
+        document.documentElement.style.setProperty('--font-scale', String(fontScale));
+    }
+
+    const display = document.getElementById('font-scale-display');
+    if (display) display.textContent = `${Math.round(fontScale * 100)}%`;
+
+    notifyLayoutChanged();
+    return fontScale;
+}
+
+export function changeFontScale(delta) {
+    const current = loadSettings().fontScale;
+    const next = Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, round1(current + delta)));
+    saveSettings({ fontScale: next });
+    applyFontScale();
+    return next;
+}
+
+export function initFontScaleControl() {
+    const inc = document.getElementById('font-scale-increase');
+    const dec = document.getElementById('font-scale-decrease');
+    if (inc) inc.addEventListener('click', () => changeFontScale(FONT_SCALE_STEP));
+    if (dec) dec.addEventListener('click', () => changeFontScale(-FONT_SCALE_STEP));
+    applyFontScale();
 }
 
 // ── Lang picker ───────────────────────────────────────────────────────────
@@ -248,6 +372,8 @@ export function initHeaderControls(onLangChange, onReadToggle) {
 
     initLangPicker(onLangChange);
     initHeaderDropdown();
+    initPaperSizeControl();
+    initFontScaleControl();
     updateMediaVisibility();
     updateReadTrackingVisibility();
 }
@@ -259,5 +385,8 @@ if (typeof module !== 'undefined' && module.exports) {
         getActiveLangs, saveActiveLangs, initLangPicker,
         updateMediaVisibility, updateReadTrackingVisibility,
         initHeaderDropdown, initHeaderControls,
+        PAPER_SIZES, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+        applyPaperSize, initPaperSizeControl,
+        applyFontScale, changeFontScale, initFontScaleControl,
     });
 }
