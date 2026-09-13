@@ -5,23 +5,18 @@ const {
     updateMediaVisibility,
     updateReadTrackingVisibility,
     initHeaderDropdown,
+    initZenModeControl,
     loadSettings,
     saveSettings,
     applySettings,
     SETTINGS_KEY,
-    PAPER_SIZES,
-    FONT_SCALE_MIN,
-    FONT_SCALE_MAX,
-    FONT_SCALE_STEP,
-    applyPaperSize,
-    initPaperSizeControl,
-    applyFontScale,
-    changeFontScale,
-    initFontScaleControl,
 } = require('./header');
 
-// Every loadSettings()/saveSettings() assertion below that checks the full
-// object includes these two defaults alongside the pre-existing fields.
+// Every assertion below that checks the full loadSettings() object includes
+// these two defaults alongside langs/videos/qrs/readTracking. Paper size and
+// font scale each have their own module and their own test file — see
+// paper-size.test.js and font-scale.test.js — and the shared schema/
+// validation behind both lives in settings.js, tested in settings.test.js.
 const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1 };
 
 function baseDom() {
@@ -45,9 +40,12 @@ function baseDom() {
         <span id="font-scale-display"></span>
         <button id="font-scale-increase"></button>
         <style id="print-page-size"></style>
+        <button id="zen-mode-btn"></button>
+        <button id="zen-exit-btn" hidden></button>
+        <button id="zen-peek-btn" hidden></button>
     `;
-    // Match production: header.js's --font-scale default lives in
-    // header.css's :root rule, which isn't loaded in jsdom unit tests.
+    // Match production: --font-scale's default lives in core/font-scale.css's
+    // :root rule, which isn't loaded in jsdom unit tests.
     document.documentElement.style.removeProperty('--font-scale');
 }
 
@@ -82,160 +80,6 @@ describe('getActiveLangs / saveActiveLangs', () => {
 
         const saved = loadSettings();
         expect(saved).toEqual({ langs: ['en'], videos: false, qrs: true, readTracking: true, ...DEFAULT_PAPER_FONT });
-    });
-});
-
-// One settings object, one localStorage key: saveSettings(partial) merges
-// into whatever's already saved, so any single control can persist its own
-// change with one call without needing to know about (or touch) the others.
-describe('loadSettings / saveSettings', () => {
-    test('defaults every field when nothing has ever been saved', () => {
-        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: false, readTracking: false, ...DEFAULT_PAPER_FONT });
-    });
-
-    test('saveSettings merges a partial update into the existing saved settings', () => {
-        saveSettings({ qrs: true });
-        saveSettings({ readTracking: true });
-
-        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: true, readTracking: true, ...DEFAULT_PAPER_FONT });
-    });
-
-    test('invalid/unknown paperSize falls back to dynamic', () => {
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ paperSize: 'letter' }));
-        expect(loadSettings().paperSize).toBe('dynamic');
-    });
-
-    test.each(PAPER_SIZES)('accepts a saved paperSize of %s', (size) => {
-        saveSettings({ paperSize: size });
-        expect(loadSettings().paperSize).toBe(size);
-    });
-
-    test('out-of-range or non-numeric fontScale falls back to 1', () => {
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ fontScale: 99 }));
-        expect(loadSettings().fontScale).toBe(1);
-
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ fontScale: 'big' }));
-        expect(loadSettings().fontScale).toBe(1);
-    });
-
-    test('accepts a saved fontScale within range', () => {
-        saveSettings({ fontScale: 1.3 });
-        expect(loadSettings().fontScale).toBe(1.3);
-    });
-});
-
-// Paper size: 'dynamic' is the current/default responsive behavior in both
-// views on screen, but must always print as A4 — a printer can't be handed
-// "whatever fits your screen" as a paper size. Only 'a3' should change the
-// printed sheet.
-describe('applyPaperSize / initPaperSizeControl', () => {
-    test('defaults to dynamic: sets body[data-paper-size] and the select, and prints as A4', () => {
-        applyPaperSize();
-        expect(document.body.dataset.paperSize).toBe('dynamic');
-        expect(document.getElementById('paper-size-select').value).toBe('dynamic');
-        expect(document.getElementById('print-page-size').textContent).toContain('A4');
-    });
-
-    test('an explicit A4 choice also prints as A4', () => {
-        saveSettings({ paperSize: 'a4' });
-        applyPaperSize();
-        expect(document.body.dataset.paperSize).toBe('a4');
-        expect(document.getElementById('print-page-size').textContent).toContain('A4');
-        expect(document.getElementById('print-page-size').textContent).not.toContain('A3');
-    });
-
-    test('an A3 choice is the only one that changes the printed sheet', () => {
-        saveSettings({ paperSize: 'a3' });
-        applyPaperSize();
-        expect(document.body.dataset.paperSize).toBe('a3');
-        expect(document.getElementById('print-page-size').textContent).toContain('A3');
-    });
-
-    test('print orientation follows the active view: landscape for book, portrait for continuous', () => {
-        localStorage.setItem('viewMode', 'book');
-        applyPaperSize();
-        expect(document.getElementById('print-page-size').textContent).toContain('landscape');
-
-        localStorage.setItem('viewMode', 'continuous');
-        applyPaperSize();
-        expect(document.getElementById('print-page-size').textContent).toContain('portrait');
-    });
-
-    test('changing the <select> persists the choice and re-applies it', () => {
-        initPaperSizeControl();
-        const select = document.getElementById('paper-size-select');
-        select.value = 'a3';
-        select.dispatchEvent(new Event('change'));
-
-        expect(loadSettings().paperSize).toBe('a3');
-        expect(document.body.dataset.paperSize).toBe('a3');
-    });
-
-    test('applySettings pushes the saved paper size onto the select', () => {
-        saveSettings({ paperSize: 'a3' });
-        baseDom();
-        applySettings();
-        expect(document.getElementById('paper-size-select').value).toBe('a3');
-        expect(document.body.dataset.paperSize).toBe('a3');
-    });
-});
-
-// Font scaling: a multiplier (not an absolute override) applied via a single
-// --font-scale custom property that both screen and @media print rules
-// read, so the two can never drift apart.
-describe('applyFontScale / changeFontScale / initFontScaleControl', () => {
-    test('defaults to 100% and sets --font-scale: 1', () => {
-        applyFontScale();
-        expect(document.documentElement.style.getPropertyValue('--font-scale')).toBe('1');
-        expect(document.getElementById('font-scale-display').textContent).toBe('100%');
-    });
-
-    test('changeFontScale increases/decreases by one step and persists it', () => {
-        const next = changeFontScale(FONT_SCALE_STEP);
-        expect(next).toBeCloseTo(1 + FONT_SCALE_STEP);
-        expect(loadSettings().fontScale).toBeCloseTo(1 + FONT_SCALE_STEP);
-        expect(document.documentElement.style.getPropertyValue('--font-scale')).toBe(String(next));
-
-        const back = changeFontScale(-FONT_SCALE_STEP);
-        expect(back).toBeCloseTo(1);
-    });
-
-    test('clamps at FONT_SCALE_MAX / FONT_SCALE_MIN instead of going out of range', () => {
-        saveSettings({ fontScale: FONT_SCALE_MAX });
-        expect(changeFontScale(FONT_SCALE_STEP)).toBe(FONT_SCALE_MAX);
-
-        saveSettings({ fontScale: FONT_SCALE_MIN });
-        expect(changeFontScale(-FONT_SCALE_STEP)).toBe(FONT_SCALE_MIN);
-    });
-
-    test('repeated increases avoid floating-point drift', () => {
-        for (let i = 0; i < 3; i++) changeFontScale(FONT_SCALE_STEP);
-        expect(loadSettings().fontScale).toBe(1.3);
-    });
-
-    test('the increase/decrease buttons update the shared setting and display', () => {
-        initFontScaleControl();
-        document.getElementById('font-scale-increase').click();
-
-        expect(loadSettings().fontScale).toBeCloseTo(1 + FONT_SCALE_STEP);
-        expect(document.getElementById('font-scale-display').textContent).toBe('110%');
-
-        document.getElementById('font-scale-decrease').click();
-        document.getElementById('font-scale-decrease').click();
-        expect(document.getElementById('font-scale-display').textContent).toBe('90%');
-    });
-
-    test('font scale and paper size persist under the same single settings key as everything else', () => {
-        saveSettings({ qrs: true });
-        changeFontScale(FONT_SCALE_STEP);
-        saveSettings({ paperSize: 'a3' });
-
-        expect(localStorage.length).toBe(1);
-        const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
-        expect(raw).toEqual({
-            langs: ['kn', 'en'], videos: true, readTracking: false,
-            qrs: true, fontScale: 1.1, paperSize: 'a3',
-        });
     });
 });
 
@@ -432,5 +276,93 @@ describe('initHeaderDropdown', () => {
 
         document.body.click();
         expect(document.getElementById('settings-menu').style.display).toBe('none');
+    });
+});
+
+// Not persisted (see header.css's comment on body.zen-mode): a transient
+// reading mode for this visit, not a saved preference. jsdom doesn't
+// implement requestFullscreen/exitFullscreen, so these tests cover the
+// header-hiding class toggle and the keyboard/Escape fallback — the
+// (best-effort, try/caught) real Fullscreen calls are exercised by the e2e
+// suite where a real browser is available.
+describe('initZenModeControl', () => {
+    test('the enter button hides the header (via body.zen-mode) and reveals the exit button', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+        expect(document.getElementById('zen-exit-btn').hidden).toBe(false);
+    });
+
+    test('the exit button restores the header', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        document.getElementById('zen-exit-btn').click();
+
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+        expect(document.getElementById('zen-exit-btn').hidden).toBe(true);
+    });
+
+    test('clicking the Focus button again while peeked open exits zen mode, rather than no-op-ing', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        document.getElementById('zen-peek-btn').click(); // header (and #zen-mode-btn) visible again
+        expect(document.body.classList.contains('zen-header-visible')).toBe(true);
+
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+        expect(document.body.classList.contains('zen-header-visible')).toBe(false);
+    });
+
+    test('Escape exits zen mode even when fullscreen was never actually entered', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+    });
+
+    test('Escape does nothing when not in zen mode', () => {
+        initZenModeControl();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+    });
+
+    test('exiting real fullscreen some other way (fullscreenchange) also restores the header', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+
+        // Simulate the browser having exited fullscreen on its own
+        // (Esc/F11/browser UI) — document.fullscreenElement is read-only in
+        // real browsers, but jsdom allows this for test purposes.
+        document.dispatchEvent(new Event('fullscreenchange'));
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+    });
+
+    test('the peek button shows/hides the header without leaving zen mode', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+
+        document.getElementById('zen-peek-btn').click();
+        expect(document.body.classList.contains('zen-header-visible')).toBe(true);
+        expect(document.body.classList.contains('zen-mode')).toBe(true); // still in zen mode
+
+        document.getElementById('zen-peek-btn').click();
+        expect(document.body.classList.contains('zen-header-visible')).toBe(false);
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+    });
+
+    test('exiting zen mode also clears a peeked-open header, rather than leaving stale state', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        document.getElementById('zen-peek-btn').click();
+        expect(document.body.classList.contains('zen-header-visible')).toBe(true);
+
+        document.getElementById('zen-exit-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+        expect(document.body.classList.contains('zen-header-visible')).toBe(false);
     });
 });

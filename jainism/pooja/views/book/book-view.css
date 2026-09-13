@@ -3,10 +3,33 @@
 #book-container {
     display: none;
     flex-direction: column;
-    align-items: center;
     padding: 20px 20px 32px;
     min-height: calc(100vh - 60px);
     background: #7a6a58;
+    /* A4/A3 below use a true fixed width (not max-width), so a genuine
+       physical page never shrinks to fit the viewport/zoom level — it
+       scrolls horizontally instead, same as a real print-preview would.
+       Deliberately NOT centering .book-shell with align-items here (see
+       .book-shell's margin below) — flexbox/grid box-alignment centering
+       (align-items/justify-content: center) has a well-known browser
+       quirk where, once the centered item overflows, only the *end*-side
+       overflow becomes scrollable — the start side is clipped and
+       unreachable no matter how far you scroll left. margin: auto
+       centering on the item itself doesn't have this problem. */
+    overflow-x: auto;
+}
+
+/* Focus/zen mode hides the 60px header entirely — reclaim that space
+   rather than leaving a dead gap at the top. 100dvh (dynamic viewport
+   height) as a progressive enhancement over 100vh: on mobile browsers,
+   100vh is measured against the *largest* possible viewport (chrome
+   collapsed), so it overshoots and gets clipped/scrolled while the
+   address bar is still showing — 100dvh tracks the actual visible height
+   as that chrome shows/hides. Unsupported browsers simply ignore the
+   second declaration and keep the 100vh fallback. */
+body.zen-mode #book-container {
+    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 #book-container.active {
@@ -19,7 +42,40 @@
     align-items: center;
     width: 100%;
     max-width: 960px;
+    /* Centers this item horizontally within #book-container using auto
+       margins rather than the parent's align-items — see the comment on
+       #book-container above for why that distinction matters once this
+       overflows the viewport in A4/A3 mode. */
+    margin: 0 auto;
     gap: 14px;
+}
+
+/* ── Paper-size (Dynamic / A4 / A3) — real physical pagination ────────────
+   Unlike continuous view's cosmetic-only width cap, this actually changes
+   page dimensions and (via the wider container-query width feeding the
+   clamp()s below) how much content fits per spread, so the total page
+   count changes too. 'dynamic' (no attribute) leaves the fluid 960px cap
+   above untouched — fully responsive — and, like 'a4', always prints as A4;
+   only 'a3' changes the printed sheet (see header.js's applyPaperSize()).
+
+   A true `width` (not `max-width`) on purpose: a max-width lets the box
+   shrink to fit whatever the viewport happens to be, which — combined with
+   CSS-columns pagination reading the box's *rendered* width — made the
+   page content silently reflow on browser zoom (the effective viewport
+   changes with zoom) and made A4 vs A3 indistinguishable whenever both
+   exceeded the viewport anyway. A fixed physical width removes both: it
+   never shrinks, so it scrolls horizontally instead, like a real print
+   preview. */
+body[data-paper-size="a4"] .book-shell,
+body[data-paper-size="a4"] .book-nav {
+    width: 420mm; /* two A4 portrait pages side by side */
+    max-width: none;
+}
+
+body[data-paper-size="a3"] .book-shell,
+body[data-paper-size="a3"] .book-nav {
+    width: 594mm; /* two A3 portrait pages side by side */
+    max-width: none;
 }
 
 /* ── Spread & CSS Column Engine ──────────────────────────────────────────── */
@@ -29,8 +85,16 @@
     /* Exact A4 proportions */
     height: auto;
 
-    /* ESTABLISH CONTAINER FOR CQI SCALING */
-    container-type: inline-size;
+    /* Establish full size containment (not just inline-size), since both
+       cqi (used by the static head/foot and lang-line font sizes) and cqh
+       (used by the standalone/inline image max-height caps below) need a
+       contained block axis to resolve against — with only inline-size
+       containment, cqh/cqb are invalid and the image height caps silently
+       don't apply, most visibly as leftover blank space under a tall
+       standalone image once A3's different proportions make the mismatch
+       obvious. aspect-ratio above already gives this box a definite,
+       content-independent height, so full containment is safe here. */
+    container-type: size;
 
     background: #f8f5f0;
     border-radius: 2px;
@@ -58,7 +122,7 @@
     z-index: 5;
     font-family: Georgia, serif;
     /* CQI scaling: shrinks and grows, but never gets smaller than 7px or larger than 10px */
-    font-size: clamp(7px, 1cqi, 10px);
+    font-size: clamp(calc(7px * var(--font-scale)), calc(1cqi * var(--font-scale)), calc(10px * var(--font-scale)));
     color: #bbb;
     letter-spacing: 0.1em;
 }
@@ -115,7 +179,7 @@
     border-bottom: 0.5px solid #eee;
     padding: 5px 7px 6px;
     margin-bottom: 4px;
-    font-size: 11px;
+    font-size: calc(11px * var(--font-scale));
     line-height: 1.5;
     position: relative;
 }
@@ -127,7 +191,7 @@
     font-weight: bold;
     color: #bbb;
     margin-bottom: 3px;
-    font-size: clamp(7px, 1cqi, 10px);
+    font-size: clamp(calc(7px * var(--font-scale)), calc(1cqi * var(--font-scale)), calc(10px * var(--font-scale)));
 }
 
 .book-lang-line {
@@ -137,12 +201,12 @@
 
 .book-lang-line.lang-kn {
     color: #111;
-    font-size: clamp(10px, 1.35cqi, 14px);
+    font-size: clamp(calc(10px * var(--font-scale)), calc(1.35cqi * var(--font-scale)), calc(14px * var(--font-scale)));
 }
 
 .book-lang-line.lang-en {
     color: #555;
-    font-size: clamp(9.5px, 1.25cqi, 13px);
+    font-size: clamp(calc(9.5px * var(--font-scale)), calc(1.25cqi * var(--font-scale)), calc(13px * var(--font-scale)));
 }
 
 .book-lang-sep {
@@ -163,7 +227,7 @@
     display: flex;
     gap: 5px;
     align-items: baseline;
-    font-size: clamp(8px, 1.1cqi, 12px);
+    font-size: clamp(calc(8px * var(--font-scale)), calc(1.1cqi * var(--font-scale)), calc(12px * var(--font-scale)));
 }
 
 .book-ref {
@@ -171,7 +235,7 @@
     font-weight: bold;
     color: #1565c0;
     flex-shrink: 0;
-    font-size: clamp(7.5px, 1cqi, 11px);
+    font-size: clamp(calc(7.5px * var(--font-scale)), calc(1cqi * var(--font-scale)), calc(11px * var(--font-scale)));
 }
 
 .book-excerpt-preview {
@@ -231,7 +295,7 @@
     background: rgba(0, 0, 0, 0.5);
     border-radius: 50%;
     color: white;
-    font-size: 9px;
+    font-size: calc(9px * var(--font-scale));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -292,7 +356,7 @@
 }
 
 .book-image-caption {
-    font-size: 9px;
+    font-size: calc(9px * var(--font-scale));
     color: #777;
     text-align: center;
     font-style: italic;
@@ -361,7 +425,7 @@
 
 .book-columns .standalone-image .book-image-caption {
     margin-top: 8px;
-    font-size: 11px;
+    font-size: calc(11px * var(--font-scale));
     text-align: center;
     color: #555;
 }
@@ -440,11 +504,10 @@
 
 /* ── Print — entire book ─────────────────────────────────────────────────── */
 @media print {
-    /* Set to landscape so the 2-column spread fits perfectly on the paper */
-    @page {
-        size: A4 landscape;
-        margin: 15mm;
-    }
+    /* Paper size + orientation (A4/A3, landscape for this 2-column spread)
+       is set dynamically by header.js's applyPaperSize() into the
+       #print-page-size <style> element in index.html — not hardcoded here —
+       so it can vary with the Settings paper-size choice. */
 
     .app-header,
     #continuous-container,

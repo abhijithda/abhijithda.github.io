@@ -33,10 +33,31 @@
 
 /* ── Book view ───────────────────────────────────────────────────────────── */
 /* Book view uses lighter tints so colour survives printing without
-   overwhelming the text. Borders are thinner (3px vs 4-5px, set in book-view.css). */
+   overwhelming the text. Borders are thinner (3px vs 4-5px, set in book-view.css).
+   Mantra is the deliberate exception: kept identical to continuous view's
+   saturated colours (not lightened) per explicit preference — the two
+   views had drifted apart here and were brought back in sync. */
+/* Item type (question/answer/images) owns the actual border-left — the
+   "outer" colour, at the true left edge, same role as continuous view's
+   outer `.card.X`. `.images` only counts as the item's own colour when it
+   genuinely IS the item type, not when it's merely a block nested inside a
+   different item (continuous view has no `.block-row.images` equivalent —
+   an images block inside a question/answer gets no colour of its own
+   there either; :not() here makes book view match that instead of letting
+   `.images`'s rule silently win the cascade over the real item colour). */
 .book-card.question { border-left-color: #c0392b; }
 .book-card.answer   { border-left-color: #27ae60; }
-.book-card.images   { border-left-color: #607d8b; }
-.book-card.note     { border-left-color: #b38f4f; background: #fdfaf2; }
-.book-card.mantra   { border-left-color: #e65100; background: #fff3e0; }
-.book-card.shloka   { border-left-color: #d4a017; background: #fffde7; }
+.book-card.images:not(.question):not(.answer) { border-left-color: #607d8b; }
+
+/* Block type (mantra/note/shloka) is the "inner" colour — continuous
+   view's nested `.block-row.X`, one level in from the item card's own
+   border. A block always occurs alongside an item-type class (never
+   alone), so this can't compete with the border-left-color rules above:
+   it draws as a second, adjacent strip via box-shadow instead of touching
+   border-left-color itself — both colours stay visible side by side,
+   same as the two real nested elements do in continuous view, rather than
+   one flatly overwriting the other the way a single border-left-color
+   would. */
+.book-card.note   { background: #fdfaf2; box-shadow: inset 5px 0 0 0 #b38f4f; }
+.book-card.mantra { background: rgb(249, 126, 3); box-shadow: inset 5px 0 0 0 rgb(255, 0, 0); }
+.book-card.shloka { background: #fffde7; box-shadow: inset 5px 0 0 0 #d4a017; }

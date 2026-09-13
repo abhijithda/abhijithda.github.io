@@ -1,73 +1,24 @@
-// header.js — Header UI: language picker, media/QR toggles, read-tracking, settings dropdown.
-// All persisted settings (languages, videos, QR codes, read-tracking) live
-// under one localStorage key and go through one load/save pair, so any
-// caller can save "everything" — or just the one field it changed — with a
-// single function call instead of juggling separate keys per setting.
+// header.js — Header UI: language picker, media/QR toggles, read-tracking,
+// settings dropdown. The persisted settings object lives in
+// core/settings.js; paper size and font scale each have their own module
+// (core/paper-size.js, core/font-scale.js) — see those for how each
+// setting is validated, applied, and wired to its control. Re-exported
+// here so callers (app.js) have one import path for everything
+// header-related.
 
 import { KNOWN_LANGS } from '../core/langs.js';
+import { SETTINGS_KEY, loadSettings, saveSettings } from '../core/settings.js';
+import { PAPER_SIZES, applyPaperSize, initPaperSizeControl } from '../core/paper-size.js';
+import {
+    FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+    applyFontScale, changeFontScale, initFontScaleControl,
+} from '../core/font-scale.js';
 
-export const SETTINGS_KEY = 'settings';
+export { SETTINGS_KEY, loadSettings, saveSettings };
+export { PAPER_SIZES, applyPaperSize, initPaperSizeControl };
+export { FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP, applyFontScale, changeFontScale, initFontScaleControl };
 
-// Paper-size options for the Settings dropdown. 'dynamic' is the
-// current/default behavior (fully responsive on screen, always prints A4 —
-// see applyPaperSize()); 'a4'/'a3' cap on-screen sizing to that paper's
-// physical proportions too.
-export const PAPER_SIZES = ['dynamic', 'a4', 'a3'];
-const DEFAULT_PAPER_SIZE = 'dynamic';
-
-// Font-scale multiplier bounds/step for the increase/decrease control.
-// Applied as a multiplier (via the --font-scale CSS custom property), not
-// an absolute override, so it composes with paper-size width capping.
-export const FONT_SCALE_MIN = 0.8;
-export const FONT_SCALE_MAX = 1.6;
-export const FONT_SCALE_STEP = 0.1;
-const DEFAULT_FONT_SCALE = 1;
-
-function defaultLangs() {
-    return KNOWN_LANGS.slice(0, 2).map(l => l.code); // Kannada + English
-}
-
-function round1(n) {
-    // Avoids float drift (e.g. 1 + 0.1 + 0.1 !== 1.2) across repeated clicks.
-    return Math.round(n * 10) / 10;
-}
-
-/** Reads the full settings object, filling in defaults for anything missing/invalid. */
-export function loadSettings() {
-    let saved;
-    try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (_) {}
-
-    const langs = Array.isArray(saved?.langs) ? saved.langs.filter(c => KNOWN_LANGS.some(l => l.code === c)) : [];
-
-    const paperSize = PAPER_SIZES.includes(saved?.paperSize) ? saved.paperSize : DEFAULT_PAPER_SIZE;
-
-    const fontScale = typeof saved?.fontScale === 'number' &&
-        saved.fontScale >= FONT_SCALE_MIN && saved.fontScale <= FONT_SCALE_MAX
-        ? round1(saved.fontScale)
-        : DEFAULT_FONT_SCALE;
-
-    return {
-        langs:        langs.length ? langs : defaultLangs(),
-        videos:       typeof saved?.videos       === 'boolean' ? saved.videos       : true,
-        qrs:          typeof saved?.qrs          === 'boolean' ? saved.qrs          : false,
-        readTracking: typeof saved?.readTracking === 'boolean' ? saved.readTracking : false,
-        paperSize,
-        fontScale,
-    };
-}
-
-/**
- * Merge `partial` into the currently saved settings and persist the result.
- * Callers pass only the field(s) they changed — e.g. saveSettings({ qrs: true })
- * — everything else is preserved. Returns the merged settings object.
- */
-export function saveSettings(partial) {
-    const merged = { ...loadSettings(), ...partial };
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
-    return merged;
-}
-
-/** Reads current settings and pushes them onto the header controls (checkboxes). */
+/** Reads current settings and pushes them onto the header controls (checkboxes, paper size, font scale). */
 export function applySettings() {
     const saved              = loadSettings();
     const toggleVideos       = document.getElementById('toggle-videos');
@@ -80,98 +31,6 @@ export function applySettings() {
     // Lang checkboxes are built by initLangPicker itself, reading loadSettings().langs.
 
     applyPaperSize();
-    applyFontScale();
-}
-
-// ── Paper size ───────────────────────────────────────────────────────────
-// A change here changes the *physical dimensions* book view paginates
-// against, but book view only re-measures on the browser's native 'resize'
-// event — a CSS attribute change alone doesn't fire one. notifyLayoutChanged()
-// fires a custom event book-view.js listens for alongside 'resize', so a
-// paper-size or font-scale change reliably re-triggers its pagination
-// re-measure too. Dispatched here rather than header.js importing
-// book-view.js directly, to keep the two decoupled.
-function notifyLayoutChanged() {
-    if (typeof window !== 'undefined' && window.dispatchEvent) {
-        window.dispatchEvent(new Event('pooja:layout-changed'));
-    }
-}
-
-// Continuous view: a live width cap previewing print width only — no real
-// pagination (no page numbers/breaks on screen). Book view: real physical
-// pagination — page dimensions and count actually change (see
-// views/book/book-view.css). Both read the same `data-paper-size` attribute
-// on <body>, set here.
-//
-// Print is handled separately from screen sizing: a printer can't be handed
-// "whatever fits your screen", so 'dynamic' always prints as A4, same as an
-// explicit 'a4' choice — only 'a3' changes the printed sheet. Since @page
-// can't be scoped to a class/attribute selector in plain CSS, the effective
-// size+orientation is written as text into the #print-page-size <style>
-// element (orientation follows whichever view is currently active — book is
-// a landscape two-page spread, continuous is a portrait single column).
-export function applyPaperSize() {
-    const { paperSize } = loadSettings();
-
-    if (document.body) document.body.dataset.paperSize = paperSize;
-
-    const select = document.getElementById('paper-size-select');
-    if (select) select.value = paperSize;
-
-    const printSize   = paperSize === 'a3' ? 'A3' : 'A4';
-    const mode        = (typeof localStorage !== 'undefined' && localStorage.getItem('viewMode')) || 'book';
-    const orientation = mode === 'book' ? 'landscape' : 'portrait';
-
-    const pageStyle = document.getElementById('print-page-size');
-    if (pageStyle) pageStyle.textContent = `@page { size: ${printSize} ${orientation}; margin: 15mm; }`;
-
-    notifyLayoutChanged();
-    return paperSize;
-}
-
-export function initPaperSizeControl() {
-    const select = document.getElementById('paper-size-select');
-    if (select) {
-        select.addEventListener('change', () => {
-            saveSettings({ paperSize: select.value });
-            applyPaperSize();
-        });
-    }
-    applyPaperSize();
-}
-
-// ── Font-size scaling ──────────────────────────────────────────────────────
-// A multiplier (not an absolute override) shared identically between screen
-// and print via the single --font-scale custom property, so print can't
-// silently drift out of sync with what's shown on screen. Shared across
-// both views (continuous and book) — not per-view.
-export function applyFontScale() {
-    const { fontScale } = loadSettings();
-
-    if (document.documentElement) {
-        document.documentElement.style.setProperty('--font-scale', String(fontScale));
-    }
-
-    const display = document.getElementById('font-scale-display');
-    if (display) display.textContent = `${Math.round(fontScale * 100)}%`;
-
-    notifyLayoutChanged();
-    return fontScale;
-}
-
-export function changeFontScale(delta) {
-    const current = loadSettings().fontScale;
-    const next = Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, round1(current + delta)));
-    saveSettings({ fontScale: next });
-    applyFontScale();
-    return next;
-}
-
-export function initFontScaleControl() {
-    const inc = document.getElementById('font-scale-increase');
-    const dec = document.getElementById('font-scale-decrease');
-    if (inc) inc.addEventListener('click', () => changeFontScale(FONT_SCALE_STEP));
-    if (dec) dec.addEventListener('click', () => changeFontScale(-FONT_SCALE_STEP));
     applyFontScale();
 }
 
@@ -356,6 +215,85 @@ export function initHeaderDropdown() {
  * @param {Function} onLangChange  - callback(activeLangs[]) on lang change
  * @param {Function} [onReadToggle] - callback when read-tracking toggle changes
  */
+// ── Focus / zen mode ─────────────────────────────────────────────────────
+// Hides the header and, best-effort, requests real browser Fullscreen so
+// the browser's own chrome gets out of the way too — see the CSS comment
+// on body.zen-mode in header.css for why Fullscreen is optional rather
+// than required. A separate peek button (body.zen-header-visible) lets the
+// header be shown/hidden again on demand without leaving zen mode/dropping
+// Fullscreen — the exit button alone was all-or-nothing, too heavy just to
+// glance at Settings. Deliberately not persisted (see the same comment):
+// requestFullscreen() needs a fresh user gesture on every load anyway, so
+// there's nothing meaningful to restore.
+export function initZenModeControl() {
+    const enterBtn = document.getElementById('zen-mode-btn');
+    const exitBtn  = document.getElementById('zen-exit-btn');
+    const peekBtn  = document.getElementById('zen-peek-btn');
+
+    function setZenClass(on) {
+        document.body.classList.toggle('zen-mode', on);
+        if (exitBtn) exitBtn.hidden = !on;
+        if (peekBtn) peekBtn.hidden = !on;
+        if (!on) document.body.classList.remove('zen-header-visible');
+    }
+
+    async function enterZen() {
+        setZenClass(true);
+        try {
+            if (document.documentElement.requestFullscreen) {
+                await document.documentElement.requestFullscreen();
+            }
+        } catch (_) {
+            // Denied or unsupported (iframe, no user gesture, etc.) — the
+            // header is still hidden regardless, so the main
+            // distraction-free effect doesn't depend on this succeeding.
+        }
+    }
+
+    async function exitZen() {
+        setZenClass(false);
+        try {
+            if (document.fullscreenElement && document.exitFullscreen) {
+                await document.exitFullscreen();
+            }
+        } catch (_) {}
+    }
+
+    if (enterBtn) enterBtn.addEventListener('click', () => {
+        // The button is only ever clickable in two states: not in zen mode
+        // (normal header) or peeked-open (header temporarily shown while
+        // still in zen mode) — in the latter case "enter" is a no-op
+        // (already there), which reads as a dead button. Toggle instead.
+        if (document.body.classList.contains('zen-mode')) {
+            exitZen();
+        } else {
+            enterZen();
+        }
+    });
+    if (exitBtn)  exitBtn.addEventListener('click', exitZen);
+    if (peekBtn)  peekBtn.addEventListener('click', () => {
+        document.body.classList.toggle('zen-header-visible');
+    });
+
+    // If real fullscreen was entered and the user exits it some other way
+    // (Esc, F11, browser UI) rather than our own exit button, keep the
+    // header's hidden state in sync instead of leaving no way back in.
+    if (typeof document.addEventListener === 'function') {
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) setZenClass(false);
+        });
+
+        // Also handle Escape when fullscreen was never actually entered
+        // (e.g. the request above was denied) — the browser only
+        // auto-handles Escape for its own real fullscreen state.
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.body.classList.contains('zen-mode')) {
+                exitZen();
+            }
+        });
+    }
+}
+
 export function initHeaderControls(onLangChange, onReadToggle) {
     applySettings();
 
@@ -374,19 +312,12 @@ export function initHeaderControls(onLangChange, onReadToggle) {
     initHeaderDropdown();
     initPaperSizeControl();
     initFontScaleControl();
+    initZenModeControl();
     updateMediaVisibility();
     updateReadTrackingVisibility();
 }
 
-// CommonJS shim for Jest
-if (typeof module !== 'undefined' && module.exports) {
-    Object.assign(module.exports, {
-        SETTINGS_KEY, loadSettings, saveSettings, applySettings,
-        getActiveLangs, saveActiveLangs, initLangPicker,
-        updateMediaVisibility, updateReadTrackingVisibility,
-        initHeaderDropdown, initHeaderControls,
-        PAPER_SIZES, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
-        applyPaperSize, initPaperSizeControl,
-        applyFontScale, changeFontScale, initFontScaleControl,
-    });
-}
+// Note: no manual CommonJS re-export shim — see paper-size.js for why (this
+// file re-exports bindings from settings.js/paper-size.js/font-scale.js,
+// which a manual Object.assign(module.exports, {...}) can't overwrite;
+// babel's transform already handles every export here, local or re-exported).

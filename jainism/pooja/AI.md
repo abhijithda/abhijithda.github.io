@@ -23,9 +23,14 @@ jainism/pooja/
 │   ├── langs.js                  (KNOWN_LANGS — supported languages)
 │   ├── media.js / media.css      (video/QR utilities + styles)
 │   ├── read-tracking.js / .css   (read/unread state, incl. isBlockTrackable)
-│   └── card-types.css            (card/block colour coding)
+│   ├── card-types.css            (card/block colour coding)
+│   ├── settings.js               (the one unified `settings` object — schema/validation)
+│   ├── layout-signal.js          (`pooja:layout-changed` event — see Paper Size & Font Scaling)
+│   ├── paper-size.js / (css lives per-view, see below)  (Dynamic/A4/A3 setting)
+│   └── font-scale.js / font-scale.css                   (font-size multiplier setting)
 ├── header/
-│   └── header.js / header.css / header.test.js
+│   └── header.js / header.css / header.test.js  ← header UI only (settings dropdown,
+│       lang picker, toggle wiring); the settings it toggles live in core/, see below
 ├── views/
 │   ├── continuous/
 │   │   └── continuous-view.js / .css / .test.js
@@ -44,6 +49,18 @@ raw ES modules straight to the browser via `<script type="module">`, and
 step exists. The by-feature grouping instead mirrors how the code is
 actually reasoned about: a shared layer, plus one folder per view.
 
+`header/` is kept deliberately thin — it's specifically the header **UI**
+(the settings dropdown, the lang picker, wiring the toggle controls), not a
+place for cross-cutting logic to accumulate just because its control lives
+in the header. A setting whose *effect* is used/rendered across views
+belongs in `core/` even though `header.js` wires its control — same
+precedent as `read-tracking.js` (its checkbox lives in `header.js`, but the
+actual read/unread logic and `updateProgressDisplay()` live in `core/`).
+Paper size and font scale followed an earlier, wrong instinct of nesting
+them under `header/` since that's where their controls are — moved to
+`core/` once that mismatch was noticed, matching `read-tracking.js`'s
+precedent instead.
+
 Every module resolves its own imports with relative paths (`../../core/x.js`
 etc.) — there's no bundler to abstract that away, so adding a new file or
 moving one means updating every path that touches it by hand. Verified by a
@@ -57,17 +74,22 @@ to a real file) as part of building this structure.
 | File | Responsibility | Status |
 |---|---|---|
 | `app.js` | Entry point; composes modules; owns `setViewMode()` | ✅ Current |
-| `header/header.js` | Settings dropdown, lang picker, media/read-tracking toggles, unified settings storage | ✅ Current |
+| `header/header.js` | Settings dropdown, lang picker, media/read-tracking toggle wiring | ✅ Current |
 | `views/continuous/continuous-view.js` | Continuous scroll view rendering (verbatim from original `script.js`) | ✅ Current |
 | `views/book/book-view.js` | Book spread view: pagination (CSS columns), card creation, navigation | ✅ Current |
 | `core/blocks.js` | Pure data-model helpers: `formatIdForDisplay`, `buildBlockIndex`, `resolveReference` — shared by both views | ✅ Current |
 | `core/langs.js` | `KNOWN_LANGS` — single source of truth for supported languages | ✅ Current |
 | `core/media.js` | Video/QR utilities (`createVideoCard`, `extractYouTubeId`, `escapeHtml`, `linkify`, etc.) | ✅ Current |
 | `core/read-tracking.js` | Pure read/unread state functions, incl. `isBlockTrackable` — shared by both views | ✅ Current |
+| `core/settings.js` | The one unified `settings` object — schema, defaults, validation (`loadSettings`/`saveSettings`) for every persisted preference | ✅ Current |
+| `core/layout-signal.js` | `notifyLayoutChanged()` — tells book view to re-measure pagination when a layout-affecting setting changes outside a window resize | ✅ Current |
+| `core/paper-size.js` | Paper size (Dynamic/A4/A3): applies `body[data-paper-size]` + the printed `@page` rule, wires the Settings `<select>` | ✅ Current |
+| `core/font-scale.js` | Font-size scaling multiplier: applies `--font-scale`, wires the increase/decrease control | ✅ Current |
 | `core/card-types.css` | Card type colours — single source of truth for both views | ✅ Current |
-| `header/header.css` | App header, search bar, settings dropdown, view toggle, lang picker | ✅ Current |
-| `views/continuous/continuous-view.css` | Card layout, block rows, excerpts — scoped to `#continuous-container` | ✅ Current |
-| `views/book/book-view.css` | Book spread layout, pages, cards, nav, print reflow — scoped to `#book-container` | ✅ Current |
+| `core/font-scale.css` | `:root { --font-scale: 1 }` — single source of truth read by both screen and `@media print` rules in both views | ✅ Current |
+| `header/header.css` | App header, search bar, settings dropdown, view toggle, lang picker, paper-size/font-scale control chrome | ✅ Current |
+| `views/continuous/continuous-view.css` | Card layout, block rows, excerpts — scoped to `#continuous-container`; also the paper-size width cap and font-scale sizing for this view's content | ✅ Current |
+| `views/book/book-view.css` | Book spread layout, pages, cards, nav, print reflow — scoped to `#book-container`; also the paper-size physical width and font-scale sizing for this view's content | ✅ Current |
 | `core/media.css` | Video/QR/image styles — scoped to `#continuous-container` (continuous view only; book view has its own media styles inline in `book-view.css`) | ✅ Current |
 | `core/read-tracking.css` | Read tick and progress counter styles | ✅ Current |
 
@@ -91,6 +113,16 @@ to a real file) as part of building this structure.
   nothing to collide. An earlier draft of this file did add that scoping;
   removed as unnecessary complexity once actually checked against the real
   class names in use.
+- `settings.js` / `paper-size.js` / `font-scale.js` / `layout-signal.js`
+  live in `core/`, not `header/` — see the note under **Directory
+  Structure** above. `header.js` imports and re-exports all of them so
+  `app.js` still has one import path (`./header/header.js`) for everything
+  header-related; it doesn't need to know these live in `core/` internally.
+- `paper-size.js`/`font-scale.js` each import `loadSettings`/`saveSettings`
+  from `settings.js` rather than reading `localStorage` directly — same
+  "one unified object" rule as everything else (see **Settings
+  Persistence**). `settings.js` itself has no dependency on either of
+  them — it owns the schema; they own how their one field is applied.
 
 ---
 
@@ -163,11 +195,15 @@ to a real file) as part of building this structure.
 
 ## Settings Persistence — ✅ Current
 
-All settings — languages, videos, QR codes, read-tracking — live under one
-`localStorage` key (`settings`), as a single object:
+All settings — languages, videos, QR codes, read-tracking, paper size, font
+scale — live under one `localStorage` key (`settings`), as a single object,
+schema owned by `core/settings.js`:
 
 ```json
-{ "langs": ["kn", "en"], "videos": true, "qrs": false, "readTracking": false }
+{
+  "langs": ["kn", "en"], "videos": true, "qrs": false, "readTracking": false,
+  "paperSize": "dynamic", "fontScale": 1
+}
 ```
 
 - `loadSettings()` reads it, filling in defaults for anything missing/invalid.
@@ -175,8 +211,10 @@ All settings — languages, videos, QR codes, read-tracking — live under one
   saved and writes the result back — any single control persists its own
   change (`saveSettings({ qrs: true })`) without needing to know about, or
   risk clobbering, the others.
-- `getActiveLangs()`/`saveActiveLangs()` and `applySettings()` are thin
-  wrappers over this for callers that only care about one slice.
+- `getActiveLangs()`/`saveActiveLangs()` and `applySettings()` (both in
+  `header/header.js`) are thin wrappers over this for callers that only
+  care about one slice; `core/paper-size.js` and `core/font-scale.js` are
+  the equivalent wrappers for their own field.
 - Book view doesn't read `settings` directly — `app.js` calls
   `getActiveLangs()` fresh each time a view is activated (boot or toggle
   click) and passes the result into `initBookView`/`renderContinuousView`,
@@ -187,6 +225,125 @@ All settings — languages, videos, QR codes, read-tracking — live under one
 No backward-compat migration was built for an even older two-key design
 (`displaySettings` + `activeLangs`) that predates the unified `settings`
 key — accepted as fine for a single-user project, nothing to preserve.
+
+---
+
+## Paper Size & Font Scaling — ✅ Current
+
+Two related Settings-dropdown controls, both persisted in the one unified
+`settings` object above (`paperSize`, `fontScale`) — see `core/paper-size.js`
+and `core/font-scale.js`.
+
+**Paper size** (`Dynamic` / `A4` / `A3`), applied via `body[data-paper-size]`:
+- *Continuous view*: a live width cap previewing print width only — cosmetic,
+  **not** real pagination (no page numbers/breaks appear on screen either way).
+- *Book view*: **real** physical pagination — the wider container genuinely
+  changes how much content fits per spread (via the `cqi`/`cqh`-based
+  `clamp()` sizing in `book-view.css`), so the total page count changes too.
+- `Dynamic` (the default) is fully responsive on screen in both views,
+  identical to the pre-paper-size behaviour, but **always prints as A4** —
+  same as choosing `A4` explicitly. Only `A3` changes the printed sheet. A
+  printer can't be handed "whatever fits your screen" as a paper size.
+- A4/A3 use a genuine fixed `width` (not `max-width`) on the relevant
+  container — **not** `max-width` + `width:100%`. A `max-width` lets the box
+  shrink to fit whatever the viewport happens to be, and browser zoom
+  changes the effective CSS-pixel viewport — with `max-width`, this made the
+  page content silently reflow on zoom, and made A4 vs A3 indistinguishable
+  once both exceeded the viewport anyway (both collapse to "100% of
+  viewport"). A fixed physical width removes both problems: it never
+  shrinks, scrolling horizontally instead, like a real print preview does.
+- Since `@page` can't be scoped to a body attribute/class in plain CSS, the
+  effective print size is written as text into the `#print-page-size
+  <style>` element in `index.html` by `applyPaperSize()` — `A3` only for the
+  `a3` choice, `A4` otherwise. Orientation follows whichever view is
+  active (book = landscape two-page spread, continuous = portrait single
+  column), re-applied on every view toggle (`app.js`'s `setViewMode()`).
+
+**Font scaling**, applied via the `--font-scale` CSS custom property:
+- A **multiplier**, not an absolute override (e.g. 110% means "1.1× each
+  element's own base size", not "set every element to some fixed size") —
+  so it composes correctly with paper-size width capping: bigger text within
+  a fixed physical width naturally reflows to more lines/pages.
+- Default value lives once in `core/font-scale.css`'s `:root` rule;
+  `applyFontScale()` overrides it with an inline style on `<html>`. Both
+  screen and `@media print` rules in `continuous-view.css`/`book-view.css`
+  read this **same** property (every content font-size there is
+  `calc(Npx * var(--font-scale))`, including inside `clamp()`), so print
+  can never silently drift out of sync with what's shown on screen.
+- Shared identically across both views — one control, not per-view.
+- Deliberately **not** applied to header/nav chrome (menu, buttons, book
+  nav controls) — only to actual pooja content.
+
+**Re-layout signal**: book view's pagination (spread width, current
+translateX, total page count) is normally only re-measured on the browser's
+native `resize` event. A paper-size or font-scale change resizes/rescales
+the page just like a resize would, but doesn't fire one on its own — both
+`applyPaperSize()` and `applyFontScale()` call `core/layout-signal.js`'s
+`notifyLayoutChanged()`, which dispatches a `pooja:layout-changed` event
+that `book-view.js` listens for alongside `resize`, so pagination doesn't go
+stale after either setting changes.
+
+**Why `.book-spread` needed `container-type: size`, not `inline-size`**: the
+standalone/inline image height caps in `book-view.css` use `cqh`
+(container-query height), which needs *block-axis* containment to resolve.
+The container previously only had `container-type: inline-size` (enough for
+the `cqi`-based font `clamp()`s, which only need the inline axis), so `cqh`
+was silently invalid — most visibly as leftover blank space under a tall
+standalone image once A3's different proportions made the mismatch obvious.
+`.book-spread` already gets a definite, content-independent height from its
+`aspect-ratio`, so switching to full `container-type: size` was safe.
+
+**Why `.book-shell` centers with `margin: 0 auto`, not the parent's
+`align-items: center`**: once A4/A3 makes `.book-shell` wider than the
+viewport, `#book-container` needs to scroll it horizontally. Centering an
+overflowing item via the parent's box-alignment (`align-items`/
+`justify-content: center`) has a well-known cross-browser quirk: only the
+*end*-side overflow becomes reachable by scrolling — the *start* side is
+clipped and unreachable no matter how far you scroll, because the browser's
+scrollable-overflow calculation for centered flex/grid items only accounts
+for the end direction. `margin: auto` centering on the child itself doesn't
+have this bug (this is the standard, documented workaround). Continuous
+view was never affected — `#continuous-container` was already centered with
+`margin: 40px auto`, not flex `align-items`.
+
+---
+
+## Focus / Zen Mode — ✅ Current
+
+A header button (`#zen-mode-btn`, "⛶ Focus") that hides the entire
+`.app-header` (search, view toggle, settings) via a `body.zen-mode` class,
+and best-effort requests real browser Fullscreen so the browser's own
+chrome (tabs, address bar) gets out of the way too. Works identically from
+both views.
+
+- **Not persisted** — unlike every other setting in this doc, this is a
+  transient reading mode for the current visit, not saved to the unified
+  `settings` object. `requestFullscreen()` requires a fresh user gesture on
+  every page load regardless, so there'd be nothing meaningful to restore.
+- Fullscreen is genuinely best-effort: the request can be denied or
+  unsupported (embedded in an iframe, no user gesture, browser policy) —
+  wrapped in try/catch, and the header still hides either way, so the core
+  distraction-free effect never depends on Fullscreen actually succeeding.
+- Since the header (containing the enter button) is hidden while active, a
+  small floating `#zen-exit-btn` (fixed top-right) is the way back — shown
+  only while `body.zen-mode` is set.
+- A second floating control, `#zen-peek-btn` (a small centered tab), toggles
+  `body.zen-header-visible` to show/hide the header **without** leaving zen
+  mode or dropping Fullscreen — added because the exit button alone was
+  all-or-nothing, too heavy just to glance at Settings. `#zen-exit-btn` is
+  hidden while peeked open (it would otherwise overlap the revealed
+  header's own controls); `Escape` still works regardless.
+- Three ways to fully exit, all kept in sync: the exit button; `Escape`
+  (handled explicitly, for when Fullscreen was never actually entered — the
+  browser only auto-exits *real* fullscreen on Escape on its own); and
+  exiting real Fullscreen some other way (F11, browser UI) — a
+  `fullscreenchange` listener removes `body.zen-mode` (and any peeked-open
+  header state with it) too, so the header can't end up permanently hidden
+  with no visible way back in.
+- `body.zen-mode #book-container { min-height: 100vh; }` reclaims the 60px
+  the header would otherwise have occupied, rather than leaving a dead gap
+  at the top — continuous view has no equivalent header-height assumption
+  to correct.
 
 ---
 
@@ -218,23 +375,54 @@ key — accepted as fine for a single-user project, nothing to preserve.
 
 ## Card Type Colours (`core/card-types.css`) — ✅ Current
 
-| Type | Continuous border/bg | Book border |
+| Type | Continuous border/bg | Book border/bg |
 |---|---|---|
-| `question` | `#d32f2f` / `#ffebee` | `#c0392b` |
-| `answer` | `#4caf50` / `#f1f8e9` | `#27ae60` |
-| `images` | `#607d8b` / `#fafafa` | `#607d8b` |
-| `note` | `#b38f4f` / `#fdfaf2` | `#b38f4f` / `#fdfaf2` |
-| `mantra` | `rgb(255,0,0)` / `rgb(249,126,3)` | `#e65100` / `#fff3e0` |
-| `shloka` | `#fbc02d` / `#fff9c4` | `#d4a017` / `#fffde7` |
+| `question` (item) | `#d32f2f` / `#ffebee` | `#c0392b` |
+| `answer` (item) | `#4caf50` / `#f1f8e9` | `#27ae60` |
+| `images` (item) | `#607d8b` / `#fafafa` | `#607d8b` |
+| `note` (block) | `#b38f4f` / `#fdfaf2` | `#b38f4f` / `#fdfaf2` |
+| `mantra` (block) | `rgb(255,0,0)` / `rgb(249,126,3)` | `rgb(255,0,0)` / `rgb(249,126,3)` — kept identical to continuous, unlike the rest of this table |
+| `shloka` (block) | `#fbc02d` / `#fff9c4` | `#d4a017` / `#fffde7` |
 
 Book view intentionally uses lighter tints and thinner borders (3px vs.
 4-5px) than continuous view — print-friendly, minimal ink, per the original
-book-view design intent. No container-id scoping needed (see **Module
-boundaries** above).
+book-view design intent (mantra is the deliberate exception noted above).
+No container-id scoping needed (see **Module boundaries** above).
 
-The `book-card` className includes both `item.type` and `block.type` when
-they differ, so a shloka block inside an answer item gets classes
-`book-card answer shloka` and picks up both colour rules.
+**Item type vs. block type — two different colour roles, not one.**
+`question`/`answer`/`images` only ever apply to an *item* (a Q&A pair or an
+images group); `note`/`mantra`/`shloka` only ever apply to a *block*
+nested inside one. Continuous view keeps these as two genuinely separate
+DOM elements — the outer `.card.X` (item) and, nested inside it, the
+`.block-row.X` (block) — so both colours are simply, independently visible:
+the item's border at the true left edge, the block's own border a little
+further in, wherever that block happens to sit.
+
+Book view flattens both into a **single** element's className:
+`book-card ${item.type}${block.type !== item.type ? ' ' + block.type : ''}`
+— e.g. a mantra block inside an answer item becomes one `<div class="book-card answer mantra">`.
+Two colour rules on one element can't both set `border-left-color` — only
+the one later in the stylesheet would win, silently dropping the other
+(this is what had drifted: an answer+mantra card only ever showed mantra's
+colour, never answer's, and an answer+images card similarly lost answer's
+green to `.book-card.images`'s own colour). Fixed without touching the
+merged-classes structure in `book-view.js`:
+- The three **item**-type rules keep `border-left-color` (the true border,
+  at the left edge) — `.images` is additionally guarded with
+  `:not(.question):not(.answer)`, since continuous view has no
+  `.block-row.images` equivalent (an images block nested in a
+  question/answer gets no extra colour of its own there either — book view
+  now matches, rather than letting `.book-card.images` win the cascade
+  over the real item colour whenever "images" happens to also be the block
+  type).
+- The three **block**-type rules (`note`/`mantra`/`shloka`) use
+  `box-shadow: inset 5px 0 0 0 <colour>` instead of `border-left-color` — a
+  second, adjacent colour strip just inside the real border, the standard
+  CSS trick for a second "border" without a second element. Since it's a
+  different property than `border-left-color`, it can never compete with
+  the item's own border colour — both are visible side by side, same as
+  continuous view's two real nested elements, rather than one flatly
+  overwriting the other.
 
 ---
 
@@ -280,13 +468,15 @@ the CSS-reflow approach above already satisfies the actual requirement
 
 - **Unit** (Jest + jsdom, via `babel.config.js` for ES module syntax):
   `data.test.js` (root), `core/blocks.test.js`, `core/media.test.js`,
-  `core/read-tracking.test.js`, `header/header.test.js`,
+  `core/read-tracking.test.js`, `core/settings.test.js`,
+  `core/paper-size.test.js`, `core/font-scale.test.js`, `header/header.test.js`,
   `views/continuous/continuous-view.test.js`, `views/book/book-view.test.js`.
 - **E2E** (Playwright, all still flat under `test/e2e/` — unaffected by the
   `core`/`header`/`views` reorg): `display-options-screenshots.test.js`,
   `language-filter.test.js`, `media-visibility.test.js`, `print.test.js`,
   `read-tracking.test.js`, `reply-excerpt.test.js`, `site-preview.spec.js`,
-  `book-view.test.js`, `book-view-screenshots.test.js`.
+  `book-view.test.js`, `book-view-screenshots.test.js`,
+  `paper-size-font-scale.test.js`, `zen-mode.test.js`.
 - `playwright.config.js` explicitly sets `reporter: [['html', {open:'never'}], ['list']]`
   — without this, no reporter writes an HTML report at all (Playwright's
   built-in default doesn't).

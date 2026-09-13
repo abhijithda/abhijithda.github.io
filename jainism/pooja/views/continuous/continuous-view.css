@@ -6,6 +6,33 @@
     margin: 40px auto;
     display: flex;
     flex-direction: column;
+    /* Base font size for all content below (block text, excerpts, etc.) —
+       explicit rather than left inherited, so var(--font-scale) reliably
+       scales it as a multiplier on top of the existing 16px base. */
+    font-size: calc(16px * var(--font-scale));
+}
+
+/* ── Paper-size preview (Dynamic / A4 / A3) ──────────────────────────────
+   A live width cap previewing print width only — NOT real pagination:
+   no page numbers and no page breaks appear on screen either way. Height
+   is untouched, so the view still scrolls exactly as before. 'dynamic'
+   (no attribute, or the default) keeps the max-width above untouched and
+   fully responsive; it still always prints as A4 (see header.js's
+   applyPaperSize()) since a printer can't be handed "whatever fits your
+   screen" as a paper size.
+
+   A true `width` here too (not `max-width`), for the same reason as book
+   view: so the preview reflects the paper's real physical width regardless
+   of the viewport or browser zoom level, scrolling horizontally rather
+   than silently shrinking. */
+body[data-paper-size="a4"] #continuous-container {
+    width: 210mm;
+    max-width: none;
+}
+
+body[data-paper-size="a3"] #continuous-container {
+    width: 297mm;
+    max-width: none;
 }
 
 /* 3. CARD DESIGN & BLOCK ROWS */
@@ -157,7 +184,7 @@ input:checked + .slider::before {
     margin: 0 10px 0 0 !important;
     padding: 0 5px !important;
     text-align: right;
-    font-size: 10px !important;
+    font-size: calc(10px * var(--font-scale)) !important;
     font-family: monospace;
     font-weight: bold;
     color: #0066cc !important;
@@ -169,7 +196,7 @@ input:checked + .slider::before {
     content: "Ref: ";
     font-weight: normal;
     color: #999;
-    font-size: 8px;
+    font-size: calc(8px * var(--font-scale));
     display: block;
     line-height: 1;
     margin-bottom: 1px;
@@ -192,7 +219,7 @@ input:checked + .slider::before {
     right: 5px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 8px;
+    font-size: calc(8px * var(--font-scale));
     opacity: 0.3;
 }
 
@@ -205,7 +232,7 @@ input:checked + .slider::before {
 .excerpt-row p {
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 11px !important;
+    font-size: calc(11px * var(--font-scale)) !important;
     line-height: 1.3 !important;
     color: #444 !important;
     white-space: nowrap !important;

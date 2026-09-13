@@ -46,7 +46,11 @@ test.describe('Paper size setting', () => {
         await openSettings(page);
         await page.locator('#paper-size-select').selectOption('a4');
         await expect(page.locator('body')).toHaveAttribute('data-paper-size', 'a4');
-        const a4Width = await page.locator('#continuous-container').evaluate(el => getComputedStyle(el).maxWidth);
+        // A4/A3 use a genuine fixed `width` (not `max-width: none` here —
+        // see book-view.css/continuous-view.css's comments on why a
+        // max-width-based cap let the page shrink to fit the viewport/zoom
+        // level), so check `width`, not `maxWidth`.
+        const a4Width = await page.locator('#continuous-container').evaluate(el => getComputedStyle(el).width);
         // 210mm at 96dpi ≈ 793.7px — assert it's the physically-capped
         // value, not the old 1000px default, without pinning an exact px
         // rounding that could vary by rendering engine.
@@ -54,7 +58,7 @@ test.describe('Paper size setting', () => {
 
         await page.locator('#paper-size-select').selectOption('a3');
         await expect(page.locator('body')).toHaveAttribute('data-paper-size', 'a3');
-        const a3Width = await page.locator('#continuous-container').evaluate(el => getComputedStyle(el).maxWidth);
+        const a3Width = await page.locator('#continuous-container').evaluate(el => getComputedStyle(el).width);
         expect(parseFloat(a3Width)).toBeGreaterThan(parseFloat(a4Width));
     });
 
@@ -74,7 +78,13 @@ test.describe('Paper size setting', () => {
 
     test('switching to A3 changes the book view spread width, and can change the total page count', async ({ page }) => {
         await expect(page.locator('#book-spread-info')).toHaveText(/\(of \d+\)/);
-        const beforeWidth = await page.locator('.book-shell').evaluate(el => getComputedStyle(el).maxWidth);
+        // A4/A3 use a genuine fixed `width` (max-width: none) — see
+        // book-view.css's comment on why a max-width-based cap let the
+        // page shrink to fit the viewport/zoom level — so check `width`,
+        // not `maxWidth` (Dynamic, the state before this switch, still
+        // uses max-width:960px + width:100%, so `width` correctly reports
+        // its actual rendered pixel width here too).
+        const beforeWidth = await page.locator('.book-shell').evaluate(el => getComputedStyle(el).width);
 
         await openSettings(page);
         await page.locator('#paper-size-select').selectOption('a3');
@@ -83,8 +93,47 @@ test.describe('Paper size setting', () => {
         // Page count is content-dependent (may or may not change with this
         // fixture), but the shell must actually have grown physically —
         // that's the real pagination mechanism (see book-view.css).
-        const afterWidth = await page.locator('.book-shell').evaluate(el => getComputedStyle(el).maxWidth);
+        const afterWidth = await page.locator('.book-shell').evaluate(el => getComputedStyle(el).width);
         expect(parseFloat(afterWidth)).toBeGreaterThan(parseFloat(beforeWidth));
+    });
+
+    test('the physical page is reachable by scrolling both left and right, not clipped on one side', async ({ page }) => {
+        // Regression test: centering an overflowing child with the parent's
+        // align-items/justify-content (box alignment) rather than the
+        // child's own margin: auto is a well-known browser quirk — only the
+        // *end*-side overflow becomes scrollable, the *start* side is
+        // clipped and unreachable. See book-view.css's #book-container /
+        // .book-shell comments.
+        await openSettings(page);
+        await page.locator('#paper-size-select').selectOption('a3');
+        await page.waitForTimeout(200);
+
+        const bookContainer = page.locator('#book-container');
+        const scrollInfo = await bookContainer.evaluate(el => ({
+            scrollWidth: el.scrollWidth,
+            clientWidth: el.clientWidth,
+        }));
+        // Only meaningful if A3 actually overflows this viewport — skip the
+        // assertion body (not the test) if the test runs in a very wide
+        // viewport where there's nothing to scroll.
+        test.skip(scrollInfo.scrollWidth <= scrollInfo.clientWidth, 'viewport wide enough that A3 does not overflow here');
+
+        // Scroll to the very start, then measure the shell's left edge
+        // relative to the container's visible left edge.
+        await bookContainer.evaluate(el => { el.scrollLeft = 0; });
+        const leftGapAtStart = await page.evaluate(() => {
+            const container = document.getElementById('book-container');
+            const shell = document.querySelector('.book-shell');
+            return shell.getBoundingClientRect().left - container.getBoundingClientRect().left;
+        });
+        // If the start-side overflow were clipped (the bug), scrollLeft=0
+        // would already show the shell's left edge flush or past the
+        // container's left edge (gap <= 0), because the browser considers
+        // "0" scrolled-as-far-left-as-it-goes even though content extends
+        // further left than that. With the margin:auto fix, scrolling to
+        // 0 should still leave a visible gap (or exactly reach the true
+        // left edge) — not silently start already past it.
+        expect(leftGapAtStart).toBeGreaterThanOrEqual(0);
     });
 
     test('Dynamic always prints as A4 regardless of screen state; only A3 changes the printed sheet', async ({ page }) => {
