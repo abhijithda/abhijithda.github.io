@@ -1,7 +1,14 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-test.describe('Continuous View - Print Mode Validation', () => {
+// Re-enabled from continuous-view-print.test.js.comment — see the header
+// comment in book-view-print.test.js for why the original full-page
+// toHaveScreenshot() calls were replaced with direct visibility checks
+// (no baseline PNGs exist for these names, and a full-page print
+// screenshot is too blunt an instrument for "is the QR code visible"
+// specifically).
+
+test.describe('Continuous View - Print Mode', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
@@ -21,41 +28,46 @@ test.describe('Continuous View - Print Mode Validation', () => {
         await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
-    test('Print Mode - Default State (Videos ON, QR OFF)', async ({ page }) => {
-        // Default state: Videos are checked, QRs are unchecked
+    test('Default state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
+        const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(500); // Allow fonts/layout to settle
-        await expect(page).toHaveScreenshot('continuous-print-default-state.png', { fullPage: true, timeout: 15000 });
+        await page.waitForTimeout(200);
+
+        await expect(mediaWrap.locator('.video-card')).toBeVisible();
+        await expect(mediaWrap.locator('.qr-code')).toBeHidden();
     });
 
-    test('Print Mode - Both State (Videos ON, QR ON)', async ({ page }) => {
-        // Turn on QRs
+    test('Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
         await page.locator('#toggle-qrs').check();
 
+        const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(500);
-        await expect(page).toHaveScreenshot('continuous-print-both-state.png', { fullPage: true, timeout: 15000 });
+        await page.waitForTimeout(200);
+
+        await expect(mediaWrap.locator('.video-card')).toBeVisible();
+        await expect(mediaWrap.locator('.qr-code')).toBeVisible();
     });
 
-    test('Print Mode - QR-only State (Videos OFF, QR ON)', async ({ page }) => {
-        // Turn on QRs, turn off Videos
+    test('QR-only state (Videos OFF, QR ON): the QR prints, the video thumbnail does not', async ({ page }) => {
         await page.locator('#toggle-qrs').check();
         await page.locator('#toggle-videos').uncheck();
 
+        const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(500);
-        await expect(page).toHaveScreenshot('continuous-print-qr-only-state.png', {
-            fullPage: true, timeout: 15000,
-            maxDiffPixelRatio: 0.02 // Allows up to a 2% variance 
-        });
+        await page.waitForTimeout(200);
+
+        await expect(mediaWrap.locator('.video-card')).toBeHidden();
+        await expect(mediaWrap.locator('.qr-code')).toBeVisible();
     });
 
-    test('Print Mode - None State (Videos OFF, QR OFF)', async ({ page }) => {
-        // Turn off Videos (QRs are off by default)
+    test('None state (Videos OFF, QR OFF): neither prints', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
 
+        const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(500);
-        await expect(page).toHaveScreenshot('continuous-print-none-state.png', { fullPage: true, timeout: 15000 });
+        await page.waitForTimeout(200);
+
+        await expect(mediaWrap.locator('.video-card')).toBeHidden();
+        await expect(mediaWrap.locator('.qr-code')).toBeHidden();
     });
 });
