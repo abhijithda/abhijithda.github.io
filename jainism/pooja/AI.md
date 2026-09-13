@@ -462,6 +462,26 @@ pipeline described in earlier design notes. That pipeline was never built —
 the CSS-reflow approach above already satisfies the actual requirement
 ("print the entire book, not just the current page") on its own.
 
+**Two screen-focused changes elsewhere needed explicit print overrides,
+once actually printed rather than just viewed on screen:**
+- `#book-container { overflow-x: auto; }` (added for the on-screen A4/A3
+  horizontal-scroll fix — see **Paper Size & Font Scaling** above) clips a
+  *printed* page to whatever was scrolled into view on screen — browsers
+  don't "unroll" a scrollable region onto extra pages, they just clip to
+  it. Fixed with `#book-container { overflow: visible !important; }` inside
+  `@media print`.
+- Moving mantra/note/shloka's colour from `border-left-color` to
+  `box-shadow` (see **Card Type Colours** above — needed so it doesn't
+  compete with the item type's own border colour) put that colour under
+  "background graphics" for print purposes, same category as
+  `background-color`, which several browsers suppress by default unless
+  the print dialog's "Background graphics" option is explicitly checked.
+  Fixed with a blanket `* { print-color-adjust: exact !important; }` inside
+  `@media print`, so both the pre-existing tinted backgrounds and the newer
+  box-shadow strips print consistently regardless of that browser setting
+  — `border-left-color`-based borders (the item-type colour) were never
+  affected by this, since borders aren't "background".
+
 ---
 
 ## Testing — ✅ Current
@@ -476,7 +496,8 @@ the CSS-reflow approach above already satisfies the actual requirement
   `language-filter.test.js`, `media-visibility.test.js`, `print.test.js`,
   `read-tracking.test.js`, `reply-excerpt.test.js`, `site-preview.spec.js`,
   `book-view.test.js`, `book-view-screenshots.test.js`,
-  `paper-size-font-scale.test.js`, `zen-mode.test.js`.
+  `paper-size-font-scale.test.js`, `zen-mode.test.js`,
+  `book-print-regressions.test.js`.
 - `playwright.config.js` explicitly sets `reporter: [['html', {open:'never'}], ['list']]`
   — without this, no reporter writes an HTML report at all (Playwright's
   built-in default doesn't).

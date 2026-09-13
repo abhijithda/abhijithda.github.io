@@ -509,6 +509,20 @@ body[data-paper-size="a3"] .book-nav {
        #print-page-size <style> element in index.html — not hardcoded here —
        so it can vary with the Settings paper-size choice. */
 
+    /* Card-type backgrounds (mantra/note/shloka) and the mantra/note/shloka
+       inner colour strip (box-shadow — see core/card-types.css's comment
+       on why that's a box-shadow rather than a second border-left) both
+       fall under "background graphics" as far as print is concerned, which
+       several browsers suppress by default unless the user has explicitly
+       enabled it in the print dialog. Force it on so those colours don't
+       silently vanish depending on that setting — border-left-color-based
+       borders (the item-type colour) aren't affected by this setting and
+       always print regardless. */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     .app-header,
     #continuous-container,
     #back-to-message,
@@ -525,6 +539,13 @@ body[data-paper-size="a3"] .book-nav {
         display: block !important;
         background: white !important;
         padding: 0 !important;
+        /* overflow-x: auto (set for the on-screen A4/A3 horizontal-scroll
+           fix) must not survive into print: a scrollable overflow
+           container gets clipped to whatever was scrolled into view at
+           print time — browsers don't "unroll" it onto extra pages — so
+           without this override, printed output could be cut off
+           depending on scroll position. */
+        overflow: visible !important;
     }
 
     .book-shell {
