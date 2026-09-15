@@ -14,7 +14,7 @@ const path = require('path');
 test.describe('Book print — regressions', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: path.join(__dirname, '..', 'data.json') });
+            route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
         });
         await page.goto('/');
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
@@ -55,6 +55,58 @@ test.describe('Book print — regressions', () => {
         // 594mm ≈ 2245px — if the bug regresses, this would report
         // something close to that instead of the viewport's own width.
         expect(parseFloat(shellWidth)).toBeLessThan(viewportWidthBefore + 50);
+    });
+
+    test('a standalone image is not capped to the same flat height as a small inline image', async ({ page }) => {
+        // Regression test: print's ".book-image { max-height: 140mm !important }"
+        // "safe fallback for inline images" is a bare selector with
+        // !important, which -- since !important always wins over a
+        // non-!important rule regardless of specificity -- silently
+        // overrode the standalone-specific 75cqh sizing (itself invalid
+        // in print anyway, since cqh needs the containment print disables
+        // -- see book-view.css's comment on this rule) too, capping every
+        // image on the page to the same flat height whether standalone or
+        // not. A standalone image should be allowed to use most of the
+        // page instead -- but not so much that it (plus its caption and
+        // card padding) exceeds A4 landscape's real usable height, which
+        // silently clips the caption instead (see the next test, and
+        // book-view.css's comment on this exact value).
+        const standaloneImage = page.locator('.book-columns .standalone-image .book-image').first();
+        await expect(standaloneImage).toBeVisible();
+
+        await page.emulateMedia({ media: 'print' });
+        await page.waitForTimeout(200);
+
+        const maxHeight = await standaloneImage.evaluate(el => getComputedStyle(el).maxHeight);
+        // 140mm ~= 529px is the old, wrong, flat inline-image cap; 150mm ~=
+        // 567px is the fix -- comfortably more than 140mm, but (unlike an
+        // earlier, too-generous 220mm attempt) still safely under A4
+        // landscape's real usable height once the caption is added.
+        expect(parseFloat(maxHeight)).toBeGreaterThan(540);
+    });
+
+    test('a standalone image with a caption does not lose the caption to page-height overflow', async ({ page }) => {
+        // Regression test: a `break-inside: avoid` card taller than a full
+        // physical page can't actually be kept unbroken -- there's no page
+        // left to avoid breaking onto -- and what browsers do with that
+        // impossible request is silently clip whatever comes after the
+        // point where the page ends. That's exactly what an earlier,
+        // too-generous standalone-image height cap (220mm, exceeding A4
+        // landscape's real 180mm usable height once the caption and card
+        // padding are added) caused: the caption, being last in the card,
+        // disappeared specifically in print despite rendering fine on
+        // screen. This looks for any standalone image that actually has a
+        // caption and asserts it stays visible under print.
+        const captions = page.locator('.book-columns .standalone-image .book-image-caption');
+        const count = await captions.count();
+        test.skip(count === 0, 'fixture has no standalone image with a caption to check');
+
+        await page.emulateMedia({ media: 'print' });
+        await page.waitForTimeout(200);
+
+        for (let i = 0; i < count; i++) {
+            await expect(captions.nth(i)).toBeVisible();
+        }
     });
 
     test('print forces color-adjust, so mantra/note/shloka colors cannot silently disappear', async ({ page }) => {

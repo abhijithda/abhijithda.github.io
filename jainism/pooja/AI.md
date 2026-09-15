@@ -36,7 +36,17 @@ jainism/pooja/
 │   │   └── continuous-view.js / .css / .test.js
 │   └── book/
 │       └── book-view.js / .css / .test.js
-├── test/e2e/                   ← Playwright, unaffected by the folders above
+├── test/e2e/                   ← Playwright, mirrors views/ (see below)
+│   ├── book/                     (book-view.test.js, book-view-print.test.js,
+│   │                              book-view-screenshots.test.js + -snapshots/,
+│   │                              book-print-regressions.test.js)
+│   ├── continuous/                (continuous-view-print.test.js,
+│   │                              continuous-view-screenshots.test.js + -snapshots/,
+│   │                              language-filter.test.js, media-visibility.test.js,
+│   │                              read-tracking.test.js, reply-excerpt.test.js,
+│   │                              site-preview.spec.js)
+│   └── core/                     (paper-size-font-scale.test.js, zen-mode.test.js —
+│                                  header-level features exercised across both views)
 ├── data.test.js                ← validates data.json against schema.json
 ├── babel.config.js, playwright.config.js, package.json
 └── AI.md, README.md
@@ -48,6 +58,28 @@ raw ES modules straight to the browser via `<script type="module">`, and
 `src/` is a bundler-project convention that would misleadingly imply a build
 step exists. The by-feature grouping instead mirrors how the code is
 actually reasoned about: a shared layer, plus one folder per view.
+
+**Deleting or adding a view should cost exactly one folder, not a hunt
+through mixed-concern files.** This is true on both sides now:
+- *Source*: `book-view.js` and `continuous-view.js` never import from each
+  other — only `app.js` (the composition root) imports from both (see
+  **Module boundaries** below for the history of this). Removing
+  `views/book/` entirely means deleting that folder plus book-related
+  lines in `app.js` and `index.html` (one file each, not a search across
+  the codebase) — nothing under `core/` or `header/` references book view
+  by name.
+- *Tests*: `test/e2e/` mirrors `views/` for exactly this reason —
+  `test/e2e/book/` holds every book-view-specific Playwright test,
+  `test/e2e/continuous/` every continuous-view-specific one. Deleting
+  `views/book/` means deleting `test/e2e/book/` too, full stop — no
+  book-view assertions live outside that folder. `test/e2e/core/` is the
+  deliberate exception: paper size and font scale are header-level
+  settings whose effect spans both views by design, so their tests
+  legitimately need to exercise both in one file rather than being split
+  in a way that would just duplicate setup — same reasoning as `core/`
+  existing alongside `views/` on the source side. Playwright's default
+  `testMatch` already recursively discovers tests in subfolders, so this
+  reorganization needed no `playwright.config.js` changes.
 
 `header/` is kept deliberately thin — it's specifically the header **UI**
 (the settings dropdown, the lang picker, wiring the toggle controls), not a
@@ -450,10 +482,14 @@ approach works correctly for navigation/pagination purposes, but:
 ## Print (Book View) — ✅ Current, but different mechanism than documented
 
 `@media print` in `book-view.css` hides `.app-header`, `#continuous-container`,
-`#back-to-message`, and `.book-nav`, then forces `#book-container` itself to
-reflow to a single column (`column-count: 1`, `transform: none`,
-`height: auto`) — this alone makes the *entire* book print as one flowing
-document, not just the currently-visible spread.
+`#back-to-message`, and `.book-nav`, then forces `.book-columns` to
+**keep** `column-count: 2` (not reflow to a single column — the two
+print-facing columns are the same "left page / right page" structure as a
+screen spread, just no longer JS-paginated) while removing the JS sliding
+(`transform: none`) and letting height flow freely (`height: auto`) across
+as many physical sheets as the content needs — this alone makes the
+*entire* book print as one flowing document, not just the currently-visible
+spread.
 
 This is **not** the `#book-print-container`/`renderPrintBook()` pre-render
 pipeline described in earlier design notes. That pipeline was never built —
@@ -462,8 +498,33 @@ pipeline described in earlier design notes. That pipeline was never built —
 the CSS-reflow approach above already satisfies the actual requirement
 ("print the entire book, not just the current page") on its own.
 
-**Two screen-focused changes elsewhere needed explicit print overrides,
-once actually printed rather than just viewed on screen:**
+**Screen spread count and print sheet count are not expected to match,
+and there's no fixed ratio between them (not 1:1, not 2:1).** Screen
+pagination and print pagination are two genuinely independent layout
+engines with different dimensions feeding them, not the same measurement
+reused twice:
+- Screen (`Dynamic`/`A4`) sizes `.book-shell` to simulate an *open book* —
+  two A4 portrait pages side by side (~420mm) — with a fixed
+  `aspect-ratio` governing its height. Print instead renders on the
+  *actual* physical sheet (`@page { size: A4 landscape }`, ~297×210mm
+  minus margins), auto-height, no aspect-ratio constraint.
+- Screen's column gap (56px, `#book-columns`'s base rule) and print's
+  (`25mm` ≈ 94.5px, print-only) differ.
+- Font sizing is shared (`--font-scale`, applied identically per **Paper
+  Size & Font Scaling** above), but it interacts with the two different
+  widths above differently, and screen's `cqi`/`cqh`-driven sizing is
+  disabled entirely for print (`container-type: normal`).
+
+Given all of that, there was never an engineered guarantee that, say,
+halving the screen spread count would predict the print sheet count — they
+can reasonably diverge, and by how much isn't something resolvable from
+source alone; it depends on real browser font-metrics at print time, which
+this sandbox has no way to render and measure directly. The one thing that
+*is* guaranteed, and is the actual requirement per REQUIREMENTS.md: the
+entire book prints, completely, regardless of how many sheets it takes.
+
+**Four real bugs found and fixed so far, all from screen-focused CSS
+leaking into print without a strong-enough print-side override:**
 - `#book-container { overflow-x: auto; }` (added for the on-screen A4/A3
   horizontal-scroll fix — see **Paper Size & Font Scaling** above) clips a
   *printed* page to whatever was scrolled into view on screen — browsers
@@ -481,6 +542,43 @@ once actually printed rather than just viewed on screen:**
   box-shadow strips print consistently regardless of that browser setting
   — `border-left-color`-based borders (the item-type colour) were never
   affected by this, since borders aren't "background".
+- **An active A3/A4 screen setting was leaking its physical width into
+  print.** `body[data-paper-size="a4"] .book-shell { width: 420mm; }` (and
+  the `a3` equivalent) lives outside any `@media` query — deliberately, so
+  it also establishes the default before print's own rules are evaluated —
+  but that also means it matches during print, and its selector has higher
+  specificity than the print block's own `.book-shell { width: 100% }`
+  reset. Neither had `!important`, so specificity decided it regardless of
+  which one was inside `@media print` — the screen-preview's physical width
+  silently won, shrinking everything on the actual printed page to fit a
+  size meant for on-screen preview, not the paper. Fixed by adding
+  `!important` to the print block's reset, so it always wins regardless of
+  what paper size was selected on screen.
+- **A standalone image was capped to the same flat height as a small
+  inline image, losing its "fill most of the page" sizing entirely** —
+  and the first fix for this overshot in the other direction, losing the
+  caption instead. Print's `.book-image { max-height: 140mm !important; }`
+  — a bare selector, meant as a safe fallback for small inline images —
+  has `!important`, which beats the standalone-specific
+  `.book-columns .standalone-image .book-image { max-height: 75cqh; }`
+  (no `!important`) regardless of the latter's higher specificity:
+  `!important` always wins over non-`!important`, no matter how specific
+  the losing selector is. (That screen-only `75cqh` value is moot in print
+  anyway, since `cqh` needs containment print disables — see the note on
+  `container-type` above.) The first fix gave standalone images their own
+  `!important`, more-specific override at `220mm` — which is *larger than
+  A4 landscape's actual usable height* (210mm − 2×15mm margin = 180mm). A
+  `break-inside: avoid` card taller than a full physical page can't
+  actually be kept unbroken (there's no page left to avoid breaking onto),
+  and what browsers do with that impossible request is silently clip
+  whatever comes after the point where the page ends — the caption, being
+  last in the card, disappeared specifically in print despite rendering
+  fine on screen. Recalibrated to `150mm` for the image / `170mm` for the
+  card (comfortably under A4's real 180mm once the caption and card
+  padding are added), with a `body[data-paper-size="a3"]` override raising
+  both to `230mm`/`250mm` for A3 landscape's genuinely larger usable height
+  (297mm − 30mm = 267mm) — the same paper-size-aware pattern already used
+  for width elsewhere in this file.
 
 ---
 
@@ -491,19 +589,29 @@ once actually printed rather than just viewed on screen:**
   `core/read-tracking.test.js`, `core/settings.test.js`,
   `core/paper-size.test.js`, `core/font-scale.test.js`, `header/header.test.js`,
   `views/continuous/continuous-view.test.js`, `views/book/book-view.test.js`.
-- **E2E** (Playwright, all still flat under `test/e2e/` — unaffected by the
-  `core`/`header`/`views` reorg): `display-options-screenshots.test.js`,
-  `language-filter.test.js`, `media-visibility.test.js`, `print.test.js`,
-  `read-tracking.test.js`, `reply-excerpt.test.js`, `site-preview.spec.js`,
-  `book-view.test.js`, `book-view-screenshots.test.js`,
-  `paper-size-font-scale.test.js`, `zen-mode.test.js`,
-  `book-print-regressions.test.js`.
+- **E2E** (Playwright, `test/e2e/` — mirrors `views/`, see **Directory
+  Structure** above for why):
+  - `test/e2e/book/`: `book-view.test.js`, `book-view-print.test.js`
+    (includes Dynamic/A4/A3 print screenshots), `book-view-screenshots.test.js`
+    (+ `-snapshots/`), `book-print-regressions.test.js`.
+  - `test/e2e/continuous/`: `continuous-view-print.test.js` (includes
+    Dynamic/A4/A3 print screenshots), `continuous-view-screenshots.test.js`
+    (+ `-snapshots/`), `language-filter.test.js`, `media-visibility.test.js`,
+    `read-tracking.test.js`, `reply-excerpt.test.js`, `site-preview.spec.js`.
+  - `test/e2e/core/`: `paper-size-font-scale.test.js`, `zen-mode.test.js`.
 - `playwright.config.js` explicitly sets `reporter: [['html', {open:'never'}], ['list']]`
   — without this, no reporter writes an HTML report at all (Playwright's
-  built-in default doesn't).
+  built-in default doesn't). `testDir`/`testMatch` needed no changes for the
+  `book`/`continuous`/`core` split — Playwright recursively discovers
+  `*.test.js`/`*.spec.js` under `testDir` by default.
 - Screenshot baselines are Linux-only (`*-linux.png`), generated via a
   dedicated `update-snapshots.yml` GitHub Actions workflow rather than
-  locally, so they're consistent regardless of contributor OS.
+  locally, so they're consistent regardless of contributor OS. The
+  paper-size print screenshots specifically exist because a real bug (an
+  active A3/A4 screen setting leaking its width into print — see **Print
+  (Book View)** below) shipped undetected precisely because nothing ever
+  visually compared print output with a non-default paper size selected;
+  every other check only covered the numbers in isolation.
 
 ---
 

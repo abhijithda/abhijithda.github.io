@@ -550,8 +550,15 @@ body[data-paper-size="a3"] .book-nav {
 
     .book-shell {
         display: block !important;
-        max-width: none;
-        width: 100%;
+        /* !important here isn't decorative — data-paper-size="a4"/"a3"'s
+           width:420mm/594mm (set outside any @media query, so it applies
+           to print too) has higher specificity than a plain `.book-shell`
+           selector, and would otherwise win over this reset even inside
+           @media print, silently shrinking everything to fit a physical
+           width meant for the *screen* preview, not the actual printed
+           page. */
+        max-width: none !important;
+        width: 100% !important;
     }
 
     /* Hide the fake screen headers/footers so they don't overlap printed text */
@@ -578,6 +585,44 @@ body[data-paper-size="a3"] .book-nav {
         max-height: 140mm !important; 
     }
 
+    /* Standalone images should use most of the page height, not the
+       inline-image fallback above — this needs its own explicit,
+       print-appropriate value rather than the screen rule's 75cqh,
+       because cqh is disabled in print (.book-spread's
+       container-type: normal above cancels containment entirely, so cqh
+       would compute as invalid regardless). Needs !important, and a more
+       specific selector than the bare `.book-image` rule above: when both
+       declarations are !important, specificity is still the tiebreaker,
+       but without !important here this loses to that rule's !important
+       outright regardless of selector weight — !important always beats
+       non-!important, no matter how specific the other selector is. That
+       mismatch (a bare, !important, "safe fallback" rule silently capping
+       every image on the page, standalone or not, to the same flat 140mm)
+       was the original bug: standalone images completely lost their
+       "grow to fill the page" sizing in print specifically.
+
+       The value itself has to respect the *physical page's actual usable
+       height*, which the card-level max-height below does not by itself
+       guarantee — an earlier fix here (220mm, matching the card's old
+       flat 250mm cap) overshot A4 landscape's real usable height
+       (210mm - 2×15mm margin = 180mm) once the caption and card padding
+       are added on top of the image. A `break-inside: avoid` block taller
+       than a full page can't actually be kept unbroken (there's no page
+       left to avoid breaking onto), and what browsers do with that
+       impossible request is to silently clip whatever comes after the
+       point where the page ends — the caption, since it's the last thing
+       in the card. 150mm (image) + ~15-20mm (caption(s) + card padding)
+       stays comfortably under 180mm. A3 landscape has real headroom to
+       spare (297mm - 30mm margin = 267mm usable), so it gets a taller
+       cap below rather than being stuck with A4's conservative number. */
+    .book-columns .standalone-image .book-image {
+        max-height: 150mm !important;
+    }
+
+    body[data-paper-size="a3"] .book-columns .standalone-image .book-image {
+        max-height: 230mm !important;
+    }
+
     .book-columns {
         display: block !important;
         column-count: 2 !important; /* Retains your exact book layout */
@@ -602,8 +647,18 @@ body[data-paper-size="a3"] .book-nav {
         page-break-inside: avoid;
         break-after: page;
 
-        /* Fits safely inside A4 print margins */
+        /* Fits safely inside A4 landscape's real usable height
+           (210mm - 2×15mm margin = 180mm) alongside the image cap above,
+           with room for the caption(s) and card padding. See the comment
+           on .book-columns .standalone-image .book-image above for why
+           this number matters, not just the image's own cap. */
         height: auto !important;
+        max-height: 170mm !important;
+    }
+
+    body[data-paper-size="a3"] .standalone-image {
+        /* A3 landscape's real usable height is 297mm - 2×15mm = 267mm —
+           genuine headroom the A4 default above doesn't have. */
         max-height: 250mm !important;
     }
 
