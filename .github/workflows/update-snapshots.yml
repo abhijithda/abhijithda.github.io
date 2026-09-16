@@ -1,4 +1,4 @@
-name: Update Snapshots
+name: Update Playwright Snapshots
 
 on:
   push:
