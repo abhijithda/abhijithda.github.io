@@ -73,13 +73,41 @@ through mixed-concern files.** This is true on both sides now:
   `test/e2e/continuous/` every continuous-view-specific one. Deleting
   `views/book/` means deleting `test/e2e/book/` too, full stop — no
   book-view assertions live outside that folder. `test/e2e/core/` is the
-  deliberate exception: paper size and font scale are header-level
-  settings whose effect spans both views by design, so their tests
-  legitimately need to exercise both in one file rather than being split
-  in a way that would just duplicate setup — same reasoning as `core/`
-  existing alongside `views/` on the source side. Playwright's default
-  `testMatch` already recursively discovers tests in subfolders, so this
-  reorganization needed no `playwright.config.js` changes.
+  deliberate exception: paper size, font scale, and zen mode are
+  header-level settings whose effect spans both views by design, so their
+  tests legitimately need to exercise both in one file rather than being
+  split in a way that would just duplicate setup — same reasoning as
+  `core/` existing alongside `views/` on the source side. Playwright's
+  default `testMatch` already recursively discovers tests in subfolders,
+  so this reorganization needed no `playwright.config.js` changes.
+
+  **Getting this categorization right took a second pass.**
+  `read-tracking.test.js` and `language-filter.test.js` initially landed
+  in `continuous/` because that's the only view their test bodies happened
+  to exercise at the time — the wrong test for the job. Most of what they
+  actually verify (localStorage persistence of read state, the Settings
+  visibility toggle, the base print CSS rule, the language-picker's
+  trigger/search/"at least one active"/persistence/click-outside behavior)
+  is the shared `header.js`/`core/read-tracking.js` mechanism itself, not
+  continuous-view rendering — it's the exact same DOM and code regardless
+  of which view happens to be showing, with continuous view used only as
+  the simplest vehicle to reach it. Deleting `continuous/` would have
+  silently deleted that coverage, with nothing under `book/` filling the
+  gap (book view's own tests only ever checked its own rendering
+  reaction, never the shared mechanism underneath). Split: the
+  mechanism/settings tests moved to `test/e2e/core/read-tracking.test.js`
+  and `test/e2e/core/language-filter.test.js`; each `continuous/` file
+  kept only the tests that actually exercise continuous-specific
+  rendering (progress-counter updates, sibling-block independence, column
+  removal on a language change, continuous's own print rendering).
+  `media-visibility.test.js` was checked against the same question and
+  found to genuinely belong in `continuous/` — its tests exercise
+  `.image-card`, a class that exists only in `continuous-view.js`; book
+  view's media-visibility has its own separate tests in `book/`.
+  The test: would this test still make sense, unchanged, if the *other*
+  view didn't exist? If yes, it's testing something shared and belongs in
+  `core/`; if the assertions are about that view's own specific markup or
+  behavior, it belongs with that view.
 
 `header/` is kept deliberately thin — it's specifically the header **UI**
 (the settings dropdown, the lang picker, wiring the toggle controls), not a
@@ -598,7 +626,9 @@ leaking into print without a strong-enough print-side override:**
     Dynamic/A4/A3 print screenshots), `continuous-view-screenshots.test.js`
     (+ `-snapshots/`), `language-filter.test.js`, `media-visibility.test.js`,
     `read-tracking.test.js`, `reply-excerpt.test.js`, `site-preview.spec.js`.
-  - `test/e2e/core/`: `paper-size-font-scale.test.js`, `zen-mode.test.js`.
+  - `test/e2e/core/`: `paper-size-font-scale.test.js`, `zen-mode.test.js`,
+    `read-tracking.test.js`, `language-filter.test.js` — see the note below
+    on the last two; they were originally miscategorized into `continuous/`.
 - `playwright.config.js` explicitly sets `reporter: [['html', {open:'never'}], ['list']]`
   — without this, no reporter writes an HTML report at all (Playwright's
   built-in default doesn't). `testDir`/`testMatch` needed no changes for the
