@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
+const { hasClass } = require('../test-utils');
 
 // These test the shared core/read-tracking.js mechanism and its Settings
 // persistence — localStorage read-state, the "Read tracking" visibility
@@ -51,7 +52,11 @@ test.describe('Read Tracking - shared mechanism and settings', () => {
         await page.locator('#toggle-read-tracking').check();
 
         await expect(page.locator('#q_001_b_1')).toHaveClass(/read/);
-        await expect(page.locator('#q_001_b_1 .read-tick')).toHaveClass(/read/);
+        // .read-tick's own base class already contains the substring
+        // "read" — toHaveClass(/read/) would pass here regardless of
+        // whether the tick were ever actually marked read, so this needs
+        // an exact class-token check instead (see test-utils.js).
+        expect(await hasClass(page.locator('#q_001_b_1 .read-tick'), 'read')).toBe(true);
     });
 
     test('Settings - read tracking visibility persists across reloads', async ({ page }) => {

@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
+const { hasClass } = require('../test-utils');
 
 // Continuous-view-specific read-tracking rendering: the progress counter,
 // per-block independence within a multi-block answer, and continuous
@@ -38,7 +39,11 @@ test.describe('Read Tracking - continuous view rendering', () => {
         await block.locator('.read-tick').click();
 
         await expect(block).toHaveClass(/read/);
-        await expect(block.locator('.read-tick')).toHaveClass(/read/);
+        // .read-tick's own base class already contains the substring
+        // "read" — toHaveClass(/read/) would pass here regardless of
+        // whether the tick were ever actually marked read, so this needs
+        // an exact class-token check instead (see test-utils.js).
+        expect(await hasClass(block.locator('.read-tick'), 'read')).toBe(true);
         await expect(progress).not.toHaveText(before);
     });
 
@@ -58,13 +63,18 @@ test.describe('Read Tracking - continuous view rendering', () => {
         await tick.click();
 
         await expect(block).not.toHaveClass(/read/);
-        await expect(tick).not.toHaveClass(/read/);
+        // Same substring trap as above — .read-tick's base class already
+        // contains "read", so the regex form would fail here even when
+        // correctly unread. This is the exact assertion that failed in CI.
+        expect(await hasClass(tick, 'read')).toBe(false);
     });
 
     test('in print, the tick reflects digital read progress for transfer to physical prints', async ({ page }) => {
         const tick = page.locator('.read-tick').first();
         await tick.click();
-        await expect(tick).toHaveClass(/read/);
+        // See test-utils.js — .read-tick's base class already contains
+        // "read", so toHaveClass(/read/) can't distinguish read from unread.
+        expect(await hasClass(tick, 'read')).toBe(true);
 
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(200);

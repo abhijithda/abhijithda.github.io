@@ -629,6 +629,28 @@ leaking into print without a strong-enough print-side override:**
   - `test/e2e/core/`: `paper-size-font-scale.test.js`, `zen-mode.test.js`,
     `read-tracking.test.js`, `language-filter.test.js` — see the note below
     on the last two; they were originally miscategorized into `continuous/`.
+  - `test/e2e/test-utils.js`: shared helpers, not a test file itself
+    (doesn't match `*.test.js`/`*.spec.js`, so Playwright doesn't try to
+    run it) — currently just `hasClass()`, see the gotcha below.
+
+**Gotcha: `toHaveClass(/foo/)` is a substring match against the entire
+class attribute, not a token match.** This silently breaks for any element
+whose own *base* class name contains the token you're checking as a
+substring — `.read-tick` is exactly that case: its unmarked base class is
+literally `read-tick`, which already contains `read` with no modifier
+class present at all. `expect(tick).not.toHaveClass(/read/)` therefore
+fails even when correctly unread (this shipped and failed in CI — see the
+"clicking the tick again" test), and — easy to miss, since it doesn't fail
+loudly — the positive form `toHaveClass(/read/)` was vacuously true
+regardless of whether the tick had ever actually been marked read,
+silently checking nothing. Fixed everywhere this pattern touched
+`.read-tick` specifically, using `test-utils.js`'s `hasClass()` (exact
+`classList.contains()` check) instead. Assertions against the *block*/card
+element's own class (not the tick) are unaffected — none of the type names
+(`answer`, `mantra`, `note`, etc.) contain `read` as a substring, so the
+regex form is safe there. Applies to any future class check too: if the
+element's own base class could contain the substring being matched,
+`toHaveClass(/regex/)` isn't safe — use `hasClass()`.
 - `playwright.config.js` explicitly sets `reporter: [['html', {open:'never'}], ['list']]`
   — without this, no reporter writes an HTML report at all (Playwright's
   built-in default doesn't). `testDir`/`testMatch` needed no changes for the

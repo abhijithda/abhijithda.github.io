@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
+const { hasClass } = require('../test-utils');
 
 // Re-enabled from book-view-print.test.js.comment. What changed and why:
 //
@@ -131,7 +132,11 @@ test.describe('Book View - Print Mode', () => {
         await page.locator('#toggle-read-tracking').check();
         const tick = page.locator('#book-q_001_b_1 .read-tick');
         await tick.click();
-        await expect(tick).toHaveClass(/read/);
+        // .read-tick's own base class already contains the substring
+        // "read" — toHaveClass(/read/) would pass here regardless of
+        // whether the tick were ever actually marked read, so this needs
+        // an exact class-token check instead (see test-utils.js).
+        expect(await hasClass(tick, 'read')).toBe(true);
 
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(200);
