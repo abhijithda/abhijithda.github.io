@@ -14,7 +14,7 @@ const path = require('path');
 test.describe('Book print — regressions', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: path.join(__dirname, '..', 'data.json') });
+            route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
         });
         await page.goto('/');
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();

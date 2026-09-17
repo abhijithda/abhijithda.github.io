@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
-const { hasClass } = require('./test-utils');
+const { hasClass } = require('../test-utils');
 
 test.describe('Read Tracking - block-level, local-only, no login', () => {
 
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', 'data.json')
+                path: path.join(__dirname, '..', '..', 'data.json')
             });
         });
 

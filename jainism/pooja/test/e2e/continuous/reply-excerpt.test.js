@@ -9,7 +9,7 @@ test.describe('Reply Excerpt - jump to source and back', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', 'data.json')
+                path: path.join(__dirname, '..', '..', 'data.json')
             });
         });
 

@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
-const { hasClass } = require('./test-utils');
+const { hasClass } = require('../test-utils');
 
 // Switches into book view and waits for the first spread to actually render
 // (initBookView populates cards synchronously, but the first
@@ -16,7 +16,7 @@ test.describe('Book View — using the small controlled fixture', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', 'data.json')
+                path: path.join(__dirname, '..', '..', 'data.json')
             });
         });
         await page.goto('/');

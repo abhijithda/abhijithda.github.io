@@ -12,7 +12,7 @@ test.describe('Continuous View - Print Mode', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', 'data.json')
+                path: path.join(__dirname, '..', '..', 'data.json')
             });
         });
 
@@ -92,7 +92,7 @@ test.describe('Continuous View - Print Mode - Paper size screenshots', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', 'data.json')
+                path: path.join(__dirname, '..', '..', 'data.json')
             });
         });
 

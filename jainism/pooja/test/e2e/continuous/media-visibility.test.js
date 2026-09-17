@@ -14,7 +14,7 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', 'data.json')
+                path: path.join(__dirname, '..', '..', 'data.json')
             });
         });
 
