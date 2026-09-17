@@ -1,44 +1,24 @@
-// header.js — Header UI: language picker, media/QR toggles, read-tracking, settings dropdown.
-// All persisted settings (languages, videos, QR codes, read-tracking) live
-// under one localStorage key and go through one load/save pair, so any
-// caller can save "everything" — or just the one field it changed — with a
-// single function call instead of juggling separate keys per setting.
+// header.js — Header UI: language picker, media/QR toggles, read-tracking,
+// settings dropdown. The persisted settings object lives in
+// core/settings.js; paper size and font scale each have their own module
+// (core/paper-size.js, core/font-scale.js) — see those for how each
+// setting is validated, applied, and wired to its control. Re-exported
+// here so callers (app.js) have one import path for everything
+// header-related.
 
 import { KNOWN_LANGS } from '../core/langs.js';
+import { SETTINGS_KEY, loadSettings, saveSettings } from '../core/settings.js';
+import { PAPER_SIZES, applyPaperSize, initPaperSizeControl } from '../core/paper-size.js';
+import {
+    FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+    applyFontScale, changeFontScale, initFontScaleControl,
+} from '../core/font-scale.js';
 
-export const SETTINGS_KEY = 'settings';
+export { SETTINGS_KEY, loadSettings, saveSettings };
+export { PAPER_SIZES, applyPaperSize, initPaperSizeControl };
+export { FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP, applyFontScale, changeFontScale, initFontScaleControl };
 
-function defaultLangs() {
-    return KNOWN_LANGS.slice(0, 2).map(l => l.code); // Kannada + English
-}
-
-/** Reads the full settings object, filling in defaults for anything missing/invalid. */
-export function loadSettings() {
-    let saved;
-    try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (_) {}
-
-    const langs = Array.isArray(saved?.langs) ? saved.langs.filter(c => KNOWN_LANGS.some(l => l.code === c)) : [];
-
-    return {
-        langs:        langs.length ? langs : defaultLangs(),
-        videos:       typeof saved?.videos       === 'boolean' ? saved.videos       : true,
-        qrs:          typeof saved?.qrs          === 'boolean' ? saved.qrs          : false,
-        readTracking: typeof saved?.readTracking === 'boolean' ? saved.readTracking : false,
-    };
-}
-
-/**
- * Merge `partial` into the currently saved settings and persist the result.
- * Callers pass only the field(s) they changed — e.g. saveSettings({ qrs: true })
- * — everything else is preserved. Returns the merged settings object.
- */
-export function saveSettings(partial) {
-    const merged = { ...loadSettings(), ...partial };
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
-    return merged;
-}
-
-/** Reads current settings and pushes them onto the header controls (checkboxes). */
+/** Reads current settings and pushes them onto the header controls (checkboxes, paper size, font scale). */
 export function applySettings() {
     const saved              = loadSettings();
     const toggleVideos       = document.getElementById('toggle-videos');
@@ -49,6 +29,9 @@ export function applySettings() {
     if (toggleQrs)          toggleQrs.checked          = saved.qrs;
     if (toggleReadTracking) toggleReadTracking.checked = saved.readTracking;
     // Lang checkboxes are built by initLangPicker itself, reading loadSettings().langs.
+
+    applyPaperSize();
+    applyFontScale();
 }
 
 // ── Lang picker ───────────────────────────────────────────────────────────
@@ -232,6 +215,85 @@ export function initHeaderDropdown() {
  * @param {Function} onLangChange  - callback(activeLangs[]) on lang change
  * @param {Function} [onReadToggle] - callback when read-tracking toggle changes
  */
+// ── Focus / zen mode ─────────────────────────────────────────────────────
+// Hides the header and, best-effort, requests real browser Fullscreen so
+// the browser's own chrome gets out of the way too — see the CSS comment
+// on body.zen-mode in header.css for why Fullscreen is optional rather
+// than required. A separate peek button (body.zen-header-visible) lets the
+// header be shown/hidden again on demand without leaving zen mode/dropping
+// Fullscreen — the exit button alone was all-or-nothing, too heavy just to
+// glance at Settings. Deliberately not persisted (see the same comment):
+// requestFullscreen() needs a fresh user gesture on every load anyway, so
+// there's nothing meaningful to restore.
+export function initZenModeControl() {
+    const enterBtn = document.getElementById('zen-mode-btn');
+    const exitBtn  = document.getElementById('zen-exit-btn');
+    const peekBtn  = document.getElementById('zen-peek-btn');
+
+    function setZenClass(on) {
+        document.body.classList.toggle('zen-mode', on);
+        if (exitBtn) exitBtn.hidden = !on;
+        if (peekBtn) peekBtn.hidden = !on;
+        if (!on) document.body.classList.remove('zen-header-visible');
+    }
+
+    async function enterZen() {
+        setZenClass(true);
+        try {
+            if (document.documentElement.requestFullscreen) {
+                await document.documentElement.requestFullscreen();
+            }
+        } catch (_) {
+            // Denied or unsupported (iframe, no user gesture, etc.) — the
+            // header is still hidden regardless, so the main
+            // distraction-free effect doesn't depend on this succeeding.
+        }
+    }
+
+    async function exitZen() {
+        setZenClass(false);
+        try {
+            if (document.fullscreenElement && document.exitFullscreen) {
+                await document.exitFullscreen();
+            }
+        } catch (_) {}
+    }
+
+    if (enterBtn) enterBtn.addEventListener('click', () => {
+        // The button is only ever clickable in two states: not in zen mode
+        // (normal header) or peeked-open (header temporarily shown while
+        // still in zen mode) — in the latter case "enter" is a no-op
+        // (already there), which reads as a dead button. Toggle instead.
+        if (document.body.classList.contains('zen-mode')) {
+            exitZen();
+        } else {
+            enterZen();
+        }
+    });
+    if (exitBtn)  exitBtn.addEventListener('click', exitZen);
+    if (peekBtn)  peekBtn.addEventListener('click', () => {
+        document.body.classList.toggle('zen-header-visible');
+    });
+
+    // If real fullscreen was entered and the user exits it some other way
+    // (Esc, F11, browser UI) rather than our own exit button, keep the
+    // header's hidden state in sync instead of leaving no way back in.
+    if (typeof document.addEventListener === 'function') {
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) setZenClass(false);
+        });
+
+        // Also handle Escape when fullscreen was never actually entered
+        // (e.g. the request above was denied) — the browser only
+        // auto-handles Escape for its own real fullscreen state.
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.body.classList.contains('zen-mode')) {
+                exitZen();
+            }
+        });
+    }
+}
+
 export function initHeaderControls(onLangChange, onReadToggle) {
     applySettings();
 
@@ -248,16 +310,14 @@ export function initHeaderControls(onLangChange, onReadToggle) {
 
     initLangPicker(onLangChange);
     initHeaderDropdown();
+    initPaperSizeControl();
+    initFontScaleControl();
+    initZenModeControl();
     updateMediaVisibility();
     updateReadTrackingVisibility();
 }
 
-// CommonJS shim for Jest
-if (typeof module !== 'undefined' && module.exports) {
-    Object.assign(module.exports, {
-        SETTINGS_KEY, loadSettings, saveSettings, applySettings,
-        getActiveLangs, saveActiveLangs, initLangPicker,
-        updateMediaVisibility, updateReadTrackingVisibility,
-        initHeaderDropdown, initHeaderControls,
-    });
-}
+// Note: no manual CommonJS re-export shim — see paper-size.js for why (this
+// file re-exports bindings from settings.js/paper-size.js/font-scale.js,
+// which a manual Object.assign(module.exports, {...}) can't overwrite;
+// babel's transform already handles every export here, local or re-exported).

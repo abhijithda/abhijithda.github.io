@@ -1,12 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
-
-// Helper: precise classList check, since '.read-tick' is itself a base
-// class name containing the substring "read" — a naive /read/ regex
-// against it would false-positive regardless of actual read state.
-async function hasClass(locator, className) {
-    return locator.evaluate((el, cls) => el.classList.contains(cls), className);
-}
+const { hasClass } = require('./test-utils');
 
 test.describe('Read Tracking - block-level, local-only, no login', () => {
 
@@ -112,7 +106,7 @@ test.describe('Read Tracking - block-level, local-only, no login', () => {
         // Target the first tick and mark it as read digitally
         const tick = page.locator('.read-tick').first();
         await tick.click();
-        await expect(tick).toHaveClass(/read/); // Ensure the JS applied the class
+        expect(await hasClass(tick, 'read')).toBe(true); // Ensure the JS applied the class
 
         // Emulate print media
         await page.emulateMedia({ media: 'print' });

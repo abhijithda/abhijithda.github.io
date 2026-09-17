@@ -5,11 +5,19 @@ const {
     updateMediaVisibility,
     updateReadTrackingVisibility,
     initHeaderDropdown,
+    initZenModeControl,
     loadSettings,
     saveSettings,
     applySettings,
     SETTINGS_KEY,
 } = require('./header');
+
+// Every assertion below that checks the full loadSettings() object includes
+// these two defaults alongside langs/videos/qrs/readTracking. Paper size and
+// font scale each have their own module and their own test file — see
+// paper-size.test.js and font-scale.test.js — and the shared schema/
+// validation behind both lives in settings.js, tested in settings.test.js.
+const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1 };
 
 function baseDom() {
     document.body.innerHTML = `
@@ -23,7 +31,22 @@ function baseDom() {
         <input type="checkbox" id="toggle-videos" checked>
         <input type="checkbox" id="toggle-qrs">
         <input type="checkbox" id="toggle-read-tracking">
+        <select id="paper-size-select">
+            <option value="dynamic">Dynamic</option>
+            <option value="a4">A4</option>
+            <option value="a3">A3</option>
+        </select>
+        <button id="font-scale-decrease"></button>
+        <span id="font-scale-display"></span>
+        <button id="font-scale-increase"></button>
+        <style id="print-page-size"></style>
+        <button id="zen-mode-btn"></button>
+        <button id="zen-exit-btn" hidden></button>
+        <button id="zen-peek-btn" hidden></button>
     `;
+    // Match production: --font-scale's default lives in core/font-scale.css's
+    // :root rule, which isn't loaded in jsdom unit tests.
+    document.documentElement.style.removeProperty('--font-scale');
 }
 
 beforeEach(() => {
@@ -56,23 +79,7 @@ describe('getActiveLangs / saveActiveLangs', () => {
         saveActiveLangs(['en']);
 
         const saved = loadSettings();
-        expect(saved).toEqual({ langs: ['en'], videos: false, qrs: true, readTracking: true });
-    });
-});
-
-// One settings object, one localStorage key: saveSettings(partial) merges
-// into whatever's already saved, so any single control can persist its own
-// change with one call without needing to know about (or touch) the others.
-describe('loadSettings / saveSettings', () => {
-    test('defaults every field when nothing has ever been saved', () => {
-        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: false, readTracking: false });
-    });
-
-    test('saveSettings merges a partial update into the existing saved settings', () => {
-        saveSettings({ qrs: true });
-        saveSettings({ readTracking: true });
-
-        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: true, readTracking: true });
+        expect(saved).toEqual({ langs: ['en'], videos: false, qrs: true, readTracking: true, ...DEFAULT_PAPER_FONT });
     });
 });
 
@@ -269,5 +276,93 @@ describe('initHeaderDropdown', () => {
 
         document.body.click();
         expect(document.getElementById('settings-menu').style.display).toBe('none');
+    });
+});
+
+// Not persisted (see header.css's comment on body.zen-mode): a transient
+// reading mode for this visit, not a saved preference. jsdom doesn't
+// implement requestFullscreen/exitFullscreen, so these tests cover the
+// header-hiding class toggle and the keyboard/Escape fallback — the
+// (best-effort, try/caught) real Fullscreen calls are exercised by the e2e
+// suite where a real browser is available.
+describe('initZenModeControl', () => {
+    test('the enter button hides the header (via body.zen-mode) and reveals the exit button', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+        expect(document.getElementById('zen-exit-btn').hidden).toBe(false);
+    });
+
+    test('the exit button restores the header', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        document.getElementById('zen-exit-btn').click();
+
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+        expect(document.getElementById('zen-exit-btn').hidden).toBe(true);
+    });
+
+    test('clicking the Focus button again while peeked open exits zen mode, rather than no-op-ing', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        document.getElementById('zen-peek-btn').click(); // header (and #zen-mode-btn) visible again
+        expect(document.body.classList.contains('zen-header-visible')).toBe(true);
+
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+        expect(document.body.classList.contains('zen-header-visible')).toBe(false);
+    });
+
+    test('Escape exits zen mode even when fullscreen was never actually entered', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+    });
+
+    test('Escape does nothing when not in zen mode', () => {
+        initZenModeControl();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+    });
+
+    test('exiting real fullscreen some other way (fullscreenchange) also restores the header', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+
+        // Simulate the browser having exited fullscreen on its own
+        // (Esc/F11/browser UI) — document.fullscreenElement is read-only in
+        // real browsers, but jsdom allows this for test purposes.
+        document.dispatchEvent(new Event('fullscreenchange'));
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+    });
+
+    test('the peek button shows/hides the header without leaving zen mode', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+
+        document.getElementById('zen-peek-btn').click();
+        expect(document.body.classList.contains('zen-header-visible')).toBe(true);
+        expect(document.body.classList.contains('zen-mode')).toBe(true); // still in zen mode
+
+        document.getElementById('zen-peek-btn').click();
+        expect(document.body.classList.contains('zen-header-visible')).toBe(false);
+        expect(document.body.classList.contains('zen-mode')).toBe(true);
+    });
+
+    test('exiting zen mode also clears a peeked-open header, rather than leaving stale state', () => {
+        initZenModeControl();
+        document.getElementById('zen-mode-btn').click();
+        document.getElementById('zen-peek-btn').click();
+        expect(document.body.classList.contains('zen-header-visible')).toBe(true);
+
+        document.getElementById('zen-exit-btn').click();
+        expect(document.body.classList.contains('zen-mode')).toBe(false);
+        expect(document.body.classList.contains('zen-header-visible')).toBe(false);
     });
 });

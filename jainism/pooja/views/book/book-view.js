@@ -388,6 +388,14 @@ window.addEventListener('resize', () => {
     setTimeout(renderCurrentSpread, 150);
 });
 
+// A paper-size or font-scale change resizes/rescales the page just like a
+// window resize would (see header.js's notifyLayoutChanged()), but doesn't
+// fire a native 'resize' event on its own — listen for the explicit signal
+// too so pagination (spread width, total page count) doesn't go stale.
+window.addEventListener('pooja:layout-changed', () => {
+    setTimeout(renderCurrentSpread, 150);
+});
+
 // Registered once, at module scope — NOT inside initBookView. That function
 // can run more than once in a session (e.g. re-rendering on every view-toggle
 // click, so read-state stays in sync between views — see app.js), and a

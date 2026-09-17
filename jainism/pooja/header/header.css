@@ -156,6 +156,43 @@ body {
 .lang-divider   { height: 0.5px; background: #eee; margin: 4px 0; }
 .lang-empty     { padding: 10px 8px; font-size: 12px; color: #999; text-align: center; }
 
+/* ── Paper size & font-scale controls in Settings ──────────────────────── */
+#paper-size-select {
+    font-size: 12px;
+    padding: 4px 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    color: #333;
+}
+
+.font-scale-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.font-scale-control button {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.font-scale-control button:hover { border-color: #bbb; }
+
+#font-scale-display {
+    font-size: 11px;
+    color: #555;
+    min-width: 34px;
+    text-align: center;
+}
+
 /* View toggle — Book / Continuous switcher */
 .view-toggle {
     display: flex;
@@ -181,4 +218,91 @@ body {
 .view-toggle-btn.active {
     background: #333;
     color: white;
+}
+
+/* ── Focus / zen mode ─────────────────────────────────────────────────────
+   Hides the app header entirely (search, view toggle, settings — the
+   things you don't need once you're actually reading) and, where the
+   browser allows it, also requests real Fullscreen so the browser's own
+   chrome (tabs, address bar) gets out of the way too. Fullscreen is best
+   effort: it can be denied or unsupported (e.g. embedded in an iframe, no
+   user gesture) — the header still hides either way, so the main
+   distraction-free effect never depends on it. Not persisted: like the
+   search box, this is a transient reading mode for *this* visit, not a
+   saved preference, and requestFullscreen() requires a fresh user gesture
+   on every page load regardless. */
+body.zen-mode .app-header {
+    display: none;
+}
+
+.zen-exit-btn {
+    display: none;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.zen-exit-btn:hover {
+    background: rgba(0, 0, 0, 0.75);
+}
+
+body.zen-mode .zen-exit-btn {
+    display: block;
+}
+
+/* Avoid overlapping the revealed header's own controls when peeked open —
+   Escape still exits zen mode regardless of this button's visibility. */
+body.zen-mode.zen-header-visible .zen-exit-btn {
+    display: none;
+}
+
+/* A peek toggle so the header can be shown/hidden on demand without fully
+   leaving zen mode (and, where active, without dropping real Fullscreen) —
+   the all-or-nothing exit button alone was too heavy just to glance at
+   Settings. body.zen-header-visible overrides the .app-header hide above;
+   it only has any effect while body.zen-mode is also set. */
+body.zen-mode.zen-header-visible .app-header {
+    display: flex;
+}
+
+.zen-peek-btn {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    padding: 2px 18px 4px;
+    border: none;
+    border-radius: 0 0 8px 8px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.zen-peek-btn:hover {
+    background: rgba(0, 0, 0, 0.75);
+}
+
+body.zen-mode .zen-peek-btn {
+    display: block;
+}
+
+/* Flip the chevron to point back up once the header is showing, so the
+   same tab reads as "put it away again" rather than looking stuck — and
+   drop it to just below the revealed header instead of overlapping it. */
+body.zen-mode.zen-header-visible .zen-peek-btn {
+    top: 60px;
+    border-radius: 0 0 8px 8px;
+    transform: translateX(-50%) rotate(180deg);
 }
