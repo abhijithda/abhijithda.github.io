@@ -12,7 +12,7 @@ test.describe('Book View - Screenshot Tests (Display Options)', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
+                path: path.join(__dirname, '..', 'data.json')
             });
         });
 

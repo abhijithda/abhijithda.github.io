@@ -22,7 +22,7 @@ async function openSettings(page) {
 test.describe('Paper size setting', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
+            route.fulfill({ path: path.join(__dirname, '..', 'data.json') });
         });
         await page.goto('/');
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
@@ -181,7 +181,7 @@ test.describe('Paper size setting', () => {
 test.describe('Font-size scaling setting', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
-            route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
+            route.fulfill({ path: path.join(__dirname, '..', 'data.json') });
         });
         await page.goto('/');
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();

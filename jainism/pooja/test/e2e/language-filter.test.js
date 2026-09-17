@@ -1,36 +1,28 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-// These test the shared header language-picker UI mechanism itself
-// (#lang-trigger -> #lang-panel: the collapsed summary, the search box,
-// the "at least one language must stay active" validation, persistence,
-// closing on an outside click) — the exact same header.js component and
-// DOM regardless of which view happens to be showing. Continuous view is
-// used here only as the simplest vehicle to reach the DOM; a couple of
-// these lean on continuous-specific `.col-en`/`.col-kn` elements purely as
-// the easiest visible proof a setting actually took effect, not because
-// the picker's own behavior is continuous-specific. Book view has its own
-// content-reaction test in book/book-view.test.js — this file isn't a
-// substitute for that.
-//
-// Split out from continuous/language-filter.test.js, which kept the one
-// test that actually exercises continuous-specific rendering (column
-// removal and content-text assertions). See that file's own header
-// comment.
+// The language picker was a single-select <select id="lang-select">
+// (All/kn/en); it's now a collapsed "Kannada, English" summary that expands
+// into a searchable checkbox list (#lang-trigger -> #lang-panel) so it
+// scales past a couple of languages without turning Settings into a wall
+// of checkboxes.
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/data.json', route => {
     route.fulfill({
-      path: path.join(__dirname, '..', '..', 'data.json')
+      path: path.join(__dirname, '..', 'data.json')
     });
   });
 
   await page.goto('/');
+  // Book view is the default on a fresh load — switch to continuous
+  // view explicitly before waiting on .card, since these tests are
+  // continuous-view-specific.
   await page.locator('.view-toggle-btn[data-view="continuous"]').click();
   await expect(page.locator('.card').first()).toBeVisible();
 
   await page.locator('#settings-btn').click();
-  await expect(page.locator('#lang-trigger')).toBeVisible();
+  await page.locator('#lang-trigger').click();
 });
 
 test('the trigger shows a collapsed summary until it is opened', async ({ page }) => {
@@ -41,6 +33,31 @@ test('the trigger shows a collapsed summary until it is opened', async ({ page }
   await expect(page.locator('#lang-panel')).toBeVisible();
   await expect(page.locator('#lang-chk-kn')).toBeVisible();
   await expect(page.locator('#lang-chk-en')).toBeVisible();
+});
+
+test('Language checkboxes filter content correctly', async ({ page }) => {
+  await page.locator('#lang-trigger').click();
+
+  // --- STATE 1: BOTH (default) ---
+  await expect(page.locator('#lang-chk-kn')).toBeChecked();
+  await expect(page.locator('#lang-chk-en')).toBeChecked();
+  await expect(page.locator('.col-en').first()).toBeVisible();
+  await expect(page.locator('.col-kn').first()).toBeVisible();
+
+  // --- STATE 2: ENGLISH ONLY ---
+  await page.locator('#lang-chk-kn').uncheck();
+  await expect(page.locator('.col-en').first()).toBeVisible();
+  // Kannada column removed (not just hidden) by renderContinuousView.
+  await expect(page.locator('.col-kn')).toHaveCount(0);
+  await expect(page.locator('.col-en').first()).toContainText(/All are equal/i);
+  await expect(page.locator('#lang-summary')).toHaveText('English');
+
+  // --- STATE 3: KANNADA ONLY ---
+  await page.locator('#lang-chk-kn').check();
+  await page.locator('#lang-chk-en').uncheck();
+  await expect(page.locator('.col-kn').first()).toBeVisible();
+  await expect(page.locator('.col-en')).toHaveCount(0);
+  await expect(page.locator('.col-kn').first()).toContainText(/ಎಲ್ಲಾ ದೇವರು ಒಂದೇ/i);
 });
 
 test('the search box filters the visible language rows', async ({ page }) => {
@@ -63,9 +80,6 @@ test('at least one language must stay active — unchecking the last one reverts
   await page.locator('#lang-chk-en').click(); // attempting to clear the last active lang
 
   await expect(page.locator('#lang-chk-en')).toBeChecked();
-  // .col-en is just the simplest visible proof English is still active —
-  // this isn't testing continuous-specific rendering, only that the
-  // picker's own validation held.
   await expect(page.locator('.col-en').first()).toBeVisible();
 });
 

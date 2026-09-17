@@ -21,7 +21,7 @@ test.describe('Site Preview (screenshot artifacts only, no assertions)', () => {
         if (!process.env.CI) {
             await page.route('**/data.json', route => {
                 route.fulfill({
-                    path: path.join(__dirname, '..', '..', 'data.json')
+                    path: path.join(__dirname, '..', 'data.json')
                 });
             });
         }

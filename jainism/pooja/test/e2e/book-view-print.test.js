@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
-const { hasClass } = require('../test-utils');
+const { hasClass } = require('./test-utils');
 
 // Re-enabled from book-view-print.test.js.comment. What changed and why:
 //
@@ -35,7 +35,7 @@ test.describe('Book View - Print Mode', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
+                path: path.join(__dirname, '..', 'data.json')
             });
         });
 
@@ -181,7 +181,7 @@ test.describe('Book View - Print Mode - Paper size screenshots', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
             route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
+                path: path.join(__dirname, '..', 'data.json')
             });
         });
 
