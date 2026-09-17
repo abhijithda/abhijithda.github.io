@@ -5,25 +5,24 @@ const { hasClass } = require('../test-utils');
 // Re-enabled from book-view-print.test.js.comment. What changed and why:
 //
 // The original file's Video/QR/None/Both "state" tests and the read-tracking
-// test each ended in a full-page `toHaveScreenshot()` call. Two problems
-// with that, neither fixable by editing the assertions themselves:
-//   1. No baseline PNGs exist for these names anywhere in the repo — first
-//      run would fail outright with "no expected screenshot found", not a
-//      real diff. Per AI.md, baselines are meant to come from the
-//      dedicated update-snapshots.yml CI workflow, not be hand-generated
-//      here.
-//   2. A full-page print screenshot is an extremely blunt instrument for
-//      "is the QR code visible" — any unrelated visual change anywhere on
-//      the page (font rendering, an unrelated color, a spacing tweak)
-//      would fail these tests for a reason that has nothing to do with
-//      what they're named after, exactly the kind of stale-baseline noise
-//      seen in book-view-screenshots.test.js/continuous-view-screenshots.test.js.
+// test each ended in a full-page `toHaveScreenshot()` call, which had two
+// real problems: no baseline PNGs existed anywhere in the repo for these
+// names (first run would just fail outright, not show a real diff), and a
+// full-page print screenshot is a blunt instrument for "is the QR code
+// visible" specifically — any unrelated visual change anywhere on the page
+// would fail these for a reason that has nothing to do with what they're
+// named after.
 //
-// Replaced with the same computed-style/visibility assertions
-// media-visibility.test.js already uses for the on-screen case — just
-// under `page.emulateMedia({ media: 'print' })` — which test the actual
-// thing each case is named after, directly and deterministically, with no
-// baseline to keep in sync.
+// First pass replaced the screenshots entirely with the same computed-style/
+// visibility assertions media-visibility.test.js uses for the on-screen
+// case — precise, deterministic, no baseline to keep in sync — but that
+// traded away something real: a human reviewing a PR that changes this
+// behavior gets a pass/fail, not a picture to actually look at. Restored
+// the screenshot alongside the precise assertions (not instead of them) in
+// each test below, so both properties hold: the assertion catches a logic
+// regression even if it happens to look pixel-identical, and the
+// screenshot catches a visual regression a developer might approve without
+// reading closely, with an actual image diff to review in the PR.
 
 async function openBookView(page) {
     await page.locator('.view-toggle-btn[data-view="book"]').click();
@@ -86,6 +85,13 @@ test.describe('Book View - Print Mode', () => {
 
         await expect(row.locator('.book-vid-thumb')).toBeVisible();
         await expect(row.locator('.book-vid-qr')).toBeHidden();
+        // Alongside the precise checks above (which catch logic
+        // regressions), a full-page screenshot too — so a visual
+        // regression here still shows up as a reviewable image diff in a
+        // PR, not just a passing/failing assertion with no picture to look
+        // at. See the describe block below's header comment for why this
+        // was reintroduced.
+        await expect(page).toHaveScreenshot('book-print-default-state.png', { fullPage: true, timeout: 15000 });
     });
 
     test('Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
@@ -97,6 +103,7 @@ test.describe('Book View - Print Mode', () => {
 
         await expect(row.locator('.book-vid-thumb')).toBeVisible();
         await expect(row.locator('.book-vid-qr')).toBeVisible();
+        await expect(page).toHaveScreenshot('book-print-both-state.png', { fullPage: true, timeout: 15000 });
     });
 
     test('QR-only state (Videos OFF, QR ON): the QR prints, the video thumbnail does not', async ({ page }) => {
@@ -109,6 +116,7 @@ test.describe('Book View - Print Mode', () => {
 
         await expect(row.locator('.book-vid-thumb')).toBeHidden();
         await expect(row.locator('.book-vid-qr')).toBeVisible();
+        await expect(page).toHaveScreenshot('book-print-qr-only-state.png', { fullPage: true, timeout: 15000 });
     });
 
     test('None state (Videos OFF, QR OFF): neither prints', async ({ page }) => {
@@ -120,6 +128,7 @@ test.describe('Book View - Print Mode', () => {
 
         await expect(row.locator('.book-vid-thumb')).toBeHidden();
         await expect(row.locator('.book-vid-qr')).toBeHidden();
+        await expect(page).toHaveScreenshot('book-print-none-state.png', { fullPage: true, timeout: 15000 });
     });
 
     // Read progress should carry from screen to printout, per
@@ -149,6 +158,7 @@ test.describe('Book View - Print Mode', () => {
         // Print CSS carries over the green fill (#4caf50 -> rgb(76,175,80))
         // instead of clearing it, so read progress is visible on paper.
         expect(appearance.backgroundColor).toBe('rgb(76, 175, 80)');
+        await expect(page).toHaveScreenshot('book-print-read-tracking-state.png', { fullPage: true, timeout: 15000 });
     });
 });
 
@@ -159,10 +169,14 @@ test.describe('Book View - Print Mode', () => {
 // output *with a non-default paper size selected* — the computed-style
 // checks above (and in paper-size-font-scale.test.js) covered the numbers
 // in isolation, but nothing looked at the actual rendered page. These
-// close that gap. Baselines aren't committed here (see the file header in
-// book-view-screenshots.test.js for why) — generate them via
-// `npm run test:update-snapshots` or the project's update-snapshots.yml
-// CI workflow before these can pass.
+// close that gap. A4/A3 specifically use the QR-codes-on and
+// Read-tracking-on state (with one tick marked read), alongside Videos
+// (already on by default) — the fullest state a physical A4/A3 printout
+// can actually make use of: a paper printout can't play a video, but a QR
+// code gets the reader to it, and read progress is meant to carry over
+// onto the printout too (see AI.md's Read Tracking section). If baselines
+// for these don't exist yet, generate them via `npm run test:update-snapshots`
+// or the project's update-snapshots.yml CI workflow before these can pass.
 test.describe('Book View - Print Mode - Paper size screenshots', () => {
     test.beforeEach(async ({ page }) => {
         await page.route('**/data.json', route => {
@@ -186,6 +200,19 @@ test.describe('Book View - Print Mode - Paper size screenshots', () => {
     });
 
     test('Print screenshot: A4 paper size', async ({ page }) => {
+        // QR codes and Read tracking on, alongside Videos (already on by
+        // default) — the fullest useful state for an actual physical
+        // printout: a paper printout can't play a video, but a QR code is
+        // exactly the thing that's actually useful once it's on paper (the
+        // reader scans it to reach the video), and read progress is meant
+        // to carry over onto the printout too (see AI.md's Read Tracking
+        // section). Marks one tick read so the screenshot actually shows
+        // the filled-in state, not just empty circles. Keeps the same
+        // baseline filename as before so this shows as a real diff in a
+        // PR rather than an unrelated add/delete.
+        await page.locator('#toggle-qrs').check();
+        await page.locator('#toggle-read-tracking').check();
+        await page.locator('#book-q_001_b_1 .read-tick').click();
         await page.locator('#paper-size-select').selectOption('a4');
         await page.waitForTimeout(200);
 
@@ -195,6 +222,10 @@ test.describe('Book View - Print Mode - Paper size screenshots', () => {
     });
 
     test('Print screenshot: A3 paper size', async ({ page }) => {
+        // Same reasoning as the A4 case above.
+        await page.locator('#toggle-qrs').check();
+        await page.locator('#toggle-read-tracking').check();
+        await page.locator('#book-q_001_b_1 .read-tick').click();
         await page.locator('#paper-size-select').selectOption('a3');
         await page.waitForTimeout(200);
 

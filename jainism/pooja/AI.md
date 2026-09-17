@@ -620,10 +620,13 @@ leaking into print without a strong-enough print-side override:**
 - **E2E** (Playwright, `test/e2e/` — mirrors `views/`, see **Directory
   Structure** above for why):
   - `test/e2e/book/`: `book-view.test.js`, `book-view-print.test.js`
-    (includes Dynamic/A4/A3 print screenshots), `book-view-screenshots.test.js`
+    (Video/QR/read-tracking "state" tests each pair a precise assertion
+    with a full-page screenshot — see its own header comment for why both;
+    also includes Dynamic/A4/A3 print screenshots), `book-view-screenshots.test.js`
     (+ `-snapshots/`), `book-print-regressions.test.js`.
-  - `test/e2e/continuous/`: `continuous-view-print.test.js` (includes
-    Dynamic/A4/A3 print screenshots), `continuous-view-screenshots.test.js`
+  - `test/e2e/continuous/`: `continuous-view-print.test.js` (same
+    assertion+screenshot pairing as book's equivalent, plus Dynamic/A4/A3
+    print screenshots), `continuous-view-screenshots.test.js`
     (+ `-snapshots/`), `language-filter.test.js`, `media-visibility.test.js`,
     `read-tracking.test.js`, `reply-excerpt.test.js`, `site-preview.spec.js`.
   - `test/e2e/core/`: `paper-size-font-scale.test.js`, `zen-mode.test.js`,
@@ -664,6 +667,18 @@ element's own base class could contain the substring being matched,
   (Book View)** below) shipped undetected precisely because nothing ever
   visually compared print output with a non-default paper size selected;
   every other check only covered the numbers in isolation.
+- **Moving/renaming a file that has snapshot baselines needs a dedicated,
+  no-other-changes commit/PR first** — a plain `git mv` of the old
+  `*-snapshots/*.png` files to their new path, same filenames, committed
+  on its own. Content and filename both staying identical is what lets
+  GitHub recognize it as a rename rather than a delete+add, so the PR shows
+  zero diff noise. Only *after* that lands should the actual behavior
+  change (what the screenshot now looks like) go in as its own commit —
+  that one will show a real, reviewable image diff, because the path was
+  already stable going in. Bundling the move and the behavior change into
+  one commit loses the diff entirely: GitHub has nothing to compare the new
+  content against, since as far as it's concerned the old path just
+  disappeared and an unrelated new one appeared.
 
 ---
 
