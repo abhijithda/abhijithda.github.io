@@ -22,7 +22,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('.card').first()).toBeVisible();
 
   await page.locator('#settings-btn').click();
-  await page.locator('#lang-trigger').click();
+  await expect(page.locator('#lang-trigger')).toBeVisible();
 });
 
 test('the trigger shows a collapsed summary until it is opened', async ({ page }) => {
