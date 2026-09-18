@@ -1,23 +1,12 @@
 [
   {
     "id": "i_000",
-    "type": "images",
-    "timestamp": "2026-08-26T21:55:00Z",
-    "blocks": [
-      {
-        "id": "i_000_b_0",
-        "type": "images",
-        "tags": [
-          "Bhagawan"
-        ],
-        "videos": [],
-        "images": [
-          {
-            "src": "Jinendra Bhagawanta.jpg"
-          }
-        ]
-      }
-    ]
+    "type": "cover",
+    "image": "Jinendra Bhagawanta.jpg",
+    "title": {
+      "en": "Jaina Pooja Vichara Sankalana",
+      "kn": "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ"
+    }
   },
   {
     "id": "i_001",
@@ -1743,10 +1732,10 @@
         "type": "mantra",
         "content": {
           "en": [
-              "Om Hreem Shreem Kleem Iyam Arham Shree Vrushabha Tirthakara Parama Jina Devaya Govadana ApratiChakre Yaksha Yakshi Sahitaya, Samavasarana Asta Pratihaarya Aadi Vibhushitaya Namah"
+            "Om Hreem Shreem Kleem Iyam Arham Shree Vrushabha Tirthakara Parama Jina Devaya Govadana ApratiChakre Yaksha Yakshi Sahitaya, Samavasarana Asta Pratihaarya Aadi Vibhushitaya Namah"
           ],
           "kn": [
-              "ಓಂ ಹ್ರೀಂ ಶ್ರೀಂ ಕ್ಲೀಂ ಐಂ ಅರ್ಹಂ ಶ್ರೀ ವೃಷಭ ತೀರ್ಥಕರ ಪರಮ ಜಿನ ದೇವಾಯ ಗೋವದನ ಅಪ್ರತಿಚಕ್ರೇ ಯಕ್ಷ ಯಕ್ಷೀ ಸಹಿತಾಯ, ಸಮವಸರಣ ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ವಿಭೂಷಿತಾಯ ನಮಃ"
+            "ಓಂ ಹ್ರೀಂ ಶ್ರೀಂ ಕ್ಲೀಂ ಐಂ ಅರ್ಹಂ ಶ್ರೀ ವೃಷಭ ತೀರ್ಥಕರ ಪರಮ ಜಿನ ದೇವಾಯ ಗೋವದನ ಅಪ್ರತಿಚಕ್ರೇ ಯಕ್ಷ ಯಕ್ಷೀ ಸಹಿತಾಯ, ಸಮವಸರಣ ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ವಿಭೂಷಿತಾಯ ನಮಃ"
           ]
         }
       },

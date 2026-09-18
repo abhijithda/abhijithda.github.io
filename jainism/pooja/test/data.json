@@ -1,32 +1,12 @@
 [
   {
-    "id": "i_001",
-    "type": "images",
-    "timestamp": "2026-07-11T10:00:00Z",
-    "references": null,
-    "blocks": [
-      {
-        "id": "i_001_b_1",
-        "type": "images",
-        "content": {
-          "kn": [],
-          "en": []
-        },
-        "tags": [
-          "personal"
-        ],
-        "videos": [],
-        "images": [
-          {
-            "src": "Bharata Bahubali Swami.jpeg",
-            "caption": {
-              "en": "Bharata Chakravarthi and Bahubali Swami",
-              "kn": "ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಹುಬಲಿ ಸ್ವಾಮಿ"
-            }
-          }
-        ]
-      }
-    ]
+    "id": "cover_001",
+    "type": "cover",
+    "image": "Bharata Bahubali Swami.jpeg",
+    "title": {
+      "en": "Bharata Chakravarthi and Bahubali Swami",
+      "kn": "ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಹುಬಲಿ ಸ್ವಾಮಿ"
+    }
   },
   {
     "id": "q_001",
