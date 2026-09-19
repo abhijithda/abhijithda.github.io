@@ -31,7 +31,7 @@ export function buildBlockIndex(data) {
     const itemById  = {};
     data.forEach(item => {
         itemById[item.id] = item;
-        item.blocks.forEach(block => { blockById[block.id] = block; });
+        (item.blocks || []).forEach(block => { blockById[block.id] = block; });
     });
     return { blockById, itemById };
 }

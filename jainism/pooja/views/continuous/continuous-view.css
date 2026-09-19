@@ -74,6 +74,42 @@ body[data-paper-size="a3"] #continuous-container {
     padding-left: 25px;
 }
 
+/* ── Cover item — large image + large title, in place of the usual
+   caption-sized content. Nothing else about continuous view changes. ── */
+.card.cover {
+    align-items: center;
+    text-align: center;
+    padding: 30px 25px;
+}
+
+.card.cover > * {
+    padding-left: 0 !important;
+}
+
+.cover-image {
+    max-width: 100%;
+    max-height: 70vh;
+    width: auto;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.cover-title {
+    font-weight: bold;
+}
+
+.cover-title.lang-kn {
+    font-size: calc(28px * var(--font-scale));
+    color: #111;
+    margin-top: 16px;
+}
+
+.cover-title.lang-en {
+    font-size: calc(20px * var(--font-scale));
+    color: #555;
+    margin-top: 4px;
+}
+
 .block-id {
     padding: 15px 5px;
     font-family: monospace;

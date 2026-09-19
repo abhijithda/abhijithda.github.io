@@ -234,6 +234,80 @@ to a real file) as part of building this structure.
 
 ---
 
+## Cover Page — ✅ Current
+- Data-driven: a single item with `type: "cover"` (always the first entry in
+  `data.json`, if present at all — its absence is fine, both views simply
+  skip the branch), carrying `image` (a filename, resolved the same way as
+  any other image) and `title` (an object keyed by language code, e.g.
+  `{ kn: "...", en: "..." }`). No separate fixture, no "first page" special
+  case in the data model itself — it's schema-validated in `schema.json` via
+  an `if/then/else` on `type`: a cover item requires `image`+`title` instead
+  of the `blocks` every other item type requires.
+- **Continuous view**: rendered inline as just another `.card` (class
+  `.card.cover`), large image + large title in place of the usual
+  block/caption content. Title respects the same `kn`/`en`/`all` language
+  filter as every other card — nothing else about continuous view's
+  pagination-free, single-scroll model changes for it.
+- **Book view**: two `.book-card.cover-page` elements (image page, title
+  page) appended as the very first entries in `#book-columns`, each forced
+  onto its own column via the same `break-after: column` CSS trick already
+  used for standalone `images` items (see **Pagination**/**Print** below) —
+  no new print mechanism needed, it rides the existing column-reflow print
+  path for free. Because it's always exactly two cards, it always becomes
+  spread 0 in its entirety: image on the left page, title (all active
+  languages, stacked, same clamp()-based step-down sizing as multi-line
+  language blocks elsewhere) on the right page.
+- **Page numbering treats the cover like a real book's title page**: no
+  running head/footer on that spread (`.book-spread.cover-spread` hides
+  both), and every subsequent spread's page numbers are shifted back by one
+  spread (`state.hasCover`, checked once in `initBookView` as
+  `data[0]?.type === 'cover'`) so the first real content page still reads
+  "1", not "3". `renderCurrentSpread`, `jumpToPage`, and the jump-input's
+  blank-input default all apply the same `spreadOffset`.
+- Real printed page numbers (a `@page`/`counter(page)` footer, independent
+  of the on-screen spread math) are a separate, not-yet-built follow-up —
+  see **Known Gaps** below. Nothing about the cover blocks that; print
+  currently shows no page numbers at all, for any page (see **Print** below
+  for why), so there's no existing numbering to conflict with.
+
+---
+
+## Home Surface — ✅ Current
+- A nav element separate from the Book/Continuous toggle, not a third view:
+  a 🏠 icon (`#home-btn`) sits to the left of the toggle in the header and
+  opens `#home-overlay`, a modal-style panel (`home/home.js`,
+  `home/home.css`). Closing it (✕ button, clicking outside the panel, or
+  Escape) returns to whichever view/toggle state was already active —
+  Home has no state of its own to preserve.
+- Shows the cover (image + title, reusing the same data), an overall
+  read-progress summary (`computeProgress`/`getReadBlocks` from
+  `core/read-tracking.js`, same total-block-count formula as both views),
+  and a settings panel.
+- **Settings are editable from Home, not just previewed — deliberately not
+  a second copy of the settings state.** Every Home control (language
+  checkboxes, video/QR/read-tracking toggles, paper size, font scale) is
+  wired to *proxy* its change onto the corresponding real header control:
+  set the header element's `value`/`checked`, then dispatch a genuine
+  `change` event on it (`proxyToHeader()` in `home.js`), or for font scale,
+  just `.click()` the header's own +/- buttons. This means every existing
+  save/apply listener already wired in `header.js` — including the lang
+  picker's "at least one language must stay active" enforcement — runs
+  exactly once, in the one place it already lives; Home never calls
+  `saveSettings()` directly. After proxying, Home re-reads that same
+  settings/DOM state to redraw itself, so it can't drift out of sync with
+  whatever the header enforced. The header dropdown remains the literal
+  source of truth; Home is a second, larger-font surface onto the same
+  switches, not an independent one.
+- Home's own fields are only refreshed when the panel is opened (and after
+  each local edit) — not live-synced against the header while both are
+  visible simultaneously, since the modal overlay makes that not a real
+  scenario in practice.
+- Tags are deliberately left off Home's summary (would spoil browsing by
+  tag as a discovery mechanism) — everything else considered for the
+  surface (progress, settings) made the cut.
+
+---
+
 ## Language Picker — ✅ Current
 
 - Searchable, collapsible multi-select in Settings — same UI, same markup,
@@ -699,6 +773,13 @@ element's own base class could contain the substring being matched,
   `offsetLeft` — works, but has no highlighting of the matched text itself
   (unlike continuous view's filter, which the user visually confirms by
   what's left on screen).
+- **No real printed page numbers.** `.book-static-foot`'s on-screen numbers
+  are JS-computed from spread index and explicitly hidden in print
+  (`display: none !important` — see **Print** above); print itself has no
+  page-numbering mechanism at all today, cover or no cover. A future
+  `@page`/`counter(page)` footer would be independent of the on-screen
+  spread math and would need its own "skip/restart at the title page" rule
+  regardless of the cover feature.
 
 ---
 

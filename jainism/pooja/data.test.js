@@ -24,4 +24,17 @@ describe('Data Layer Validation', () => {
 
     expect(isValid).toBe(true);
   });
+
+  test('schema accepts a cover item (image+title, no blocks) and rejects a non-cover item with no blocks', () => {
+    const ajv = new Ajv({ allErrors: true });
+    addFormats(ajv);
+    const schema = JSON.parse(fs.readFileSync(path.join(__dirname, 'schema.json'), 'utf8'));
+    const validate = ajv.compile(schema);
+
+    const withCover = [{ id: 'cover_001', type: 'cover', image: 'x.jpg', title: { kn: 'ಶೀ', en: 'Title' } }];
+    expect(validate(withCover)).toBe(true);
+
+    const missingBlocks = [{ id: 'a_001', type: 'answer' }];
+    expect(validate(missingBlocks)).toBe(false);
+  });
 });

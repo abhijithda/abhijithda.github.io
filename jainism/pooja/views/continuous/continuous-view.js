@@ -52,12 +52,37 @@ export function renderContinuousView(data, container, lang = 'all') {
 
     const readBlocks      = getReadBlocks(localStorage);
     const totalBlockCount = data.reduce((sum, item) =>
-        sum + item.blocks.filter(isBlockTrackable).length, 0);
+        sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
 
     data.forEach(item => {
         const card = document.createElement('div');
         card.className = `card ${item.type}`;
         card.id = item.id;
+
+        // Cover item — image + multi-lang title, large. No fixture, no
+        // "first item" mechanics: it's rendered like any other item, just
+        // with different content in place of the usual blocks. Title
+        // always follows the same active-language filter as everything
+        // else, so it's not a special case there either.
+        if (item.type === 'cover') {
+            const titleLangs = ['kn', 'en'].filter(l => (lang === l || lang === 'all') && item.title?.[l]);
+
+            const img = document.createElement('img');
+            img.className = 'cover-image';
+            img.src = `images/${item.image}`;
+            img.alt = item.title?.[titleLangs[0]] || item.title?.kn || item.title?.en || '';
+            card.appendChild(img);
+
+            titleLangs.forEach(l => {
+                const titleEl = document.createElement('div');
+                titleEl.className = `cover-title lang-${l}`;
+                titleEl.textContent = item.title[l];
+                card.appendChild(titleEl);
+            });
+
+            container.appendChild(card);
+            return;
+        }
 
         // Reply-excerpt (verbatim from master)
         if (item.references && item.references.length > 0) {

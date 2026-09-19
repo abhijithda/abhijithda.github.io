@@ -430,6 +430,75 @@ body[data-paper-size="a3"] .book-nav {
     color: #555;
 }
 
+/* ── Cover spread (title page) — image page + title page, same
+   break-after: column trick as standalone images, so they always land as
+   the left/right pages of spread 0. ── */
+.book-columns .cover-page {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: column;
+    page-break-after: always;
+    -webkit-column-break-after: always;
+
+    background: white;
+    border-left: 3px solid #607d8b;
+    border-top: 0.5px solid #eee;
+    border-right: 0.5px solid #eee;
+    border-bottom: 0.5px solid #eee;
+    padding: 8px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cover-image-page .book-image-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.cover-image-page .book-image {
+    width: 100%;
+    height: auto;
+    max-height: 90cqh;
+    object-fit: contain;
+    border: none;
+    box-shadow: none;
+}
+
+.cover-title-page {
+    gap: 10px;
+}
+
+.cover-title-line {
+    text-align: center;
+    font-weight: bold;
+}
+
+.cover-title-line.lang-kn {
+    font-size: clamp(calc(18px * var(--font-scale)), calc(3.2cqi * var(--font-scale)), calc(28px * var(--font-scale)));
+    color: #111;
+}
+
+.cover-title-line.lang-en {
+    font-size: clamp(calc(13px * var(--font-scale)), calc(2.2cqi * var(--font-scale)), calc(19px * var(--font-scale)));
+    color: #555;
+}
+
+/* Same font step-down as any additional stacked language elsewhere in the
+   book — keeps 3+ active languages fitting the title page. */
+.cover-title-page:has(.cover-title-line:nth-child(3)) .cover-title-line {
+    font-size: clamp(calc(11px * var(--font-scale)), calc(1.8cqi * var(--font-scale)), calc(15px * var(--font-scale)));
+}
+
+/* Cover spread is a title page: no running head/footer, like a real book. */
+.book-spread.cover-spread .book-static-head,
+.book-spread.cover-spread .book-static-foot {
+    display: none;
+}
+
 /* ── Nav bar ─────────────────────────────────────────────────────────────── */
 .book-nav {
     display: flex;
@@ -621,6 +690,15 @@ body[data-paper-size="a3"] .book-nav {
 
     body[data-paper-size="a3"] .book-columns .standalone-image .book-image {
         max-height: 230mm !important;
+    }
+
+    /* Same fix, same reasoning, for the cover's image page. */
+    .cover-image-page .book-image {
+        max-height: 170mm !important;
+    }
+
+    body[data-paper-size="a3"] .cover-image-page .book-image {
+        max-height: 250mm !important;
     }
 
     .book-columns {

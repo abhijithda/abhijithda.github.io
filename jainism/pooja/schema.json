@@ -12,7 +12,8 @@
         "enum": [
           "question",
           "answer",
-          "images"
+          "images",
+          "cover"
         ]
       },
       "timestamp": {
@@ -26,6 +27,16 @@
         ],
         "items": {
           "type": "string"
+        }
+      },
+      "image": {
+        "type": "string"
+      },
+      "title": {
+        "type": "object",
+        "properties": {
+          "kn": { "type": "string" },
+          "en": { "type": "string" }
         }
       },
       "blocks": {
@@ -133,8 +144,16 @@
     },
     "required": [
       "id",
-      "type",
-      "blocks"
-    ]
+      "type"
+    ],
+    "if": {
+      "properties": { "type": { "const": "cover" } }
+    },
+    "then": {
+      "required": ["image", "title"]
+    },
+    "else": {
+      "required": ["blocks"]
+    }
   }
 }

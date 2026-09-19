@@ -172,6 +172,31 @@ describe('renderContinuousView', () => {
         renderContinuousView(data, container, 'all');
         expect(document.querySelectorAll('#continuous-container .card').length).toBe(1);
     });
+
+    test('a cover item renders as an image + title card, not through the normal block loop', () => {
+        const data = [{ id: 'cover_001', type: 'cover', image: 'x.jpg', title: { kn: 'ಶೀರ್ಷಿಕೆ', en: 'Title' } }];
+        renderContinuousView(data, container, 'all');
+
+        const card = document.getElementById('cover_001');
+        expect(card.classList.contains('cover')).toBe(true);
+        expect(card.querySelector('.cover-image').src).toContain('images/x.jpg');
+        expect(card.querySelector('.cover-title.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(card.querySelector('.cover-title.lang-en').textContent).toBe('Title');
+        // A cover has no blocks, so it must not count toward read progress.
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
+    });
+
+    test.each([
+        ['kn', true, false],
+        ['en', false, true],
+        ['all', true, true],
+    ])('cover title respects the active-language filter: lang="%s" shows kn=%s / en=%s', (lang, showsKn, showsEn) => {
+        const data = [{ id: 'cover_001', type: 'cover', image: 'x.jpg', title: { kn: 'ಶೀರ್ಷಿಕೆ', en: 'Title' } }];
+        renderContinuousView(data, container, lang);
+        const card = document.getElementById('cover_001');
+        expect(card.querySelector('.cover-title.lang-kn') !== null).toBe(showsKn);
+        expect(card.querySelector('.cover-title.lang-en') !== null).toBe(showsEn);
+    });
 });
 
 describe('renderContinuousView against the real test/data.json fixture', () => {

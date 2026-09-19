@@ -393,6 +393,46 @@ describe('Navigation: jumpToPage', () => {
     });
 });
 
+describe('Cover page — spread 0, unnumbered, real content starts at page 1', () => {
+    const dataWithCover = [
+        { id: 'cover_001', type: 'cover', image: 'x.jpg', title: { kn: 'ಶೀರ್ಷಿಕೆ', en: 'Title' } },
+        { id: 'a_101', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_101_b_1' })] },
+        { id: 'a_102', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_102_b_1' })] },
+    ];
+
+    beforeEach(() => {
+        initBookView(dataWithCover, ['kn', 'en']);
+        mockSpreadLayout({ spreadWidth: 800, columnsScrollWidth: 3200 }); // 4 spreads incl. cover
+        renderCurrentSpread();
+    });
+
+    test('cover spread (0) renders the image page and title page, and is unnumbered', () => {
+        const imgPage = document.getElementById('book-cover_001-image');
+        const titlePage = document.getElementById('book-cover_001-title');
+        expect(imgPage.classList.contains('cover-page')).toBe(true);
+        expect(titlePage.classList.contains('cover-page')).toBe(true);
+        expect(titlePage.querySelector('.cover-title-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(titlePage.querySelector('.cover-title-line.lang-en').textContent).toBe('Title');
+
+        expect(document.getElementById('book-page-num-left').textContent).toBe('');
+        expect(document.getElementById('book-page-num-right').textContent).toBe('');
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(true);
+    });
+
+    test('the spread right after the cover is numbered page 1, not page 3', () => {
+        goToNextSpread();
+        expect(document.getElementById('book-page-num-left').textContent).toBe('1');
+        expect(document.getElementById('book-page-num-right').textContent).toBe('2');
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(false);
+    });
+
+    test('jumpToPage(1) lands on the spread after the cover, not spread 0', () => {
+        jumpToPage(1);
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(false);
+        expect(document.getElementById('book-page-num-left').textContent).toBe('1');
+    });
+});
+
 describe('applyBookMediaVisibility', () => {
     const data = [{
         id: 'a_200', type: 'answer', references: null,
@@ -455,9 +495,10 @@ describe('onBookLangChange', () => {
 describe('initBookView against the real test/data.json fixture', () => {
     const fixtureData = require('../../test/data.json');
 
-    test('renders one book-card (or standalone-image card) per item/block without throwing', () => {
+    test('renders one book-card (or standalone-image/cover card) per item/block without throwing', () => {
         expect(() => initBookView(fixtureData, ['kn', 'en'])).not.toThrow();
-        expect(document.getElementById('book-i_001').classList.contains('standalone-image')).toBe(true);
+        expect(document.getElementById('book-cover_001-image').classList.contains('cover-page')).toBe(true);
+        expect(document.getElementById('book-cover_001-title').classList.contains('cover-page')).toBe(true);
         expect(document.getElementById('book-a_001_b_1').querySelector('.book-excerpt')).not.toBeNull();
     });
 });

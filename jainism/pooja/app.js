@@ -5,6 +5,7 @@
 import { renderContinuousView, filterContinuous, goBackToMessage } from './views/continuous/continuous-view.js';
 import { initBookView, onBookLangChange, applyBookMediaVisibility, searchBookView } from './views/book/book-view.js';
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
+import { initHomeControls } from './home/home.js';
 
 let data;
 const continuous = () => document.getElementById('continuous-container');
@@ -110,6 +111,9 @@ async function init() {
         document.getElementById(id)
             ?.addEventListener('change', applyBookMediaVisibility);
     });
+
+    // ── Home surface — separate nav element, not a third view ─────────────
+    initHomeControls(data);
 
     // ── View toggle ───────────────────────────────────────────────────────
     document.querySelectorAll('.view-toggle-btn').forEach(btn =>

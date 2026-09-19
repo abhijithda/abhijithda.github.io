@@ -160,6 +160,39 @@ function populateBookColumns() {
     const readBlocks = getReadBlocks(localStorage);
 
     state.data.forEach(item => {
+        // --- 0. HANDLE THE COVER ITEM ---
+        // Two cards, each forced onto its own column exactly like a
+        // standalone image page — image lands on the left page, title on
+        // the right page, together forming spread 0. No new pagination
+        // mechanism: same break-after: column trick as standalone images.
+        if (item.type === 'cover') {
+            const imgCard = document.createElement('div');
+            imgCard.className = 'book-card cover-page cover-image-page';
+            imgCard.id = `book-${item.id}-image`;
+            const wrap = document.createElement('div');
+            wrap.className = 'book-image-wrap';
+            const imgEl = document.createElement('img');
+            imgEl.src = item.image.includes('://') ? item.image : `images/${item.image}`;
+            imgEl.className = 'book-image';
+            wrap.appendChild(imgEl);
+            imgCard.appendChild(wrap);
+            columns.appendChild(imgCard);
+
+            const titleCard = document.createElement('div');
+            titleCard.className = 'book-card cover-page cover-title-page';
+            titleCard.id = `book-${item.id}-title`;
+            state.activeLangs.forEach(lang => {
+                const t = item.title?.[lang];
+                if (!t) return;
+                const line = document.createElement('div');
+                line.className = `cover-title-line lang-${lang}`;
+                line.textContent = t;
+                titleCard.appendChild(line);
+            });
+            columns.appendChild(titleCard);
+            return;
+        }
+
         // --- 1. HANDLE STANDALONE IMAGE ITEMS ---
         if (item.type === 'images') {
             const imgBlock = item.blocks && item.blocks[0];
@@ -220,26 +253,35 @@ export function renderCurrentSpread() {
 
     const spreadWidth = spread.clientWidth;
     const totalSpreads = Math.max(1, Math.ceil(columns.scrollWidth / spreadWidth));
-    const totalPages = totalSpreads * 2;
 
     if (state.currentSpread >= totalSpreads) state.currentSpread = totalSpreads - 1;
     if (state.currentSpread < 0) state.currentSpread = 0;
 
     columns.style.transform = `translateX(-${state.currentSpread * spreadWidth}px)`;
 
-    // Calculate actual Page Numbers (Spread 0 = Pages 1 & 2)
-    const leftPage = (state.currentSpread * 2) + 1;
-    const rightPage = (state.currentSpread * 2) + 2;
+    // Cover spread (spread 0, when present) is a title page: no running
+    // head/footer, no page number — matching how a real printed book
+    // treats its title page. Numbering for every spread after it shifts
+    // back by one spread so the first real content page still reads "1".
+    const onCoverSpread = state.hasCover && state.currentSpread === 0;
+    spread.classList.toggle('cover-spread', onCoverSpread);
+    const spreadOffset = state.hasCover ? 1 : 0;
+    const numberedSpreads = Math.max(0, totalSpreads - spreadOffset);
+    const totalNumberedPages = numberedSpreads * 2;
 
-    if (leftNum) leftNum.textContent = leftPage;
-    if (rightNum) rightNum.textContent = rightPage;
-    if (info) info.textContent = `(of ${totalPages})`;
+    // Calculate actual Page Numbers (first numbered spread = Pages 1 & 2)
+    const leftPage = ((state.currentSpread - spreadOffset) * 2) + 1;
+    const rightPage = ((state.currentSpread - spreadOffset) * 2) + 2;
+
+    if (leftNum) leftNum.textContent = onCoverSpread ? '' : leftPage;
+    if (rightNum) rightNum.textContent = onCoverSpread ? '' : rightPage;
+    if (info) info.textContent = onCoverSpread ? '' : `(of ${totalNumberedPages})`;
 
     // Sync the input box with the current page ---
     const jumpInput = document.getElementById('book-jump-input');
     // Only update if the user isn't currently typing in it
     if (jumpInput && document.activeElement !== jumpInput) {
-        jumpInput.value = leftPage;
+        jumpInput.value = onCoverSpread ? '' : leftPage;
     }
 
     const prevBtn = document.getElementById('book-prev');
@@ -264,8 +306,11 @@ export function goToNextSpread() {
 }
 
 export function jumpToPage(pageNumber) {
-    // Translate the desired Page Number back into a Spread Index
-    state.currentSpread = Math.max(0, Math.floor((pageNumber - 1) / 2));
+    // Translate the desired (real, numbered) Page Number back into a
+    // Spread Index — offset by the cover's own spread when present, since
+    // "page 1" is the first spread *after* the unnumbered cover.
+    const spreadOffset = state.hasCover ? 1 : 0;
+    state.currentSpread = spreadOffset + Math.max(0, Math.floor((pageNumber - 1) / 2));
     renderCurrentSpread();
     localStorage.setItem('bookSpread', state.currentSpread);
 }
@@ -328,9 +373,15 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     state.itemById = {};
     data.forEach(item => {
         state.itemById[item.id] = item;
-        item.blocks.forEach(b => { state.blockById[b.id] = b; });
+        (item.blocks || []).forEach(b => { state.blockById[b.id] = b; });
     });
-    state.totalBlockCount = data.reduce((s, item) => s + item.blocks.filter(isBlockTrackable).length, 0);
+    state.totalBlockCount = data.reduce((s, item) => s + (item.blocks || []).filter(isBlockTrackable).length, 0);
+    // A cover item, when present, is always the very first entry and always
+    // occupies exactly one spread (image page + title page) — see
+    // populateBookColumns. Page numbering treats it like a real book's
+    // title page: unnumbered, with the first real content page starting
+    // at "1" rather than "3".
+    state.hasCover = data[0]?.type === 'cover';
 
     // Added the static footers to the HTML!
     container.innerHTML = `
@@ -372,7 +423,8 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     });
     jumpInput.addEventListener('blur', () => {
         if (jumpInput.value === '') {
-            jumpInput.value = (state.currentSpread * 2) + 1;
+            const spreadOffset = state.hasCover ? 1 : 0;
+            jumpInput.value = ((state.currentSpread - spreadOffset) * 2) + 1;
         }
     });
 
