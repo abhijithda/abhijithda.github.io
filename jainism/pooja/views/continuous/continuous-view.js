@@ -73,12 +73,21 @@ export function renderContinuousView(data, container, lang = 'all') {
             img.alt = item.title?.[titleLangs[0]] || item.title?.kn || item.title?.en || '';
             card.appendChild(img);
 
+            const titleWrap = document.createElement('div');
+            titleWrap.className = 'cover-title-wrap';
+            const ruleTop = document.createElement('div');
+            ruleTop.className = 'cover-title-rule';
+            titleWrap.appendChild(ruleTop);
             titleLangs.forEach(l => {
                 const titleEl = document.createElement('div');
                 titleEl.className = `cover-title lang-${l}`;
                 titleEl.textContent = item.title[l];
-                card.appendChild(titleEl);
+                titleWrap.appendChild(titleEl);
             });
+            const ruleBottom = document.createElement('div');
+            ruleBottom.className = 'cover-title-rule';
+            titleWrap.appendChild(ruleBottom);
+            card.appendChild(titleWrap);
 
             container.appendChild(card);
             return;

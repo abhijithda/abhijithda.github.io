@@ -1,15 +1,19 @@
-// home/home.js — Home surface: a nav element separate from the Book/
-// Continuous toggle (not a third view). Shows the cover, an overall
-// read-progress summary, and the same settings as the header.
+// home/home.js — Home: the landing page shown when the app first opens (and
+// whenever the header's Home icon is clicked). NOT a third toggle state
+// alongside Book/Continuous in the data sense — it renders no book content
+// of its own, just the cover, overall progress, a plain-language choice
+// between the two real views, and settings. app.js owns showing/hiding it
+// relative to #book-container/#continuous-container.
 //
 // Settings here are NOT a second copy: every control below proxies its
 // change onto the corresponding header control (setting its value/checked
 // state, then dispatching a real 'change' event) so all of header.js's
 // existing save/apply logic — including things like the lang picker's
-// "at least one language must stay active" rule — runs exactly once,
-// in exactly the place it already lives. Home then re-reads that same
-// state to redraw itself. The header dropdown stays the source of truth;
-// this is just a second, larger-font place to reach the same switches.
+// "at least one language must stay active" rule — runs exactly once, in
+// exactly the place it already lives. Home then re-reads that same state
+// to redraw itself. The header dropdown stays the source of truth; this
+// is just a second, larger-font, always-expanded place to reach the same
+// switches (the whole point of putting settings here instead of a link).
 
 import { KNOWN_LANGS } from '../core/langs.js';
 import { loadSettings, getActiveLangs } from '../header/header.js';
@@ -22,6 +26,9 @@ function totalBlockCount() {
     return allData.reduce((sum, item) => sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
 }
 
+// Cover rendering is data-driven and generic — whatever title/image the
+// loaded data.json's cover item carries, in whatever languages are active.
+// Nothing here is specific to any one book.
 function renderCover() {
     const img = document.getElementById('home-cover-image');
     const title = document.getElementById('home-cover-title');
@@ -34,6 +41,8 @@ function renderCover() {
     }
 
     img.hidden = false;
+    // object-fit: contain (in home.css) — the whole image is shown, not
+    // cropped top/bottom to fill a fixed box.
     img.src = coverItem.image.includes('://') ? coverItem.image : `images/${coverItem.image}`;
 
     const activeLangs = getActiveLangs();
@@ -79,7 +88,7 @@ function renderLangList() {
         chk.checked = active.includes(lang.code);
         chk.addEventListener('change', () => {
             proxyToHeader(`lang-chk-${lang.code}`, (headerChk) => { headerChk.checked = chk.checked; });
-            refreshFromSettings(); // re-sync in case the header enforced "at least one"
+            refreshHomeView(); // re-sync in case the header enforced "at least one"
         });
 
         const labelText = document.createElement('span');
@@ -109,7 +118,10 @@ function renderSettingsMirror() {
     renderLangList();
 }
 
-function refreshFromSettings() {
+// Called on boot and every time the Home page becomes visible again (app.js
+// calls this from the header Home icon's click handler), so it can't drift
+// from whatever changed elsewhere while it was hidden.
+export function refreshHomeView() {
     renderCover();
     renderProgress();
     renderSettingsMirror();
@@ -118,21 +130,6 @@ function refreshFromSettings() {
 export function initHomeControls(data) {
     allData = data || [];
     coverItem = allData.find(item => item.type === 'cover') || null;
-
-    const homeBtn = document.getElementById('home-btn');
-    const overlay = document.getElementById('home-overlay');
-    const closeBtn = document.getElementById('home-close-btn');
-    if (!homeBtn || !overlay) return;
-
-    homeBtn.addEventListener('click', () => {
-        overlay.hidden = false;
-        refreshFromSettings();
-    });
-    if (closeBtn) closeBtn.addEventListener('click', () => { overlay.hidden = true; });
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.hidden = true; });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !overlay.hidden) overlay.hidden = true;
-    });
 
     // Videos / QRs / read tracking — proxy straight onto the header's own
     // checkboxes, which already have their own save+apply listeners wired
@@ -157,9 +154,11 @@ export function initHomeControls(data) {
         document.getElementById('font-scale-decrease')?.click();
         renderSettingsMirror();
     });
+
+    refreshHomeView();
 }
 
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
-    Object.assign(module.exports, { initHomeControls });
+    Object.assign(module.exports, { initHomeControls, refreshHomeView });
 }

@@ -24,7 +24,7 @@
         <button id="home-btn" class="menu-trigger home-btn" title="Home — cover, progress and settings at a glance">🏠</button>
 
         <div class="view-toggle">
-            <button class="view-toggle-btn active" data-view="book" title="Book spread view">📖 Book</button>
+            <button class="view-toggle-btn" data-view="book" title="Book spread view">📖 Book</button>
             <button class="view-toggle-btn" data-view="continuous" title="Continuous scrolling view">☰ Continuous</button>
         </div>
 
@@ -96,63 +96,75 @@
         </div>
     </header>
 
-    <div id="home-overlay" class="home-overlay" hidden>
-        <div class="home-panel">
-            <div class="home-panel-header">
-                <span class="home-panel-title">🏠 Home</span>
-                <button id="home-close-btn" class="home-close-btn" aria-label="Close">✕</button>
+    <div id="home-view" class="home-view">
+        <img id="home-cover-image" class="home-cover-image" alt="">
+        <div class="home-cover-title-wrap">
+            <div class="home-cover-title-rule"></div>
+            <div id="home-cover-title" class="home-cover-title"></div>
+            <div class="home-cover-title-rule"></div>
+        </div>
+
+        <div id="home-progress" class="home-progress"></div>
+
+        <div class="home-view-options">
+            <div class="home-view-option">
+                <span class="home-view-option-icon">📖</span>
+                <span class="home-view-option-title">Book</span>
+                <p class="home-view-option-desc">Page-by-page, closest to reading the printed book. Good if you like turning pages or reading start to finish.</p>
+                <button type="button" id="home-open-book" class="home-view-option-btn">Open book view</button>
+            </div>
+            <div class="home-view-option">
+                <span class="home-view-option-icon">☰</span>
+                <span class="home-view-option-title">Continuous</span>
+                <p class="home-view-option-desc">One long scroll, everything stacked in order. Easier for searching a topic or skimming quickly.</p>
+                <button type="button" id="home-open-continuous" class="home-view-option-btn">Open continuous view</button>
+            </div>
+        </div>
+
+        <div class="home-settings">
+            <span class="home-settings-label">⚙️ Settings</span>
+            <p class="home-settings-hint">Same settings as the header — change them here or there, they stay in sync.</p>
+
+            <div class="home-section">
+                <span class="home-section-label">🌐 Language</span>
+                <div id="home-lang-list" class="home-lang-list"></div>
             </div>
 
-            <img id="home-cover-image" class="home-cover-image" alt="">
-            <div id="home-cover-title" class="home-cover-title"></div>
-
-            <div id="home-progress" class="home-progress"></div>
-
-            <div class="home-settings">
-                <span class="home-settings-label">⚙️ Settings</span>
-                <p class="home-settings-hint">Same settings as the header — change them here or there, they stay in sync.</p>
-
-                <div class="home-section">
-                    <span class="home-section-label">🌐 Language</span>
-                    <div id="home-lang-list" class="home-lang-list"></div>
-                </div>
-
-                <div class="home-section home-row">
-                    <label>🎬 Videos</label>
-                    <label class="switch">
-                        <input type="checkbox" id="home-toggle-videos">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="home-section home-row">
-                    <label>📱 QR Codes</label>
-                    <label class="switch">
-                        <input type="checkbox" id="home-toggle-qrs">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="home-section home-row">
-                    <label>✓ Read tracking</label>
-                    <label class="switch">
-                        <input type="checkbox" id="home-toggle-read-tracking">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="home-section home-row">
-                    <label for="home-paper-size-select">🖨️ Paper size</label>
-                    <select id="home-paper-size-select">
-                        <option value="dynamic">Dynamic</option>
-                        <option value="a4">A4</option>
-                        <option value="a3">A3</option>
-                    </select>
-                </div>
-                <div class="home-section home-row">
-                    <label>🔤 Font size</label>
-                    <div class="font-scale-control">
-                        <button type="button" id="home-font-scale-decrease" aria-label="Decrease font size">A−</button>
-                        <span id="home-font-scale-display">100%</span>
-                        <button type="button" id="home-font-scale-increase" aria-label="Increase font size">A+</button>
-                    </div>
+            <div class="home-section home-row">
+                <label>🎬 Videos</label>
+                <label class="switch">
+                    <input type="checkbox" id="home-toggle-videos">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="home-section home-row">
+                <label>📱 QR Codes</label>
+                <label class="switch">
+                    <input type="checkbox" id="home-toggle-qrs">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="home-section home-row">
+                <label>✓ Read tracking</label>
+                <label class="switch">
+                    <input type="checkbox" id="home-toggle-read-tracking">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="home-section home-row">
+                <label for="home-paper-size-select">🖨️ Paper size</label>
+                <select id="home-paper-size-select">
+                    <option value="dynamic">Dynamic</option>
+                    <option value="a4">A4</option>
+                    <option value="a3">A3</option>
+                </select>
+            </div>
+            <div class="home-section home-row">
+                <label>🔤 Font size</label>
+                <div class="font-scale-control">
+                    <button type="button" id="home-font-scale-decrease" aria-label="Decrease font size">A−</button>
+                    <span id="home-font-scale-display">100%</span>
+                    <button type="button" id="home-font-scale-increase" aria-label="Increase font size">A+</button>
                 </div>
             </div>
         </div>
@@ -163,7 +175,7 @@
 
     <div id="continuous-container" style="display:none"></div>
 
-    <div id="book-container" class="active"></div>
+    <div id="book-container" style="display:none"></div>
 
     <button id="back-to-message"
         style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">

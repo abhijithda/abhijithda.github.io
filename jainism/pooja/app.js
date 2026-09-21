@@ -5,10 +5,30 @@
 import { renderContinuousView, filterContinuous, goBackToMessage } from './views/continuous/continuous-view.js';
 import { initBookView, onBookLangChange, applyBookMediaVisibility, searchBookView } from './views/book/book-view.js';
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
-import { initHomeControls } from './home/home.js';
+import { initHomeControls, refreshHomeView } from './home/home.js';
 
 let data;
 const continuous = () => document.getElementById('continuous-container');
+
+// ── Home (landing page) ──────────────────────────────────────────────────
+// Home is not a third value of viewMode — book/continuous stay the only
+// two states that get remembered, and print/title logic only ever sees
+// those. Home is just an extra layer shown on top: visible at boot and
+// whenever the header's icon is clicked, hidden the moment either real
+// view is opened.
+function showHome() {
+    const home = document.getElementById('home-view');
+    const book = document.getElementById('book-container');
+    const cont = document.getElementById('continuous-container');
+    if (home) home.style.display = 'block';
+    if (book) book.style.display = 'none';
+    if (cont) cont.style.display = 'none';
+    refreshHomeView();
+}
+function hideHome() {
+    const home = document.getElementById('home-view');
+    if (home) home.style.display = 'none';
+}
 
 // ── View mode ─────────────────────────────────────────────────────────────
 function setViewMode(mode) {
@@ -62,6 +82,7 @@ function setViewMode(mode) {
 // switching always re-renders fresh, that eager work was just being
 // thrown away and rebuilt the moment (if ever) the user opened it.
 function activateView(mode) {
+    hideHome();
     const activeLangs = getActiveLangs();
     if (mode === 'book') {
         initBookView(data, activeLangs);
@@ -112,8 +133,11 @@ async function init() {
             ?.addEventListener('change', applyBookMediaVisibility);
     });
 
-    // ── Home surface — separate nav element, not a third view ─────────────
+    // ── Home surface — the landing page, not a third view state ────────────
     initHomeControls(data);
+    document.getElementById('home-btn')?.addEventListener('click', showHome);
+    document.getElementById('home-open-book')?.addEventListener('click', () => activateView('book'));
+    document.getElementById('home-open-continuous')?.addEventListener('click', () => activateView('continuous'));
 
     // ── View toggle ───────────────────────────────────────────────────────
     document.querySelectorAll('.view-toggle-btn').forEach(btn =>
@@ -145,7 +169,12 @@ async function init() {
     }, 100);
 
     // ── Activate the initial view ────────────────────────────────────────
-    activateView(localStorage.getItem('viewMode') || 'book');
+    // Land on Home first, every time — the two view cards there are the
+    // deliberate way in, not something to skip past via a remembered
+    // viewMode. Book/Continuous still render normally (via activateView)
+    // the moment either is opened, from Home's buttons or the header
+    // toggle — nothing needs pre-rendering at boot.
+    showHome();
 }
 
 window.addEventListener('scroll', () => {

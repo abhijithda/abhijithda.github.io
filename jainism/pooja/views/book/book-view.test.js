@@ -406,13 +406,11 @@ describe('Cover page — spread 0, unnumbered, real content starts at page 1', (
         renderCurrentSpread();
     });
 
-    test('cover spread (0) renders the image page and title page, and is unnumbered', () => {
-        const imgPage = document.getElementById('book-cover_001-image');
-        const titlePage = document.getElementById('book-cover_001-title');
-        expect(imgPage.classList.contains('cover-page')).toBe(true);
-        expect(titlePage.classList.contains('cover-page')).toBe(true);
-        expect(titlePage.querySelector('.cover-title-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
-        expect(titlePage.querySelector('.cover-title-line.lang-en').textContent).toBe('Title');
+    test('cover spread (0) renders the image and title on one page, and is unnumbered', () => {
+        const coverCard = document.getElementById('book-cover_001');
+        expect(coverCard.classList.contains('cover-page')).toBe(true);
+        expect(coverCard.querySelector('.cover-title-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(coverCard.querySelector('.cover-title-line.lang-en').textContent).toBe('Title');
 
         expect(document.getElementById('book-page-num-left').textContent).toBe('');
         expect(document.getElementById('book-page-num-right').textContent).toBe('');
@@ -497,8 +495,7 @@ describe('initBookView against the real test/data.json fixture', () => {
 
     test('renders one book-card (or standalone-image/cover card) per item/block without throwing', () => {
         expect(() => initBookView(fixtureData, ['kn', 'en'])).not.toThrow();
-        expect(document.getElementById('book-cover_001-image').classList.contains('cover-page')).toBe(true);
-        expect(document.getElementById('book-cover_001-title').classList.contains('cover-page')).toBe(true);
+        expect(document.getElementById('book-cover_001').classList.contains('cover-page')).toBe(true);
         expect(document.getElementById('book-a_001_b_1').querySelector('.book-excerpt')).not.toBeNull();
     });
 });

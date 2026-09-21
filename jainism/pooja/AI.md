@@ -248,15 +248,17 @@ to a real file) as part of building this structure.
   block/caption content. Title respects the same `kn`/`en`/`all` language
   filter as every other card — nothing else about continuous view's
   pagination-free, single-scroll model changes for it.
-- **Book view**: two `.book-card.cover-page` elements (image page, title
-  page) appended as the very first entries in `#book-columns`, each forced
-  onto its own column via the same `break-after: column` CSS trick already
-  used for standalone `images` items (see **Pagination**/**Print** below) —
-  no new print mechanism needed, it rides the existing column-reflow print
-  path for free. Because it's always exactly two cards, it always becomes
-  spread 0 in its entirety: image on the left page, title (all active
-  languages, stacked, same clamp()-based step-down sizing as multi-line
-  language blocks elsewhere) on the right page.
+- **Book view**: a single `.book-card.cover-page` (image on top, title below
+  it with rule-line dividers — both use `object-fit: contain`, not `cover`,
+  so the whole image is visible rather than cropped to fill a box) appended
+  as the very first entry in `#book-columns`, forced onto its own column via
+  the same `break-after: column` CSS trick already used for standalone
+  `images` items (see **Pagination**/**Print** below) — no new print
+  mechanism needed, it rides the existing column-reflow print path for
+  free. It occupies only the left page of spread 0; the right page falls
+  through to whatever the first real item is, same as any single-page
+  standalone image today. Title shows all active languages, stacked, same
+  clamp()-based step-down sizing as multi-line language blocks elsewhere.
 - **Page numbering treats the cover like a real book's title page**: no
   running head/footer on that spread (`.book-spread.cover-spread` hides
   both), and every subsequent spread's page numbers are shifted back by one
@@ -273,16 +275,30 @@ to a real file) as part of building this structure.
 ---
 
 ## Home Surface — ✅ Current
-- A nav element separate from the Book/Continuous toggle, not a third view:
-  a 🏠 icon (`#home-btn`) sits to the left of the toggle in the header and
-  opens `#home-overlay`, a modal-style panel (`home/home.js`,
-  `home/home.css`). Closing it (✕ button, clicking outside the panel, or
-  Escape) returns to whichever view/toggle state was already active —
-  Home has no state of its own to preserve.
-- Shows the cover (image + title, reusing the same data), an overall
-  read-progress summary (`computeProgress`/`getReadBlocks` from
-  `core/read-tracking.js`, same total-block-count formula as both views),
-  and a settings panel.
+- A full-page landing page (`#home-view`, `home/home.js`, `home/home.css`),
+  not a modal and not a third value of `viewMode` — `localStorage`'s
+  `viewMode` only ever holds `book`/`continuous`, same as before. `app.js`'s
+  `showHome()`/`hideHome()` just toggle which of `#home-view`,
+  `#book-container`, `#continuous-container` is visible, layered on top of
+  the existing book/continuous machinery rather than becoming a third state
+  inside it. Shown by default on every load (`init()` calls `showHome()`
+  instead of `activateView()`), and reachable afterward via the 🏠 icon
+  (`#home-btn`) that sits left of the Book/Continuous toggle in the header —
+  clicking either of Home's own two option buttons, or the header's Book/
+  Continuous toggle buttons, calls `activateView()`, which hides Home as
+  its first step.
+- Layout mirrors a continuous-view cover card, not a small icon-sized
+  preview: full-width image (`object-fit: contain`, not `cover` — the whole
+  image is visible, nothing cropped off the top or bottom to fill a fixed
+  box), then the title below it with the same "rule line, title, rule line"
+  styling as the book/continuous cover pages, all driven by the same
+  `cover`-type item and the active-language filter — nothing here is
+  specific to any one book's data.
+- Below the cover: an overall read-progress summary
+  (`computeProgress`/`getReadBlocks` from `core/read-tracking.js`, same
+  total-block-count formula as both views), then two side-by-side option
+  cards explaining Book vs. Continuous in plain language (page-by-page vs.
+  one long scroll) with a button into each, then settings.
 - **Settings are editable from Home, not just previewed — deliberately not
   a second copy of the settings state.** Every Home control (language
   checkboxes, video/QR/read-tracking toggles, paper size, font scale) is
@@ -296,15 +312,16 @@ to a real file) as part of building this structure.
   `saveSettings()` directly. After proxying, Home re-reads that same
   settings/DOM state to redraw itself, so it can't drift out of sync with
   whatever the header enforced. The header dropdown remains the literal
-  source of truth; Home is a second, larger-font surface onto the same
-  switches, not an independent one.
-- Home's own fields are only refreshed when the panel is opened (and after
-  each local edit) — not live-synced against the header while both are
-  visible simultaneously, since the modal overlay makes that not a real
-  scenario in practice.
+  source of truth; Home is a second, larger-font, always-expanded surface
+  onto the same switches (the whole point of putting settings on this page
+  rather than behind a link) — not an independent one.
+- Home's fields are refreshed (`refreshHomeView()`) on boot and every time
+  Home becomes visible again via the header icon — not live-synced against
+  the header while both happen to be on screen, since Home fully replaces
+  the header's view area while shown rather than floating over it.
 - Tags are deliberately left off Home's summary (would spoil browsing by
   tag as a discovery mechanism) — everything else considered for the
-  surface (progress, settings) made the cut.
+  surface (progress, settings, the view explainer) made the cut.
 
 ---
 

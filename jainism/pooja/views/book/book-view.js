@@ -161,35 +161,43 @@ function populateBookColumns() {
 
     state.data.forEach(item => {
         // --- 0. HANDLE THE COVER ITEM ---
-        // Two cards, each forced onto its own column exactly like a
-        // standalone image page — image lands on the left page, title on
-        // the right page, together forming spread 0. No new pagination
-        // mechanism: same break-after: column trick as standalone images.
+        // One card — image on top, title below with rule lines — forced
+        // onto its own column exactly like a standalone image page. It
+        // takes only the left page of spread 0; the facing (right) page
+        // falls through to whatever the first real item is, same as any
+        // single-page standalone image today.
         if (item.type === 'cover') {
-            const imgCard = document.createElement('div');
-            imgCard.className = 'book-card cover-page cover-image-page';
-            imgCard.id = `book-${item.id}-image`;
+            const card = document.createElement('div');
+            card.className = 'book-card cover-page';
+            card.id = `book-${item.id}`;
+
             const wrap = document.createElement('div');
-            wrap.className = 'book-image-wrap';
+            wrap.className = 'book-image-wrap cover-image-wrap';
             const imgEl = document.createElement('img');
             imgEl.src = item.image.includes('://') ? item.image : `images/${item.image}`;
-            imgEl.className = 'book-image';
+            imgEl.className = 'book-image cover-image';
             wrap.appendChild(imgEl);
-            imgCard.appendChild(wrap);
-            columns.appendChild(imgCard);
+            card.appendChild(wrap);
 
-            const titleCard = document.createElement('div');
-            titleCard.className = 'book-card cover-page cover-title-page';
-            titleCard.id = `book-${item.id}-title`;
+            const titleWrap = document.createElement('div');
+            titleWrap.className = 'cover-title-wrap';
+            const ruleTop = document.createElement('div');
+            ruleTop.className = 'cover-title-rule';
+            titleWrap.appendChild(ruleTop);
             state.activeLangs.forEach(lang => {
                 const t = item.title?.[lang];
                 if (!t) return;
                 const line = document.createElement('div');
                 line.className = `cover-title-line lang-${lang}`;
                 line.textContent = t;
-                titleCard.appendChild(line);
+                titleWrap.appendChild(line);
             });
-            columns.appendChild(titleCard);
+            const ruleBottom = document.createElement('div');
+            ruleBottom.className = 'cover-title-rule';
+            titleWrap.appendChild(ruleBottom);
+            card.appendChild(titleWrap);
+
+            columns.appendChild(card);
             return;
         }
 

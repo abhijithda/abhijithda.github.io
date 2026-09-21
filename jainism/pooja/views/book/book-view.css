@@ -451,25 +451,38 @@ body[data-paper-size="a3"] .book-nav {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 16px;
 }
 
-.cover-image-page .book-image-wrap {
+.cover-image-wrap {
     width: 100%;
     display: flex;
     justify-content: center;
 }
 
-.cover-image-page .book-image {
+/* object-fit: contain (not cover) so the whole image is visible — nothing
+   cropped off the top or bottom to fill a fixed box. */
+.cover-image {
     width: 100%;
     height: auto;
-    max-height: 90cqh;
+    max-height: 75cqh;
     object-fit: contain;
     border: none;
     box-shadow: none;
 }
 
-.cover-title-page {
-    gap: 10px;
+.cover-title-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.cover-title-rule {
+    width: 32px;
+    height: 2px;
+    background: #607d8b;
 }
 
 .cover-title-line {
@@ -488,8 +501,8 @@ body[data-paper-size="a3"] .book-nav {
 }
 
 /* Same font step-down as any additional stacked language elsewhere in the
-   book — keeps 3+ active languages fitting the title page. */
-.cover-title-page:has(.cover-title-line:nth-child(3)) .cover-title-line {
+   book — keeps 3+ active languages fitting the page. */
+.cover-title-wrap:has(.cover-title-line:nth-child(4)) .cover-title-line {
     font-size: clamp(calc(11px * var(--font-scale)), calc(1.8cqi * var(--font-scale)), calc(15px * var(--font-scale)));
 }
 
@@ -693,11 +706,11 @@ body[data-paper-size="a3"] .book-nav {
     }
 
     /* Same fix, same reasoning, for the cover's image page. */
-    .cover-image-page .book-image {
+    .cover-image {
         max-height: 170mm !important;
     }
 
-    body[data-paper-size="a3"] .cover-image-page .book-image {
+    body[data-paper-size="a3"] .cover-image {
         max-height: 250mm !important;
     }
 
