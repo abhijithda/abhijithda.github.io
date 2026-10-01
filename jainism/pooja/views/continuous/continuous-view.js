@@ -51,44 +51,71 @@ export function renderContinuousView(data, container, lang = 'all') {
     const { blockById, itemById } = buildBlockIndex(data);
 
     const readBlocks      = getReadBlocks(localStorage);
+    // "insert" items (front cover, dividers) are decorative structure, not
+    // content a reader marks as read — excluded from the count entirely,
+    // even if their block happens to carry title text that would otherwise
+    // look "trackable" by the generic per-block rule.
     const totalBlockCount = data.reduce((sum, item) =>
-        sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
+        item.type === 'insert' ? sum : sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
 
     data.forEach(item => {
         const card = document.createElement('div');
         card.className = `card ${item.type}`;
         card.id = item.id;
 
-        // Cover item — image + multi-lang title, large. No fixture, no
-        // "first item" mechanics: it's rendered like any other item, just
-        // with different content in place of the usual blocks. Title
-        // always follows the same active-language filter as everything
-        // else, so it's not a special case there either.
-        if (item.type === 'cover') {
-            const titleLangs = ['kn', 'en'].filter(l => (lang === l || lang === 'all') && item.title?.[l]);
+        // "insert" items — the front cover, section dividers, and pure
+        // blank pages, all one item type distinguished by which fields its
+        // one block has. Rendered as one big centered page instead of the
+        // usual caption-sized block row. Unlike a normal block row, there's
+        // no visible id badge here — but the card's DOM id is still set to
+        // the block's id (not the item's), same as every other block
+        // elsewhere, specifically so that another item's `references` can
+        // still jump straight to it via jumpToReference(). The only
+        // exception is `hideId: true` (meant for the front cover, which
+        // nothing should ever cite): that suppresses the id entirely, so
+        // it can't be jumped to at all. An insert with neither text nor an
+        // image renders nothing — continuous view has no concept of blank
+        // space.
+        if (item.type === 'insert') {
+            const block = item.blocks?.[0];
+            const imgData = block?.images?.[0];
+            const langs = ['kn', 'en'].filter(l => (lang === l || lang === 'all'));
+            const hasContent = langs.some(l => (block?.content?.[l] || []).some(line => line.trim() !== ''));
 
-            const img = document.createElement('img');
-            img.className = 'cover-image';
-            img.src = `images/${item.image}`;
-            img.alt = item.title?.[titleLangs[0]] || item.title?.kn || item.title?.en || '';
-            card.appendChild(img);
+            if (!imgData && !hasContent) return; // nothing to show
 
-            const titleWrap = document.createElement('div');
-            titleWrap.className = 'cover-title-wrap';
-            const ruleTop = document.createElement('div');
-            ruleTop.className = 'cover-title-rule';
-            titleWrap.appendChild(ruleTop);
-            titleLangs.forEach(l => {
-                const titleEl = document.createElement('div');
-                titleEl.className = `cover-title lang-${l}`;
-                titleEl.textContent = item.title[l];
-                titleWrap.appendChild(titleEl);
-            });
-            const ruleBottom = document.createElement('div');
-            ruleBottom.className = 'cover-title-rule';
-            titleWrap.appendChild(ruleBottom);
-            card.appendChild(titleWrap);
+            card.id = (block && !item.hideId) ? block.id : '';
 
+            if (imgData) {
+                const img = document.createElement('img');
+                img.className = 'title-style-image';
+                img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
+                img.alt = langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '';
+                card.appendChild(img);
+            }
+
+            if (hasContent) {
+                const textWrap = document.createElement('div');
+                textWrap.className = 'title-style-text-wrap';
+                const ruleTop = document.createElement('div');
+                ruleTop.className = 'title-style-text-rule';
+                textWrap.appendChild(ruleTop);
+                langs.forEach(l => {
+                    (block.content?.[l] || []).forEach(line => {
+                        if (!line.trim()) return;
+                        const lineEl = document.createElement('div');
+                        lineEl.className = `title-style-text-line lang-${l}`;
+                        lineEl.textContent = line;
+                        textWrap.appendChild(lineEl);
+                    });
+                });
+                const ruleBottom = document.createElement('div');
+                ruleBottom.className = 'title-style-text-rule';
+                textWrap.appendChild(ruleBottom);
+                card.appendChild(textWrap);
+            }
+
+            card.classList.add('title-style');
             container.appendChild(card);
             return;
         }

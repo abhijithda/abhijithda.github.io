@@ -1,12 +1,31 @@
 [
   {
     "id": "i_000",
-    "type": "cover",
-    "image": "Jinendra Bhagawanta.jpg",
-    "title": {
-      "en": "Jaina Pooja Vichara Sankalana",
-      "kn": "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ"
-    }
+    "type": "insert",
+    "hideId": true,
+    "blocks": [
+      {
+        "id": "i_000_b_1",
+        "type": "images",
+        "images": [
+          {
+            "src": "Jinendra Bhagawanta.jpg"
+          }
+        ],
+        "content": {
+          "kn": [
+            "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ"
+          ],
+          "en": [
+            "Jaina Pooja Vichara Sankalana"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "blank_000",
+    "type": "insert"
   },
   {
     "id": "i_001",

@@ -393,9 +393,9 @@ describe('Navigation: jumpToPage', () => {
     });
 });
 
-describe('Cover page — spread 0, unnumbered, real content starts at page 1', () => {
+describe('Cover page (insert item) — spread 0, unnumbered, real content starts at page 1', () => {
     const dataWithCover = [
-        { id: 'cover_001', type: 'cover', image: 'x.jpg', title: { kn: 'ಶೀರ್ಷಿಕೆ', en: 'Title' } },
+        { id: 'ins_001', type: 'insert', hideId: true, blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }] },
         { id: 'a_101', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_101_b_1' })] },
         { id: 'a_102', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_102_b_1' })] },
     ];
@@ -406,11 +406,11 @@ describe('Cover page — spread 0, unnumbered, real content starts at page 1', (
         renderCurrentSpread();
     });
 
-    test('cover spread (0) renders the image and title on one page, and is unnumbered', () => {
-        const coverCard = document.getElementById('book-cover_001');
-        expect(coverCard.classList.contains('cover-page')).toBe(true);
-        expect(coverCard.querySelector('.cover-title-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
-        expect(coverCard.querySelector('.cover-title-line.lang-en').textContent).toBe('Title');
+    test('cover spread (0) renders the image and text on one page, and is unnumbered', () => {
+        const coverCard = document.getElementById('book-ins_001');
+        expect(coverCard.classList.contains('title-style-page')).toBe(true);
+        expect(coverCard.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(coverCard.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
 
         expect(document.getElementById('book-page-num-left').textContent).toBe('');
         expect(document.getElementById('book-page-num-right').textContent).toBe('');
@@ -428,6 +428,28 @@ describe('Cover page — spread 0, unnumbered, real content starts at page 1', (
         jumpToPage(1);
         expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(false);
         expect(document.getElementById('book-page-num-left').textContent).toBe('1');
+    });
+
+    test('jumpToPage(0) returns to the unnumbered cover', () => {
+        jumpToPage(1);
+        jumpToPage(0);
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(true);
+    });
+});
+
+describe('Insert item as a blank/divider page — book-view-only pagination tool', () => {
+    const dataWithDivider = [
+        { id: 'ins_001', type: 'insert', hideId: true, blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }] },
+        { id: 'ins_002', type: 'insert', blocks: [{ id: 'ins_002_b_1', type: 'images', content: { kn: ['ಭಾಗ ೧'], en: ['Part 1'] } }] },
+        { id: 'a_101', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_101_b_1' })] },
+    ];
+
+    test('a text-only insert (no image) renders as its own page and forces a break', () => {
+        initBookView(dataWithDivider, ['kn', 'en']);
+        const dividerCard = document.getElementById('book-ins_002');
+        expect(dividerCard.classList.contains('title-style-page')).toBe(true);
+        expect(dividerCard.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಭಾಗ ೧');
+        expect(dividerCard.querySelector('.title-style-text-line.lang-en').textContent).toBe('Part 1');
     });
 });
 
@@ -493,9 +515,9 @@ describe('onBookLangChange', () => {
 describe('initBookView against the real test/data.json fixture', () => {
     const fixtureData = require('../../test/data.json');
 
-    test('renders one book-card (or standalone-image/cover card) per item/block without throwing', () => {
+    test('renders one book-card (or standalone-image/insert card) per item/block without throwing', () => {
         expect(() => initBookView(fixtureData, ['kn', 'en'])).not.toThrow();
-        expect(document.getElementById('book-cover_001').classList.contains('cover-page')).toBe(true);
+        expect(document.getElementById('book-ins_001').classList.contains('title-style-page')).toBe(true);
         expect(document.getElementById('book-a_001_b_1').querySelector('.book-excerpt')).not.toBeNull();
     });
 });

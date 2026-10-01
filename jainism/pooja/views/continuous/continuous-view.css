@@ -74,19 +74,22 @@ body[data-paper-size="a3"] #continuous-container {
     padding-left: 25px;
 }
 
-/* ── Cover item — large image + large title, in place of the usual
-   caption-sized content. Nothing else about continuous view changes. ── */
-.card.cover {
+/* ── "insert" items — the front cover, section dividers, and pure blank
+   pages, all one item type: large image and/or large centered text, in
+   place of the usual caption-sized block row and id badge. An item with
+   neither field is skipped entirely (see continuous-view.js), so there's
+   no "empty card" case to style here. ── */
+.card.title-style {
     align-items: center;
     text-align: center;
     padding: 30px 25px;
 }
 
-.card.cover > * {
+.card.title-style > * {
     padding-left: 0 !important;
 }
 
-.cover-image {
+.title-style-image {
     max-width: 100%;
     max-height: 70vh;
     width: auto;
@@ -94,7 +97,7 @@ body[data-paper-size="a3"] #continuous-container {
     border-radius: 6px;
 }
 
-.cover-title-wrap {
+.title-style-text-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -102,22 +105,22 @@ body[data-paper-size="a3"] #continuous-container {
     margin-top: 16px;
 }
 
-.cover-title-rule {
+.title-style-text-rule {
     width: 32px;
     height: 2px;
     background: #607d8b;
 }
 
-.cover-title {
+.title-style-text-line {
     font-weight: bold;
 }
 
-.cover-title.lang-kn {
+.title-style-text-line.lang-kn {
     font-size: calc(28px * var(--font-scale));
     color: #111;
 }
 
-.cover-title.lang-en {
+.title-style-text-line.lang-en {
     font-size: calc(20px * var(--font-scale));
     color: #555;
 }

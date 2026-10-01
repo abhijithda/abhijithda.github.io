@@ -16,32 +16,43 @@ const continuous = () => document.getElementById('continuous-container');
 // those. Home is just an extra layer shown on top: visible at boot and
 // whenever the header's icon is clicked, hidden the moment either real
 // view is opened.
-function showHome() {
+//
+// Every place that changes which of the three areas (home/book/continuous)
+// is visible goes through this one function, so there is exactly one
+// source of truth for "what's on screen right now" — no separate
+// show/hide pair that can fall out of sync with each other.
+function setActiveScreen(screen) {
     const home = document.getElementById('home-view');
     const book = document.getElementById('book-container');
     const cont = document.getElementById('continuous-container');
-    if (home) home.style.display = 'block';
-    if (book) book.style.display = 'none';
-    if (cont) cont.style.display = 'none';
-    refreshHomeView();
+    if (home) home.style.display = screen === 'home' ? 'block' : 'none';
+    if (book) book.style.display = screen === 'book' ? 'flex' : 'none';
+    if (cont) cont.style.display = screen === 'continuous' ? 'flex' : 'none';
+    if (screen === 'home') refreshHomeView();
+
+    // Selected-state for the nav row: the Home icon and the Book/Continuous
+    // toggle buttons are mutually exclusive, so this is the one place that
+    // decides which (if any) looks selected — same reasoning as the rest
+    // of this function: one source of truth instead of each caller having
+    // to remember to update it themselves.
+    document.getElementById('home-btn')?.classList.toggle('active', screen === 'home');
+    document.querySelectorAll('.view-toggle-btn').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.view === screen)
+    );
 }
-function hideHome() {
-    const home = document.getElementById('home-view');
-    if (home) home.style.display = 'none';
-}
+function showHome() { setActiveScreen('home'); }
 
 // ── View mode ─────────────────────────────────────────────────────────────
 function setViewMode(mode) {
-    const continuous = document.getElementById('continuous-container');
     const book       = document.getElementById('book-container');
     const backBtn    = document.getElementById('back-to-message');
 
     const isBook = mode === 'book';
-    
-    // Explicitly toggle inline display for BOTH containers so they stay hidden 
-    // even when their respective CSS stylesheets are disabled!
-    if (continuous) continuous.style.display = isBook ? 'none' : 'flex';
-    if (book)       book.style.display = isBook ? 'flex' : 'none';
+
+    // Visibility of home/book/continuous all goes through setActiveScreen —
+    // this just adds the view-specific bits (the .active class some CSS
+    // hooks off, title/stylesheet swaps, remembering the choice).
+    setActiveScreen(mode);
 
     if (book)       book.classList.toggle('active', isBook);
     if (backBtn && isBook) backBtn.style.display = 'none';
@@ -61,10 +72,8 @@ function setViewMode(mode) {
         document.title = "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ | Jaina Pooja Vichara Sankalana";
     }
 
-    document.querySelectorAll('.view-toggle-btn').forEach(btn =>
-        btn.classList.toggle('active', btn.dataset.view === mode)
-    );
-
+    // The .active class on the toggle buttons/Home icon is already handled
+    // by setActiveScreen() above — nothing more to do here.
     localStorage.setItem('viewMode', mode);
 
     // The printed page's orientation follows whichever view is active (book
@@ -82,7 +91,6 @@ function setViewMode(mode) {
 // switching always re-renders fresh, that eager work was just being
 // thrown away and rebuilt the moment (if ever) the user opened it.
 function activateView(mode) {
-    hideHome();
     const activeLangs = getActiveLangs();
     if (mode === 'book') {
         initBookView(data, activeLangs);

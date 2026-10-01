@@ -234,38 +234,74 @@ to a real file) as part of building this structure.
 
 ---
 
-## Cover Page — ✅ Current
-- Data-driven: a single item with `type: "cover"` (always the first entry in
-  `data.json`, if present at all — its absence is fine, both views simply
-  skip the branch), carrying `image` (a filename, resolved the same way as
-  any other image) and `title` (an object keyed by language code, e.g.
-  `{ kn: "...", en: "..." }`). No separate fixture, no "first page" special
-  case in the data model itself — it's schema-validated in `schema.json` via
-  an `if/then/else` on `type`: a cover item requires `image`+`title` instead
-  of the `blocks` every other item type requires.
-- **Continuous view**: rendered inline as just another `.card` (class
-  `.card.cover`), large image + large title in place of the usual
-  block/caption content. Title respects the same `kn`/`en`/`all` language
-  filter as every other card — nothing else about continuous view's
-  pagination-free, single-scroll model changes for it.
-- **Book view**: a single `.book-card.cover-page` (image on top, title below
-  it with rule-line dividers — both use `object-fit: contain`, not `cover`,
-  so the whole image is visible rather than cropped to fill a box) appended
-  as the very first entry in `#book-columns`, forced onto its own column via
-  the same `break-after: column` CSS trick already used for standalone
-  `images` items (see **Pagination**/**Print** below) — no new print
-  mechanism needed, it rides the existing column-reflow print path for
-  free. It occupies only the left page of spread 0; the right page falls
-  through to whatever the first real item is, same as any single-page
-  standalone image today. Title shows all active languages, stacked, same
-  clamp()-based step-down sizing as multi-line language blocks elsewhere.
-- **Page numbering treats the cover like a real book's title page**: no
-  running head/footer on that spread (`.book-spread.cover-spread` hides
-  both), and every subsequent spread's page numbers are shifted back by one
-  spread (`state.hasCover`, checked once in `initBookView` as
-  `data[0]?.type === 'cover'`) so the first real content page still reads
+## "insert" Item Type — ✅ Current
+- One item type covers the front cover, section dividers, and pure blank
+  pages — no separate `cover`/`spacer` type. `type: "insert"` always
+  carries `blocks` like every other item (the schema never makes `blocks`
+  conditionally required — one uniform rule, no `if`/`then` branching), and
+  its first block's `images`/`content` fields (the same shape a plain
+  `images`-type block already has) decide what it looks like:
+  `images[0]` + `content` -> image on top, text below (the cover);
+  `content` only -> just the text, centered (a labeled divider);
+  neither -> a genuinely empty page (a plain divider/blank page).
+  This was originally a separate `cover` type, then a `spacer` type with
+  its own item-level `image`/`content` fields, before landing here — see
+  the design conversation in git history if the "why not just reuse
+  `images`" question comes up again. The short version: `images` already
+  names a block type, so reusing it at the item level too (even behind a
+  `style` flag) read confusingly; `insert` avoids that clash while still
+  reusing the exact same block shape, so nothing about blocks/schema needed
+  duplicating.
+- `hideId: true` — meant for the front cover specifically, not dividers in
+  general. It does more than hide a badge: in continuous view, an insert
+  with `hideId: true` renders **nothing at all**, under any DOM id, so
+  anyone's `references` can never jump to it and it can't show up mid-scroll
+  looking like a stray full-page card. An insert *without* `hideId` renders
+  fully and is referenceable — its DOM id is the **block's** id, not the
+  item's, matching how every other block anchors itself for
+  `jumpToReference()`. (This is also the referencing bug fix: an earlier
+  version anchored the card to the item id, which meant nothing could ever
+  actually jump to a title-style page even when it should have been able
+  to.) `hideId` has no effect in book view — every insert renders there
+  regardless, since book view doesn't have a "skip this page" concept.
+- Excluded from the read-progress denominator entirely, in all three
+  places that compute it (`book-view.js`, `continuous-view.js`,
+  `home/home.js`) — even though an insert's block may carry real title
+  text that would otherwise look "trackable" by the generic per-block rule
+  (`isBlockTrackable` only looks at text/video presence, not item type).
+  Front matter and dividers aren't things a reader marks as read.
+- **Continuous view**: rendered as one big centered card (`.title-style`
+  class — kept as the CSS name across the "cover" → "spacer" → "insert"
+  renames, since it describes the *look*, which never changed, not the
+  type name, which did) with `object-fit: contain` for the image (nothing
+  cropped to fill a box) and multi-line `content` respecting the active
+  language filter, same as everywhere else. An insert with neither image
+  nor content renders nothing.
+- **Book view**: a single `.book-card.title-style-page` (image on top,
+  text below with rule-line dividers) appended as the very first entry in
+  `#book-columns` when it's the cover, forced onto its own column via the
+  same `break-after: column` trick as standalone `images` items (see
+  **Pagination**/**Print** below) — no new print mechanism needed, it
+  rides the existing column-reflow print path for free.
+- **Page numbering treats the front cover like a real book's title page**:
+  no running head/footer on that spread (`.book-spread.cover-spread` hides
+  both), and every subsequent spread's page numbers are shifted back by
+  one spread (`state.hasCoverPage`, checked once in `initBookView` as
+  `data[0]?.type === 'insert'`) so the first real content page still reads
   "1", not "3". `renderCurrentSpread`, `jumpToPage`, and the jump-input's
   blank-input default all apply the same `spreadOffset`.
+- **Getting back to the unnumbered cover**: the Prev button already reaches
+  it naturally (disabled only at spread 0 itself, so it's enabled on page
+  1 and steps back one spread to the cover); typing `0` into the
+  jump-to-page box also jumps straight there (`jumpToPage` special-cases
+  `pageNumber <= 0` when `state.hasCoverPage`), since the cover has no page
+  number of its own to type.
+- **Motivating use case for a divider (a plain `insert`, no `hideId`)**:
+  without one, real content immediately fills the cover spread's facing
+  (right) page — which, being part of the unnumbered cover spread, never
+  gets a page number shown even though it has real content. Inserting a
+  divider right after the cover fills that facing page instead, so the
+  first real content always lands on a fresh, numbered spread.
 - Real printed page numbers (a `@page`/`counter(page)` footer, independent
   of the on-screen spread math) are a separate, not-yet-built follow-up —
   see **Known Gaps** below. Nothing about the cover blocks that; print
@@ -274,26 +310,35 @@ to a real file) as part of building this structure.
 
 ---
 
+
 ## Home Surface — ✅ Current
 - A full-page landing page (`#home-view`, `home/home.js`, `home/home.css`),
   not a modal and not a third value of `viewMode` — `localStorage`'s
-  `viewMode` only ever holds `book`/`continuous`, same as before. `app.js`'s
-  `showHome()`/`hideHome()` just toggle which of `#home-view`,
-  `#book-container`, `#continuous-container` is visible, layered on top of
-  the existing book/continuous machinery rather than becoming a third state
-  inside it. Shown by default on every load (`init()` calls `showHome()`
-  instead of `activateView()`), and reachable afterward via the 🏠 icon
-  (`#home-btn`) that sits left of the Book/Continuous toggle in the header —
-  clicking either of Home's own two option buttons, or the header's Book/
-  Continuous toggle buttons, calls `activateView()`, which hides Home as
-  its first step.
+  `viewMode` only ever holds `book`/`continuous`, same as before.
+  Visibility of `#home-view`/`#book-container`/`#continuous-container` is
+  centralized in one function, `app.js`'s `setActiveScreen(screen)` — every
+  other function (`showHome()`, `setViewMode()`) calls through it rather
+  than toggling `style.display` itself, so the three can't end up
+  simultaneously visible from two code paths disagreeing (an earlier
+  version had a separate `hideHome()` called from `activateView()`, which
+  duplicated what `setViewMode()` also did and was the source of a bug
+  where Home stayed visible above the opened view). Shown by default on
+  every load (`init()` calls `showHome()` instead of `activateView()`), and
+  reachable afterward via the 🏠 icon (`#home-btn`) that sits left of the
+  Book/Continuous toggle in the header — clicking either of Home's own two
+  option buttons, or the header's Book/Continuous toggle buttons, calls
+  `activateView()`, which switches the active screen as part of
+  `setViewMode()`.
 - Layout mirrors a continuous-view cover card, not a small icon-sized
   preview: full-width image (`object-fit: contain`, not `cover` — the whole
   image is visible, nothing cropped off the top or bottom to fill a fixed
   box), then the title below it with the same "rule line, title, rule line"
-  styling as the book/continuous cover pages, all driven by the same
-  `cover`-type item and the active-language filter — nothing here is
-  specific to any one book's data.
+  styling as the book/continuous title pages, sourced from `data[0]` when
+  it's an `insert`-type item (`home.js`'s `coverItem`, read from
+  `data[0].blocks[0].images[0]`/`.content`, not a search across the whole
+  array — see the **"insert" Item Type** section above) and filtered by
+  the active-language list — nothing here is specific to any one book's
+  data.
 - Below the cover: an overall read-progress summary
   (`computeProgress`/`getReadBlocks` from `core/read-tracking.js`, same
   total-block-count formula as both views), then two side-by-side option

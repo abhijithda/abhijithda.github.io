@@ -173,29 +173,55 @@ describe('renderContinuousView', () => {
         expect(document.querySelectorAll('#continuous-container .card').length).toBe(1);
     });
 
-    test('a cover item renders as an image + title card, not through the normal block loop', () => {
-        const data = [{ id: 'cover_001', type: 'cover', image: 'x.jpg', title: { kn: 'ಶೀರ್ಷಿಕೆ', en: 'Title' } }];
+    test('an insert item (cover/divider) renders as an image + text card, not through the normal block loop', () => {
+        const data = [{
+            id: 'ins_001', type: 'insert',
+            blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }],
+        }];
         renderContinuousView(data, container, 'all');
 
-        const card = document.getElementById('cover_001');
-        expect(card.classList.contains('cover')).toBe(true);
-        expect(card.querySelector('.cover-image').src).toContain('images/x.jpg');
-        expect(card.querySelector('.cover-title.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
-        expect(card.querySelector('.cover-title.lang-en').textContent).toBe('Title');
-        // A cover has no blocks, so it must not count toward read progress.
+        const card = document.getElementById('ins_001_b_1'); // block id, not item id — see jumpToReference note
+        expect(card.classList.contains('title-style')).toBe(true);
+        expect(card.querySelector('.title-style-image').src).toContain('images/x.jpg');
+        expect(card.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(card.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
+        // An insert's block has no text/video by isBlockTrackable's rule, so it must not count toward read progress.
         expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
+    });
+
+    test('hideId: true suppresses the DOM id entirely, so it cannot be jumped to by reference', () => {
+        const data = [{
+            id: 'ins_002', type: 'insert', hideId: true,
+            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['T'] } }],
+        }];
+        renderContinuousView(data, container, 'all');
+        expect(document.getElementById('ins_002_b_1')).toBeNull();
+        expect(document.getElementById('ins_002')).toBeNull();
     });
 
     test.each([
         ['kn', true, false],
         ['en', false, true],
         ['all', true, true],
-    ])('cover title respects the active-language filter: lang="%s" shows kn=%s / en=%s', (lang, showsKn, showsEn) => {
-        const data = [{ id: 'cover_001', type: 'cover', image: 'x.jpg', title: { kn: 'ಶೀರ್ಷಿಕೆ', en: 'Title' } }];
+    ])('insert text respects the active-language filter: lang="%s" shows kn=%s / en=%s', (lang, showsKn, showsEn) => {
+        const data = [{
+            id: 'ins_003', type: 'insert',
+            blocks: [{ id: 'ins_003_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }],
+        }];
         renderContinuousView(data, container, lang);
-        const card = document.getElementById('cover_001');
-        expect(card.querySelector('.cover-title.lang-kn') !== null).toBe(showsKn);
-        expect(card.querySelector('.cover-title.lang-en') !== null).toBe(showsEn);
+        const card = document.getElementById('ins_003_b_1');
+        expect(card.querySelector('.title-style-text-line.lang-kn') !== null).toBe(showsKn);
+        expect(card.querySelector('.title-style-text-line.lang-en') !== null).toBe(showsEn);
+    });
+
+    test('an insert with neither image nor content renders no card at all', () => {
+        const data = [
+            { id: 'ins_004', type: 'insert', blocks: [{ id: 'ins_004_b_1', type: 'images' }] },
+            { id: 'q_040', type: 'question', references: null, blocks: [baseBlock({ id: 'q_040_b_1' })] },
+        ];
+        renderContinuousView(data, container, 'all');
+        expect(document.getElementById('ins_004_b_1')).toBeNull();
+        expect(document.querySelectorAll('#continuous-container .card').length).toBe(1);
     });
 });
 

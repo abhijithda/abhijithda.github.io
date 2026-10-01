@@ -13,8 +13,11 @@
           "question",
           "answer",
           "images",
-          "cover"
+          "insert"
         ]
+      },
+      "hideId": {
+        "type": "boolean"
       },
       "timestamp": {
         "type": "string",
@@ -27,16 +30,6 @@
         ],
         "items": {
           "type": "string"
-        }
-      },
-      "image": {
-        "type": "string"
-      },
-      "title": {
-        "type": "object",
-        "properties": {
-          "kn": { "type": "string" },
-          "en": { "type": "string" }
         }
       },
       "blocks": {
@@ -144,16 +137,8 @@
     },
     "required": [
       "id",
-      "type"
-    ],
-    "if": {
-      "properties": { "type": { "const": "cover" } }
-    },
-    "then": {
-      "required": ["image", "title"]
-    },
-    "else": {
-      "required": ["blocks"]
-    }
+      "type",
+      "blocks"
+    ]
   }
 }

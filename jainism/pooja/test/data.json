@@ -1,12 +1,27 @@
 [
   {
-    "id": "cover_001",
-    "type": "cover",
-    "image": "Bharata Bahubali Swami.jpeg",
-    "title": {
-      "en": "Bharata Chakravarthi and Bahubali Swami",
-      "kn": "ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಹುಬಲಿ ಸ್ವಾಮಿ"
-    }
+    "id": "ins_001",
+    "type": "insert",
+    "hideId": true,
+    "blocks": [
+      {
+        "id": "ins_001_b_1",
+        "type": "images",
+        "images": [
+          {
+            "src": "Bharata Bahubali Swami.jpeg"
+          }
+        ],
+        "content": {
+          "kn": [
+            "ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಹುಬಲಿ ಸ್ವಾಮಿ"
+          ],
+          "en": [
+            "Bharata Chakravarthi and Bahubali Swami"
+          ]
+        }
+      }
+    ]
   },
   {
     "id": "q_001",

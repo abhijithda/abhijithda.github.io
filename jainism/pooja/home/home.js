@@ -23,37 +23,44 @@ let coverItem = null;
 let allData = [];
 
 function totalBlockCount() {
-    return allData.reduce((sum, item) => sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
+    // Same exclusion as book/continuous view: "insert" items (front cover,
+    // dividers) don't count toward read progress even if their block
+    // carries title text.
+    return allData.reduce((sum, item) =>
+        item.type === 'insert' ? sum : sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
 }
 
-// Cover rendering is data-driven and generic — whatever title/image the
-// loaded data.json's cover item carries, in whatever languages are active.
-// Nothing here is specific to any one book.
+// Cover rendering is data-driven and generic — whatever image/content the
+// loaded data.json's cover item (data[0], when it's an "insert" item)
+// carries, in whatever languages are active. Nothing here is specific to
+// any one book.
 function renderCover() {
     const img = document.getElementById('home-cover-image');
     const title = document.getElementById('home-cover-title');
     if (!img || !title) return;
 
-    if (!coverItem) {
-        img.hidden = true;
-        title.innerHTML = '';
-        return;
-    }
+    const coverBlock = coverItem?.blocks?.[0];
+    const imgData = coverBlock?.images?.[0];
 
-    img.hidden = false;
-    // object-fit: contain (in home.css) — the whole image is shown, not
-    // cropped top/bottom to fill a fixed box.
-    img.src = coverItem.image.includes('://') ? coverItem.image : `images/${coverItem.image}`;
+    if (!imgData) {
+        img.hidden = true;
+    } else {
+        img.hidden = false;
+        // object-fit: contain (in home.css) — the whole image is shown,
+        // not cropped top/bottom to fill a fixed box.
+        img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
+    }
 
     const activeLangs = getActiveLangs();
     title.innerHTML = '';
     activeLangs.forEach(lang => {
-        const t = coverItem.title?.[lang];
-        if (!t) return;
-        const line = document.createElement('div');
-        line.className = `home-cover-title-line lang-${lang}`;
-        line.textContent = t;
-        title.appendChild(line);
+        (coverBlock?.content?.[lang] || []).forEach(line => {
+            if (!line.trim()) return;
+            const el = document.createElement('div');
+            el.className = `home-cover-title-line lang-${lang}`;
+            el.textContent = line;
+            title.appendChild(el);
+        });
     });
 }
 
@@ -129,7 +136,7 @@ export function refreshHomeView() {
 
 export function initHomeControls(data) {
     allData = data || [];
-    coverItem = allData.find(item => item.type === 'cover') || null;
+    coverItem = data?.[0]?.type === 'insert' ? data[0] : null;
 
     // Videos / QRs / read tracking — proxy straight onto the header's own
     // checkboxes, which already have their own save+apply listeners wired

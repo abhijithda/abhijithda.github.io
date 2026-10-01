@@ -160,52 +160,68 @@ function populateBookColumns() {
     const readBlocks = getReadBlocks(localStorage);
 
     state.data.forEach(item => {
-        // --- 0. HANDLE THE COVER ITEM ---
-        // One card — image on top, title below with rule lines — forced
-        // onto its own column exactly like a standalone image page. It
-        // takes only the left page of spread 0; the facing (right) page
-        // falls through to whatever the first real item is, same as any
-        // single-page standalone image today.
-        if (item.type === 'cover') {
+        // --- 0. HANDLE "insert" ITEMS ---
+        // The front cover, section dividers, and pure blank pages are all
+        // one item type, distinguished only by which fields its one block
+        // has (block.images[0] for a picture, block.content for text,
+        // either, or neither) — not by a flag on top of "images", since
+        // "images" already names a block type too and reusing it at the
+        // item level as well was confusing. Rendered as one big centered
+        // page. Forced onto its own column, so it never shares a page with
+        // anything else.
+        if (item.type === 'insert') {
+            const insertBlock = item.blocks && item.blocks[0];
+            const imgData = insertBlock && insertBlock.images && insertBlock.images[0];
+
             const card = document.createElement('div');
-            card.className = 'book-card cover-page';
+            card.className = 'book-card title-style-page';
             card.id = `book-${item.id}`;
 
-            const wrap = document.createElement('div');
-            wrap.className = 'book-image-wrap cover-image-wrap';
-            const imgEl = document.createElement('img');
-            imgEl.src = item.image.includes('://') ? item.image : `images/${item.image}`;
-            imgEl.className = 'book-image cover-image';
-            wrap.appendChild(imgEl);
-            card.appendChild(wrap);
+            if (imgData) {
+                const wrap = document.createElement('div');
+                wrap.className = 'book-image-wrap title-style-image-wrap';
+                const imgEl = document.createElement('img');
+                imgEl.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
+                imgEl.className = 'book-image title-style-image';
+                wrap.appendChild(imgEl);
+                card.appendChild(wrap);
+            }
 
-            const titleWrap = document.createElement('div');
-            titleWrap.className = 'cover-title-wrap';
-            const ruleTop = document.createElement('div');
-            ruleTop.className = 'cover-title-rule';
-            titleWrap.appendChild(ruleTop);
-            state.activeLangs.forEach(lang => {
-                const t = item.title?.[lang];
-                if (!t) return;
-                const line = document.createElement('div');
-                line.className = `cover-title-line lang-${lang}`;
-                line.textContent = t;
-                titleWrap.appendChild(line);
-            });
-            const ruleBottom = document.createElement('div');
-            ruleBottom.className = 'cover-title-rule';
-            titleWrap.appendChild(ruleBottom);
-            card.appendChild(titleWrap);
+            // block.content.<lang> is an array of lines/paragraphs, so an
+            // insert's text can span multiple lines just as easily as a
+            // single short title.
+            const hasContent = state.activeLangs.some(lang =>
+                (insertBlock?.content?.[lang] || []).some(line => line.trim() !== ''));
+            if (hasContent) {
+                const textWrap = document.createElement('div');
+                textWrap.className = 'title-style-text-wrap';
+                const ruleTop = document.createElement('div');
+                ruleTop.className = 'title-style-text-rule';
+                textWrap.appendChild(ruleTop);
+                state.activeLangs.forEach(lang => {
+                    (insertBlock?.content?.[lang] || []).forEach(line => {
+                        if (!line.trim()) return;
+                        const lineEl = document.createElement('div');
+                        lineEl.className = `title-style-text-line lang-${lang}`;
+                        lineEl.textContent = line;
+                        textWrap.appendChild(lineEl);
+                    });
+                });
+                const ruleBottom = document.createElement('div');
+                ruleBottom.className = 'title-style-text-rule';
+                textWrap.appendChild(ruleBottom);
+                card.appendChild(textWrap);
+            }
 
             columns.appendChild(card);
             return;
         }
 
-        // --- 1. HANDLE STANDALONE IMAGE ITEMS ---
+        // --- 1. HANDLE STANDALONE "images" ITEMS ---
         if (item.type === 'images') {
             const imgBlock = item.blocks && item.blocks[0];
             const imgData = imgBlock && imgBlock.images && imgBlock.images[0];
-            
+
             if (imgData) {
                 const card = document.createElement('div');
                 // UNIQUE CLASS APPLIED HERE:
@@ -271,9 +287,9 @@ export function renderCurrentSpread() {
     // head/footer, no page number — matching how a real printed book
     // treats its title page. Numbering for every spread after it shifts
     // back by one spread so the first real content page still reads "1".
-    const onCoverSpread = state.hasCover && state.currentSpread === 0;
+    const onCoverSpread = state.hasCoverPage && state.currentSpread === 0;
     spread.classList.toggle('cover-spread', onCoverSpread);
-    const spreadOffset = state.hasCover ? 1 : 0;
+    const spreadOffset = state.hasCoverPage ? 1 : 0;
     const numberedSpreads = Math.max(0, totalSpreads - spreadOffset);
     const totalNumberedPages = numberedSpreads * 2;
 
@@ -316,9 +332,14 @@ export function goToNextSpread() {
 export function jumpToPage(pageNumber) {
     // Translate the desired (real, numbered) Page Number back into a
     // Spread Index — offset by the cover's own spread when present, since
-    // "page 1" is the first spread *after* the unnumbered cover.
-    const spreadOffset = state.hasCover ? 1 : 0;
-    state.currentSpread = spreadOffset + Math.max(0, Math.floor((pageNumber - 1) / 2));
+    // "page 1" is the first spread *after* the unnumbered cover. Typing 0
+    // (the cover has no number of its own to type) jumps to the cover.
+    const spreadOffset = state.hasCoverPage ? 1 : 0;
+    if (state.hasCoverPage && pageNumber <= 0) {
+        state.currentSpread = 0;
+    } else {
+        state.currentSpread = spreadOffset + Math.max(0, Math.floor((pageNumber - 1) / 2));
+    }
     renderCurrentSpread();
     localStorage.setItem('bookSpread', state.currentSpread);
 }
@@ -383,13 +404,18 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
         state.itemById[item.id] = item;
         (item.blocks || []).forEach(b => { state.blockById[b.id] = b; });
     });
-    state.totalBlockCount = data.reduce((s, item) => s + (item.blocks || []).filter(isBlockTrackable).length, 0);
+    // "insert" items (front cover, dividers) are decorative structure, not
+    // content a reader marks as read — excluded from the count entirely,
+    // even if their block happens to carry title text that would otherwise
+    // look "trackable" by the generic per-block rule.
+    state.totalBlockCount = data.reduce((s, item) =>
+        item.type === 'insert' ? s : s + (item.blocks || []).filter(isBlockTrackable).length, 0);
     // A cover item, when present, is always the very first entry and always
     // occupies exactly one spread (image page + title page) — see
     // populateBookColumns. Page numbering treats it like a real book's
     // title page: unnumbered, with the first real content page starting
     // at "1" rather than "3".
-    state.hasCover = data[0]?.type === 'cover';
+    state.hasCoverPage = data[0]?.type === 'insert';
 
     // Added the static footers to the HTML!
     container.innerHTML = `
@@ -431,7 +457,7 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     });
     jumpInput.addEventListener('blur', () => {
         if (jumpInput.value === '') {
-            const spreadOffset = state.hasCover ? 1 : 0;
+            const spreadOffset = state.hasCoverPage ? 1 : 0;
             jumpInput.value = ((state.currentSpread - spreadOffset) * 2) + 1;
         }
     });

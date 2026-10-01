@@ -430,10 +430,13 @@ body[data-paper-size="a3"] .book-nav {
     color: #555;
 }
 
-/* ── Cover spread (title page) — image page + title page, same
-   break-after: column trick as standalone images, so they always land as
-   the left/right pages of spread 0. ── */
-.book-columns .cover-page {
+/* ── "insert" items — the front cover, section dividers, and pure blank
+   pages, all one item type (distinct from block-level "images" to avoid
+   the same word meaning two different things), distinguished purely by
+   which fields the block has (image, content, both, or neither). Same
+   break-after: column trick as standalone images, so it always lands
+   alone on its own page, never sharing a column with anything else. ── */
+.book-columns .title-style-page {
     break-inside: avoid;
     page-break-inside: avoid;
     break-after: column;
@@ -454,7 +457,7 @@ body[data-paper-size="a3"] .book-nav {
     gap: 16px;
 }
 
-.cover-image-wrap {
+.title-style-image-wrap {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -462,7 +465,7 @@ body[data-paper-size="a3"] .book-nav {
 
 /* object-fit: contain (not cover) so the whole image is visible — nothing
    cropped off the top or bottom to fill a fixed box. */
-.cover-image {
+.title-style-image {
     width: 100%;
     height: auto;
     max-height: 75cqh;
@@ -471,7 +474,7 @@ body[data-paper-size="a3"] .book-nav {
     box-shadow: none;
 }
 
-.cover-title-wrap {
+.title-style-text-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -479,34 +482,36 @@ body[data-paper-size="a3"] .book-nav {
     width: 100%;
 }
 
-.cover-title-rule {
+.title-style-text-rule {
     width: 32px;
     height: 2px;
     background: #607d8b;
 }
 
-.cover-title-line {
+.title-style-text-line {
     text-align: center;
     font-weight: bold;
 }
 
-.cover-title-line.lang-kn {
+.title-style-text-line.lang-kn {
     font-size: clamp(calc(18px * var(--font-scale)), calc(3.2cqi * var(--font-scale)), calc(28px * var(--font-scale)));
     color: #111;
 }
 
-.cover-title-line.lang-en {
+.title-style-text-line.lang-en {
     font-size: clamp(calc(13px * var(--font-scale)), calc(2.2cqi * var(--font-scale)), calc(19px * var(--font-scale)));
     color: #555;
 }
 
-/* Same font step-down as any additional stacked language elsewhere in the
-   book — keeps 3+ active languages fitting the page. */
-.cover-title-wrap:has(.cover-title-line:nth-child(4)) .cover-title-line {
+/* Same font step-down as any additional stacked line elsewhere in the
+   book — keeps 3+ active languages, or multi-line content, fitting the
+   page. */
+.title-style-text-wrap:has(.title-style-text-line:nth-child(4)) .title-style-text-line {
     font-size: clamp(calc(11px * var(--font-scale)), calc(1.8cqi * var(--font-scale)), calc(15px * var(--font-scale)));
 }
 
-/* Cover spread is a title page: no running head/footer, like a real book. */
+/* The cover spread (the very first item, when it's an "insert") is a
+   title page: no running head/footer, like a real book. */
 .book-spread.cover-spread .book-static-head,
 .book-spread.cover-spread .book-static-foot {
     display: none;
@@ -705,12 +710,13 @@ body[data-paper-size="a3"] .book-nav {
         max-height: 230mm !important;
     }
 
-    /* Same fix, same reasoning, for the cover's image page. */
-    .cover-image {
+    /* Same fix, same reasoning, for a title-style item's image (e.g. the
+       cover). */
+    .title-style-image {
         max-height: 170mm !important;
     }
 
-    body[data-paper-size="a3"] .cover-image {
+    body[data-paper-size="a3"] .title-style-image {
         max-height: 250mm !important;
     }
 

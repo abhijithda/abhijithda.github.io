@@ -1,10 +1,19 @@
 /* home/home.css — the Home landing page (#home-view): shown by default on
    load and whenever the header's Home icon is clicked. Full-width page,
-   not a modal — same "page you land in" feel as the two real views. */
+   not a modal — same "page you land in" feel as the two real views.
+   Text sizes use calc(Npx * var(--font-scale)), same custom property
+   core/font-scale.css sets and book-view.css/continuous-view.css read —
+   otherwise the header's font-size +/- controls would visibly work in
+   both real views but silently do nothing here. */
 
 .home-btn {
     font-size: 18px;
     padding: 4px 10px;
+}
+
+.home-btn.active {
+    background: #333;
+    border-radius: 20px;
 }
 
 .home-view {
@@ -45,13 +54,13 @@
 }
 
 .home-cover-title-line.lang-kn {
-    font-size: 22px;
+    font-size: calc(22px * var(--font-scale));
     font-weight: bold;
     color: #111;
 }
 
 .home-cover-title-line.lang-en {
-    font-size: 15px;
+    font-size: calc(15px * var(--font-scale));
     color: #555;
     margin-top: 4px;
 }
@@ -90,12 +99,12 @@
 }
 
 .home-view-option-title {
-    font-size: 15px;
+    font-size: calc(15px * var(--font-scale));
     font-weight: bold;
 }
 
 .home-view-option-desc {
-    font-size: 13px;
+    font-size: calc(13px * var(--font-scale));
     color: #666;
     margin: 0;
     flex: 1;
@@ -112,11 +121,11 @@
 
 .home-settings-label {
     font-weight: bold;
-    font-size: 15px;
+    font-size: calc(15px * var(--font-scale));
 }
 
 .home-settings-hint {
-    font-size: 12px;
+    font-size: calc(12px * var(--font-scale));
     color: #888;
     margin: 4px 0 14px;
 }
@@ -129,12 +138,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 15px;
+    font-size: calc(15px * var(--font-scale));
 }
 
 .home-section-label {
     display: block;
-    font-size: 15px;
+    font-size: calc(15px * var(--font-scale));
     margin-bottom: 6px;
 }
 
@@ -148,6 +157,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 15px;
+    font-size: calc(15px * var(--font-scale));
     cursor: pointer;
 }
