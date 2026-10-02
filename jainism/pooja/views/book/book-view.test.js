@@ -57,7 +57,7 @@ describe('initBookView: rendering', () => {
     test('a standalone "images" item renders as a single centered standalone-image card', () => {
         const data = [{
             id: 'i_001',
-            type: 'images',
+            type: 'insert',
             references: null,
             blocks: [baseBlock({
                 id: 'i_001_b_1',
@@ -74,23 +74,26 @@ describe('initBookView: rendering', () => {
         expect(document.querySelectorAll('#book-columns .book-card').length).toBe(1);
     });
 
-    test('a standalone image item with no image data is skipped rather than rendering an empty card', () => {
+    test('an insert with no image and no content renders an empty blank-page card, not nothing', () => {
         const data = [{
             id: 'i_002',
-            type: 'images',
+            type: 'insert',
             references: null,
             blocks: [baseBlock({ id: 'i_002_b_1', type: 'images', images: [] })],
         }];
 
         expect(() => initBookView(data, ['kn', 'en'])).not.toThrow();
-        expect(document.getElementById('book-i_002')).toBeNull();
-        expect(document.querySelectorAll('#book-columns .book-card').length).toBe(0);
+        const card = document.getElementById('book-i_002');
+        expect(card).not.toBeNull();
+        expect(card.classList.contains('standalone-image')).toBe(true);
+        expect(card.querySelector('.book-image-wrap')).toBeNull();
+        expect(document.querySelectorAll('#book-columns .book-card').length).toBe(1);
     });
 
     test('standalone image caption renders once per active language that has text, skips languages without one', () => {
         const data = [{
             id: 'i_003',
-            type: 'images',
+            type: 'insert',
             references: null,
             blocks: [baseBlock({
                 id: 'i_003_b_1',
@@ -231,7 +234,7 @@ describe('initBookView: read tracking (isBlockTrackable)', () => {
     // that stays true rather than a regression.
     test('a standalone image item gets no read-tick', () => {
         const data = [{
-            id: 'i_004', type: 'images', references: null,
+            id: 'i_004', type: 'insert', references: null,
             blocks: [baseBlock({ id: 'i_004_b_1', type: 'images', images: [{ src: 'x.jpg', caption: {} }] })],
         }];
         initBookView(data, ['kn', 'en']);

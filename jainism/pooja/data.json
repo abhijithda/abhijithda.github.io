@@ -29,7 +29,7 @@
   },
   {
     "id": "i_001",
-    "type": "images",
+    "type": "insert",
     "timestamp": "2026-07-12T14:22:00Z",
     "blocks": [
       {
@@ -450,7 +450,7 @@
   },
   {
     "id": "i_004",
-    "type": "images",
+    "type": "insert",
     "timestamp": "2026-07-11T15:32:00Z",
     "blocks": [
       {

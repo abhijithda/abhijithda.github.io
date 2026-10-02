@@ -235,54 +235,78 @@ to a real file) as part of building this structure.
 ---
 
 ## "insert" Item Type — ✅ Current
-- One item type covers the front cover, section dividers, and pure blank
-  pages — no separate `cover`/`spacer` type. `type: "insert"` always
-  carries `blocks` like every other item (the schema never makes `blocks`
-  conditionally required — one uniform rule, no `if`/`then` branching), and
-  its first block's `images`/`content` fields (the same shape a plain
-  `images`-type block already has) decide what it looks like:
-  `images[0]` + `content` -> image on top, text below (the cover);
-  `content` only -> just the text, centered (a labeled divider);
-  neither -> a genuinely empty page (a plain divider/blank page).
-  This was originally a separate `cover` type, then a `spacer` type with
-  its own item-level `image`/`content` fields, before landing here — see
-  the design conversation in git history if the "why not just reuse
-  `images`" question comes up again. The short version: `images` already
-  names a block type, so reusing it at the item level too (even behind a
-  `style` flag) read confusingly; `insert` avoids that clash while still
-  reusing the exact same block shape, so nothing about blocks/schema needed
-  duplicating.
-- `hideId: true` — meant for the front cover specifically, not dividers in
-  general. It does more than hide a badge: in continuous view, an insert
-  with `hideId: true` renders **nothing at all**, under any DOM id, so
-  anyone's `references` can never jump to it and it can't show up mid-scroll
-  looking like a stray full-page card. An insert *without* `hideId` renders
-  fully and is referenceable — its DOM id is the **block's** id, not the
-  item's, matching how every other block anchors itself for
-  `jumpToReference()`. (This is also the referencing bug fix: an earlier
-  version anchored the card to the item id, which meant nothing could ever
-  actually jump to a title-style page even when it should have been able
-  to.) `hideId` has no effect in book view — every insert renders there
-  regardless, since book view doesn't have a "skip this page" concept.
+- One item type covers the front cover, section dividers, plain standalone
+  photos, and pure blank pages — there is no separate `cover`/`images`/
+  `spacer` type any more. `type: "insert"` always carries `blocks` like
+  every other item (the schema never makes `blocks` conditionally
+  required — one uniform rule, no `if`/`then` branching). Its first
+  block's `images`/`content` fields (same shape as a plain `images`-type
+  block always had) decide what it looks like:
+  - `block.content` present -> big, centered, dash-ruled title-style text
+    (what the cover/dividers looked like before this merge)
+  - only `block.images[0].caption` present (no `content`) -> small per-image
+    caption text (what a plain standalone photo item looked like before
+    the merge — **a standalone photo is just an `insert` with a caption
+    instead of a title**)
+  - neither -> a blank page/card, no visible content at all
+  This went through several names before landing here — `cover`, then a
+  `spacer` type with its own item-level `image`/`content` fields, then
+  `images` + a `style: "title"` flag — before finally merging the plain
+  `images` item type into `insert` entirely, once it was clear a photo
+  entry is conceptually "just another kind of insert." `images` still
+  exists as a **block** type (`block.type: "images"`); only the item-level
+  type went away.
+- `hideId: true` — meant for the front cover specifically, not dividers or
+  photos in general. It suppresses exactly two things: the DOM id (so
+  `jumpToReference()` can never land on it) and the visible id badge in
+  continuous view. **It does not hide the item's content** — the image and
+  text still render completely normally either way. An insert *without*
+  `hideId` is fully referenceable: its DOM id is the **block's** id, not
+  the item's, matching how every other block anchors itself (this was also
+  a bug fix — an earlier version anchored the card to the item id, so
+  nothing could actually jump to an insert even when it should have been
+  able to), and it gets the same visible id badge a normal block row does,
+  so a reader can actually see and cite it. `hideId` has no effect in book
+  view at all — book view has no "visible id badge" concept for inserts to
+  begin with, and every insert always renders there regardless.
+- **Continuous view shows exactly the same content as book view — nothing
+  is ever skipped or omitted.** An insert with neither image nor content
+  still renders as an empty card (class `.insert-blank`), the same "blank
+  page" idea book view has; it is **not** left out of the DOM the way an
+  earlier version of this feature did. The one thing continuous view
+  changes per-insert is *id visibility* (via `hideId`, covered above), never
+  *content* visibility.
+  - Blank inserts specifically get a print-only forced page: continuous
+    view has **no other per-item page-break mechanism at all** (unlike book
+    view's deliberate `break-after: column` on every page) — print there is
+    just natural document flow, breaking wherever content runs out. Without
+    `break-before: page`/`break-after: page` on `.insert-blank` (see
+    **Print** below), a blank insert would print as an invisible sliver
+    squeezed between whatever's above and below it, not an actual blank
+    sheet.
 - Excluded from the read-progress denominator entirely, in all three
   places that compute it (`book-view.js`, `continuous-view.js`,
-  `home/home.js`) — even though an insert's block may carry real title
-  text that would otherwise look "trackable" by the generic per-block rule
-  (`isBlockTrackable` only looks at text/video presence, not item type).
-  Front matter and dividers aren't things a reader marks as read.
-- **Continuous view**: rendered as one big centered card (`.title-style`
-  class — kept as the CSS name across the "cover" → "spacer" → "insert"
-  renames, since it describes the *look*, which never changed, not the
-  type name, which did) with `object-fit: contain` for the image (nothing
-  cropped to fill a box) and multi-line `content` respecting the active
-  language filter, same as everywhere else. An insert with neither image
-  nor content renders nothing.
-- **Book view**: a single `.book-card.title-style-page` (image on top,
-  text below with rule-line dividers) appended as the very first entry in
-  `#book-columns` when it's the cover, forced onto its own column via the
-  same `break-after: column` trick as standalone `images` items (see
-  **Pagination**/**Print** below) — no new print mechanism needed, it
-  rides the existing column-reflow print path for free.
+  `home/home.js`) — by item type, unconditionally, even though an insert's
+  block may carry real title text that would otherwise look "trackable" by
+  the generic per-block rule (`isBlockTrackable` only looks at
+  text/video presence, not item type). In practice this changes nothing
+  for what used to be plain `images` items either: their caption text
+  lives in `block.images[].caption`, never `block.content`, so
+  `isBlockTrackable` was already always `false` for them regardless of
+  item type.
+- **This only ever applies inside the `insert` branch.** A `question`/
+  `answer` item with real `block.content` is completely unaffected by any
+  of the title-style/caption-style logic above — that logic only exists
+  inside `if (item.type === 'insert')`, so ordinary Q&A content keeps
+  rendering exactly as it always has, through `createBookCard`/the normal
+  per-block loop, regardless of what an insert elsewhere in the same
+  `data.json` looks like.
+- **Book view**: a single `.book-card` (class `title-style-page` or
+  `standalone-image`, matching the two looks above) appended to
+  `#book-columns`, forced onto its own column via the same
+  `break-after: column` trick every standalone page uses (see
+  **Pagination**/**Print** below) — no new print mechanism needed there,
+  it rides the existing column-reflow print path for free.
 - **Page numbering treats the front cover like a real book's title page**:
   no running head/footer on that spread (`.book-spread.cover-spread` hides
   both), and every subsequent spread's page numbers are shifted back by
@@ -296,17 +320,17 @@ to a real file) as part of building this structure.
   jump-to-page box also jumps straight there (`jumpToPage` special-cases
   `pageNumber <= 0` when `state.hasCoverPage`), since the cover has no page
   number of its own to type.
-- **Motivating use case for a divider (a plain `insert`, no `hideId`)**:
-  without one, real content immediately fills the cover spread's facing
-  (right) page — which, being part of the unnumbered cover spread, never
-  gets a page number shown even though it has real content. Inserting a
-  divider right after the cover fills that facing page instead, so the
-  first real content always lands on a fresh, numbered spread.
+- **Motivating use case for a blank/divider insert**: without one, real
+  content immediately fills the cover spread's facing (right) page — which,
+  being part of the unnumbered cover spread, never gets a page number shown
+  even though it has real content. Inserting a blank/divider right after
+  the cover fills that facing page instead, so the first real content
+  always lands on a fresh, numbered spread.
 - Real printed page numbers (a `@page`/`counter(page)` footer, independent
   of the on-screen spread math) are a separate, not-yet-built follow-up —
-  see **Known Gaps** below. Nothing about the cover blocks that; print
-  currently shows no page numbers at all, for any page (see **Print** below
-  for why), so there's no existing numbering to conflict with.
+  see **Known Gaps** below. Nothing about the cover blocks that; book-view
+  print currently shows no page numbers at all, for any page (see **Print**
+  below for why), so there's no existing numbering to conflict with.
 
 ---
 

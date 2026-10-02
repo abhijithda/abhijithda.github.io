@@ -63,38 +63,69 @@ export function renderContinuousView(data, container, lang = 'all') {
         card.className = `card ${item.type}`;
         card.id = item.id;
 
-        // "insert" items — the front cover, section dividers, and pure
-        // blank pages, all one item type distinguished by which fields its
-        // one block has. Rendered as one big centered page instead of the
-        // usual caption-sized block row. Unlike a normal block row, there's
-        // no visible id badge here — but the card's DOM id is still set to
-        // the block's id (not the item's), same as every other block
-        // elsewhere, specifically so that another item's `references` can
-        // still jump straight to it via jumpToReference(). The only
-        // exception is `hideId: true` (meant for the front cover, which
-        // nothing should ever cite): that suppresses the id entirely, so
-        // it can't be jumped to at all. An insert with neither text nor an
-        // image renders nothing — continuous view has no concept of blank
-        // space.
+        // "insert" items — the front cover, section dividers, plain
+        // standalone photos, and pure blank pages are all one item type: a
+        // standalone photo is really just an insert with a per-image
+        // caption instead of a page title. Which fields the one block has
+        // decide the look: block.content -> big centered title-style text
+        // (dash-ruled); block.images[0].caption only -> small caption text
+        // (the old plain "images" look); neither -> a blank card with no
+        // visible content at all, same blank-page idea as book view.
+        // Continuous view never omits an insert — same content as book
+        // view, just laid out differently.
+        //
+        // The card's DOM id is the block's id (not the item's), same as
+        // every other block, so another item's `references` can jump
+        // straight to it via jumpToReference() — and a visible id badge is
+        // shown too, same as a normal block row, so it can actually be
+        // cited by someone reading the page. The only exception is
+        // `hideId: true` (meant for the front cover, which nothing should
+        // ever cite): that suppresses the DOM id and the badge only — the
+        // image/text content itself still renders exactly as normal.
         if (item.type === 'insert') {
             const block = item.blocks?.[0];
             const imgData = block?.images?.[0];
             const langs = ['kn', 'en'].filter(l => (lang === l || lang === 'all'));
             const hasContent = langs.some(l => (block?.content?.[l] || []).some(line => line.trim() !== ''));
+            const titleStyle = hasContent;
+            const isBlank = !imgData && !hasContent;
 
-            if (!imgData && !hasContent) return; // nothing to show
-
+            // No early return here even when there's neither image nor
+            // text — a blank insert still renders as an empty card, same
+            // as its blank page in book view. Continuous view shows the
+            // same content as book view, just laid out differently.
             card.id = (block && !item.hideId) ? block.id : '';
+
+            if (block && !item.hideId) {
+                const idLabel = document.createElement('span');
+                idLabel.className = 'block-id';
+                idLabel.innerText = formatIdForDisplay(block);
+                card.appendChild(idLabel);
+            }
 
             if (imgData) {
                 const img = document.createElement('img');
-                img.className = 'title-style-image';
+                img.className = titleStyle ? 'title-style-image' : 'insert-image';
                 img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
-                img.alt = langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '';
+                img.alt = titleStyle
+                    ? (langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '')
+                    : (langs.map(l => imgData.caption?.[l]).find(Boolean) || '');
                 card.appendChild(img);
+
+                if (!titleStyle) {
+                    // Small per-image caption — the old plain "images" look.
+                    langs.forEach(l => {
+                        const capText = imgData.caption?.[l];
+                        if (!capText || !capText.trim()) return;
+                        const capEl = document.createElement('p');
+                        capEl.className = `insert-caption lang-${l}`;
+                        capEl.textContent = capText;
+                        card.appendChild(capEl);
+                    });
+                }
             }
 
-            if (hasContent) {
+            if (titleStyle) {
                 const textWrap = document.createElement('div');
                 textWrap.className = 'title-style-text-wrap';
                 const ruleTop = document.createElement('div');
@@ -116,6 +147,7 @@ export function renderContinuousView(data, container, lang = 'all') {
             }
 
             card.classList.add('title-style');
+            if (isBlank) card.classList.add('insert-blank');
             container.appendChild(card);
             return;
         }

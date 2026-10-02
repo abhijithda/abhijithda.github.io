@@ -161,38 +161,59 @@ function populateBookColumns() {
 
     state.data.forEach(item => {
         // --- 0. HANDLE "insert" ITEMS ---
-        // The front cover, section dividers, and pure blank pages are all
-        // one item type, distinguished only by which fields its one block
-        // has (block.images[0] for a picture, block.content for text,
-        // either, or neither) — not by a flag on top of "images", since
-        // "images" already names a block type too and reusing it at the
-        // item level as well was confusing. Rendered as one big centered
-        // page. Forced onto its own column, so it never shares a page with
+        // The front cover, section dividers, plain standalone photos, and
+        // pure blank pages are all one item type now — a standalone photo
+        // is really just an "insert" with a per-image caption instead of a
+        // page title. Distinguished only by which fields its one block has:
+        //   block.images[0].caption -> small caption text (the old plain
+        //                              "images" look)
+        //   block.content           -> big centered title-style text
+        //                              (dash-ruled), which wins if both are
+        //                              somehow present
+        //   neither                 -> no text at all
+        //   no image either         -> a genuinely blank page
+        // Forced onto its own column, so it never shares a page with
         // anything else.
         if (item.type === 'insert') {
             const insertBlock = item.blocks && item.blocks[0];
             const imgData = insertBlock && insertBlock.images && insertBlock.images[0];
 
+            const hasContent = state.activeLangs.some(lang =>
+                (insertBlock?.content?.[lang] || []).some(line => line.trim() !== ''));
+            const titleStyle = hasContent; // block.content present -> big style
+
             const card = document.createElement('div');
-            card.className = 'book-card title-style-page';
+            card.className = `book-card ${titleStyle ? 'title-style-page' : 'standalone-image'}`;
             card.id = `book-${item.id}`;
 
             if (imgData) {
                 const wrap = document.createElement('div');
-                wrap.className = 'book-image-wrap title-style-image-wrap';
+                wrap.className = titleStyle ? 'book-image-wrap title-style-image-wrap' : 'book-image-wrap';
                 const imgEl = document.createElement('img');
                 imgEl.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
-                imgEl.className = 'book-image title-style-image';
+                imgEl.className = titleStyle ? 'book-image title-style-image' : 'book-image';
                 wrap.appendChild(imgEl);
+
+                if (!titleStyle) {
+                    // Small per-image caption — the old plain "images" look.
+                    state.activeLangs.forEach(lang => {
+                        const capText = imgData.caption?.[lang];
+                        if (capText && capText.trim()) {
+                            const capEl = document.createElement('p');
+                            capEl.className = `book-image-caption lang-${lang}`;
+                            capEl.textContent = capText;
+                            wrap.appendChild(capEl);
+                        }
+                    });
+                }
+
                 card.appendChild(wrap);
             }
 
             // block.content.<lang> is an array of lines/paragraphs, so an
-            // insert's text can span multiple lines just as easily as a
-            // single short title.
-            const hasContent = state.activeLangs.some(lang =>
-                (insertBlock?.content?.[lang] || []).some(line => line.trim() !== ''));
-            if (hasContent) {
+            // insert's title-style text can span multiple lines just as
+            // easily as a single short title.
+            if (titleStyle) {
                 const textWrap = document.createElement('div');
                 textWrap.className = 'title-style-text-wrap';
                 const ruleTop = document.createElement('div');
@@ -217,43 +238,7 @@ function populateBookColumns() {
             return;
         }
 
-        // --- 1. HANDLE STANDALONE "images" ITEMS ---
-        if (item.type === 'images') {
-            const imgBlock = item.blocks && item.blocks[0];
-            const imgData = imgBlock && imgBlock.images && imgBlock.images[0];
-
-            if (imgData) {
-                const card = document.createElement('div');
-                // UNIQUE CLASS APPLIED HERE:
-                card.className = 'book-card standalone-image'; 
-                card.id = `book-${item.id}`;
-
-                const wrap = document.createElement('div');
-                wrap.className = 'book-image-wrap';
-                
-                const imgEl = document.createElement('img');
-                imgEl.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
-                imgEl.className = 'book-image';
-                wrap.appendChild(imgEl);
-
-                // Render ALL active languages for the caption
-                state.activeLangs.forEach(lang => {
-                    const capText = imgData.caption?.[lang];
-                    if (capText && capText.trim()) {
-                        const capEl = document.createElement('p');
-                        capEl.className = `book-image-caption lang-${lang}`;
-                        capEl.textContent = capText;
-                        wrap.appendChild(capEl);
-                    }
-                });
-
-                card.appendChild(wrap);
-                columns.appendChild(card);
-            }
-            return; // Skip standard block loop for dedicated image items
-        }
-
-        // --- 2. HANDLE STANDARD Q&A / SHLOKA CARDS ---
+        // --- 1. HANDLE STANDARD Q&A / SHLOKA CARDS ---
         const refs = item.references || [];
         item.blocks.forEach((block, blockIdx) => {
             const showExcerpt = blockIdx === 0 && refs.length > 0;

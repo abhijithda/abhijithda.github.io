@@ -125,6 +125,51 @@ body[data-paper-size="a3"] #continuous-container {
     color: #555;
 }
 
+/* Plain-photo style insert (block.images[0].caption, no block.content) —
+   smaller image and caption text than the title-style, matching the old
+   plain "images" item look. */
+.insert-image {
+    max-width: 100%;
+    max-height: 50vh;
+    width: auto;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.insert-caption {
+    text-align: center;
+    color: #555;
+    margin-top: 10px;
+}
+
+.insert-caption.lang-kn {
+    font-size: calc(15px * var(--font-scale));
+}
+
+.insert-caption.lang-en {
+    font-size: calc(13px * var(--font-scale));
+}
+
+/* A content-less insert (no image, no text) — the "blank page" case.
+   On screen, enough height to read as a deliberate break rather than
+   nothing at all. In print, forced onto its own page before AND after —
+   continuous view otherwise has no per-item page-break mechanism at all
+   (unlike book view's break-after: column), so without this, a blank
+   insert would just be an invisible sliver squeezed between whatever
+   printed above and below it, not an actual blank sheet. */
+.card.insert-blank {
+    min-height: 4em;
+}
+
+@media print {
+    .card.insert-blank {
+        break-before: page;
+        break-after: page;
+        page-break-before: always;
+        page-break-after: always;
+    }
+}
+
 .block-id {
     padding: 15px 5px;
     font-family: monospace;

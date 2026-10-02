@@ -189,14 +189,20 @@ describe('renderContinuousView', () => {
         expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
     });
 
-    test('hideId: true suppresses the DOM id entirely, so it cannot be jumped to by reference', () => {
+    test('hideId: true suppresses the DOM id and the id badge, so it cannot be jumped to by reference — but the content itself still renders, same as any other insert', () => {
         const data = [{
             id: 'ins_002', type: 'insert', hideId: true,
-            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['T'] } }],
+            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }],
         }];
         renderContinuousView(data, container, 'all');
         expect(document.getElementById('ins_002_b_1')).toBeNull();
         expect(document.getElementById('ins_002')).toBeNull();
+
+        const card = document.querySelector('#continuous-container .card');
+        expect(card).not.toBeNull();
+        expect(card.querySelector('.block-id')).toBeNull();
+        expect(card.querySelector('.title-style-image').src).toContain('images/x.jpg');
+        expect(card.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
     });
 
     test.each([
@@ -214,14 +220,17 @@ describe('renderContinuousView', () => {
         expect(card.querySelector('.title-style-text-line.lang-en') !== null).toBe(showsEn);
     });
 
-    test('an insert with neither image nor content renders no card at all', () => {
+    test('an insert with neither image nor content still renders — a blank card, same as book view\'s blank page', () => {
         const data = [
             { id: 'ins_004', type: 'insert', blocks: [{ id: 'ins_004_b_1', type: 'images' }] },
             { id: 'q_040', type: 'question', references: null, blocks: [baseBlock({ id: 'q_040_b_1' })] },
         ];
         renderContinuousView(data, container, 'all');
-        expect(document.getElementById('ins_004_b_1')).toBeNull();
-        expect(document.querySelectorAll('#continuous-container .card').length).toBe(1);
+        const card = document.getElementById('ins_004_b_1');
+        expect(card).not.toBeNull();
+        expect(card.classList.contains('insert-blank')).toBe(true);
+        expect(card.querySelector('img')).toBeNull();
+        expect(document.querySelectorAll('#continuous-container .card').length).toBe(2);
     });
 });
 

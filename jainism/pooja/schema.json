@@ -12,7 +12,6 @@
         "enum": [
           "question",
           "answer",
-          "images",
           "insert"
         ]
       },
