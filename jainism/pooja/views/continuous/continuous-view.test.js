@@ -189,6 +189,25 @@ describe('renderContinuousView', () => {
         expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
     });
 
+    test('an insert with an image + per-image caption but no content (a plain standalone photo) falls through to the normal per-block row — not the big centered title-style card', () => {
+        const data = [{
+            id: 'ins_002', type: 'insert',
+            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg', caption: { kn: 'ಶೀ', en: 'Caption' } }] }],
+        }];
+        renderContinuousView(data, container, 'all');
+
+        const row = document.getElementById('ins_002_b_1');
+        expect(row).not.toBeNull();
+        expect(row.classList.contains('block-row')).toBe(true);
+        expect(row.classList.contains('title-style')).toBe(false);
+        expect(row.querySelector('.block-id')).not.toBeNull(); // left-aligned id, same as any other block row
+        const card = row.querySelector('.image-card');
+        expect(card.querySelector('img').src).toContain('images/x.jpg');
+        // Each language on its own line, never joined with "/".
+        expect(card.querySelector('.image-caption.lang-kn').textContent).toBe('ಶೀ');
+        expect(card.querySelector('.image-caption.lang-en').textContent).toBe('Caption');
+    });
+
     test('hideId: true suppresses the DOM id and the id badge, so it cannot be jumped to by reference — but the content itself still renders, same as any other insert', () => {
         const data = [{
             id: 'ins_002', type: 'insert', hideId: true,

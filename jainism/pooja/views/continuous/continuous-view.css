@@ -125,31 +125,6 @@ body[data-paper-size="a3"] #continuous-container {
     color: #555;
 }
 
-/* Plain-photo style insert (block.images[0].caption, no block.content) —
-   smaller image and caption text than the title-style, matching the old
-   plain "images" item look. */
-.insert-image {
-    max-width: 100%;
-    max-height: 50vh;
-    width: auto;
-    object-fit: contain;
-    border-radius: 6px;
-}
-
-.insert-caption {
-    text-align: center;
-    color: #555;
-    margin-top: 10px;
-}
-
-.insert-caption.lang-kn {
-    font-size: calc(15px * var(--font-scale));
-}
-
-.insert-caption.lang-en {
-    font-size: calc(13px * var(--font-scale));
-}
-
 /* A content-less insert (no image, no text) — the "blank page" case.
    On screen, enough height to read as a deliberate break rather than
    nothing at all. In print, forced onto its own page before AND after —

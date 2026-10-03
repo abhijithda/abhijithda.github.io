@@ -270,12 +270,25 @@ to a real file) as part of building this structure.
   view at all — book view has no "visible id badge" concept for inserts to
   begin with, and every insert always renders there regardless.
 - **Continuous view shows exactly the same content as book view — nothing
-  is ever skipped or omitted.** An insert with neither image nor content
-  still renders as an empty card (class `.insert-blank`), the same "blank
-  page" idea book view has; it is **not** left out of the DOM the way an
-  earlier version of this feature did. The one thing continuous view
-  changes per-insert is *id visibility* (via `hideId`, covered above), never
-  *content* visibility.
+  is ever skipped or omitted.** But only the two cases with no equivalent
+  in the normal per-block row actually get special rendering there:
+  - `block.content` present -> the big centered title-style card.
+  - neither image nor content -> an empty card, class `.insert-blank`,
+    forced onto its own printed page (see below) — the "blank page" idea,
+    same as book view's.
+  A **plain standalone photo** (image + per-image caption, no
+  `block.content`) is deliberately **not** special-cased in continuous
+  view — it falls through to the exact same per-block row rendering every
+  other block gets: left-aligned `.block-id` column, `.image-card` at its
+  original size, same as before "insert" existed. An earlier version of
+  this merge routed every insert — photos included — through the big
+  centered treatment, which shrank the image and replaced the left-aligned
+  id column with a centered one; that was a real regression, not an
+  intentional restyle, and is why this distinction exists at all. Only the
+  title-style and blank cases ever touch the "insert never gets skipped"
+  rule in the first place — an earlier version of *that* feature also
+  skipped blank inserts entirely, which was also wrong (fixed alongside
+  this one).
   - Blank inserts specifically get a print-only forced page: continuous
     view has **no other per-item page-break mechanism at all** (unlike book
     view's deliberate `break-after: column` on every page) — print there is
@@ -284,6 +297,12 @@ to a real file) as part of building this structure.
     **Print** below), a blank insert would print as an invisible sliver
     squeezed between whatever's above and below it, not an actual blank
     sheet.
+- **Multi-language captions/titles are always one line per language, never
+  joined onto a single line with "/".** This applies everywhere a caption
+  or title can show more than one language at once — the per-image caption
+  in continuous view's normal `.image-card` (an earlier version joined
+  `kn`/`en` with " / " when the active language was "all" — fixed), book
+  view's standalone-image caption, and both views' title-style text.
 - Excluded from the read-progress denominator entirely, in all three
   places that compute it (`book-view.js`, `continuous-view.js`,
   `home/home.js`) — by item type, unconditionally, even though an insert's

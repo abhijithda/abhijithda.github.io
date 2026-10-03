@@ -64,92 +64,86 @@ export function renderContinuousView(data, container, lang = 'all') {
         card.id = item.id;
 
         // "insert" items — the front cover, section dividers, plain
-        // standalone photos, and pure blank pages are all one item type: a
-        // standalone photo is really just an insert with a per-image
-        // caption instead of a page title. Which fields the one block has
-        // decide the look: block.content -> big centered title-style text
-        // (dash-ruled); block.images[0].caption only -> small caption text
-        // (the old plain "images" look); neither -> a blank card with no
-        // visible content at all, same blank-page idea as book view.
-        // Continuous view never omits an insert — same content as book
-        // view, just laid out differently.
-        //
-        // The card's DOM id is the block's id (not the item's), same as
-        // every other block, so another item's `references` can jump
-        // straight to it via jumpToReference() — and a visible id badge is
-        // shown too, same as a normal block row, so it can actually be
-        // cited by someone reading the page. The only exception is
-        // `hideId: true` (meant for the front cover, which nothing should
-        // ever cite): that suppresses the DOM id and the badge only — the
-        // image/text content itself still renders exactly as normal.
+        // standalone photos, and pure blank pages are all one item type.
+        // Only the two cases with no equivalent in the normal per-block
+        // row get special rendering here:
+        //   block.content present -> big centered title-style page
+        //     (dash-ruled) — the cover/divider look.
+        //   neither image nor content -> a blank card, forced onto its
+        //     own printed page (see .insert-blank in continuous-view.css).
+        // A plain standalone photo (image + per-image caption, no
+        // block.content) is NOT special-cased — it falls through to the
+        // exact same per-block row rendering below as any other block,
+        // id-column-on-the-left layout and all, because that *is* what a
+        // standalone photo looked like before "insert" existed. Giving it
+        // the big centered treatment instead (an earlier version of this
+        // feature did) shrank the image and lost that left-aligned id
+        // column — a real regression, not an intentional restyle.
         if (item.type === 'insert') {
             const block = item.blocks?.[0];
             const imgData = block?.images?.[0];
             const langs = ['kn', 'en'].filter(l => (lang === l || lang === 'all'));
             const hasContent = langs.some(l => (block?.content?.[l] || []).some(line => line.trim() !== ''));
-            const titleStyle = hasContent;
             const isBlank = !imgData && !hasContent;
 
-            // No early return here even when there's neither image nor
-            // text — a blank insert still renders as an empty card, same
-            // as its blank page in book view. Continuous view shows the
-            // same content as book view, just laid out differently.
-            card.id = (block && !item.hideId) ? block.id : '';
+            if (hasContent || isBlank) {
+                // The card's DOM id is the block's id (not the item's),
+                // same as every other block, so another item's
+                // `references` can jump straight to it via
+                // jumpToReference() — and a visible id badge is shown too,
+                // same as a normal block row, so it can actually be cited
+                // by someone reading the page. The only exception is
+                // `hideId: true` (meant for the front cover, which nothing
+                // should ever cite): that suppresses the DOM id and the
+                // badge only — the image/text content itself still
+                // renders exactly as normal.
+                card.id = (block && !item.hideId) ? block.id : '';
 
-            if (block && !item.hideId) {
-                const idLabel = document.createElement('span');
-                idLabel.className = 'block-id';
-                idLabel.innerText = formatIdForDisplay(block);
-                card.appendChild(idLabel);
-            }
-
-            if (imgData) {
-                const img = document.createElement('img');
-                img.className = titleStyle ? 'title-style-image' : 'insert-image';
-                img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
-                img.alt = titleStyle
-                    ? (langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '')
-                    : (langs.map(l => imgData.caption?.[l]).find(Boolean) || '');
-                card.appendChild(img);
-
-                if (!titleStyle) {
-                    // Small per-image caption — the old plain "images" look.
-                    langs.forEach(l => {
-                        const capText = imgData.caption?.[l];
-                        if (!capText || !capText.trim()) return;
-                        const capEl = document.createElement('p');
-                        capEl.className = `insert-caption lang-${l}`;
-                        capEl.textContent = capText;
-                        card.appendChild(capEl);
-                    });
+                if (block && !item.hideId) {
+                    const idLabel = document.createElement('span');
+                    idLabel.className = 'block-id';
+                    idLabel.innerText = formatIdForDisplay(block);
+                    card.appendChild(idLabel);
                 }
-            }
 
-            if (titleStyle) {
-                const textWrap = document.createElement('div');
-                textWrap.className = 'title-style-text-wrap';
-                const ruleTop = document.createElement('div');
-                ruleTop.className = 'title-style-text-rule';
-                textWrap.appendChild(ruleTop);
-                langs.forEach(l => {
-                    (block.content?.[l] || []).forEach(line => {
-                        if (!line.trim()) return;
-                        const lineEl = document.createElement('div');
-                        lineEl.className = `title-style-text-line lang-${l}`;
-                        lineEl.textContent = line;
-                        textWrap.appendChild(lineEl);
+                if (imgData) {
+                    const img = document.createElement('img');
+                    img.className = 'title-style-image';
+                    img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
+                    img.alt = langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '';
+                    card.appendChild(img);
+                }
+
+                if (hasContent) {
+                    // block.content.<lang> is an array of lines/paragraphs,
+                    // so title-style text can span multiple lines.
+                    const textWrap = document.createElement('div');
+                    textWrap.className = 'title-style-text-wrap';
+                    const ruleTop = document.createElement('div');
+                    ruleTop.className = 'title-style-text-rule';
+                    textWrap.appendChild(ruleTop);
+                    langs.forEach(l => {
+                        (block.content?.[l] || []).forEach(line => {
+                            if (!line.trim()) return;
+                            const lineEl = document.createElement('div');
+                            lineEl.className = `title-style-text-line lang-${l}`;
+                            lineEl.textContent = line;
+                            textWrap.appendChild(lineEl);
+                        });
                     });
-                });
-                const ruleBottom = document.createElement('div');
-                ruleBottom.className = 'title-style-text-rule';
-                textWrap.appendChild(ruleBottom);
-                card.appendChild(textWrap);
-            }
+                    const ruleBottom = document.createElement('div');
+                    ruleBottom.className = 'title-style-text-rule';
+                    textWrap.appendChild(ruleBottom);
+                    card.appendChild(textWrap);
+                }
 
-            card.classList.add('title-style');
-            if (isBlank) card.classList.add('insert-blank');
-            container.appendChild(card);
-            return;
+                card.classList.add('title-style');
+                if (isBlank) card.classList.add('insert-blank');
+                container.appendChild(card);
+                return;
+            }
+            // Else: plain photo (image + caption, no content) — fall
+            // through to the normal per-block row rendering below.
         }
 
         // Reply-excerpt (verbatim from master)
@@ -234,13 +228,21 @@ export function renderContinuousView(data, container, lang = 'all') {
                 block.images.forEach(img => {
                     const capKn = img.caption?.kn || '';
                     const capEn = img.caption?.en || '';
-                    let capText = '';
-                    if (lang === 'all') capText = (capKn && capEn) ? `${capKn} / ${capEn}` : (capKn || capEn);
-                    else                capText = (lang === 'kn') ? capKn : capEn;
+                    const altText = (lang === 'kn') ? capKn : (lang === 'en') ? capEn : (capKn || capEn);
+                    // Each active language gets its own caption line —
+                    // never joined onto one line with "/" — same as every
+                    // other multi-language caption/title in the app.
+                    let captionsHtml = '';
+                    if ((lang === 'kn' || lang === 'all') && capKn) {
+                        captionsHtml += `<p class="image-caption lang-kn">${capKn}</p>`;
+                    }
+                    if ((lang === 'en' || lang === 'all') && capEn) {
+                        captionsHtml += `<p class="image-caption lang-en">${capEn}</p>`;
+                    }
                     mediaCol.innerHTML += `
                         <div class="image-card">
-                            <img src="images/${img.src}" alt="${capText}">
-                            ${capText ? `<p class="image-caption">${capText}</p>` : ''}
+                            <img src="images/${img.src}" alt="${altText}">
+                            ${captionsHtml}
                         </div>`;
                 });
             }

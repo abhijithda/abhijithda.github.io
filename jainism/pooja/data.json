@@ -24,10 +24,6 @@
     ]
   },
   {
-    "id": "blank_000",
-    "type": "insert"
-  },
-  {
     "id": "i_001",
     "type": "insert",
     "timestamp": "2026-07-12T14:22:00Z",
