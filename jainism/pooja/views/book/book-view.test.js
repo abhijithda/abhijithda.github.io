@@ -454,6 +454,34 @@ describe('Insert item as a blank/divider page — book-view-only pagination tool
         expect(dividerCard.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಭಾಗ ೧');
         expect(dividerCard.querySelector('.title-style-text-line.lang-en').textContent).toBe('Part 1');
     });
+
+    test('the id badge is shown for a divider (no hideId) but suppressed for the cover (hideId: true) — matching continuous view\'s rule', () => {
+        initBookView(dataWithDivider, ['kn', 'en']);
+        expect(document.getElementById('book-ins_001').querySelector('.book-bid')).toBeNull();
+        const dividerBid = document.getElementById('book-ins_002').querySelector('.book-bid');
+        expect(dividerBid).not.toBeNull();
+        expect(dividerBid.textContent.length).toBeGreaterThan(0);
+    });
+
+    test('a plain standalone photo (caption-style, no hideId) also shows its id badge — the regression this fixes', () => {
+        const data = [{
+            id: 'ins_photo', type: 'insert',
+            blocks: [{ id: 'ins_photo_b_1', type: 'images', images: [{ src: 'x.jpg', caption: { en: 'Caption' } }] }],
+        }];
+        initBookView(data, ['kn', 'en']);
+        const card = document.getElementById('book-ins_photo');
+        expect(card.classList.contains('standalone-image')).toBe(true);
+        expect(card.querySelector('.book-bid')).not.toBeNull();
+    });
+
+    test('a blank insert (no blocks at all) renders without throwing and with no id badge', () => {
+        const data = [{ id: 'blank_000', type: 'insert' }];
+        expect(() => initBookView(data, ['kn', 'en'])).not.toThrow();
+        const card = document.getElementById('book-blank_000');
+        expect(card).not.toBeNull();
+        expect(card.classList.contains('standalone-image')).toBe(true);
+        expect(card.querySelector('.book-bid')).toBeNull();
+    });
 });
 
 describe('applyBookMediaVisibility', () => {

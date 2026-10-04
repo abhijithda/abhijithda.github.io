@@ -34,7 +34,7 @@ describe('Data Layer Validation', () => {
     expect(data[0].hideId).toBe(true);
   });
 
-  test('schema requires blocks on every item, insert included, and accepts hideId', () => {
+  test('schema requires blocks on every item except insert, and accepts hideId', () => {
     const ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
     const schema = JSON.parse(fs.readFileSync(path.join(__dirname, 'schema.json'), 'utf8'));
@@ -45,6 +45,11 @@ describe('Data Layer Validation', () => {
         blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }],
     }];
     expect(validate(withInsert)).toBe(true);
+
+    // A plain blank insert — no blocks at all — is the minimal, common
+    // case for a blank/separator page, and must validate.
+    const blankInsert = [{ id: 'blank_000', type: 'insert' }];
+    expect(validate(blankInsert)).toBe(true);
 
     const missingBlocks = [{ id: 'a_001', type: 'answer' }];
     expect(validate(missingBlocks)).toBe(false);

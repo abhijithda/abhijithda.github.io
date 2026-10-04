@@ -237,11 +237,20 @@ to a real file) as part of building this structure.
 ## "insert" Item Type — ✅ Current
 - One item type covers the front cover, section dividers, plain standalone
   photos, and pure blank pages — there is no separate `cover`/`images`/
-  `spacer` type any more. `type: "insert"` always carries `blocks` like
-  every other item (the schema never makes `blocks` conditionally
-  required — one uniform rule, no `if`/`then` branching). Its first
-  block's `images`/`content` fields (same shape as a plain `images`-type
-  block always had) decide what it looks like:
+  `spacer` type any more. Every other item type still unconditionally
+  requires `blocks`, but `insert` is the one exception: `blocks` is
+  entirely optional for it (`schema.json`'s `if`/`then` on
+  `type === "insert"`), so the minimal blank page is just
+  `{ "id": "blank_000", "type": "insert" }` — no empty block required to
+  satisfy the schema. (An earlier version of this schema made `blocks`
+  unconditionally required for every type, including `insert`, specifically
+  to avoid `if`/`then` branching — but that made the single most common
+  `insert` use case, a bare blank page, need an empty block just to
+  validate. All the rendering code already handled a missing `item.blocks`
+  safely by this point, so the conditional-requirement branching came back
+  for this one case.) When a block *is* present, its `images`/`content`
+  fields (same shape as a plain `images`-type block always had) decide what
+  it looks like:
   - `block.content` present -> big, centered, dash-ruled title-style text
     (what the cover/dividers looked like before this merge)
   - only `block.images[0].caption` present (no `content`) -> small per-image
@@ -257,18 +266,25 @@ to a real file) as part of building this structure.
   exists as a **block** type (`block.type: "images"`); only the item-level
   type went away.
 - `hideId: true` — meant for the front cover specifically, not dividers or
-  photos in general. It suppresses exactly two things: the DOM id (so
-  `jumpToReference()` can never land on it) and the visible id badge in
-  continuous view. **It does not hide the item's content** — the image and
-  text still render completely normally either way. An insert *without*
+  photos in general. It suppresses exactly two things, **identically in
+  both views**: the DOM id (so `jumpToReference()` can never land on it)
+  and the visible id badge (`.block-id` in continuous view, `.book-bid` in
+  book view). **It does not hide the item's content** — the image and text
+  still render completely normally either way. An insert *without*
   `hideId` is fully referenceable: its DOM id is the **block's** id, not
   the item's, matching how every other block anchors itself (this was also
   a bug fix — an earlier version anchored the card to the item id, so
   nothing could actually jump to an insert even when it should have been
   able to), and it gets the same visible id badge a normal block row does,
-  so a reader can actually see and cite it. `hideId` has no effect in book
-  view at all — book view has no "visible id badge" concept for inserts to
-  begin with, and every insert always renders there regardless.
+  so a reader can actually see and cite it. Book view's parity here is
+  itself a fix: an earlier version had a leftover CSS rule
+  (`.standalone-image .book-bid { display: none !important; }`) from the
+  old plain-`images` type, unconditionally hiding the badge for every
+  insert regardless of `hideId` — meaning continuous view showed ids for
+  ordinary photos/dividers but book view never did for any insert at all.
+  That rule is gone; book view now renders the same `.book-bid` badge
+  `createBookCard` always has, governed by `hideId` exactly like
+  continuous view's badge is.
 - **Continuous view shows exactly the same content as book view — nothing
   is ever skipped or omitted.** But only the two cases with no equivalent
   in the normal per-block row actually get special rendering there:
@@ -365,13 +381,23 @@ to a real file) as part of building this structure.
   simultaneously visible from two code paths disagreeing (an earlier
   version had a separate `hideHome()` called from `activateView()`, which
   duplicated what `setViewMode()` also did and was the source of a bug
-  where Home stayed visible above the opened view). Shown by default on
-  every load (`init()` calls `showHome()` instead of `activateView()`), and
-  reachable afterward via the 🏠 icon (`#home-btn`) that sits left of the
-  Book/Continuous toggle in the header — clicking either of Home's own two
-  option buttons, or the header's Book/Continuous toggle buttons, calls
-  `activateView()`, which switches the active screen as part of
-  `setViewMode()`.
+  where Home stayed visible above the opened view). Shown by default only
+  on a genuine first visit — `init()` checks `localStorage.getItem('viewMode')`
+  and calls `showHome()` only when nothing is stored yet; once Book or
+  Continuous has actually been opened once, a reload calls `activateView()`
+  with that remembered mode instead, restoring book view's current page
+  (`initBookView` already reads `bookSpread` from `localStorage` on its
+  own) or continuous view's scroll position. An earlier version called
+  `showHome()` unconditionally on every load regardless of history, which
+  meant a plain page refresh both looked like "back to the start" and
+  *actually was* — neither view was even rendered until a button was
+  clicked, so continuous view's scroll-position restore and book view's
+  current-page restore both had nothing to act on. The 🏠 icon
+  (`#home-btn`), left of the Book/Continuous toggle in the header, is
+  still always available to go back to Home deliberately — clicking it,
+  either of Home's own two option buttons, or the header's Book/Continuous
+  toggle buttons all call `activateView()`/`showHome()`, which switch the
+  active screen as part of `setViewMode()`/`setActiveScreen()`.
 - Layout mirrors a continuous-view cover card, not a small icon-sized
   preview: full-width image (`object-fit: contain`, not `cover` — the whole
   image is visible, nothing cropped off the top or bottom to fill a fixed

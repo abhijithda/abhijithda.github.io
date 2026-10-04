@@ -177,12 +177,22 @@ async function init() {
     }, 100);
 
     // ── Activate the initial view ────────────────────────────────────────
-    // Land on Home first, every time — the two view cards there are the
-    // deliberate way in, not something to skip past via a remembered
-    // viewMode. Book/Continuous still render normally (via activateView)
-    // the moment either is opened, from Home's buttons or the header
-    // toggle — nothing needs pre-rendering at boot.
-    showHome();
+    // Land on Home only on a genuine first visit (no remembered viewMode
+    // yet) — once someone has actually picked Book or Continuous, a
+    // reload restores that same view instead of dumping them back on Home
+    // and losing their place. An earlier version always called showHome()
+    // here regardless, which meant a plain page refresh both looked like
+    // "back to the start" and, worse, actually discarded continuous view's
+    // scroll position and book view's current page, since neither view
+    // was even rendered until Home's buttons or the header toggle were
+    // clicked. The Home icon is still always available to go back
+    // deliberately.
+    const rememberedView = localStorage.getItem('viewMode');
+    if (rememberedView) {
+        activateView(rememberedView);
+    } else {
+        showHome();
+    }
 }
 
 window.addEventListener('scroll', () => {

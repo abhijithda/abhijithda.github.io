@@ -397,8 +397,12 @@ body[data-paper-size="a3"] .book-nav {
     -webkit-column-break-before: always;
 }
 
-/* Hide the block ID and Read Tick so the image page is clean */
-.book-columns .standalone-image .book-bid,
+/* Read ticks never apply to a standalone-image/insert page (not trackable
+   content — see isBlockTrackable), so still hide that specifically. The id
+   badge itself (.book-bid) is NOT hidden here any more: it's shown/hidden
+   per-item via `hideId` in book-view.js, matching continuous view's rule
+   exactly, rather than being unconditionally hidden for every standalone
+   image the way an earlier version did. */
 .book-columns .standalone-image .read-tick {
     display: none !important;
 }

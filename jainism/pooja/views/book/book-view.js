@@ -186,6 +186,19 @@ function populateBookColumns() {
             card.className = `book-card ${titleStyle ? 'title-style-page' : 'standalone-image'}`;
             card.id = `book-${item.id}`;
 
+            // Same id badge every normal card gets (see createBookCard's
+            // `bid` below) — suppressed only by `hideId: true` (meant for
+            // the front cover), matching continuous view's id-badge rule
+            // exactly. An earlier version never rendered this badge at all
+            // for inserts, in either style, which was a book-view-only
+            // regression once continuous view's badge was restored.
+            if (insertBlock && !item.hideId) {
+                const bid = document.createElement('span');
+                bid.className = 'book-bid';
+                bid.textContent = formatIdForDisplay(insertBlock);
+                card.appendChild(bid);
+            }
+
             if (imgData) {
                 const wrap = document.createElement('div');
                 wrap.className = titleStyle ? 'book-image-wrap title-style-image-wrap' : 'book-image-wrap';
