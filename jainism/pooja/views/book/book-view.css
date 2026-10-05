@@ -434,6 +434,17 @@ body[data-paper-size="a3"] .book-nav {
     color: #555;
 }
 
+/* The id badge stays left-aligned, matching every normal Q&A card's
+   .book-bid, even though .standalone-image/.title-style-page center
+   everything else (image, caption, title text). Without this, the flex
+   column's align-items: center pulls the badge to the middle too, which
+   looked inconsistent next to the left-aligned numbering on every other
+   page. */
+.book-columns .standalone-image .book-bid,
+.book-columns .title-style-page .book-bid {
+    align-self: flex-start;
+}
+
 /* ── "insert" items — the front cover, section dividers, and pure blank
    pages, all one item type (distinct from block-level "images" to avoid
    the same word meaning two different things), distinguished purely by

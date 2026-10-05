@@ -17,11 +17,18 @@ const continuous = () => document.getElementById('continuous-container');
 // whenever the header's icon is clicked, hidden the moment either real
 // view is opened.
 //
+// currentScreen tracks what's on screen *right now*, in memory — used to
+// scope the scroll listener below so Home/book scrolling never overwrites
+// continuous view's saved scroll position (see that listener's comment).
+let currentScreen = null;
+
 // Every place that changes which of the three areas (home/book/continuous)
 // is visible goes through this one function, so there is exactly one
 // source of truth for "what's on screen right now" — no separate
 // show/hide pair that can fall out of sync with each other.
 function setActiveScreen(screen) {
+    currentScreen = screen;
+
     const home = document.getElementById('home-view');
     const book = document.getElementById('book-container');
     const cont = document.getElementById('continuous-container');
@@ -39,6 +46,16 @@ function setActiveScreen(screen) {
     document.querySelectorAll('.view-toggle-btn').forEach(btn =>
         btn.classList.toggle('active', btn.dataset.view === screen)
     );
+
+    // What to restore on the *next* reload is "whatever screen is showing
+    // right now" — including Home — which is NOT the same thing as
+    // `viewMode` below (that only ever holds book/continuous, for
+    // print/title formatting, and deliberately never changes just because
+    // Home was opened). Conflating the two was the bug: clicking the Home
+    // icon left `viewMode` pointing at whichever real view was open
+    // before, so a reload from Home jumped straight back into that view
+    // instead of staying on Home.
+    localStorage.setItem('lastScreen', screen);
 }
 function showHome() { setActiveScreen('home'); }
 
@@ -176,27 +193,34 @@ async function init() {
         if (saved) window.scrollTo(0, parseInt(saved));
     }, 100);
 
-    // ── Activate the initial view ────────────────────────────────────────
-    // Land on Home only on a genuine first visit (no remembered viewMode
-    // yet) — once someone has actually picked Book or Continuous, a
-    // reload restores that same view instead of dumping them back on Home
-    // and losing their place. An earlier version always called showHome()
-    // here regardless, which meant a plain page refresh both looked like
-    // "back to the start" and, worse, actually discarded continuous view's
-    // scroll position and book view's current page, since neither view
-    // was even rendered until Home's buttons or the header toggle were
-    // clicked. The Home icon is still always available to go back
-    // deliberately.
-    const rememberedView = localStorage.getItem('viewMode');
-    if (rememberedView) {
-        activateView(rememberedView);
+    // ── Activate the initial screen ──────────────────────────────────────
+    // Restore whatever screen — including Home — was showing before the
+    // reload, via `lastScreen` (set by every setActiveScreen() call, so it
+    // always reflects reality, Home included). This is deliberately NOT
+    // `viewMode`: that only ever holds book/continuous and is never
+    // touched by visiting Home, so using it here was the earlier bug —
+    // refreshing while on Home jumped straight into whichever real view
+    // had been open before, because `viewMode` still pointed at it.
+    const lastScreen = localStorage.getItem('lastScreen');
+    if (lastScreen === 'book' || lastScreen === 'continuous') {
+        activateView(lastScreen);
     } else {
         showHome();
     }
 }
 
+// Only save scroll position while continuous view is actually the active
+// screen. This listener is global (continuous view's own content isn't
+// its own scroll container, the window is), so without this guard, simply
+// visiting Home — whose content is short, so the window sits near scrollY
+// 0 — fired this same listener and overwrote continuous view's saved
+// position with 0, even though continuous view itself was never touched.
+// That silently destroyed the position the moment you opened Home, well
+// before any reload; the reload just revealed the damage already done.
 window.addEventListener('scroll', () => {
-    localStorage.setItem('scrollPosition', window.scrollY);
+    if (currentScreen === 'continuous') {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    }
 });
 
 if (document.readyState === 'loading') {

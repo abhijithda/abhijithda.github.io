@@ -285,6 +285,15 @@ to a real file) as part of building this structure.
   That rule is gone; book view now renders the same `.book-bid` badge
   `createBookCard` always has, governed by `hideId` exactly like
   continuous view's badge is.
+- **The id badge is always left-aligned, in both views, regardless of
+  which card style it's sitting inside.** `.standalone-image`/
+  `.title-style-page` (book view) and `.card.title-style` (continuous
+  view) all use a centered flex column for everything else they
+  contain — image, caption, title text — and without an explicit
+  `align-self: flex-start` override on `.book-bid`/`.block-id`
+  specifically, the badge inherited that centering too, which looked
+  inconsistent next to every normal Q&A card's left-aligned numbering.
+  Both views' CSS now carries that override.
 - **Continuous view shows exactly the same content as book view — nothing
   is ever skipped or omitted.** But only the two cases with no equivalent
   in the normal per-block row actually get special rendering there:
@@ -382,22 +391,38 @@ to a real file) as part of building this structure.
   version had a separate `hideHome()` called from `activateView()`, which
   duplicated what `setViewMode()` also did and was the source of a bug
   where Home stayed visible above the opened view). Shown by default only
-  on a genuine first visit — `init()` checks `localStorage.getItem('viewMode')`
-  and calls `showHome()` only when nothing is stored yet; once Book or
-  Continuous has actually been opened once, a reload calls `activateView()`
-  with that remembered mode instead, restoring book view's current page
-  (`initBookView` already reads `bookSpread` from `localStorage` on its
-  own) or continuous view's scroll position. An earlier version called
-  `showHome()` unconditionally on every load regardless of history, which
-  meant a plain page refresh both looked like "back to the start" and
-  *actually was* — neither view was even rendered until a button was
-  clicked, so continuous view's scroll-position restore and book view's
-  current-page restore both had nothing to act on. The 🏠 icon
-  (`#home-btn`), left of the Book/Continuous toggle in the header, is
-  still always available to go back to Home deliberately — clicking it,
-  either of Home's own two option buttons, or the header's Book/Continuous
-  toggle buttons all call `activateView()`/`showHome()`, which switch the
-  active screen as part of `setViewMode()`/`setActiveScreen()`.
+  on a genuine first visit — `init()` checks `localStorage.getItem('lastScreen')`
+  and calls `showHome()` when nothing is stored, or when it's `'home'`;
+  otherwise it calls `activateView()` with that remembered screen, which
+  restores book view's current page (`initBookView` already reads
+  `bookSpread` from `localStorage` on its own) or continuous view's scroll
+  position. `lastScreen` is set inside `setActiveScreen()` itself — every
+  visible-screen change writes it, Home included — and is deliberately a
+  **different key from `viewMode`**: `viewMode` only ever holds
+  `book`/`continuous` and exists purely for print/title formatting, so it
+  is never touched by opening Home. An earlier version used `viewMode` for
+  this boot decision instead of a dedicated key, which seemed equivalent
+  but wasn't: opening Home left `viewMode` still pointing at whichever real
+  view had been open before, so a reload *from Home* jumped straight back
+  into that view rather than staying on Home. (A version before *that* one
+  called `showHome()` unconditionally on every load regardless of history,
+  which was the more obviously-wrong bug — no view was even rendered until
+  a button was clicked, so there was nothing for either view's position
+  restore to act on.)
+  - The global `window.addEventListener('scroll', ...)` that saves
+    continuous view's position has its own matching guard: it only writes
+    `scrollPosition` while `currentScreen === 'continuous'` (an in-memory
+    variable `setActiveScreen()` also sets). Without it, simply *opening*
+    Home — whose content is short, so the window sits near `scrollY` 0 —
+    fired the same global listener and silently overwrote continuous
+    view's saved position with 0, well before any reload; the reload only
+    ever revealed damage that had already happened the moment Home was
+    opened. The 🏠 icon (`#home-btn`), left of the Book/Continuous toggle
+    in the header, is still always available to go back to Home
+    deliberately — clicking it, either of Home's own two option buttons, or
+    the header's Book/Continuous toggle buttons all call
+    `activateView()`/`showHome()`, which switch the active screen as part
+    of `setViewMode()`/`setActiveScreen()`.
 - Layout mirrors a continuous-view cover card, not a small icon-sized
   preview: full-width image (`object-fit: contain`, not `cover` — the whole
   image is visible, nothing cropped off the top or bottom to fill a fixed

@@ -89,6 +89,15 @@ body[data-paper-size="a3"] #continuous-container {
     padding-left: 0 !important;
 }
 
+/* The id badge stays left-aligned, matching every normal block row's
+   .block-id, even though .card.title-style centers everything else
+   (image, title text). Same reasoning as book-view.css's equivalent rule
+   for .book-bid — numbering should look the same everywhere, regardless
+   of which card style it's sitting inside. */
+.card.title-style .block-id {
+    align-self: flex-start;
+}
+
 .title-style-image {
     max-width: 100%;
     max-height: 70vh;

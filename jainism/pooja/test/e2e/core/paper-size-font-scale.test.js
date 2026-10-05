@@ -25,6 +25,9 @@ test.describe('Paper size setting', () => {
             route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
         });
         await page.goto('/');
+        // The app now lands on the Home page first (not book view) — open
+        // book view explicitly before any test here relies on its content.
+        await page.locator('.view-toggle-btn[data-view="book"]').click();
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
     });
 
@@ -184,6 +187,9 @@ test.describe('Font-size scaling setting', () => {
             route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
         });
         await page.goto('/');
+        // The app now lands on the Home page first (not book view) — open
+        // book view explicitly before any test here relies on its content.
+        await page.locator('.view-toggle-btn[data-view="book"]').click();
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
     });
 
