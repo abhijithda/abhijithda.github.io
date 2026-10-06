@@ -115,6 +115,20 @@ function activateView(mode) {
         const cLang = activeLangs.length === 1 ? activeLangs[0] : 'all';
         renderContinuousView(data, continuous(), cLang);
         updateMediaVisibility();
+
+        // Restore continuous view's scroll position every time it becomes
+        // the active screen — not just once at boot. An earlier version
+        // only ever restored it in init()'s one-time startup code, so the
+        // position was correctly *saved* (see the scroll listener below)
+        // across a Home/Book detour but never *re-applied* when coming
+        // back to continuous view mid-session — only on an actual page
+        // reload. The short delay mirrors the original boot-time restore:
+        // the container needs a moment to lay out before scrollTo has a
+        // real scrollable height to target.
+        setTimeout(() => {
+            const saved = localStorage.getItem('scrollPosition');
+            if (saved) window.scrollTo(0, parseInt(saved, 10));
+        }, 100);
     }
     setViewMode(mode);
 }
@@ -187,13 +201,10 @@ async function init() {
     const backBtn = document.getElementById('back-to-message');
     if (backBtn) backBtn.onclick = goBackToMessage;
 
-    // ── Restore scroll position (continuous view) ─────────────────────────
-    setTimeout(() => {
-        const saved = localStorage.getItem('scrollPosition');
-        if (saved) window.scrollTo(0, parseInt(saved));
-    }, 100);
-
     // ── Activate the initial screen ──────────────────────────────────────
+    // (Continuous view's scroll-position restore now lives inside
+    // activateView() itself, so it runs here too whenever `lastScreen` is
+    // 'continuous' — no separate boot-only restore needed.)
     // Restore whatever screen — including Home — was showing before the
     // reload, via `lastScreen` (set by every setActiveScreen() call, so it
     // always reflects reality, Home included). This is deliberately NOT
