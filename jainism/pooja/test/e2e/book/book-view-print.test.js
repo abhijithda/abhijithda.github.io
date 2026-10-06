@@ -40,11 +40,8 @@ test.describe('Book View - Print Mode', () => {
         });
 
         await page.goto('/');
-        // The app now lands on the Home page first (not book view) — open
-        // book view explicitly before any test here relies on its content.
-        await page.locator('.view-toggle-btn[data-view="book"]').click();
-        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
-
+        // The app lands on the Home page first — openBookView() handles
+        // switching into book view and waiting for its content.
         await openBookView(page);
 
         await page.locator('#settings-btn').click();
@@ -186,10 +183,8 @@ test.describe('Book View - Print Mode - Paper size screenshots', () => {
         });
 
         await page.goto('/');
-        // The app now lands on the Home page first (not book view) — open
-        // book view explicitly before any test here relies on its content.
-        await page.locator('.view-toggle-btn[data-view="book"]').click();
-        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
+        // The app lands on the Home page first — openBookView() handles
+        // switching into book view and waiting for its content.
         await openBookView(page);
 
         await page.locator('#settings-btn').click();

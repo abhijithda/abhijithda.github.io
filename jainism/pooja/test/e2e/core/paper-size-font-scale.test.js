@@ -243,6 +243,11 @@ test.describe('Font-size scaling setting', () => {
     });
 
     test('font scale composes with paper-size capping: bigger text within a fixed physical width can push the book past a single spread', async ({ page }) => {
+        // The real book opens on its (unnumbered) cover spread, where
+        // #book-spread-info is deliberately blank — advance past it first.
+        const nextBtn = page.locator('#book-next');
+        if (!(await nextBtn.isDisabled())) await nextBtn.click();
+
         await openSettings(page);
         await page.locator('#paper-size-select').selectOption('a4');
         await page.waitForTimeout(200);
