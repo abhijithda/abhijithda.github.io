@@ -17,11 +17,8 @@ test.describe('Book View - Screenshot Tests (Display Options)', () => {
         });
 
         await page.goto('/');
-        // The app now lands on the Home page first (not book view) — open
-        // book view explicitly before any test here relies on its content.
-        await page.locator('.view-toggle-btn[data-view="book"]').click();
-        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
-
+        // The app lands on the Home page first — openBookView() handles
+        // switching into book view and waiting for its content.
         await openBookView(page);
 
         await page.locator('#settings-btn').click();
@@ -112,6 +109,20 @@ test.describe('Book View - Screenshot Tests (Display Options)', () => {
     // since it's governed by different CSS (centered, full-page, no card
     // border) than an inline image block.
     test('Screenshot: standalone image page (i_001)', async ({ page }) => {
+        // Isolated fixture, not the shared small one — the shared
+        // fixture's only standalone-image-shaped item is the cover
+        // (ins_001), which has block.content and so renders as the
+        // title-style page, not the plain standalone-image page this
+        // screenshot is meant to document.
+        await page.route('**/data.json', route => route.fulfill({
+            json: [{
+                id: 'i_001', type: 'insert',
+                blocks: [{ id: 'i_001_b_1', type: 'images', images: [{ src: 'test.jpg', caption: { kn: 'ಪರೀಕ್ಷೆ', en: 'Test Caption' } }] }],
+            }],
+        }));
+        await page.reload();
+        await openBookView(page);
+
         const card = page.locator('#book-i_001');
         await expect(card).toHaveClass(/standalone-image/);
         await expect(card.locator('.book-image')).toBeVisible();

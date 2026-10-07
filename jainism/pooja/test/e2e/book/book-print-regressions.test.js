@@ -13,12 +13,26 @@ const path = require('path');
 
 test.describe('Book print — regressions', () => {
     test.beforeEach(async ({ page }) => {
-        await page.route('**/data.json', route => {
-            route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
-        });
+        // Not the shared small fixture directly — it's just the cover
+        // (title-style, no plain standalone-image), and this file's tests
+        // specifically need a plain standalone image with a caption to
+        // check against. Clone the shared fixture's content/flavor but
+        // splice in a plain photo item so both exist without changing the
+        // file other specs share (which would shift their page/spread math).
+        const sharedFixture = require(path.join(__dirname, '..', '..', 'data.json'));
+        const withStandaloneImage = [
+            sharedFixture[0], // the cover
+            {
+                id: 'i_001', type: 'insert',
+                blocks: [{ id: 'i_001_b_1', type: 'images', images: [{ src: 'test.jpg', caption: { kn: 'ಪರೀಕ್ಷೆ', en: 'Test Caption' } }] }],
+            },
+            ...sharedFixture.slice(1),
+        ];
+        await page.route('**/data.json', route => route.fulfill({ json: withStandaloneImage }));
+
         await page.goto('/');
-        // The app now lands on the Home page first (not book view) — open
-        // book view explicitly before any test here relies on its content.
+        // The app lands on the Home page first — open book view explicitly
+        // before relying on its content.
         await page.locator('.view-toggle-btn[data-view="book"]').click();
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
     });
