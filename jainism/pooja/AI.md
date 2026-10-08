@@ -322,6 +322,16 @@ to a real file) as part of building this structure.
     **Print** below), a blank insert would print as an invisible sliver
     squeezed between whatever's above and below it, not an actual blank
     sheet.
+- **Title-style images are sized by the same rules as every other photo,
+  in both views — and the book-view cap reserves room for the text.**
+  - Continuous view renders a title-style insert's image inside the exact
+    same `.block-row.media-only > .col-media.has-images > .image-card > img`
+    markup a normal photo block gets, so `core/media.css` sizes it
+    (screen, mobile, print). An earlier version gave `.title-style-image`
+    its own `max-height: 70vh` rule, so the same photo visibly shrank the
+    moment it gained a title. The `.title-style-image` class remains only as
+    a hook; it deliberately carries no size rules in
+    `continuous-view.css`.
 - **Multi-language captions/titles are always one line per language, never
   joined onto a single line with "/".** This applies everywhere a caption
   or title can show more than one language at once — the per-image caption
@@ -417,7 +427,24 @@ to a real file) as part of building this structure.
     fired the same global listener and silently overwrote continuous
     view's saved position with 0, well before any reload; the reload only
     ever revealed damage that had already happened the moment Home was
-    opened. The 🏠 icon (`#home-btn`), left of the Book/Continuous toggle
+    opened.
+  - *Saving* the position correctly was only half the fix — *restoring*
+    it has to happen every time continuous view becomes the active screen,
+    not just once at boot. `activateView()`'s `continuous` branch now does
+    the `scrollTo` restore itself (short `setTimeout`, same reasoning as
+    before: the container needs a moment to lay out before `scrollTo` has
+    a real scrollable height to target), rather than that restore living
+    only in `init()`'s one-time startup code. An earlier version had it
+    only in `init()`, which meant a straight page *reload* while on
+    continuous view worked (that path goes through `init()`), but
+    navigating away to Home or book view and back *mid-session* did not —
+    the position was saved correctly the whole time, just never
+    re-applied on the way back in. Book view never had this problem
+    because its own position restore (`bookSpread` in `localStorage`)
+    already lived inside `initBookView()` itself, which runs fresh on
+    every activation regardless of path — continuous view's restore now
+    follows the same pattern.
+  - The 🏠 icon (`#home-btn`), left of the Book/Continuous toggle
     in the header, is still always available to go back to Home
     deliberately — clicking it, either of Home's own two option buttons, or
     the header's Book/Continuous toggle buttons all call
