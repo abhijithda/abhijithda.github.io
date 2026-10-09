@@ -479,14 +479,66 @@ body[data-paper-size="a3"] .book-nav {
 }
 
 /* object-fit: contain (not cover) so the whole image is visible — nothing
-   cropped off the top or bottom to fill a fixed box. */
+   cropped off the top or bottom to fill a fixed box.
+
+   The height cap has to leave real room for the title text below it.
+   cqh here is a percentage of the whole .book-spread (the size
+   container), but the page column is shorter than the spread by
+   .book-columns' vertical padding (35px + 35px), and the card itself
+   adds padding, borders and gaps. A flat 75cqh ignored all that, so a
+   tall portrait image plus its Kannada+English title overflowed the
+   column and the English line spilled onto the facing page. Reserve:
+   70px column padding + 60px card padding/borders/gaps + ~150px for the
+   text block (scaled by font size, since the text grows with it). */
 .title-style-image {
     width: 100%;
     height: auto;
-    max-height: 75cqh;
+    max-height: calc(100cqh - 70px - 60px - (150px * var(--font-scale)));
     object-fit: contain;
     border: none;
     box-shadow: none;
+}
+
+/* The text block is never the thing that gets squeezed or split away
+   from its image. */
+.title-style-text-wrap {
+    flex-shrink: 0;
+}
+
+/* On screen the page size is dynamic (viewport-dependent), so a height
+   *estimate* for the image can never be guaranteed right at every size.
+   Instead, make the card exactly one page column tall and let the image
+   give up space only when it must:
+     column height = 100cqh (the spread, a size container with a fixed
+                     aspect ratio) - 70px (.book-columns' 35px + 35px
+                     vertical padding, border-box)
+   The image wrap does NOT grow (flex: 0 1 auto) — it keeps the image's
+   natural fitted height, and the card centers image + title as one group
+   (justify-content: center). It only SHRINKS (min-height: 0, with the
+   image's max-height: 100% resolving against the shrunken wrap) when
+   image + title would otherwise exceed the column. The text block
+   (flex-shrink: 0) never shrinks. So image and title always share one
+   page at any screen size or font scale, with no stretched gap between
+   them (an earlier version used flex: 1 1 0, which stretched the wrap to
+   fill the leftover height and left a tall empty band around any image
+   that doesn't happen to fill it). This is the same rule paged media
+   follows generally: scale the figure to fit the page, never separate it
+   from its caption. Print keeps the fixed-paper mm caps below.
+   */
+@media screen {
+    .book-columns .title-style-page {
+        height: calc(100cqh - 70px);
+        box-sizing: border-box;
+    }
+
+    .title-style-image-wrap {
+        flex: 0 1 auto;
+        min-height: 0;
+    }
+
+    .title-style-image {
+        max-height: 100%;
+    }
 }
 
 .title-style-text-wrap {

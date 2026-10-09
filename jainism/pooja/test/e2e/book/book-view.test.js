@@ -35,6 +35,37 @@ test.describe('Book View — using the small controlled fixture', () => {
         await expect(page.locator('.view-toggle-btn[data-view="book"]')).toHaveClass(/active/);
     });
 
+    // The insert's image and its title must always share one page, at any
+    // screen size — if they ever split, the title's box lands outside the
+    // card (in the next column) and these bounds checks fail.
+    for (const size of [
+        { width: 1920, height: 1080 },
+        { width: 1280, height: 720 },
+        { width: 1024, height: 600 },
+        { width: 800, height: 600 },
+    ]) {
+        test(`the cover's image and both title lines stay on one page at ${size.width}x${size.height}`, async ({ page }) => {
+            await page.setViewportSize(size);
+            await openBookView(page);
+
+            const card = page.locator('#book-ins_001');
+            await expect(card).toBeVisible();
+            const cardBox = await card.boundingBox();
+            const imgBox = await card.locator('.title-style-image').boundingBox();
+
+            for (const sel of ['.title-style-text-line.lang-kn', '.title-style-text-line.lang-en']) {
+                const box = await card.locator(sel).boundingBox();
+                expect(box, `${sel} should be rendered`).not.toBeNull();
+                // Same column: horizontally inside the card, and vertically
+                // below the image and above the card's bottom edge.
+                expect(box.x).toBeGreaterThanOrEqual(cardBox.x - 1);
+                expect(box.x + box.width).toBeLessThanOrEqual(cardBox.x + cardBox.width + 1);
+                expect(box.y).toBeGreaterThanOrEqual(imgBox.y + imgBox.height - 1);
+                expect(box.y + box.height).toBeLessThanOrEqual(cardBox.y + cardBox.height + 1);
+            }
+        });
+    }
+
     test('a standalone photo (insert with no block.content, just a caption) renders as its own centered page, not inline with text', async ({ page }) => {
         // Isolated fixture, not the shared small one — the shared fixture
         // keeps q_001 right on the cover's facing page (spread 0), which

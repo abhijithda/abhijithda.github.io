@@ -332,6 +332,27 @@ to a real file) as part of building this structure.
     moment it gained a title. The `.title-style-image` class remains only as
     a hook; it deliberately carries no size rules in
     `continuous-view.css`.
+  - Book view guarantees the image and title share one page **by
+    construction, not by estimate.** On screen, `.title-style-page` is
+    exactly one page column tall (`calc(100cqh - 70px)`: the spread is a
+    size container with a fixed aspect ratio, and `.book-columns` has
+    35px + 35px of vertical padding) and centers image + title as one
+    group. The image wrap is `flex: 0 1 auto; min-height: 0` — it does
+    **not** grow, it only *shrinks* (the image's `max-height: 100%`
+    resolves against the shrunken wrap) when image + title would exceed
+    the column — and `.title-style-text-wrap` is `flex-shrink: 0`, so the
+    text is never squeezed. At any screen size or font scale the title
+    stays with its image, with no stretched gap. Three earlier versions
+    got this wrong: a flat `75cqh` cap and a `calc(100cqh - ... - 150px *
+    var(--font-scale))` cap were height *estimates* that could be wrong at
+    some size (the English line spilled onto the facing page), and a
+    `flex: 1 1 0` fill *grew* the image wrap to the leftover height, which
+    left a tall empty band above and below any image that doesn't fill it
+    (a landscape cover looked like a small image floating between big
+    gaps). Print is unchanged (fixed paper size, mm-based caps). Only if
+    the text block alone is taller than a page (tiny viewport + large font
+    scale) can it still overflow — nothing can keep that on one page. An
+    e2e test checks the bounds at four viewport sizes.
 - **Multi-language captions/titles are always one line per language, never
   joined onto a single line with "/".** This applies everywhere a caption
   or title can show more than one language at once — the per-image caption
