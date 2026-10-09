@@ -189,17 +189,6 @@ describe('renderContinuousView', () => {
         expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
     });
 
-    test('a title-style insert\'s image uses the same media-only image markup as any other photo, so core/media.css sizes it identically', () => {
-        const data = [{
-            id: 'ins_010', type: 'insert',
-            blocks: [{ id: 'ins_010_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }],
-        }];
-        renderContinuousView(data, container, 'all');
-        const img = document.querySelector('#ins_010_b_1 .block-row.media-only .col-media.has-images .image-card img');
-        expect(img).not.toBeNull();
-        expect(img.src).toContain('images/x.jpg');
-    });
-
     test('an insert with an image + per-image caption but no content (a plain standalone photo) falls through to the normal per-block row — not the big centered title-style card', () => {
         const data = [{
             id: 'ins_002', type: 'insert',

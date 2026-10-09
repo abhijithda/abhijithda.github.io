@@ -107,28 +107,11 @@ export function renderContinuousView(data, container, lang = 'all') {
                 }
 
                 if (imgData) {
-                    // Same markup as a normal media-only image block
-                    // (.block-row.media-only > .col-media > .image-card >
-                    // img), on purpose: that way core/media.css sizes this
-                    // photo with the exact same rules as every other photo
-                    // in continuous view — screen, mobile and print. An
-                    // earlier version gave title-style images their own
-                    // separate size rule (max-height: 70vh), so the very
-                    // same photo shrank the moment it gained a title.
-                    const imgRow = document.createElement('div');
-                    imgRow.className = 'block-row images media-only title-style-image-row';
-                    const imgCol = document.createElement('div');
-                    imgCol.className = 'col-media has-images';
-                    const imgCard = document.createElement('div');
-                    imgCard.className = 'image-card';
                     const img = document.createElement('img');
                     img.className = 'title-style-image';
                     img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
                     img.alt = langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '';
-                    imgCard.appendChild(img);
-                    imgCol.appendChild(imgCard);
-                    imgRow.appendChild(imgCol);
-                    card.appendChild(imgRow);
+                    card.appendChild(img);
                 }
 
                 if (hasContent) {
