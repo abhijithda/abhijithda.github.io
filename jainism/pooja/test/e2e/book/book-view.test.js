@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
-const { hasClass } = require('../test-utils');
+const { hasClass, plainPhotoInsert } = require('../test-utils');
 
 // Switches into book view and waits for the first spread to actually render
 // (initBookView populates cards synchronously, but the first
@@ -74,10 +74,7 @@ test.describe('Book View — using the small controlled fixture', () => {
         await page.route('**/data.json', route => route.fulfill({
             json: [
                 { id: 'ins_001', type: 'insert', hideId: true, blocks: [{ id: 'ins_001_b_1', type: 'images' }] },
-                {
-                    id: 'i_001', type: 'insert',
-                    blocks: [{ id: 'i_001_b_1', type: 'images', images: [{ src: 'test.jpg', caption: { kn: 'ಪರೀಕ್ಷೆ', en: 'Test Caption' } }] }],
-                },
+                plainPhotoInsert('i_001'),
             ],
         }));
         await page.reload();

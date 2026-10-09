@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
+const { plainPhotoInsert } = require('../test-utils');
 
 async function openBookView(page) {
     await page.locator('.view-toggle-btn[data-view="book"]').click();
@@ -115,10 +116,7 @@ test.describe('Book View - Screenshot Tests (Display Options)', () => {
         // title-style page, not the plain standalone-image page this
         // screenshot is meant to document.
         await page.route('**/data.json', route => route.fulfill({
-            json: [{
-                id: 'i_001', type: 'insert',
-                blocks: [{ id: 'i_001_b_1', type: 'images', images: [{ src: 'test.jpg', caption: { kn: 'ಪರೀಕ್ಷೆ', en: 'Test Caption' } }] }],
-            }],
+            json: [plainPhotoInsert('i_001')],
         }));
         await page.reload();
         await openBookView(page);

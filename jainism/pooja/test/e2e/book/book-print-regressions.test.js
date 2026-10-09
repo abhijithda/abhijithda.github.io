@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
+const { plainPhotoInsert } = require('../test-utils');
 
 // Regression coverage for two print-specific side effects of earlier,
 // screen-focused changes:
@@ -22,10 +23,7 @@ test.describe('Book print — regressions', () => {
         const sharedFixture = require(path.join(__dirname, '..', '..', 'data.json'));
         const withStandaloneImage = [
             sharedFixture[0], // the cover
-            {
-                id: 'i_001', type: 'insert',
-                blocks: [{ id: 'i_001_b_1', type: 'images', images: [{ src: 'test.jpg', caption: { kn: 'ಪರೀಕ್ಷೆ', en: 'Test Caption' } }] }],
-            },
+            plainPhotoInsert('i_001'),
             ...sharedFixture.slice(1),
         ];
         await page.route('**/data.json', route => route.fulfill({ json: withStandaloneImage }));

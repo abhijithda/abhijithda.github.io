@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
+const { plainPhotoInsert } = require('../test-utils');
 
 // Regression coverage for a real bug: .col-media's visibility used to be
 // gated entirely on the Videos/QR toggles, so any photo (standalone item,
@@ -35,10 +36,7 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
         // which deliberately renders with no findable DOM id at all; this
         // test needs a plain, referenceable standalone photo instead.
         await page.route('**/data.json', route => route.fulfill({
-            json: [{
-                id: 'i_001', type: 'insert',
-                blocks: [{ id: 'i_001_b_1', type: 'images', images: [{ src: 'test.jpg', caption: { en: 'Test' } }] }],
-            }],
+            json: [plainPhotoInsert('i_001')],
         }));
         await page.reload();
         await page.locator('.view-toggle-btn[data-view="continuous"]').click();
