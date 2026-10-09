@@ -1,9 +1,5 @@
 [
   {
-    "id": "blank_000",
-    "type": "insert"
-  },
-  {
     "id": "i_000",
     "type": "insert",
     "hideId": true,
