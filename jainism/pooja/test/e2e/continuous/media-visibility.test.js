@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
+const { plainPhotoInsert } = require('../test-utils');
 
 // Regression coverage for a real bug: .col-media's visibility used to be
 // gated entirely on the Videos/QR toggles, so any photo (standalone item,
@@ -19,7 +20,7 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
         });
 
         await page.goto('/');
-        // Book view is the default on a fresh load — switch to continuous
+        // The app lands on the Home page first — switch to continuous
         // view explicitly before waiting on .card, since these tests are
         // continuous-view-specific.
         await page.locator('.view-toggle-btn[data-view="continuous"]').click();
@@ -30,11 +31,23 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
     });
 
     test('a standalone photo item stays visible when both toggles are off', async ({ page }) => {
+        // Isolated fixture, not the shared small one — the shared fixture's
+        // only standalone-image item is the cover (ins_001, hideId: true),
+        // which deliberately renders with no findable DOM id at all; this
+        // test needs a plain, referenceable standalone photo instead.
+        await page.route('**/data.json', route => route.fulfill({
+            json: [plainPhotoInsert('i_001')],
+        }));
+        await page.reload();
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
+        await expect(page.locator('.card').first()).toBeVisible();
+        await page.locator('#settings-btn').click();
+        await expect(page.locator('#toggle-videos')).toBeVisible();
+
         // Videos is ON and QR is OFF by default — turn Videos off too.
         await page.locator('#toggle-videos').uncheck();
         await page.waitForTimeout(300);
 
-        // i_001: standalone "images"-type item in the fixture
         await expect(page.locator('#i_001_b_1 .image-card img')).toBeVisible();
     });
 

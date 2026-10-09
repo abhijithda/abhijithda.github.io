@@ -25,6 +25,9 @@ test.describe('Paper size setting', () => {
             route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
         });
         await page.goto('/');
+        // The app lands on the Home page first — open book view explicitly
+        // before relying on its content.
+        await page.locator('.view-toggle-btn[data-view="book"]').click();
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
     });
 
@@ -77,6 +80,10 @@ test.describe('Paper size setting', () => {
     });
 
     test('switching to A3 changes the book view spread width, and can change the total page count', async ({ page }) => {
+        // The real book opens on its (unnumbered) cover spread, where
+        // #book-spread-info is deliberately blank — advance past it first.
+        const nextBtn = page.locator('#book-next');
+        if (!(await nextBtn.isDisabled())) await nextBtn.click();
         await expect(page.locator('#book-spread-info')).toHaveText(/\(of \d+\)/);
         // A4/A3 use a genuine fixed `width` (max-width: none) — see
         // book-view.css's comment on why a max-width-based cap let the
@@ -184,6 +191,9 @@ test.describe('Font-size scaling setting', () => {
             route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
         });
         await page.goto('/');
+        // The app lands on the Home page first — open book view explicitly
+        // before relying on its content.
+        await page.locator('.view-toggle-btn[data-view="book"]').click();
         await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
     });
 
@@ -233,6 +243,11 @@ test.describe('Font-size scaling setting', () => {
     });
 
     test('font scale composes with paper-size capping: bigger text within a fixed physical width can push the book past a single spread', async ({ page }) => {
+        // The real book opens on its (unnumbered) cover spread, where
+        // #book-spread-info is deliberately blank — advance past it first.
+        const nextBtn = page.locator('#book-next');
+        if (!(await nextBtn.isDisabled())) await nextBtn.click();
+
         await openSettings(page);
         await page.locator('#paper-size-select').selectOption('a4');
         await page.waitForTimeout(200);

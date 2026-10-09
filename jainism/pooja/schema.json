@@ -12,8 +12,11 @@
         "enum": [
           "question",
           "answer",
-          "images"
+          "insert"
         ]
+      },
+      "hideId": {
+        "type": "boolean"
       },
       "timestamp": {
         "type": "string",
@@ -133,8 +136,14 @@
     },
     "required": [
       "id",
-      "type",
-      "blocks"
-    ]
+      "type"
+    ],
+    "if": {
+      "properties": { "type": { "const": "insert" } }
+    },
+    "then": {},
+    "else": {
+      "required": ["blocks"]
+    }
   }
 }

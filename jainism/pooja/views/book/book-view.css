@@ -397,8 +397,12 @@ body[data-paper-size="a3"] .book-nav {
     -webkit-column-break-before: always;
 }
 
-/* Hide the block ID and Read Tick so the image page is clean */
-.book-columns .standalone-image .book-bid,
+/* Read ticks never apply to a standalone-image/insert page (not trackable
+   content — see isBlockTrackable), so still hide that specifically. The id
+   badge itself (.book-bid) is NOT hidden here any more: it's shown/hidden
+   per-item via `hideId` in book-view.js, matching continuous view's rule
+   exactly, rather than being unconditionally hidden for every standalone
+   image the way an earlier version did. */
 .book-columns .standalone-image .read-tick {
     display: none !important;
 }
@@ -428,6 +432,156 @@ body[data-paper-size="a3"] .book-nav {
     font-size: calc(11px * var(--font-scale));
     text-align: center;
     color: #555;
+}
+
+/* The id badge stays left-aligned, matching every normal Q&A card's
+   .book-bid, even though .standalone-image/.title-style-page center
+   everything else (image, caption, title text). Without this, the flex
+   column's align-items: center pulls the badge to the middle too, which
+   looked inconsistent next to the left-aligned numbering on every other
+   page. */
+.book-columns .standalone-image .book-bid,
+.book-columns .title-style-page .book-bid {
+    align-self: flex-start;
+}
+
+/* ── "insert" items — the front cover, section dividers, and pure blank
+   pages, all one item type (distinct from block-level "images" to avoid
+   the same word meaning two different things), distinguished purely by
+   which fields the block has (image, content, both, or neither). Same
+   break-after: column trick as standalone images, so it always lands
+   alone on its own page, never sharing a column with anything else. ── */
+.book-columns .title-style-page {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: column;
+    page-break-after: always;
+    -webkit-column-break-after: always;
+
+    background: white;
+    border-left: 3px solid #607d8b;
+    border-top: 0.5px solid #eee;
+    border-right: 0.5px solid #eee;
+    border-bottom: 0.5px solid #eee;
+    padding: 8px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.title-style-image-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* object-fit: contain (not cover) so the whole image is visible — nothing
+   cropped off the top or bottom to fill a fixed box.
+
+   The height cap has to leave real room for the title text below it.
+   cqh here is a percentage of the whole .book-spread (the size
+   container), but the page column is shorter than the spread by
+   .book-columns' vertical padding (35px + 35px), and the card itself
+   adds padding, borders and gaps. A flat 75cqh ignored all that, so a
+   tall portrait image plus its Kannada+English title overflowed the
+   column and the English line spilled onto the facing page. Reserve:
+   70px column padding + 60px card padding/borders/gaps + ~150px for the
+   text block (scaled by font size, since the text grows with it). */
+.title-style-image {
+    width: 100%;
+    height: auto;
+    max-height: calc(100cqh - 70px - 60px - (150px * var(--font-scale)));
+    object-fit: contain;
+    border: none;
+    box-shadow: none;
+}
+
+/* The text block is never the thing that gets squeezed or split away
+   from its image. */
+.title-style-text-wrap {
+    flex-shrink: 0;
+}
+
+/* On screen the page size is dynamic (viewport-dependent), so a height
+   *estimate* for the image can never be guaranteed right at every size.
+   Instead, make the card exactly one page column tall and let the image
+   give up space only when it must:
+     column height = 100cqh (the spread, a size container with a fixed
+                     aspect ratio) - 70px (.book-columns' 35px + 35px
+                     vertical padding, border-box)
+   The image wrap does NOT grow (flex: 0 1 auto) — it keeps the image's
+   natural fitted height, and the card centers image + title as one group
+   (justify-content: center). It only SHRINKS (min-height: 0, with the
+   image's max-height: 100% resolving against the shrunken wrap) when
+   image + title would otherwise exceed the column. The text block
+   (flex-shrink: 0) never shrinks. So image and title always share one
+   page at any screen size or font scale, with no stretched gap between
+   them (an earlier version used flex: 1 1 0, which stretched the wrap to
+   fill the leftover height and left a tall empty band around any image
+   that doesn't happen to fill it). This is the same rule paged media
+   follows generally: scale the figure to fit the page, never separate it
+   from its caption. Print keeps the fixed-paper mm caps below.
+   */
+@media screen {
+    .book-columns .title-style-page {
+        height: calc(100cqh - 70px);
+        box-sizing: border-box;
+    }
+
+    .title-style-image-wrap {
+        flex: 0 1 auto;
+        min-height: 0;
+    }
+
+    .title-style-image {
+        max-height: 100%;
+    }
+}
+
+.title-style-text-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.title-style-text-rule {
+    width: 32px;
+    height: 2px;
+    background: #607d8b;
+}
+
+.title-style-text-line {
+    text-align: center;
+    font-weight: bold;
+}
+
+.title-style-text-line.lang-kn {
+    font-size: clamp(calc(18px * var(--font-scale)), calc(3.2cqi * var(--font-scale)), calc(28px * var(--font-scale)));
+    color: #111;
+}
+
+.title-style-text-line.lang-en {
+    font-size: clamp(calc(13px * var(--font-scale)), calc(2.2cqi * var(--font-scale)), calc(19px * var(--font-scale)));
+    color: #555;
+}
+
+/* Same font step-down as any additional stacked line elsewhere in the
+   book — keeps 3+ active languages, or multi-line content, fitting the
+   page. */
+.title-style-text-wrap:has(.title-style-text-line:nth-child(4)) .title-style-text-line {
+    font-size: clamp(calc(11px * var(--font-scale)), calc(1.8cqi * var(--font-scale)), calc(15px * var(--font-scale)));
+}
+
+/* The cover spread (the very first item, when it's an "insert") is a
+   title page: no running head/footer, like a real book. */
+.book-spread.cover-spread .book-static-head,
+.book-spread.cover-spread .book-static-foot {
+    display: none;
 }
 
 /* ── Nav bar ─────────────────────────────────────────────────────────────── */
@@ -621,6 +775,16 @@ body[data-paper-size="a3"] .book-nav {
 
     body[data-paper-size="a3"] .book-columns .standalone-image .book-image {
         max-height: 230mm !important;
+    }
+
+    /* Same fix, same reasoning, for a title-style item's image (e.g. the
+       cover). */
+    .title-style-image {
+        max-height: 170mm !important;
+    }
+
+    body[data-paper-size="a3"] .title-style-image {
+        max-height: 250mm !important;
     }
 
     .book-columns {

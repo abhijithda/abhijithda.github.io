@@ -234,6 +234,284 @@ to a real file) as part of building this structure.
 
 ---
 
+## "insert" Item Type — ✅ Current
+- One item type covers the front cover, section dividers, plain standalone
+  photos, and pure blank pages — there is no separate `cover`/`images`/
+  `spacer` type any more. Every other item type still unconditionally
+  requires `blocks`, but `insert` is the one exception: `blocks` is
+  entirely optional for it (`schema.json`'s `if`/`then` on
+  `type === "insert"`), so the minimal blank page is just
+  `{ "id": "blank_000", "type": "insert" }` — no empty block required to
+  satisfy the schema. (An earlier version of this schema made `blocks`
+  unconditionally required for every type, including `insert`, specifically
+  to avoid `if`/`then` branching — but that made the single most common
+  `insert` use case, a bare blank page, need an empty block just to
+  validate. All the rendering code already handled a missing `item.blocks`
+  safely by this point, so the conditional-requirement branching came back
+  for this one case.) When a block *is* present, its `images`/`content`
+  fields (same shape as a plain `images`-type block always had) decide what
+  it looks like:
+  - `block.content` present -> big, centered, dash-ruled title-style text
+    (what the cover/dividers looked like before this merge)
+  - only `block.images[0].caption` present (no `content`) -> small per-image
+    caption text (what a plain standalone photo item looked like before
+    the merge — **a standalone photo is just an `insert` with a caption
+    instead of a title**)
+  - neither -> a blank page/card, no visible content at all
+  This went through several names before landing here — `cover`, then a
+  `spacer` type with its own item-level `image`/`content` fields, then
+  `images` + a `style: "title"` flag — before finally merging the plain
+  `images` item type into `insert` entirely, once it was clear a photo
+  entry is conceptually "just another kind of insert." `images` still
+  exists as a **block** type (`block.type: "images"`); only the item-level
+  type went away.
+- `hideId: true` — meant for the front cover specifically, not dividers or
+  photos in general. It suppresses exactly two things, **identically in
+  both views**: the DOM id (so `jumpToReference()` can never land on it)
+  and the visible id badge (`.block-id` in continuous view, `.book-bid` in
+  book view). **It does not hide the item's content** — the image and text
+  still render completely normally either way. An insert *without*
+  `hideId` is fully referenceable: its DOM id is the **block's** id, not
+  the item's, matching how every other block anchors itself (this was also
+  a bug fix — an earlier version anchored the card to the item id, so
+  nothing could actually jump to an insert even when it should have been
+  able to), and it gets the same visible id badge a normal block row does,
+  so a reader can actually see and cite it. Book view's parity here is
+  itself a fix: an earlier version had a leftover CSS rule
+  (`.standalone-image .book-bid { display: none !important; }`) from the
+  old plain-`images` type, unconditionally hiding the badge for every
+  insert regardless of `hideId` — meaning continuous view showed ids for
+  ordinary photos/dividers but book view never did for any insert at all.
+  That rule is gone; book view now renders the same `.book-bid` badge
+  `createBookCard` always has, governed by `hideId` exactly like
+  continuous view's badge is.
+- **The id badge is always left-aligned, in both views, regardless of
+  which card style it's sitting inside.** `.standalone-image`/
+  `.title-style-page` (book view) and `.card.title-style` (continuous
+  view) all use a centered flex column for everything else they
+  contain — image, caption, title text — and without an explicit
+  `align-self: flex-start` override on `.book-bid`/`.block-id`
+  specifically, the badge inherited that centering too, which looked
+  inconsistent next to every normal Q&A card's left-aligned numbering.
+  Both views' CSS now carries that override.
+- **Continuous view shows exactly the same content as book view — nothing
+  is ever skipped or omitted.** But only the two cases with no equivalent
+  in the normal per-block row actually get special rendering there:
+  - `block.content` present -> the big centered title-style card.
+  - neither image nor content -> an empty card, class `.insert-blank`,
+    forced onto its own printed page (see below) — the "blank page" idea,
+    same as book view's.
+  A **plain standalone photo** (image + per-image caption, no
+  `block.content`) is deliberately **not** special-cased in continuous
+  view — it falls through to the exact same per-block row rendering every
+  other block gets: left-aligned `.block-id` column, `.image-card` at its
+  original size, same as before "insert" existed. An earlier version of
+  this merge routed every insert — photos included — through the big
+  centered treatment, which shrank the image and replaced the left-aligned
+  id column with a centered one; that was a real regression, not an
+  intentional restyle, and is why this distinction exists at all. Only the
+  title-style and blank cases ever touch the "insert never gets skipped"
+  rule in the first place — an earlier version of *that* feature also
+  skipped blank inserts entirely, which was also wrong (fixed alongside
+  this one).
+  - Blank inserts specifically get a print-only forced page: continuous
+    view has **no other per-item page-break mechanism at all** (unlike book
+    view's deliberate `break-after: column` on every page) — print there is
+    just natural document flow, breaking wherever content runs out. Without
+    `break-before: page`/`break-after: page` on `.insert-blank` (see
+    **Print** below), a blank insert would print as an invisible sliver
+    squeezed between whatever's above and below it, not an actual blank
+    sheet.
+- **Title-style images are sized by the same rules as every other photo,
+  in both views — and the book-view cap reserves room for the text.**
+  - Continuous view renders a title-style insert's image inside the exact
+    same `.block-row.media-only > .col-media.has-images > .image-card > img`
+    markup a normal photo block gets, so `core/media.css` sizes it
+    (screen, mobile, print). An earlier version gave `.title-style-image`
+    its own `max-height: 70vh` rule, so the same photo visibly shrank the
+    moment it gained a title. The `.title-style-image` class remains only as
+    a hook; it deliberately carries no size rules in
+    `continuous-view.css`.
+  - Book view guarantees the image and title share one page **by
+    construction, not by estimate.** On screen, `.title-style-page` is
+    exactly one page column tall (`calc(100cqh - 70px)`: the spread is a
+    size container with a fixed aspect ratio, and `.book-columns` has
+    35px + 35px of vertical padding) and centers image + title as one
+    group. The image wrap is `flex: 0 1 auto; min-height: 0` — it does
+    **not** grow, it only *shrinks* (the image's `max-height: 100%`
+    resolves against the shrunken wrap) when image + title would exceed
+    the column — and `.title-style-text-wrap` is `flex-shrink: 0`, so the
+    text is never squeezed. At any screen size or font scale the title
+    stays with its image, with no stretched gap. Three earlier versions
+    got this wrong: a flat `75cqh` cap and a `calc(100cqh - ... - 150px *
+    var(--font-scale))` cap were height *estimates* that could be wrong at
+    some size (the English line spilled onto the facing page), and a
+    `flex: 1 1 0` fill *grew* the image wrap to the leftover height, which
+    left a tall empty band above and below any image that doesn't fill it
+    (a landscape cover looked like a small image floating between big
+    gaps). Print is unchanged (fixed paper size, mm-based caps). Only if
+    the text block alone is taller than a page (tiny viewport + large font
+    scale) can it still overflow — nothing can keep that on one page. An
+    e2e test checks the bounds at four viewport sizes.
+- **Multi-language captions/titles are always one line per language, never
+  joined onto a single line with "/".** This applies everywhere a caption
+  or title can show more than one language at once — the per-image caption
+  in continuous view's normal `.image-card` (an earlier version joined
+  `kn`/`en` with " / " when the active language was "all" — fixed), book
+  view's standalone-image caption, and both views' title-style text.
+- Excluded from the read-progress denominator entirely, in all three
+  places that compute it (`book-view.js`, `continuous-view.js`,
+  `home/home.js`) — by item type, unconditionally, even though an insert's
+  block may carry real title text that would otherwise look "trackable" by
+  the generic per-block rule (`isBlockTrackable` only looks at
+  text/video presence, not item type). In practice this changes nothing
+  for what used to be plain `images` items either: their caption text
+  lives in `block.images[].caption`, never `block.content`, so
+  `isBlockTrackable` was already always `false` for them regardless of
+  item type.
+- **This only ever applies inside the `insert` branch.** A `question`/
+  `answer` item with real `block.content` is completely unaffected by any
+  of the title-style/caption-style logic above — that logic only exists
+  inside `if (item.type === 'insert')`, so ordinary Q&A content keeps
+  rendering exactly as it always has, through `createBookCard`/the normal
+  per-block loop, regardless of what an insert elsewhere in the same
+  `data.json` looks like.
+- **Book view**: a single `.book-card` (class `title-style-page` or
+  `standalone-image`, matching the two looks above) appended to
+  `#book-columns`, forced onto its own column via the same
+  `break-after: column` trick every standalone page uses (see
+  **Pagination**/**Print** below) — no new print mechanism needed there,
+  it rides the existing column-reflow print path for free.
+- **Page numbering treats the front cover like a real book's title page**:
+  no running head/footer on that spread (`.book-spread.cover-spread` hides
+  both), and every subsequent spread's page numbers are shifted back by
+  one spread (`state.hasCoverPage`, checked once in `initBookView` as
+  `data[0]?.type === 'insert'`) so the first real content page still reads
+  "1", not "3". `renderCurrentSpread`, `jumpToPage`, and the jump-input's
+  blank-input default all apply the same `spreadOffset`.
+- **Getting back to the unnumbered cover**: the Prev button already reaches
+  it naturally (disabled only at spread 0 itself, so it's enabled on page
+  1 and steps back one spread to the cover); typing `0` into the
+  jump-to-page box also jumps straight there (`jumpToPage` special-cases
+  `pageNumber <= 0` when `state.hasCoverPage`), since the cover has no page
+  number of its own to type.
+- **Motivating use case for a blank/divider insert**: without one, real
+  content immediately fills the cover spread's facing (right) page — which,
+  being part of the unnumbered cover spread, never gets a page number shown
+  even though it has real content. Inserting a blank/divider right after
+  the cover fills that facing page instead, so the first real content
+  always lands on a fresh, numbered spread.
+- Real printed page numbers (a `@page`/`counter(page)` footer, independent
+  of the on-screen spread math) are a separate, not-yet-built follow-up —
+  see **Known Gaps** below. Nothing about the cover blocks that; book-view
+  print currently shows no page numbers at all, for any page (see **Print**
+  below for why), so there's no existing numbering to conflict with.
+
+---
+
+
+## Home Surface — ✅ Current
+- A full-page landing page (`#home-view`, `home/home.js`, `home/home.css`),
+  not a modal and not a third value of `viewMode` — `localStorage`'s
+  `viewMode` only ever holds `book`/`continuous`, same as before.
+  Visibility of `#home-view`/`#book-container`/`#continuous-container` is
+  centralized in one function, `app.js`'s `setActiveScreen(screen)` — every
+  other function (`showHome()`, `setViewMode()`) calls through it rather
+  than toggling `style.display` itself, so the three can't end up
+  simultaneously visible from two code paths disagreeing (an earlier
+  version had a separate `hideHome()` called from `activateView()`, which
+  duplicated what `setViewMode()` also did and was the source of a bug
+  where Home stayed visible above the opened view). Shown by default only
+  on a genuine first visit — `init()` checks `localStorage.getItem('lastScreen')`
+  and calls `showHome()` when nothing is stored, or when it's `'home'`;
+  otherwise it calls `activateView()` with that remembered screen, which
+  restores book view's current page (`initBookView` already reads
+  `bookSpread` from `localStorage` on its own) or continuous view's scroll
+  position. `lastScreen` is set inside `setActiveScreen()` itself — every
+  visible-screen change writes it, Home included — and is deliberately a
+  **different key from `viewMode`**: `viewMode` only ever holds
+  `book`/`continuous` and exists purely for print/title formatting, so it
+  is never touched by opening Home. An earlier version used `viewMode` for
+  this boot decision instead of a dedicated key, which seemed equivalent
+  but wasn't: opening Home left `viewMode` still pointing at whichever real
+  view had been open before, so a reload *from Home* jumped straight back
+  into that view rather than staying on Home. (A version before *that* one
+  called `showHome()` unconditionally on every load regardless of history,
+  which was the more obviously-wrong bug — no view was even rendered until
+  a button was clicked, so there was nothing for either view's position
+  restore to act on.)
+  - The global `window.addEventListener('scroll', ...)` that saves
+    continuous view's position has its own matching guard: it only writes
+    `scrollPosition` while `currentScreen === 'continuous'` (an in-memory
+    variable `setActiveScreen()` also sets). Without it, simply *opening*
+    Home — whose content is short, so the window sits near `scrollY` 0 —
+    fired the same global listener and silently overwrote continuous
+    view's saved position with 0, well before any reload; the reload only
+    ever revealed damage that had already happened the moment Home was
+    opened.
+  - *Saving* the position correctly was only half the fix — *restoring*
+    it has to happen every time continuous view becomes the active screen,
+    not just once at boot. `activateView()`'s `continuous` branch now does
+    the `scrollTo` restore itself (short `setTimeout`, same reasoning as
+    before: the container needs a moment to lay out before `scrollTo` has
+    a real scrollable height to target), rather than that restore living
+    only in `init()`'s one-time startup code. An earlier version had it
+    only in `init()`, which meant a straight page *reload* while on
+    continuous view worked (that path goes through `init()`), but
+    navigating away to Home or book view and back *mid-session* did not —
+    the position was saved correctly the whole time, just never
+    re-applied on the way back in. Book view never had this problem
+    because its own position restore (`bookSpread` in `localStorage`)
+    already lived inside `initBookView()` itself, which runs fresh on
+    every activation regardless of path — continuous view's restore now
+    follows the same pattern.
+  - The 🏠 icon (`#home-btn`), left of the Book/Continuous toggle
+    in the header, is still always available to go back to Home
+    deliberately — clicking it, either of Home's own two option buttons, or
+    the header's Book/Continuous toggle buttons all call
+    `activateView()`/`showHome()`, which switch the active screen as part
+    of `setViewMode()`/`setActiveScreen()`.
+- Layout mirrors a continuous-view cover card, not a small icon-sized
+  preview: full-width image (`object-fit: contain`, not `cover` — the whole
+  image is visible, nothing cropped off the top or bottom to fill a fixed
+  box), then the title below it with the same "rule line, title, rule line"
+  styling as the book/continuous title pages, sourced from `data[0]` when
+  it's an `insert`-type item (`home.js`'s `coverItem`, read from
+  `data[0].blocks[0].images[0]`/`.content`, not a search across the whole
+  array — see the **"insert" Item Type** section above) and filtered by
+  the active-language list — nothing here is specific to any one book's
+  data.
+- Below the cover: an overall read-progress summary
+  (`computeProgress`/`getReadBlocks` from `core/read-tracking.js`, same
+  total-block-count formula as both views), then two side-by-side option
+  cards explaining Book vs. Continuous in plain language (page-by-page vs.
+  one long scroll) with a button into each, then settings.
+- **Settings are editable from Home, not just previewed — deliberately not
+  a second copy of the settings state.** Every Home control (language
+  checkboxes, video/QR/read-tracking toggles, paper size, font scale) is
+  wired to *proxy* its change onto the corresponding real header control:
+  set the header element's `value`/`checked`, then dispatch a genuine
+  `change` event on it (`proxyToHeader()` in `home.js`), or for font scale,
+  just `.click()` the header's own +/- buttons. This means every existing
+  save/apply listener already wired in `header.js` — including the lang
+  picker's "at least one language must stay active" enforcement — runs
+  exactly once, in the one place it already lives; Home never calls
+  `saveSettings()` directly. After proxying, Home re-reads that same
+  settings/DOM state to redraw itself, so it can't drift out of sync with
+  whatever the header enforced. The header dropdown remains the literal
+  source of truth; Home is a second, larger-font, always-expanded surface
+  onto the same switches (the whole point of putting settings on this page
+  rather than behind a link) — not an independent one.
+- Home's fields are refreshed (`refreshHomeView()`) on boot and every time
+  Home becomes visible again via the header icon — not live-synced against
+  the header while both happen to be on screen, since Home fully replaces
+  the header's view area while shown rather than floating over it.
+- Tags are deliberately left off Home's summary (would spoil browsing by
+  tag as a discovery mechanism) — everything else considered for the
+  surface (progress, settings, the view explainer) made the cut.
+
+---
+
 ## Language Picker — ✅ Current
 
 - Searchable, collapsible multi-select in Settings — same UI, same markup,
@@ -699,6 +977,13 @@ element's own base class could contain the substring being matched,
   `offsetLeft` — works, but has no highlighting of the matched text itself
   (unlike continuous view's filter, which the user visually confirms by
   what's left on screen).
+- **No real printed page numbers.** `.book-static-foot`'s on-screen numbers
+  are JS-computed from spread index and explicitly hidden in print
+  (`display: none !important` — see **Print** above); print itself has no
+  page-numbering mechanism at all today, cover or no cover. A future
+  `@page`/`counter(page)` footer would be independent of the on-screen
+  spread math and would need its own "skip/restart at the title page" rule
+  regardless of the cover feature.
 
 ---
 

@@ -40,11 +40,8 @@ test.describe('Book View - Print Mode', () => {
         });
 
         await page.goto('/');
-        // Book view is the default on a fresh load — wait for its content
-        // (rather than continuous view's, which is rendered but hidden)
-        // as the "data has loaded" signal.
-        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
-
+        // The app lands on the Home page first — openBookView() handles
+        // switching into book view and waiting for its content.
         await openBookView(page);
 
         await page.locator('#settings-btn').click();
@@ -186,7 +183,8 @@ test.describe('Book View - Print Mode - Paper size screenshots', () => {
         });
 
         await page.goto('/');
-        await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
+        // The app lands on the Home page first — openBookView() handles
+        // switching into book view and waiting for its content.
         await openBookView(page);
 
         await page.locator('#settings-btn').click();

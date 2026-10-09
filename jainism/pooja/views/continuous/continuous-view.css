@@ -74,6 +74,92 @@ body[data-paper-size="a3"] #continuous-container {
     padding-left: 25px;
 }
 
+/* ── "insert" items — the front cover, section dividers, and pure blank
+   pages, all one item type: large image and/or large centered text, in
+   place of the usual caption-sized block row and id badge. An item with
+   neither field is skipped entirely (see continuous-view.js), so there's
+   no "empty card" case to style here. ── */
+.card.title-style {
+    align-items: center;
+    text-align: center;
+    padding: 30px 25px;
+}
+
+.card.title-style > * {
+    padding-left: 0 !important;
+}
+
+/* The id badge stays left-aligned, matching every normal block row's
+   .block-id, even though .card.title-style centers everything else
+   (image, title text). Same reasoning as book-view.css's equivalent rule
+   for .book-bid — numbering should look the same everywhere, regardless
+   of which card style it's sitting inside. */
+.card.title-style .block-id {
+    align-self: flex-start;
+}
+
+/* No size rules of its own for .title-style-image on purpose: it is
+   rendered inside the same .block-row.media-only > .col-media >
+   .image-card markup as every other photo, so core/media.css already
+   sizes it (screen, mobile and print) identically. Only centering here. */
+.card.title-style .title-style-image-row {
+    justify-content: center;
+    padding-left: 0 !important;
+}
+
+.card.title-style .title-style-image-row .col-media {
+    margin-left: 0;
+    align-items: center;
+}
+
+.title-style-text-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.title-style-text-rule {
+    width: 32px;
+    height: 2px;
+    background: #607d8b;
+}
+
+.title-style-text-line {
+    font-weight: bold;
+}
+
+.title-style-text-line.lang-kn {
+    font-size: calc(28px * var(--font-scale));
+    color: #111;
+}
+
+.title-style-text-line.lang-en {
+    font-size: calc(20px * var(--font-scale));
+    color: #555;
+}
+
+/* A content-less insert (no image, no text) — the "blank page" case.
+   On screen, enough height to read as a deliberate break rather than
+   nothing at all. In print, forced onto its own page before AND after —
+   continuous view otherwise has no per-item page-break mechanism at all
+   (unlike book view's break-after: column), so without this, a blank
+   insert would just be an invisible sliver squeezed between whatever
+   printed above and below it, not an actual blank sheet. */
+.card.insert-blank {
+    min-height: 4em;
+}
+
+@media print {
+    .card.insert-blank {
+        break-before: page;
+        break-after: page;
+        page-break-before: always;
+        page-break-after: always;
+    }
+}
+
 .block-id {
     padding: 15px 5px;
     font-family: monospace;

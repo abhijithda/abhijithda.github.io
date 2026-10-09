@@ -16,4 +16,26 @@ async function hasClass(locator, className) {
     return locator.evaluate((el, cls) => el.classList.contains(cls), className);
 }
 
-module.exports = { hasClass };
+// A plain standalone-photo insert (image + per-image caption, no
+// block.content) for the e2e specs that need one in an isolated fixture.
+// Uses an image that really exists in the repo's images/ folder — an
+// earlier version used a made-up 'test.jpg', which rendered as a broken
+// image icon: useless as a screenshot baseline, and a broken <img> has no
+// aspect ratio, so the print-height assertions measured nothing real.
+function plainPhotoInsert(id = 'i_001') {
+    return {
+        id, type: 'insert',
+        blocks: [{
+            id: `${id}_b_1`, type: 'images',
+            images: [{
+                src: 'Bharata Bahubali Swami.jpeg',
+                caption: {
+                    kn: 'ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಾಹುಬಲಿ ಸ್ವಾಮಿ',
+                    en: 'Bharata Chakravarthi and Bahubali Swami',
+                },
+            }],
+        }],
+    };
+}
+
+module.exports = { hasClass, plainPhotoInsert };

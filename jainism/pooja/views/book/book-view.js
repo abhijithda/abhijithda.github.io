@@ -160,43 +160,98 @@ function populateBookColumns() {
     const readBlocks = getReadBlocks(localStorage);
 
     state.data.forEach(item => {
-        // --- 1. HANDLE STANDALONE IMAGE ITEMS ---
-        if (item.type === 'images') {
-            const imgBlock = item.blocks && item.blocks[0];
-            const imgData = imgBlock && imgBlock.images && imgBlock.images[0];
-            
-            if (imgData) {
-                const card = document.createElement('div');
-                // UNIQUE CLASS APPLIED HERE:
-                card.className = 'book-card standalone-image'; 
-                card.id = `book-${item.id}`;
+        // --- 0. HANDLE "insert" ITEMS ---
+        // The front cover, section dividers, plain standalone photos, and
+        // pure blank pages are all one item type now — a standalone photo
+        // is really just an "insert" with a per-image caption instead of a
+        // page title. Distinguished only by which fields its one block has:
+        //   block.images[0].caption -> small caption text (the old plain
+        //                              "images" look)
+        //   block.content           -> big centered title-style text
+        //                              (dash-ruled), which wins if both are
+        //                              somehow present
+        //   neither                 -> no text at all
+        //   no image either         -> a genuinely blank page
+        // Forced onto its own column, so it never shares a page with
+        // anything else.
+        if (item.type === 'insert') {
+            const insertBlock = item.blocks && item.blocks[0];
+            const imgData = insertBlock && insertBlock.images && insertBlock.images[0];
 
+            const hasContent = state.activeLangs.some(lang =>
+                (insertBlock?.content?.[lang] || []).some(line => line.trim() !== ''));
+            const titleStyle = hasContent; // block.content present -> big style
+
+            const card = document.createElement('div');
+            card.className = `book-card ${titleStyle ? 'title-style-page' : 'standalone-image'}`;
+            card.id = `book-${item.id}`;
+
+            // Same id badge every normal card gets (see createBookCard's
+            // `bid` below) — suppressed only by `hideId: true` (meant for
+            // the front cover), matching continuous view's id-badge rule
+            // exactly. An earlier version never rendered this badge at all
+            // for inserts, in either style, which was a book-view-only
+            // regression once continuous view's badge was restored.
+            if (insertBlock && !item.hideId) {
+                const bid = document.createElement('span');
+                bid.className = 'book-bid';
+                bid.textContent = formatIdForDisplay(insertBlock);
+                card.appendChild(bid);
+            }
+
+            if (imgData) {
                 const wrap = document.createElement('div');
-                wrap.className = 'book-image-wrap';
-                
+                wrap.className = titleStyle ? 'book-image-wrap title-style-image-wrap' : 'book-image-wrap';
                 const imgEl = document.createElement('img');
                 imgEl.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
-                imgEl.className = 'book-image';
+                imgEl.className = titleStyle ? 'book-image title-style-image' : 'book-image';
                 wrap.appendChild(imgEl);
 
-                // Render ALL active languages for the caption
-                state.activeLangs.forEach(lang => {
-                    const capText = imgData.caption?.[lang];
-                    if (capText && capText.trim()) {
-                        const capEl = document.createElement('p');
-                        capEl.className = `book-image-caption lang-${lang}`;
-                        capEl.textContent = capText;
-                        wrap.appendChild(capEl);
-                    }
-                });
+                if (!titleStyle) {
+                    // Small per-image caption — the old plain "images" look.
+                    state.activeLangs.forEach(lang => {
+                        const capText = imgData.caption?.[lang];
+                        if (capText && capText.trim()) {
+                            const capEl = document.createElement('p');
+                            capEl.className = `book-image-caption lang-${lang}`;
+                            capEl.textContent = capText;
+                            wrap.appendChild(capEl);
+                        }
+                    });
+                }
 
                 card.appendChild(wrap);
-                columns.appendChild(card);
             }
-            return; // Skip standard block loop for dedicated image items
+
+            // block.content.<lang> is an array of lines/paragraphs, so an
+            // insert's title-style text can span multiple lines just as
+            // easily as a single short title.
+            if (titleStyle) {
+                const textWrap = document.createElement('div');
+                textWrap.className = 'title-style-text-wrap';
+                const ruleTop = document.createElement('div');
+                ruleTop.className = 'title-style-text-rule';
+                textWrap.appendChild(ruleTop);
+                state.activeLangs.forEach(lang => {
+                    (insertBlock?.content?.[lang] || []).forEach(line => {
+                        if (!line.trim()) return;
+                        const lineEl = document.createElement('div');
+                        lineEl.className = `title-style-text-line lang-${lang}`;
+                        lineEl.textContent = line;
+                        textWrap.appendChild(lineEl);
+                    });
+                });
+                const ruleBottom = document.createElement('div');
+                ruleBottom.className = 'title-style-text-rule';
+                textWrap.appendChild(ruleBottom);
+                card.appendChild(textWrap);
+            }
+
+            columns.appendChild(card);
+            return;
         }
 
-        // --- 2. HANDLE STANDARD Q&A / SHLOKA CARDS ---
+        // --- 1. HANDLE STANDARD Q&A / SHLOKA CARDS ---
         const refs = item.references || [];
         item.blocks.forEach((block, blockIdx) => {
             const showExcerpt = blockIdx === 0 && refs.length > 0;
@@ -220,26 +275,35 @@ export function renderCurrentSpread() {
 
     const spreadWidth = spread.clientWidth;
     const totalSpreads = Math.max(1, Math.ceil(columns.scrollWidth / spreadWidth));
-    const totalPages = totalSpreads * 2;
 
     if (state.currentSpread >= totalSpreads) state.currentSpread = totalSpreads - 1;
     if (state.currentSpread < 0) state.currentSpread = 0;
 
     columns.style.transform = `translateX(-${state.currentSpread * spreadWidth}px)`;
 
-    // Calculate actual Page Numbers (Spread 0 = Pages 1 & 2)
-    const leftPage = (state.currentSpread * 2) + 1;
-    const rightPage = (state.currentSpread * 2) + 2;
+    // Cover spread (spread 0, when present) is a title page: no running
+    // head/footer, no page number — matching how a real printed book
+    // treats its title page. Numbering for every spread after it shifts
+    // back by one spread so the first real content page still reads "1".
+    const onCoverSpread = state.hasCoverPage && state.currentSpread === 0;
+    spread.classList.toggle('cover-spread', onCoverSpread);
+    const spreadOffset = state.hasCoverPage ? 1 : 0;
+    const numberedSpreads = Math.max(0, totalSpreads - spreadOffset);
+    const totalNumberedPages = numberedSpreads * 2;
 
-    if (leftNum) leftNum.textContent = leftPage;
-    if (rightNum) rightNum.textContent = rightPage;
-    if (info) info.textContent = `(of ${totalPages})`;
+    // Calculate actual Page Numbers (first numbered spread = Pages 1 & 2)
+    const leftPage = ((state.currentSpread - spreadOffset) * 2) + 1;
+    const rightPage = ((state.currentSpread - spreadOffset) * 2) + 2;
+
+    if (leftNum) leftNum.textContent = onCoverSpread ? '' : leftPage;
+    if (rightNum) rightNum.textContent = onCoverSpread ? '' : rightPage;
+    if (info) info.textContent = onCoverSpread ? '' : `(of ${totalNumberedPages})`;
 
     // Sync the input box with the current page ---
     const jumpInput = document.getElementById('book-jump-input');
     // Only update if the user isn't currently typing in it
     if (jumpInput && document.activeElement !== jumpInput) {
-        jumpInput.value = leftPage;
+        jumpInput.value = onCoverSpread ? '' : leftPage;
     }
 
     const prevBtn = document.getElementById('book-prev');
@@ -264,8 +328,16 @@ export function goToNextSpread() {
 }
 
 export function jumpToPage(pageNumber) {
-    // Translate the desired Page Number back into a Spread Index
-    state.currentSpread = Math.max(0, Math.floor((pageNumber - 1) / 2));
+    // Translate the desired (real, numbered) Page Number back into a
+    // Spread Index — offset by the cover's own spread when present, since
+    // "page 1" is the first spread *after* the unnumbered cover. Typing 0
+    // (the cover has no number of its own to type) jumps to the cover.
+    const spreadOffset = state.hasCoverPage ? 1 : 0;
+    if (state.hasCoverPage && pageNumber <= 0) {
+        state.currentSpread = 0;
+    } else {
+        state.currentSpread = spreadOffset + Math.max(0, Math.floor((pageNumber - 1) / 2));
+    }
     renderCurrentSpread();
     localStorage.setItem('bookSpread', state.currentSpread);
 }
@@ -328,9 +400,20 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     state.itemById = {};
     data.forEach(item => {
         state.itemById[item.id] = item;
-        item.blocks.forEach(b => { state.blockById[b.id] = b; });
+        (item.blocks || []).forEach(b => { state.blockById[b.id] = b; });
     });
-    state.totalBlockCount = data.reduce((s, item) => s + item.blocks.filter(isBlockTrackable).length, 0);
+    // "insert" items (front cover, dividers) are decorative structure, not
+    // content a reader marks as read — excluded from the count entirely,
+    // even if their block happens to carry title text that would otherwise
+    // look "trackable" by the generic per-block rule.
+    state.totalBlockCount = data.reduce((s, item) =>
+        item.type === 'insert' ? s : s + (item.blocks || []).filter(isBlockTrackable).length, 0);
+    // A cover item, when present, is always the very first entry and always
+    // occupies exactly one spread (image page + title page) — see
+    // populateBookColumns. Page numbering treats it like a real book's
+    // title page: unnumbered, with the first real content page starting
+    // at "1" rather than "3".
+    state.hasCoverPage = data[0]?.type === 'insert';
 
     // Added the static footers to the HTML!
     container.innerHTML = `
@@ -372,7 +455,8 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     });
     jumpInput.addEventListener('blur', () => {
         if (jumpInput.value === '') {
-            jumpInput.value = (state.currentSpread * 2) + 1;
+            const spreadOffset = state.hasCoverPage ? 1 : 0;
+            jumpInput.value = ((state.currentSpread - spreadOffset) * 2) + 1;
         }
     });
 

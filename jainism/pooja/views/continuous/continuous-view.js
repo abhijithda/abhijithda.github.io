@@ -51,13 +51,117 @@ export function renderContinuousView(data, container, lang = 'all') {
     const { blockById, itemById } = buildBlockIndex(data);
 
     const readBlocks      = getReadBlocks(localStorage);
+    // "insert" items (front cover, dividers) are decorative structure, not
+    // content a reader marks as read — excluded from the count entirely,
+    // even if their block happens to carry title text that would otherwise
+    // look "trackable" by the generic per-block rule.
     const totalBlockCount = data.reduce((sum, item) =>
-        sum + item.blocks.filter(isBlockTrackable).length, 0);
+        item.type === 'insert' ? sum : sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
 
     data.forEach(item => {
         const card = document.createElement('div');
         card.className = `card ${item.type}`;
         card.id = item.id;
+
+        // "insert" items — the front cover, section dividers, plain
+        // standalone photos, and pure blank pages are all one item type.
+        // Only the two cases with no equivalent in the normal per-block
+        // row get special rendering here:
+        //   block.content present -> big centered title-style page
+        //     (dash-ruled) — the cover/divider look.
+        //   neither image nor content -> a blank card, forced onto its
+        //     own printed page (see .insert-blank in continuous-view.css).
+        // A plain standalone photo (image + per-image caption, no
+        // block.content) is NOT special-cased — it falls through to the
+        // exact same per-block row rendering below as any other block,
+        // id-column-on-the-left layout and all, because that *is* what a
+        // standalone photo looked like before "insert" existed. Giving it
+        // the big centered treatment instead (an earlier version of this
+        // feature did) shrank the image and lost that left-aligned id
+        // column — a real regression, not an intentional restyle.
+        if (item.type === 'insert') {
+            const block = item.blocks?.[0];
+            const imgData = block?.images?.[0];
+            const langs = ['kn', 'en'].filter(l => (lang === l || lang === 'all'));
+            const hasContent = langs.some(l => (block?.content?.[l] || []).some(line => line.trim() !== ''));
+            const isBlank = !imgData && !hasContent;
+
+            if (hasContent || isBlank) {
+                // The card's DOM id is the block's id (not the item's),
+                // same as every other block, so another item's
+                // `references` can jump straight to it via
+                // jumpToReference() — and a visible id badge is shown too,
+                // same as a normal block row, so it can actually be cited
+                // by someone reading the page. The only exception is
+                // `hideId: true` (meant for the front cover, which nothing
+                // should ever cite): that suppresses the DOM id and the
+                // badge only — the image/text content itself still
+                // renders exactly as normal.
+                card.id = (block && !item.hideId) ? block.id : '';
+
+                if (block && !item.hideId) {
+                    const idLabel = document.createElement('span');
+                    idLabel.className = 'block-id';
+                    idLabel.innerText = formatIdForDisplay(block);
+                    card.appendChild(idLabel);
+                }
+
+                if (imgData) {
+                    // Same markup as a normal media-only image block
+                    // (.block-row.media-only > .col-media > .image-card >
+                    // img), on purpose: that way core/media.css sizes this
+                    // photo with the exact same rules as every other photo
+                    // in continuous view — screen, mobile and print. An
+                    // earlier version gave title-style images their own
+                    // separate size rule (max-height: 70vh), so the very
+                    // same photo shrank the moment it gained a title.
+                    const imgRow = document.createElement('div');
+                    imgRow.className = 'block-row images media-only title-style-image-row';
+                    const imgCol = document.createElement('div');
+                    imgCol.className = 'col-media has-images';
+                    const imgCard = document.createElement('div');
+                    imgCard.className = 'image-card';
+                    const img = document.createElement('img');
+                    img.className = 'title-style-image';
+                    img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
+                    img.alt = langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '';
+                    imgCard.appendChild(img);
+                    imgCol.appendChild(imgCard);
+                    imgRow.appendChild(imgCol);
+                    card.appendChild(imgRow);
+                }
+
+                if (hasContent) {
+                    // block.content.<lang> is an array of lines/paragraphs,
+                    // so title-style text can span multiple lines.
+                    const textWrap = document.createElement('div');
+                    textWrap.className = 'title-style-text-wrap';
+                    const ruleTop = document.createElement('div');
+                    ruleTop.className = 'title-style-text-rule';
+                    textWrap.appendChild(ruleTop);
+                    langs.forEach(l => {
+                        (block.content?.[l] || []).forEach(line => {
+                            if (!line.trim()) return;
+                            const lineEl = document.createElement('div');
+                            lineEl.className = `title-style-text-line lang-${l}`;
+                            lineEl.textContent = line;
+                            textWrap.appendChild(lineEl);
+                        });
+                    });
+                    const ruleBottom = document.createElement('div');
+                    ruleBottom.className = 'title-style-text-rule';
+                    textWrap.appendChild(ruleBottom);
+                    card.appendChild(textWrap);
+                }
+
+                card.classList.add('title-style');
+                if (isBlank) card.classList.add('insert-blank');
+                container.appendChild(card);
+                return;
+            }
+            // Else: plain photo (image + caption, no content) — fall
+            // through to the normal per-block row rendering below.
+        }
 
         // Reply-excerpt (verbatim from master)
         if (item.references && item.references.length > 0) {
@@ -141,13 +245,21 @@ export function renderContinuousView(data, container, lang = 'all') {
                 block.images.forEach(img => {
                     const capKn = img.caption?.kn || '';
                     const capEn = img.caption?.en || '';
-                    let capText = '';
-                    if (lang === 'all') capText = (capKn && capEn) ? `${capKn} / ${capEn}` : (capKn || capEn);
-                    else                capText = (lang === 'kn') ? capKn : capEn;
+                    const altText = (lang === 'kn') ? capKn : (lang === 'en') ? capEn : (capKn || capEn);
+                    // Each active language gets its own caption line —
+                    // never joined onto one line with "/" — same as every
+                    // other multi-language caption/title in the app.
+                    let captionsHtml = '';
+                    if ((lang === 'kn' || lang === 'all') && capKn) {
+                        captionsHtml += `<p class="image-caption lang-kn">${capKn}</p>`;
+                    }
+                    if ((lang === 'en' || lang === 'all') && capEn) {
+                        captionsHtml += `<p class="image-caption lang-en">${capEn}</p>`;
+                    }
                     mediaCol.innerHTML += `
                         <div class="image-card">
-                            <img src="images/${img.src}" alt="${capText}">
-                            ${capText ? `<p class="image-caption">${capText}</p>` : ''}
+                            <img src="images/${img.src}" alt="${altText}">
+                            ${captionsHtml}
                         </div>`;
                 });
             }

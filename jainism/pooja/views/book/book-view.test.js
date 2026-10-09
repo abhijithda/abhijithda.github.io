@@ -57,7 +57,7 @@ describe('initBookView: rendering', () => {
     test('a standalone "images" item renders as a single centered standalone-image card', () => {
         const data = [{
             id: 'i_001',
-            type: 'images',
+            type: 'insert',
             references: null,
             blocks: [baseBlock({
                 id: 'i_001_b_1',
@@ -74,23 +74,26 @@ describe('initBookView: rendering', () => {
         expect(document.querySelectorAll('#book-columns .book-card').length).toBe(1);
     });
 
-    test('a standalone image item with no image data is skipped rather than rendering an empty card', () => {
+    test('an insert with no image and no content renders an empty blank-page card, not nothing', () => {
         const data = [{
             id: 'i_002',
-            type: 'images',
+            type: 'insert',
             references: null,
             blocks: [baseBlock({ id: 'i_002_b_1', type: 'images', images: [] })],
         }];
 
         expect(() => initBookView(data, ['kn', 'en'])).not.toThrow();
-        expect(document.getElementById('book-i_002')).toBeNull();
-        expect(document.querySelectorAll('#book-columns .book-card').length).toBe(0);
+        const card = document.getElementById('book-i_002');
+        expect(card).not.toBeNull();
+        expect(card.classList.contains('standalone-image')).toBe(true);
+        expect(card.querySelector('.book-image-wrap')).toBeNull();
+        expect(document.querySelectorAll('#book-columns .book-card').length).toBe(1);
     });
 
     test('standalone image caption renders once per active language that has text, skips languages without one', () => {
         const data = [{
             id: 'i_003',
-            type: 'images',
+            type: 'insert',
             references: null,
             blocks: [baseBlock({
                 id: 'i_003_b_1',
@@ -231,7 +234,7 @@ describe('initBookView: read tracking (isBlockTrackable)', () => {
     // that stays true rather than a regression.
     test('a standalone image item gets no read-tick', () => {
         const data = [{
-            id: 'i_004', type: 'images', references: null,
+            id: 'i_004', type: 'insert', references: null,
             blocks: [baseBlock({ id: 'i_004_b_1', type: 'images', images: [{ src: 'x.jpg', caption: {} }] })],
         }];
         initBookView(data, ['kn', 'en']);
@@ -393,6 +396,94 @@ describe('Navigation: jumpToPage', () => {
     });
 });
 
+describe('Cover page (insert item) — spread 0, unnumbered, real content starts at page 1', () => {
+    const dataWithCover = [
+        { id: 'ins_001', type: 'insert', hideId: true, blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }] },
+        { id: 'a_101', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_101_b_1' })] },
+        { id: 'a_102', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_102_b_1' })] },
+    ];
+
+    beforeEach(() => {
+        initBookView(dataWithCover, ['kn', 'en']);
+        mockSpreadLayout({ spreadWidth: 800, columnsScrollWidth: 3200 }); // 4 spreads incl. cover
+        renderCurrentSpread();
+    });
+
+    test('cover spread (0) renders the image and text on one page, and is unnumbered', () => {
+        const coverCard = document.getElementById('book-ins_001');
+        expect(coverCard.classList.contains('title-style-page')).toBe(true);
+        expect(coverCard.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(coverCard.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
+
+        expect(document.getElementById('book-page-num-left').textContent).toBe('');
+        expect(document.getElementById('book-page-num-right').textContent).toBe('');
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(true);
+    });
+
+    test('the spread right after the cover is numbered page 1, not page 3', () => {
+        goToNextSpread();
+        expect(document.getElementById('book-page-num-left').textContent).toBe('1');
+        expect(document.getElementById('book-page-num-right').textContent).toBe('2');
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(false);
+    });
+
+    test('jumpToPage(1) lands on the spread after the cover, not spread 0', () => {
+        jumpToPage(1);
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(false);
+        expect(document.getElementById('book-page-num-left').textContent).toBe('1');
+    });
+
+    test('jumpToPage(0) returns to the unnumbered cover', () => {
+        jumpToPage(1);
+        jumpToPage(0);
+        expect(document.getElementById('book-spread').classList.contains('cover-spread')).toBe(true);
+    });
+});
+
+describe('Insert item as a blank/divider page — book-view-only pagination tool', () => {
+    const dataWithDivider = [
+        { id: 'ins_001', type: 'insert', hideId: true, blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }] },
+        { id: 'ins_002', type: 'insert', blocks: [{ id: 'ins_002_b_1', type: 'images', content: { kn: ['ಭಾಗ ೧'], en: ['Part 1'] } }] },
+        { id: 'a_101', type: 'answer', references: null, blocks: [baseBlock({ id: 'a_101_b_1' })] },
+    ];
+
+    test('a text-only insert (no image) renders as its own page and forces a break', () => {
+        initBookView(dataWithDivider, ['kn', 'en']);
+        const dividerCard = document.getElementById('book-ins_002');
+        expect(dividerCard.classList.contains('title-style-page')).toBe(true);
+        expect(dividerCard.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಭಾಗ ೧');
+        expect(dividerCard.querySelector('.title-style-text-line.lang-en').textContent).toBe('Part 1');
+    });
+
+    test('the id badge is shown for a divider (no hideId) but suppressed for the cover (hideId: true) — matching continuous view\'s rule', () => {
+        initBookView(dataWithDivider, ['kn', 'en']);
+        expect(document.getElementById('book-ins_001').querySelector('.book-bid')).toBeNull();
+        const dividerBid = document.getElementById('book-ins_002').querySelector('.book-bid');
+        expect(dividerBid).not.toBeNull();
+        expect(dividerBid.textContent.length).toBeGreaterThan(0);
+    });
+
+    test('a plain standalone photo (caption-style, no hideId) also shows its id badge — the regression this fixes', () => {
+        const data = [{
+            id: 'ins_photo', type: 'insert',
+            blocks: [{ id: 'ins_photo_b_1', type: 'images', images: [{ src: 'x.jpg', caption: { en: 'Caption' } }] }],
+        }];
+        initBookView(data, ['kn', 'en']);
+        const card = document.getElementById('book-ins_photo');
+        expect(card.classList.contains('standalone-image')).toBe(true);
+        expect(card.querySelector('.book-bid')).not.toBeNull();
+    });
+
+    test('a blank insert (no blocks at all) renders without throwing and with no id badge', () => {
+        const data = [{ id: 'blank_000', type: 'insert' }];
+        expect(() => initBookView(data, ['kn', 'en'])).not.toThrow();
+        const card = document.getElementById('book-blank_000');
+        expect(card).not.toBeNull();
+        expect(card.classList.contains('standalone-image')).toBe(true);
+        expect(card.querySelector('.book-bid')).toBeNull();
+    });
+});
+
 describe('applyBookMediaVisibility', () => {
     const data = [{
         id: 'a_200', type: 'answer', references: null,
@@ -455,9 +546,9 @@ describe('onBookLangChange', () => {
 describe('initBookView against the real test/data.json fixture', () => {
     const fixtureData = require('../../test/data.json');
 
-    test('renders one book-card (or standalone-image card) per item/block without throwing', () => {
+    test('renders one book-card (or standalone-image/insert card) per item/block without throwing', () => {
         expect(() => initBookView(fixtureData, ['kn', 'en'])).not.toThrow();
-        expect(document.getElementById('book-i_001').classList.contains('standalone-image')).toBe(true);
+        expect(document.getElementById('book-ins_001').classList.contains('title-style-page')).toBe(true);
         expect(document.getElementById('book-a_001_b_1').querySelector('.book-excerpt')).not.toBeNull();
     });
 });

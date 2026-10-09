@@ -172,6 +172,96 @@ describe('renderContinuousView', () => {
         renderContinuousView(data, container, 'all');
         expect(document.querySelectorAll('#continuous-container .card').length).toBe(1);
     });
+
+    test('an insert item (cover/divider) renders as an image + text card, not through the normal block loop', () => {
+        const data = [{
+            id: 'ins_001', type: 'insert',
+            blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, 'all');
+
+        const card = document.getElementById('ins_001_b_1'); // block id, not item id — see jumpToReference note
+        expect(card.classList.contains('title-style')).toBe(true);
+        expect(card.querySelector('.title-style-image').src).toContain('images/x.jpg');
+        expect(card.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(card.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
+        // An insert's block has no text/video by isBlockTrackable's rule, so it must not count toward read progress.
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
+    });
+
+    test('a title-style insert\'s image uses the same media-only image markup as any other photo, so core/media.css sizes it identically', () => {
+        const data = [{
+            id: 'ins_010', type: 'insert',
+            blocks: [{ id: 'ins_010_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, 'all');
+        const img = document.querySelector('#ins_010_b_1 .block-row.media-only .col-media.has-images .image-card img');
+        expect(img).not.toBeNull();
+        expect(img.src).toContain('images/x.jpg');
+    });
+
+    test('an insert with an image + per-image caption but no content (a plain standalone photo) falls through to the normal per-block row — not the big centered title-style card', () => {
+        const data = [{
+            id: 'ins_002', type: 'insert',
+            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg', caption: { kn: 'ಶೀ', en: 'Caption' } }] }],
+        }];
+        renderContinuousView(data, container, 'all');
+
+        const row = document.getElementById('ins_002_b_1');
+        expect(row).not.toBeNull();
+        expect(row.classList.contains('block-row')).toBe(true);
+        expect(row.classList.contains('title-style')).toBe(false);
+        expect(row.querySelector('.block-id')).not.toBeNull(); // left-aligned id, same as any other block row
+        const card = row.querySelector('.image-card');
+        expect(card.querySelector('img').src).toContain('images/x.jpg');
+        // Each language on its own line, never joined with "/".
+        expect(card.querySelector('.image-caption.lang-kn').textContent).toBe('ಶೀ');
+        expect(card.querySelector('.image-caption.lang-en').textContent).toBe('Caption');
+    });
+
+    test('hideId: true suppresses the DOM id and the id badge, so it cannot be jumped to by reference — but the content itself still renders, same as any other insert', () => {
+        const data = [{
+            id: 'ins_002', type: 'insert', hideId: true,
+            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, 'all');
+        expect(document.getElementById('ins_002_b_1')).toBeNull();
+        expect(document.getElementById('ins_002')).toBeNull();
+
+        const card = document.querySelector('#continuous-container .card');
+        expect(card).not.toBeNull();
+        expect(card.querySelector('.block-id')).toBeNull();
+        expect(card.querySelector('.title-style-image').src).toContain('images/x.jpg');
+        expect(card.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
+    });
+
+    test.each([
+        ['kn', true, false],
+        ['en', false, true],
+        ['all', true, true],
+    ])('insert text respects the active-language filter: lang="%s" shows kn=%s / en=%s', (lang, showsKn, showsEn) => {
+        const data = [{
+            id: 'ins_003', type: 'insert',
+            blocks: [{ id: 'ins_003_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, lang);
+        const card = document.getElementById('ins_003_b_1');
+        expect(card.querySelector('.title-style-text-line.lang-kn') !== null).toBe(showsKn);
+        expect(card.querySelector('.title-style-text-line.lang-en') !== null).toBe(showsEn);
+    });
+
+    test('an insert with neither image nor content still renders — a blank card, same as book view\'s blank page', () => {
+        const data = [
+            { id: 'ins_004', type: 'insert', blocks: [{ id: 'ins_004_b_1', type: 'images' }] },
+            { id: 'q_040', type: 'question', references: null, blocks: [baseBlock({ id: 'q_040_b_1' })] },
+        ];
+        renderContinuousView(data, container, 'all');
+        const card = document.getElementById('ins_004_b_1');
+        expect(card).not.toBeNull();
+        expect(card.classList.contains('insert-blank')).toBe(true);
+        expect(card.querySelector('img')).toBeNull();
+        expect(document.querySelectorAll('#continuous-container .card').length).toBe(2);
+    });
 });
 
 describe('renderContinuousView against the real test/data.json fixture', () => {
