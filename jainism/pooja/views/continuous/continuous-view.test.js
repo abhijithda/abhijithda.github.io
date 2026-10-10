@@ -1,0 +1,275 @@
+const {
+    jumpToReference,
+    goBackToMessage,
+    filterContinuous,
+    renderContinuousView,
+} = require('./continuous-view');
+
+// jsdom doesn't implement scrollIntoView.
+Element.prototype.scrollIntoView = jest.fn();
+window.scrollTo = jest.fn();
+
+function baseBlock(overrides = {}) {
+    return {
+        id: 'a_999_b_1',
+        type: 'answer',
+        content: { kn: [], en: [] },
+        images: [],
+        videos: [],
+        ...overrides,
+    };
+}
+
+beforeEach(() => {
+    localStorage.clear();
+    document.body.innerHTML = '<div id="continuous-container"></div><span id="read-progress"></span><button id="back-to-message" style="display:none"></button>';
+    // backStack is module-private and only reset as a side effect of
+    // renderContinuousView — reset it explicitly so jumpToReference/
+    // goBackToMessage tests don't leak state into each other.
+    renderContinuousView([], document.getElementById('continuous-container'));
+});
+
+describe('jumpToReference / goBackToMessage', () => {
+    test('jumping to a missing target is a no-op', () => {
+        expect(() => jumpToReference('nope')).not.toThrow();
+        expect(document.getElementById('back-to-message').style.display).toBe('none');
+    });
+
+    test('jumping to an existing target shows Back and scrolls to it', () => {
+        document.body.insertAdjacentHTML('beforeend', '<div id="q_001_b_1"></div>');
+        jumpToReference('q_001_b_1');
+
+        expect(document.getElementById('back-to-message').style.display).toBe('block');
+        expect(document.getElementById('q_001_b_1').classList.contains('jump-highlight')).toBe(true);
+    });
+
+    test('going back hides Back to Message once the stack is empty', () => {
+        document.body.insertAdjacentHTML('beforeend', '<div id="q_001_b_1"></div>');
+        jumpToReference('q_001_b_1');
+        goBackToMessage();
+        expect(document.getElementById('back-to-message').style.display).toBe('none');
+    });
+});
+
+describe('filterContinuous', () => {
+    test('hides cards whose text does not match the query, case-insensitively', () => {
+        document.getElementById('continuous-container').innerHTML =
+            '<div class="card">Abhisheka details</div><div class="card">Daana giving</div>';
+
+        filterContinuous('daana');
+
+        const cards = document.querySelectorAll('#continuous-container .card');
+        expect(cards[0].style.display).toBe('none');
+        expect(cards[1].style.display).toBe('');
+    });
+
+    test('an empty query shows every card', () => {
+        document.getElementById('continuous-container').innerHTML =
+            '<div class="card">A</div><div class="card">B</div>';
+        filterContinuous('');
+        document.querySelectorAll('#continuous-container .card').forEach(c => {
+            expect(c.style.display).toBe('');
+        });
+    });
+});
+
+describe('renderContinuousView', () => {
+    let container;
+    beforeEach(() => { container = document.getElementById('continuous-container'); });
+
+    test('renders one card per item, id set to the item id', () => {
+        const data = [
+            { id: 'q_001', type: 'question', references: null, blocks: [baseBlock({ id: 'q_001_b_1', content: { kn: ['ಪ್ರಶ್ನೆ'], en: ['Question'] } })] },
+        ];
+        renderContinuousView(data, container);
+        expect(document.getElementById('q_001')).not.toBeNull();
+        expect(document.querySelectorAll('#continuous-container .card').length).toBe(1);
+    });
+
+    test.each([
+        ['kn', true, false],
+        ['en', false, true],
+        ['all', true, true],
+    ])('lang="%s" shows kn=%s / en=%s', (lang, showsKn, showsEn) => {
+        const data = [
+            { id: 'q_001', type: 'question', references: null, blocks: [baseBlock({ id: 'q_001_b_1', content: { kn: ['ಪ್ರಶ್ನೆ'], en: ['Question'] } })] },
+        ];
+        renderContinuousView(data, container, lang);
+        const row = document.getElementById('q_001_b_1');
+        expect(row.querySelector('.col-kn') !== null).toBe(showsKn);
+        expect(row.querySelector('.col-en') !== null).toBe(showsEn);
+    });
+
+    test('renders a reply-excerpt for items with references, resolving to the source block text', () => {
+        const referenced = { id: 'q_010', type: 'question', references: null, blocks: [baseBlock({ id: 'q_010_b_1', content: { kn: ['ಪ್ರ'], en: ['Q text'] } })] };
+        const followUp = { id: 'a_010', type: 'answer', references: ['q_010_b_1'], blocks: [baseBlock({ id: 'a_010_b_1', content: { kn: ['ಉ'], en: ['A text'] } })] };
+        renderContinuousView([referenced, followUp], container, 'all');
+
+        const excerpt = document.getElementById('a_010').querySelector('.reply-excerpt.multi-block');
+        expect(excerpt).not.toBeNull();
+        expect(excerpt.textContent).toContain('Q text');
+    });
+
+    test('marks a row read and updates the progress counter when the read-tick is clicked', () => {
+        const data = [{ id: 'q_020', type: 'question', references: null, blocks: [baseBlock({ id: 'q_020_b_1', content: { kn: ['ಪ'], en: ['Text'] } })] }];
+        renderContinuousView(data, container, 'all');
+
+        document.getElementById('q_020_b_1').querySelector('.read-tick').click();
+
+        expect(document.getElementById('q_020_b_1').classList.contains('read')).toBe(true);
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 1/1 read');
+    });
+
+    test('a block with no text content is marked media-only', () => {
+        const data = [{ id: 'i_001', type: 'images', references: null, blocks: [baseBlock({ id: 'i_001_b_1', content: { kn: [], en: [] }, images: [{ src: 'x.jpg', caption: {} }] })] }];
+        renderContinuousView(data, container, 'all');
+        expect(document.getElementById('i_001_b_1').classList.contains('media-only')).toBe(true);
+    });
+
+    // A standalone image has nothing to "read" (per read-tracking.js's
+    // isBlockTrackable) — no tick, and it shouldn't inflate the denominator
+    // of the read-progress counter either.
+    test('a standalone image block (no text, no video) gets no read-tick and is excluded from the progress count', () => {
+        const data = [{ id: 'i_002', type: 'images', references: null, blocks: [baseBlock({ id: 'i_002_b_1', content: { kn: [], en: [] }, images: [{ src: 'x.jpg', caption: {} }] })] }];
+        renderContinuousView(data, container, 'all');
+
+        expect(document.getElementById('i_002_b_1').querySelector('.read-tick')).toBeNull();
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
+    });
+
+    // A video can run long, so watching it is worth tracking even with no
+    // accompanying text — unlike a plain standalone image.
+    test('a video-only block (no text) still gets a read-tick and counts toward progress', () => {
+        const data = [{ id: 'v_001', type: 'answer', references: null, blocks: [baseBlock({ id: 'v_001_b_1', content: { kn: [], en: [] }, videos: [{ url: 'https://www.youtube.com/watch?v=abc12345678' }] })] }];
+        renderContinuousView(data, container, 'all');
+
+        const tick = document.getElementById('v_001_b_1').querySelector('.read-tick');
+        expect(tick).not.toBeNull();
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/1 read');
+
+        tick.click();
+        expect(document.getElementById('v_001_b_1').classList.contains('read')).toBe(true);
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 1/1 read');
+    });
+
+    // A mix of trackable and non-trackable blocks in one render: the
+    // progress denominator should count only the trackable ones.
+    test('progress total only counts trackable blocks when standalone images are mixed in', () => {
+        const data = [{
+            id: 'mix_001', type: 'answer', references: null,
+            blocks: [
+                baseBlock({ id: 'mix_001_b_1', content: { kn: ['ಪ'], en: ['Text'] } }), // trackable (text)
+                baseBlock({ id: 'mix_001_b_2', type: 'images', content: { kn: [], en: [] }, images: [{ src: 'x.jpg', caption: {} }] }), // not trackable
+            ],
+        }];
+        renderContinuousView(data, container, 'all');
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/1 read');
+    });
+
+    test('re-rendering clears the container instead of appending to previous content', () => {
+        const data = [{ id: 'q_030', type: 'question', references: null, blocks: [baseBlock({ id: 'q_030_b_1' })] }];
+        renderContinuousView(data, container, 'all');
+        renderContinuousView(data, container, 'all');
+        expect(document.querySelectorAll('#continuous-container .card').length).toBe(1);
+    });
+
+    test('an insert item (cover/divider) renders as an image + text card, not through the normal block loop', () => {
+        const data = [{
+            id: 'ins_001', type: 'insert',
+            blocks: [{ id: 'ins_001_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, 'all');
+
+        const card = document.getElementById('ins_001_b_1'); // block id, not item id — see jumpToReference note
+        expect(card.classList.contains('title-style')).toBe(true);
+        expect(card.querySelector('.title-style-image').src).toContain('images/x.jpg');
+        expect(card.querySelector('.title-style-text-line.lang-kn').textContent).toBe('ಶೀರ್ಷಿಕೆ');
+        expect(card.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
+        // An insert's block has no text/video by isBlockTrackable's rule, so it must not count toward read progress.
+        expect(document.getElementById('read-progress').textContent).toBe('✓ 0/0 read');
+    });
+
+    test('a title-style insert\'s image uses the same media-only image markup as any other photo, so core/media.css sizes it identically', () => {
+        const data = [{
+            id: 'ins_010', type: 'insert',
+            blocks: [{ id: 'ins_010_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, 'all');
+        const img = document.querySelector('#ins_010_b_1 .block-row.media-only .col-media.has-images .image-card img');
+        expect(img).not.toBeNull();
+        expect(img.src).toContain('images/x.jpg');
+    });
+
+    test('an insert with an image + per-image caption but no content (a plain standalone photo) falls through to the normal per-block row — not the big centered title-style card', () => {
+        const data = [{
+            id: 'ins_002', type: 'insert',
+            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg', caption: { kn: 'ಶೀ', en: 'Caption' } }] }],
+        }];
+        renderContinuousView(data, container, 'all');
+
+        const row = document.getElementById('ins_002_b_1');
+        expect(row).not.toBeNull();
+        expect(row.classList.contains('block-row')).toBe(true);
+        expect(row.classList.contains('title-style')).toBe(false);
+        expect(row.querySelector('.block-id')).not.toBeNull(); // left-aligned id, same as any other block row
+        const card = row.querySelector('.image-card');
+        expect(card.querySelector('img').src).toContain('images/x.jpg');
+        // Each language on its own line, never joined with "/".
+        expect(card.querySelector('.image-caption.lang-kn').textContent).toBe('ಶೀ');
+        expect(card.querySelector('.image-caption.lang-en').textContent).toBe('Caption');
+    });
+
+    test('hideId: true suppresses the DOM id and the id badge, so it cannot be jumped to by reference — but the content itself still renders, same as any other insert', () => {
+        const data = [{
+            id: 'ins_002', type: 'insert', hideId: true,
+            blocks: [{ id: 'ins_002_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, 'all');
+        expect(document.getElementById('ins_002_b_1')).toBeNull();
+        expect(document.getElementById('ins_002')).toBeNull();
+
+        const card = document.querySelector('#continuous-container .card');
+        expect(card).not.toBeNull();
+        expect(card.querySelector('.block-id')).toBeNull();
+        expect(card.querySelector('.title-style-image').src).toContain('images/x.jpg');
+        expect(card.querySelector('.title-style-text-line.lang-en').textContent).toBe('Title');
+    });
+
+    test.each([
+        ['kn', true, false],
+        ['en', false, true],
+        ['all', true, true],
+    ])('insert text respects the active-language filter: lang="%s" shows kn=%s / en=%s', (lang, showsKn, showsEn) => {
+        const data = [{
+            id: 'ins_003', type: 'insert',
+            blocks: [{ id: 'ins_003_b_1', type: 'images', images: [{ src: 'x.jpg' }], content: { kn: ['ಶೀರ್ಷಿಕೆ'], en: ['Title'] } }],
+        }];
+        renderContinuousView(data, container, lang);
+        const card = document.getElementById('ins_003_b_1');
+        expect(card.querySelector('.title-style-text-line.lang-kn') !== null).toBe(showsKn);
+        expect(card.querySelector('.title-style-text-line.lang-en') !== null).toBe(showsEn);
+    });
+
+    test('an insert with neither image nor content still renders — a blank card, same as book view\'s blank page', () => {
+        const data = [
+            { id: 'ins_004', type: 'insert', blocks: [{ id: 'ins_004_b_1', type: 'images' }] },
+            { id: 'q_040', type: 'question', references: null, blocks: [baseBlock({ id: 'q_040_b_1' })] },
+        ];
+        renderContinuousView(data, container, 'all');
+        const card = document.getElementById('ins_004_b_1');
+        expect(card).not.toBeNull();
+        expect(card.classList.contains('insert-blank')).toBe(true);
+        expect(card.querySelector('img')).toBeNull();
+        expect(document.querySelectorAll('#continuous-container .card').length).toBe(2);
+    });
+});
+
+describe('renderContinuousView against the real test/data.json fixture', () => {
+    const fixtureData = require('../../test/data.json');
+
+    test('renders without throwing and resolves a_001\'s reference to q_001', () => {
+        const container = document.getElementById('continuous-container');
+        expect(() => renderContinuousView(fixtureData, container, 'all')).not.toThrow();
+        expect(document.getElementById('a_001').querySelector('.reply-excerpt')).not.toBeNull();
+    });
+});

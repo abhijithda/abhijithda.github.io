@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ | Jaina Pooja Vichara Sankalana</title>
+    <link rel="stylesheet" href="header/header.css">
+    <link rel="stylesheet" href="home/home.css">
+    <link rel="stylesheet" href="core/media.css">
+    <link rel="stylesheet" href="core/read-tracking.css">
+    <link rel="stylesheet" href="core/card-types.css">
+    <link rel="stylesheet" href="core/font-scale.css">
+    <link rel="stylesheet" id="css-continuous" href="views/continuous/continuous-view.css">
+    <link rel="stylesheet" id="css-book"       href="views/book/book-view.css">
+    <!-- @page can't be scoped to a body attribute/class in plain CSS, so the
+         effective print paper size + orientation is written here as text by
+         header.js's applyPaperSize() — kept last in <head> so it wins over
+         the (unscoped) view stylesheets on any property overlap. -->
+    <style id="print-page-size"></style>
+</head>
+
+<body>
+    <header class="app-header">
+        <button id="home-btn" class="menu-trigger home-btn" title="Home — cover, progress and settings at a glance">🏠</button>
+
+        <div class="view-toggle">
+            <button class="view-toggle-btn" data-view="book" title="Book spread view">📖 Book</button>
+            <button class="view-toggle-btn" data-view="continuous" title="Continuous scrolling view">☰ Continuous</button>
+        </div>
+
+        <input type="text" id="search-bar" placeholder="Search topics - ಅಭಿಷೇಕ, Daana...">
+
+        <span id="read-progress" class="read-progress" title="Items you've marked as read"></span>
+
+        <button id="zen-mode-btn" class="menu-trigger" title="Focus mode — hide header and browser chrome (Esc to exit)">⛶ Focus</button>
+
+        <div class="view-menu-container">
+            <button id="settings-btn" class="menu-trigger">Settings ⚙️</button>
+            <div id="settings-menu" class="menu-content">
+                <!-- Language: searchable multi-select, collapsed by default.
+                     Was a single <select id="lang-select"> (All/kn/en); this scales
+                     to a long language list without a wall of checkboxes. -->
+                <div class="menu-section menu-section--lang">
+                    <span class="menu-label">🌐 Language:</span>
+                    <div class="lang-picker">
+                        <button type="button" id="lang-trigger" class="lang-trigger" aria-expanded="false">
+                            <span id="lang-summary" class="lang-summary"></span>
+                            <span class="lang-chevron" aria-hidden="true">▾</span>
+                        </button>
+                        <div id="lang-panel" class="lang-panel" hidden>
+                            <input type="text" id="lang-search" class="lang-search" placeholder="Search languages">
+                            <div id="lang-list" class="lang-list">
+                                <!-- built by header.js from KNOWN_LANGS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <label>🎬 Videos:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-videos" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-section">
+                    <label>📱 QR Codes:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-qrs">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-section">
+                    <label>✓ Read tracking:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-read-tracking">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-section">
+                    <label for="paper-size-select">🖨️ Paper size:</label>
+                    <select id="paper-size-select">
+                        <option value="dynamic">Dynamic</option>
+                        <option value="a4">A4</option>
+                        <option value="a3">A3</option>
+                    </select>
+                </div>
+                <div class="menu-section">
+                    <label>🔤 Font size:</label>
+                    <div class="font-scale-control">
+                        <button type="button" id="font-scale-decrease" title="Decrease font size" aria-label="Decrease font size">A−</button>
+                        <span id="font-scale-display">100%</span>
+                        <button type="button" id="font-scale-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="home-view" class="home-view">
+        <img id="home-cover-image" class="home-cover-image" alt="">
+        <div class="home-cover-title-wrap">
+            <div class="home-cover-title-rule"></div>
+            <div id="home-cover-title" class="home-cover-title"></div>
+            <div class="home-cover-title-rule"></div>
+        </div>
+
+        <div id="home-progress" class="home-progress"></div>
+
+        <div class="home-view-options">
+            <div class="home-view-option">
+                <span class="home-view-option-icon">📖</span>
+                <span class="home-view-option-title">Book</span>
+                <p class="home-view-option-desc">Page-by-page, closest to reading the printed book. Good if you like turning pages or reading start to finish.</p>
+                <button type="button" id="home-open-book" class="home-view-option-btn">Open book view</button>
+            </div>
+            <div class="home-view-option">
+                <span class="home-view-option-icon">☰</span>
+                <span class="home-view-option-title">Continuous</span>
+                <p class="home-view-option-desc">One long scroll, everything stacked in order. Easier for searching a topic or skimming quickly.</p>
+                <button type="button" id="home-open-continuous" class="home-view-option-btn">Open continuous view</button>
+            </div>
+        </div>
+
+        <div class="home-settings">
+            <span class="home-settings-label">⚙️ Settings</span>
+            <p class="home-settings-hint">Same settings as the header — change them here or there, they stay in sync.</p>
+
+            <div class="home-section">
+                <span class="home-section-label">🌐 Language</span>
+                <div id="home-lang-list" class="home-lang-list"></div>
+            </div>
+
+            <div class="home-section home-row">
+                <label>🎬 Videos</label>
+                <label class="switch">
+                    <input type="checkbox" id="home-toggle-videos">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="home-section home-row">
+                <label>📱 QR Codes</label>
+                <label class="switch">
+                    <input type="checkbox" id="home-toggle-qrs">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="home-section home-row">
+                <label>✓ Read tracking</label>
+                <label class="switch">
+                    <input type="checkbox" id="home-toggle-read-tracking">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="home-section home-row">
+                <label for="home-paper-size-select">🖨️ Paper size</label>
+                <select id="home-paper-size-select">
+                    <option value="dynamic">Dynamic</option>
+                    <option value="a4">A4</option>
+                    <option value="a3">A3</option>
+                </select>
+            </div>
+            <div class="home-section home-row">
+                <label>🔤 Font size</label>
+                <div class="font-scale-control">
+                    <button type="button" id="home-font-scale-decrease" aria-label="Decrease font size">A−</button>
+                    <span id="home-font-scale-display">100%</span>
+                    <button type="button" id="home-font-scale-increase" aria-label="Increase font size">A+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="zen-exit-btn" class="zen-exit-btn" title="Exit focus mode (Esc)" hidden>✕ Exit focus</button>
+    <button id="zen-peek-btn" class="zen-peek-btn" title="Show/hide header without leaving focus mode" hidden>⌄</button>
+
+    <div id="continuous-container" style="display:none"></div>
+
+    <div id="book-container" style="display:none"></div>
+
+    <button id="back-to-message"
+        style="display:none; position:fixed; bottom:25px; right:25px; background:#333; color:#fff; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; z-index:1000; font-weight:bold;">
+        ← Back to Message
+    </button>
+
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>

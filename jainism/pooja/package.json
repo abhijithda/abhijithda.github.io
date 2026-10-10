@@ -1,0 +1,26 @@
+{
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@playwright/test": "^1.61.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "http-server": "^14.1.1",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1"
+  },
+  "scripts": {
+    "postinstall": "playwright install --with-deps",
+    "test:unit": "jest",
+    "test:update-snapshots": "npx playwright test --update-snapshots",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:e2e",
+    "render:artifacts": "node scripts/render-artifacts.js"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testPathIgnorePatterns": [
+      "/e2e/"
+    ]
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "question",
+          "answer",
+          "insert"
+        ]
+      },
+      "hideId": {
+        "type": "boolean"
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "references": {
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "blocks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "paragraph",
+                "images",
+                "mantra",
+                "note",
+                "shloka"
+              ]
+            },
+            "content": {
+              "type": "object",
+              "properties": {
+                "kn": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "en": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "kn",
+                "en"
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "videos": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "youtubeId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url",
+                  "youtubeId"
+                ]
+              }
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "src": {
+                    "type": "string"
+                  },
+                  "caption": {
+                    "type": "object",
+                    "properties": {
+                      "kn": {
+                        "type": "string"
+                      },
+                      "en": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "src"
+                ]
+              }
+            }
+          },
+          "required": [
+            "id",
+            "type"
+          ],
+          "if": {
+            "properties": { "type": { "const": "images" } }
+          },
+          "else": {
+            "required": ["content"]
+          }
+        }
+      }
+    },
+    "required": [
+      "id",
+      "type"
+    ],
+    "if": {
+      "properties": { "type": { "const": "insert" } }
+    },
+    "then": {},
+    "else": {
+      "required": ["blocks"]
+    }
+  }
+}

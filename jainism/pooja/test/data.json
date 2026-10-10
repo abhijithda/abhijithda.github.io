@@ -1,0 +1,307 @@
+[
+  {
+    "id": "ins_001",
+    "type": "insert",
+    "hideId": true,
+    "blocks": [
+      {
+        "id": "ins_001_b_1",
+        "type": "images",
+        "images": [
+          {
+            "src": "Bharata Bahubali Swami.jpeg"
+          }
+        ],
+        "content": {
+          "kn": [
+            "ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಾಹುಬಲಿ ಸ್ವಾಮಿ"
+          ],
+          "en": [
+            "Bharata Chakravarthi and Bahubali Swami"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "q_001",
+    "type": "question",
+    "timestamp": "2026-06-15T10:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_001_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಎಲ್ಲಾ ದೇವರು ಒಂದೇ (ದೇವತೆಗಳು =?= ಜಿನೇಂದ್ರ ದೇವ) ?"
+          ],
+          "en": [
+            "All are equal (Devatas =?= Jinendra deva)?"
+          ]
+        },
+        "tags": [
+          "DevaMoodhata"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_001",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:01:00Z",
+    "references": [
+      "q_001"
+    ],
+    "blocks": [
+      {
+        "id": "a_001_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಯಾರು ಜಿನ ಶಾಸನ ದೆವತೆಗಳನ್ನು ತೀರ್ಥಂಕರ ಭಗವಂತರ ಸಮಾನರೆಂದು ಪೂಜಿಸುತ್ತಾರೋ ಅವರು ಅಧೋ / ನರಕ ಗಾಮಿಗಳಾಗುತ್ತಾರೆ"
+          ],
+          "en": [
+            "Result of doing pooja of jina shaasana deva devi pooja thinking as bhagawan - Adho gaami / Narak gaami:"
+          ]
+        },
+        "tags": [
+          "DevaMoodhata"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=bgldj0TMZB4",
+            "youtubeId": "bgldj0TMZB4"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_002",
+    "type": "question",
+    "timestamp": "2026-06-15T10:05:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "q_002_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಸಮ್ಯಕ್ತ್ವ ಮಲಿನ"
+          ],
+          "en": [
+            "Samyaktva Malinatha"
+          ]
+        },
+        "tags": [
+          "Samyaktva"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_002",
+    "type": "answer",
+    "timestamp": "2026-06-15T10:06:00Z",
+    "references": [
+      "q_002"
+    ],
+    "blocks": [
+      {
+        "id": "a_002_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಭಗವಂತರ ಸ್ವರೂಪ ತಿಳಿದು, ಹಾಗು ದೇವತೆಗಳನ್ನು ವೀತರಾಗ ಭಗವಂತರಲ್ಲ ಎಂದು ಅರಿತು, ದೇವೇತಗಳನ್ನು ಪೂಜೆ ಮಾಡಿದರೆ, ಸಮ್ಯಕ್ತ್ವ ನಷ್ಟವಾಗುದಿಲ್ಲ / ಮಿಥ್ಯಾತ್ವ ಎಂದು ಪರಿಗಣಿಸುವುದಿಲ್ಲ."
+          ],
+          "en": []
+        },
+        "tags": [
+          "Samyaktva"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_002_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಶಾಸನ ದೇವತೆಗಳ ಪೂಜೆ ವರದ ಲೋಭದಿಂದ ಮಾಡಿದರೆ ಮಲಿನವಾಗುತ್ತದೆ... ಏಕೆಂದರೆ, ಇವರ ಕಾರ್ಯ ಧರ್ಮದ ರಕ್ಷಣೆ... ಇವರನ್ನು ತಮ್ಮ ಸ್ವಂತ ಕಾರ್ಯಕ್ಕೆ / ಲೋಭ ಪೂರ್ಣಗೊಳಿಸಲು ಪೂಜೆ ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ಕ ಮಲಿನವಾಗುತ್ತದೆ."
+          ],
+          "en": [
+            "Doing pooja of Jina Shaasana devata with the greed to get boon is Samyak Malinatha, because they're there for protecting shaasana/dharma, and one tries to use them for their own greed."
+          ]
+        },
+        "tags": [
+          "Samyaktva",
+          "ShasanaDevata"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_002_b_3",
+        "type": "note",
+        "content": {
+          "kn": [
+            "ವಿದ್ಯಾ ದೇವತೆಗಳ ಪೂಜೆ ವಿದ್ಯಾ ಸಿದ್ದಿ / ವರ ಪ್ರಾಪ್ತಿ ಮಾಡುಕೊಳ್ಳಲು ಮಾಡುವುದರಿಂದ ಸಮ್ಯಕ್ತ್ವ ಮಲಿನವಾಗುವುದು ಇಲ್ಲ ನಷ್ಟವಾಗುವುದು ಇಲ್ಲ. ಅನೇಕ ಮೋಕ್ಷ ಗಾಮಿಗಳು ವಿದ್ಯಾ ದೇವತಗಳ ಆರಾಧನೆ ವಿದ್ಯಾ ಸಿದ್ದಿಗೋಸ್ಕರ ಮಾಡಿದ್ದಾರೆ."
+          ],
+          "en": [
+            "Vidyaa devata pooja neither causes dosha in samyaktva, nor causes samyaktva to be lost. Many moksha gaami's have done aradhana of vidyaa devatas."
+          ]
+        },
+        "tags": [
+          "Samyaktva",
+          "VidyaDevata"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=u5wU3JpUrEc",
+            "youtubeId": "u5wU3JpUrEc"
+          }
+        ],
+        "images": []
+      },
+      {
+        "id": "a_002_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [],
+          "en": []
+        },
+        "tags": [
+          "personal"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Vardhamanaiah-Kowsalyamma.jpg",
+            "caption": {
+              "en": "Tatha Ajji",
+              "kn": "ತಾತ ಅಜ್ಜಿ"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "a_003",
+    "type": "answer",
+    "timestamp": "2026-06-16T09:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "a_003_b_1",
+        "type": "mantra",
+        "content": {
+          "kn": [
+            "ಭಕ್ತಾಮರ ಸ್ತೋತ್ರದ ೪೩ನೇ ಶ್ಲೋಕದ ಮಂತ್ರ:",
+            "",
+            "ಓಂ ನಮೋ ಚಕ್ರೇಶ್ವರಿ ದೇವಿ, ಚಕ್ರ ಧಾರಿಣಿ, ಜಿನಶಾಸನ ಸೇವಾ ಕಾರಿಣಿ, ಜಿನಶಾಸನ ಕುದ್ರೋಪದ್ರವ ವಿನಾಶಿನಿ, ಧರ್ಮ ಶಾಂತಿ ಕಾರಿಣಿ ನಮಃ ಕುರು ಕುರು ಸ್ವಾಹಾ."
+          ],
+          "en": [
+            "Bhaktamara stotra's 43rd sloka's mantra:",
+            "",
+            "Om Namo Chakreshwari Devi, Chakra Dhaarini, Jina Shasana Sevaa Kaarini, Jina Shasana Kshudropadrava Vinaashini, Dharma Shaanti Kaarini Namah Kuru Kuru Swaahaa."
+          ]
+        },
+        "tags": [
+          "Mantra"
+        ],
+        "videos": [],
+        "images": [
+          {
+            "src": "Adinatha Swami Golakot.jpg",
+            "caption": {
+              "en": "Adinatha Swami",
+              "kn": "ಆದಿನಾಥ ಸ್ವಾಮಿ"
+            }
+          }
+        ]
+      },
+      {
+        "id": "a_003_b_2",
+        "type": "shloka",
+        "content": {
+          "kn": [
+            "೯ ಕ್ಷಾಯಿಕ ಲಬ್ಬಿಗಳು:",
+            "",
+            "೧. ಕೇವಲ ದರ್ಶನ",
+            "೨. ಕೇವಲ ಜ್ಞಾನ",
+            "೩. ಕೇವಲ ಚರಿತ್ರೆ",
+            "೪. ಕೇವಲ ದಾನ",
+            "೫. ಕೇವಲ ಲಾಭ",
+            "೬. ಕೇವಲ ವೀರ್ಯ",
+            "೭. ಕೇವಲ ಭೋಗ",
+            "೮. ಕೇವಲ ಉಪಭೋಗ",
+            "೯. ಕೇವಲ ಸಮ್ಯಕ್ತ್ವ"
+          ],
+          "en": [
+            "9 kshaika labdhis:",
+            "",
+            "1. Kevala Darshana",
+            "2. Kevala Jnaana",
+            "3. Kevala Charitra",
+            "4. Kevala Daana",
+            "5. Kevala Laabha",
+            "6. Kevala Veerya",
+            "7. Kevala Bhoga",
+            "8. Kevala Upabhoga",
+            "9. Kevala Samyaktva"
+          ]
+        },
+        "tags": [
+          "Shloka"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_004",
+    "type": "answer",
+    "timestamp": "2026-07-12T09:00:00Z",
+    "references": null,
+    "blocks": [
+      {
+        "id": "a_004_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಉತ್ತರ: ದೀಕ್ಷೆ ಪಡೆದು ಕರ್ಮ ನಷ್ಟ ಮಾಡಿದ ಮೇಲೆ, ಸಮವಸರಣ, ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ತೀರ್ಥಂಕರರಿಗೆ / ಜಿನೇಂದ್ರ ಭಗವಂತರಿಗೆ ಪ್ರಾಪ್ತವಾಗಿರುವುದು . ಅವರ ಹತ್ತಿರ ಇರುವಷ್ಟು ಮಾಹಾ ವಿಭೂತಿಗಳು ಈ ಸಂಸಾರದಲ್ಲಿ ಯಾರಿಗೂ ಪ್ರಾಪ್ತವಾಗುವದಿಲ್ಲ ."
+          ],
+          "en": [
+            "Answer: After taking deeksha and destroying karmas, Samavasarana, Ashta Pratiharya, and so on becomes Tirthankara/Jinendra Bhagawan. No one in this sansara attains so much as them."
+          ]
+        },
+        "tags": [
+          "MixedMedia"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=bgldj0TMZB4",
+            "youtubeId": "bgldj0TMZB4"
+          }
+        ],
+        "images": [
+          {
+            "src": "Jinendra Bhagawanta.jpg",
+            "caption": {
+              "en": "Jinendra Bhagawanta",
+              "kn": "ಜಿನೇಂದ್ರ ಭಗವಂತ"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
