@@ -4,10 +4,18 @@ name: Render Artifacts
 # from the Actions tab ("Run workflow"), pick the branch and a data source:
 #   real — renders ./jainism/pooja/data.json, the content as deployed
 #   test — renders ./jainism/pooja/test/data.json, the small e2e fixture
-# Output (screen PNG + print PDF for continuous and book view, each at dynamic, A4 and A3 paper size) is uploaded as a
-# downloadable artifact for review. Separate from update-snapshots.yml on
-# purpose: that one regenerates test baselines (and can push), this one only
-# renders for eyeballing, so it gets read-only permissions.
+# Output (screen PNG + print PDF for continuous and book view, each at
+# dynamic, A4 and A3 paper size) is uploaded as a downloadable workflow
+# artifact for review (kept 90 days — GitHub's max for public repos).
+#
+# Optionally also attach the output to a GitHub Release (publish_release),
+# which doesn't expire. That runs as a separate job so only it gets write
+# access; the render job itself stays read-only. Releases are created as
+# pre-releases and never marked "Latest", so they don't compete with a real
+# release. Each one creates a tag (render-<data>-<date>-<run#>) on the branch's
+# current commit — tags only, nothing is committed or pushed to a branch.
+# Separate from update-snapshots.yml on purpose: that one regenerates test
+# baselines (and can push), this one only renders for eyeballing.
 on:
   workflow_dispatch:
     inputs:
@@ -19,6 +27,11 @@ on:
         options:
           - real
           - test
+      publish_release:
+        description: 'Also attach the output to a GitHub Release (no expiry)'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -57,5 +70,35 @@ jobs:
       with:
         name: pooja-render-${{ inputs.data_source }}-data
         path: jainism/pooja/artifacts/
-        retention-days: 14
+        retention-days: 90   # GitHub's max for public repos
         if-no-files-found: error
+
+  publish-release:
+    if: inputs.publish_release
+    needs: render-artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Only this job can write to the repo (to create the release + tag).
+    permissions:
+      contents: write
+
+    steps:
+    - name: 📥 Download rendered output
+      uses: actions/download-artifact@v4
+      with:
+        name: pooja-render-${{ inputs.data_source }}-data
+        path: render-output
+
+    - name: 🏷️ Create release with the output attached
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        TAG="render-${{ inputs.data_source }}-$(date -u +%Y%m%d)-${{ github.run_number }}"
+        gh release create "$TAG" render-output/* \
+          --repo "${{ github.repository }}" \
+          --target "${{ github.sha }}" \
+          --title "Render: ${{ inputs.data_source }} data ($(date -u +%Y-%m-%d))" \
+          --notes "Rendered from branch \`${{ github.ref_name }}\` at ${{ github.sha }} using ${{ inputs.data_source }} data. Continuous + book view, dynamic/A4/A3, screen PNG + print PDF." \
+          --prerelease \
+          --latest=false
