@@ -1,0 +1,61 @@
+name: Render Artifacts
+
+# Manual only — never runs on push/PR, and never commits anything. Trigger it
+# from the Actions tab ("Run workflow"), pick the branch and a data source:
+#   real — renders ./jainism/pooja/data.json, the content as deployed
+#   test — renders ./jainism/pooja/test/data.json, the small e2e fixture
+# Output (screen PNG + print PDF of continuous and book view) is uploaded as a
+# downloadable artifact for review. Separate from update-snapshots.yml on
+# purpose: that one regenerates test baselines (and can push), this one only
+# renders for eyeballing, so it gets read-only permissions.
+on:
+  workflow_dispatch:
+    inputs:
+      data_source:
+        description: 'Which data to render'
+        required: true
+        type: choice
+        default: real
+        options:
+          - real
+          - test
+
+permissions:
+  contents: read
+
+jobs:
+  render-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: ./jainism/pooja
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: './jainism/pooja/package-lock.json'
+
+    - name: 📦 Install dependencies
+      run: npm ci
+
+    - name: 🌐 Install Playwright Browsers & OS Dependencies
+      run: npx playwright install --with-deps
+
+    - name: 🖨️ Render views (${{ inputs.data_source }} data)
+      run: node scripts/render-artifacts.js --data=${{ inputs.data_source }}
+
+    - name: 📦 Upload rendered output for review
+      uses: actions/upload-artifact@v4
+      with:
+        name: pooja-render-${{ inputs.data_source }}-data
+        path: jainism/pooja/artifacts/
+        retention-days: 14
+        if-no-files-found: error
