@@ -171,6 +171,41 @@ body[data-paper-size="a3"] #continuous-container {
     padding: 4px 5px;
 }
 
+/* ── Standalone photos (screen only) ─────────────────────────────────────
+   A content-less image block used to wrap onto its own line under the id
+   badge, so the photo sat at the card's far-left edge at a fixed 640px
+   while every text block sat in the content column to the right of the id.
+   Now the photo goes in that same column, beside the id, sized
+   by its own proportions, left-aligned with the text columns (tall portraits
+   are height-capped, landscape ones fill the width) — the screen counterpart of print's auto width +
+   max-height: 7in. Print keeps its own !important rules in core/media.css.
+   Cover/divider images (.title-style-image-row) keep their centred layout. */
+.block-row.media-only:not(.title-style-image-row) {
+    flex-wrap: nowrap;
+}
+
+.block-row.media-only:not(.title-style-image-row) .col-media {
+    flex: 1 1 0%;
+    min-width: 0;
+    margin-left: 0;
+    align-items: flex-start;   /* left edge lines up with the text columns */
+}
+
+.block-row.media-only:not(.title-style-image-row) .image-card {
+    width: auto;
+    max-width: 100%;
+    height: auto;          /* grows to hold the captions below the photo */
+}
+
+/* Only the <img> is height-capped — never the .image-card wrapper, which
+   also contains the captions; capping it made them overflow onto the
+   content below. */
+.block-row.media-only:not(.title-style-image-row) .image-card img {
+    width: auto;
+    max-width: 100%;
+    max-height: 80vh;
+}
+
 .col-kn,
 .col-en {
     flex: 1 1 0%;

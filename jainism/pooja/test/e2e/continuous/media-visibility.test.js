@@ -84,3 +84,51 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
         await expect(block.locator('.video-card')).toBeVisible();
     });
 });
+
+// A standalone photo (image + caption, no block.content) must sit in the same
+// content column as text blocks — beside the id badge, left-aligned with the
+// text columns — rather than wrapping under the id at the card's far-left
+// edge at a fixed width. See "Standalone photos" in continuous-view.css.
+test.describe('Media Layout - standalone photo alignment (screen)', () => {
+
+    test.beforeEach(async ({ page }) => {
+        await page.route('**/data.json', route => route.fulfill({
+            json: [plainPhotoInsert('i_001')],
+        }));
+        await page.goto('/');
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
+        await expect(page.locator('.card').first()).toBeVisible();
+    });
+
+    test('the photo sits beside the id badge, not wrapped under it', async ({ page }) => {
+        const idBox = await page.locator('#i_001_b_1 .block-id').boundingBox();
+        const imgBox = await page.locator('#i_001_b_1 .image-card img').boundingBox();
+        expect(imgBox.x).toBeGreaterThanOrEqual(idBox.x + idBox.width);
+        expect(imgBox.y).toBeLessThan(idBox.y + idBox.height + 40);
+    });
+
+    test('the photo starts at its column\'s left edge, even when narrower than the column', async ({ page }) => {
+        const colBox = await page.locator('#i_001_b_1 .col-media').boundingBox();
+        const imgBox = await page.locator('#i_001_b_1 .image-card img').boundingBox();
+        expect(Math.abs(imgBox.x - colBox.x)).toBeLessThanOrEqual(1);
+    });
+
+    test('the photo stays inside its card and within the 80vh height cap', async ({ page }) => {
+        const cardBox = await page.locator('#i_001').boundingBox();
+        const imgBox = await page.locator('#i_001_b_1 .image-card img').boundingBox();
+        const vh = page.viewportSize().height;
+        expect(imgBox.x + imgBox.width).toBeLessThanOrEqual(cardBox.x + cardBox.width);
+        expect(imgBox.height).toBeLessThanOrEqual(vh * 0.8 + 1);
+    });
+
+    test('the captions stay inside the image card and do not overflow onto the next block', async ({ page }) => {
+        const cardBox = await page.locator('#i_001_b_1 .image-card').boundingBox();
+        const captions = page.locator('#i_001_b_1 .image-caption');
+        const n = await captions.count();
+        expect(n).toBeGreaterThan(0);
+        for (let i = 0; i < n; i++) {
+            const c = await captions.nth(i).boundingBox();
+            expect(c.y + c.height).toBeLessThanOrEqual(cardBox.y + cardBox.height + 1);
+        }
+    });
+});
