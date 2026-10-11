@@ -15,7 +15,7 @@
     "test:update-snapshots": "npx playwright test --update-snapshots",
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e",
-    "render:artifacts": "node scripts/render-artifacts.js"
+    "render:prints": "node scripts/render-prints.js"
   },
   "jest": {
     "testEnvironment": "jsdom",

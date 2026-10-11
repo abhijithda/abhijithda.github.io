@@ -151,6 +151,16 @@ body[data-paper-size="a3"] #continuous-container {
     min-height: 4em;
 }
 
+/* Dynamic prints as A4 (see core/paper-size.js), so give it the same 210mm
+   layout width A4 gets above. Without this, Dynamic printed at the fluid
+   screen width instead — larger text, ~44 pages vs A4's ~34. */
+@media print {
+    body:not([data-paper-size="a3"]) #continuous-container {
+        width: 210mm;
+        max-width: none;
+    }
+}
+
 @media print {
     .card.insert-blank {
         break-before: page;
