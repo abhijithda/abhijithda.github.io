@@ -25,7 +25,7 @@ on:
         description: 'How to deliver the prints'
         required: true
         type: choice
-        default: artifact
+        default: release
         options:
           - artifact
           - release
