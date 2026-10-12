@@ -104,6 +104,20 @@ test.describe('Continuous View - Print Mode - Paper size screenshots', () => {
         await expect(page.locator('#paper-size-select')).toBeVisible();
     });
 
+    test('every insert item (cover, standalone photo, ...) prints on its own page', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const breaks = await page.locator('.card.insert').evaluateAll(cards =>
+            cards.map(c => {
+                const s = getComputedStyle(c);
+                return { before: s.breakBefore, after: s.breakAfter };
+            }));
+        expect(breaks.length).toBeGreaterThan(0);
+        for (const b of breaks) {
+            expect(b.before).toBe('page');
+            expect(b.after).toBe('page');
+        }
+    });
+
     test('Print screenshot: Dynamic (default) paper size', async ({ page }) => {
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(300);

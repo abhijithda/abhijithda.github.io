@@ -826,6 +826,29 @@ body[data-paper-size="a3"] .book-nav {
         max-height: 250mm !important;
     }
 
+    /* Insert pages (standalone photo, cover/divider) are separator pages, so
+       centre their content vertically instead of leaving it pinned to the top
+       with the rest of the page blank. min-height matches the max-height
+       cap above (the usable page height with room to spare), so it can
+       never push the card onto a second page. These cards are already
+       flex columns that centre horizontally. */
+    .standalone-image,
+    .book-columns .title-style-page {
+        min-height: 170mm;
+        justify-content: center;
+    }
+
+    body[data-paper-size="a3"] .standalone-image,
+    body[data-paper-size="a3"] .book-columns .title-style-page {
+        min-height: 250mm;
+    }
+
+    /* A paragraph that splits across pages never strands 1-2 lines. */
+    .book-columns {
+        orphans: 3;
+        widows: 3;
+    }
+
     .standalone-image:not(:first-child) {
         break-before: page;
     }

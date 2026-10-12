@@ -161,12 +161,32 @@ body[data-paper-size="a3"] #continuous-container {
     }
 }
 
+/* Print flow. Every "insert" item (cover, dividers, plain standalone photos,
+   blank pages) is a separator page: forced onto its own page before AND
+   after — continuous view otherwise has no per-item page-break mechanism
+   (unlike book view's break-after: column). Everything else flows
+   normally, and may split across pages.
+
+   The two small rules below stop a stranded scrap from being left behind
+   when a block does split: a Ref strip stays with the block it introduces,
+   and a paragraph never leaves just one or two lines on either page. */
 @media print {
-    .card.insert-blank {
+    .card.insert {
         break-before: page;
         break-after: page;
         page-break-before: always;
         page-break-after: always;
+    }
+
+    .reply-excerpt {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    .col-kn,
+    .col-en {
+        orphans: 3;
+        widows: 3;
     }
 }
 
