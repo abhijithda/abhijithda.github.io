@@ -18,7 +18,7 @@ beforeEach(() => {
 
 describe('loadSettings / saveSettings', () => {
     test('defaults every field when nothing has ever been saved', () => {
-        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: false, readTracking: false, ...DEFAULT_PAPER_FONT });
+        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: true, readTracking: false, ...DEFAULT_PAPER_FONT });
     });
 
     test('saveSettings merges a partial update into the existing saved settings', () => {

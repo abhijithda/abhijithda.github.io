@@ -27,7 +27,9 @@ test.describe('Continuous View - Print Mode', () => {
         await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
-    test('Default state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
+    test('Videos-only state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
+        await page.locator('#toggle-qrs').uncheck();
+
         const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(200);
@@ -37,7 +39,8 @@ test.describe('Continuous View - Print Mode', () => {
         await expect(page).toHaveScreenshot('continuous-print-default-state.png', { fullPage: true, timeout: 15000 });
     });
 
-    test('Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
+    test('Default / Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
+        // Both are ON by default; check() is a no-op that documents the state.
         await page.locator('#toggle-qrs').check();
 
         const mediaWrap = page.locator('.media-wrap').first();
@@ -64,6 +67,7 @@ test.describe('Continuous View - Print Mode', () => {
 
     test('None state (Videos OFF, QR OFF): neither prints', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
 
         const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });

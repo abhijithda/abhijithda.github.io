@@ -44,8 +44,9 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
         await page.locator('#settings-btn').click();
         await expect(page.locator('#toggle-videos')).toBeVisible();
 
-        // Videos is ON and QR is OFF by default — turn Videos off too.
+        // Videos and QR are both ON by default — turn both off.
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
         await page.waitForTimeout(300);
 
         await expect(page.locator('#i_001_b_1 .image-card img')).toBeVisible();
@@ -53,6 +54,7 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
 
     test('a media-only photo block inside a text-heavy answer stays visible when both toggles are off', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
         await page.waitForTimeout(300);
 
         // a_002_b_4: content-less image block inside the a_002 answer item
@@ -63,6 +65,7 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
 
     test('a photo stays visible (and its sibling video stays hidden) when both toggles are off', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
         await page.waitForTimeout(300);
 
         // a_004_b_1: mixed-media block — both a video and an image together

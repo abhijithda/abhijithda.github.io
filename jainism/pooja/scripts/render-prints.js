@@ -146,7 +146,7 @@ async function imagesLoaded(page) {
                 await page.pdf({
                     path: path.join(OUT_DIR, fileName),
                     preferCSSPageSize: true,   // honour the app's own @page rule (size + orientation)
-                    printBackground: false,    // matches Chrome's default print dialog
+                    printBackground: true,     // keep the block colours; readers can print grayscale
                     displayHeaderFooter: true,
                     headerTemplate: '<span></span>',
                     footerTemplate: footerTemplate(view.pageNumbers),
