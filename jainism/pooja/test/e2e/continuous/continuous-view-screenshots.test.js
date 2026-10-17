@@ -21,7 +21,7 @@ test.describe('Continuous View - Screenshot Tests (Display Options)', () => {
         await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
-    test('Screenshot: Default state (Videos ON, QR OFF)', async ({ page }) => {
+    test('Screenshot: Default state (Videos ON, QR ON)', async ({ page }) => {
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
         const chatContainer = page.locator('#continuous-container');
@@ -29,25 +29,25 @@ test.describe('Continuous View - Screenshot Tests (Display Options)', () => {
         // Wait for content to load
         await page.waitForSelector('#continuous-container .card .video-card');
 
-        // Verify default state
+        // Verify default state: both ON
         await expect(videosCheckbox).toBeChecked();
-        await expect(qrsCheckbox).not.toBeChecked();
+        await expect(qrsCheckbox).toBeChecked();
 
-        // Validate that video is visible and QR is hidden
+        // Validate that video and QR are both visible
         const firstCardWithVideo = chatContainer.locator('.card:has(.video-card)').first();
         const videoInCard = firstCardWithVideo.locator('.video-card').first();
         const qrInCard = firstCardWithVideo.locator('.qr-code').first();
 
         await expect(videoInCard).toBeVisible();
-        await expect(qrInCard).toBeHidden();
+        await expect(qrInCard).toBeVisible();
 
-        // Capture visual snapshot for comparison (viewport only for consistency)
-        await expect(page).toHaveScreenshot('continuous-screenshot-default-state-videos-on-qr-off.png', {
-            fullPage: true, // Optional: captures the entire scrollable page
+        // Capture visual snapshot for comparison
+        await expect(page).toHaveScreenshot('continuous-screenshot-default-state-videos-on-qr-on.png', {
+            fullPage: true,
             timeout: 20000
         });
 
-        console.log('✓ Default state: Videos visible, QR hidden');
+        console.log('✓ Default state: Videos visible, QR visible');
     });
 
     test('Screenshot: QR-only state (Videos OFF, QR ON)', async ({ page }) => {
@@ -165,7 +165,7 @@ test.describe('Continuous View - Screenshot Tests (Display Options)', () => {
         console.log('✓ None state: Videos and QR hidden');
     });
 
-    test('Screenshot: Videos-only state (Videos ON, QR OFF) - verify default persists', async ({ page }) => {
+    test('Screenshot: Videos-only state (Videos ON, QR OFF)', async ({ page }) => {
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
         const chatContainer = page.locator('#continuous-container');
@@ -173,7 +173,7 @@ test.describe('Continuous View - Screenshot Tests (Display Options)', () => {
         // Wait for content to load
         await page.waitForSelector('#continuous-container .card .video-card');
 
-        // Ensure state is Videos ON, QR OFF (default)
+        // Videos ON, QR OFF (QR is ON by default, so turn it off)
         await videosCheckbox.check();
         await qrsCheckbox.uncheck();
 

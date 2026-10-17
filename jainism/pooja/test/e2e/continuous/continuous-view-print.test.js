@@ -27,7 +27,9 @@ test.describe('Continuous View - Print Mode', () => {
         await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
-    test('Default state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
+    test('Videos-only state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
+        await page.locator('#toggle-qrs').uncheck();
+
         const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(200);
@@ -37,7 +39,8 @@ test.describe('Continuous View - Print Mode', () => {
         await expect(page).toHaveScreenshot('continuous-print-default-state.png', { fullPage: true, timeout: 15000 });
     });
 
-    test('Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
+    test('Default / Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
+        // Both are ON by default; check() is a no-op that documents the state.
         await page.locator('#toggle-qrs').check();
 
         const mediaWrap = page.locator('.media-wrap').first();
@@ -64,6 +67,7 @@ test.describe('Continuous View - Print Mode', () => {
 
     test('None state (Videos OFF, QR OFF): neither prints', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
 
         const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
@@ -102,6 +106,26 @@ test.describe('Continuous View - Print Mode - Paper size screenshots', () => {
 
         await page.locator('#settings-btn').click();
         await expect(page.locator('#paper-size-select')).toBeVisible();
+    });
+
+    test('every insert item (cover, standalone photo, ...) prints on its own page', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const breaks = await page.locator('.card.insert').evaluateAll(cards =>
+            cards.map(c => {
+                const s = getComputedStyle(c);
+                return {
+                    isFirstCard: !c.previousElementSibling,
+                    before: s.breakBefore,
+                    after: s.breakAfter,
+                };
+            }));
+        expect(breaks.length).toBeGreaterThan(0);
+        for (const b of breaks) {
+            expect(b.after).toBe('page');
+            // A forced break before the document's very first card would
+            // print a blank first page, so only later inserts break before.
+            expect(b.before).toBe(b.isFirstCard ? 'auto' : 'page');
+        }
     });
 
     test('Print screenshot: Dynamic (default) paper size', async ({ page }) => {

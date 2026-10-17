@@ -151,12 +151,48 @@ body[data-paper-size="a3"] #continuous-container {
     min-height: 4em;
 }
 
+/* Dynamic prints as A4 (see core/paper-size.js), so give it the same 210mm
+   layout width A4 gets above. Without this, Dynamic printed at the fluid
+   screen width instead — larger text, ~44 pages vs A4's ~34. */
 @media print {
-    .card.insert-blank {
-        break-before: page;
+    body:not([data-paper-size="a3"]) #continuous-container {
+        width: 210mm;
+        max-width: none;
+    }
+}
+
+/* Print flow. Every "insert" item (cover, dividers, plain standalone photos,
+   blank pages) is a separator page: forced onto its own page before AND
+   after — continuous view otherwise has no per-item page-break mechanism
+   (unlike book view's break-after: column). Everything else flows
+   normally, and may split across pages.
+
+   The two small rules below stop a stranded scrap from being left behind
+   when a block does split: a Ref strip stays with the block it introduces,
+   and a paragraph never leaves just one or two lines on either page. */
+@media print {
+    /* Page break after every insert; before every insert EXCEPT the first
+       card (a forced break before the document's first content gave a blank
+       first page, pushing the cover to page 2). */
+    .card.insert {
         break-after: page;
-        page-break-before: always;
         page-break-after: always;
+    }
+
+    .card + .card.insert {
+        break-before: page;
+        page-break-before: always;
+    }
+
+    .reply-excerpt {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    .col-kn,
+    .col-en {
+        orphans: 3;
+        widows: 3;
     }
 }
 
