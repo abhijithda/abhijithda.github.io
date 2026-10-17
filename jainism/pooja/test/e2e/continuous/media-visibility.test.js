@@ -135,3 +135,25 @@ test.describe('Media Layout - standalone photo alignment (screen)', () => {
         }
     });
 });
+
+test.describe('Media Layout - video play badge (continuous)', () => {
+
+    test('a video thumbnail carries a small play badge in its bottom-left corner', async ({ page }) => {
+        await page.route('**/data.json', route => {
+            route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
+        });
+        await page.goto('/');
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
+        const link = page.locator('.video-card a').first();
+        await expect(link).toBeVisible();
+
+        const badge = await link.evaluate(a => {
+            const s = getComputedStyle(a, '::after');
+            return { content: s.content, position: s.position, left: s.left, bottom: s.bottom };
+        });
+        expect(badge.content).toContain('▶');
+        expect(badge.position).toBe('absolute');
+        expect(parseFloat(badge.left)).toBeGreaterThanOrEqual(0);
+        expect(parseFloat(badge.bottom)).toBeGreaterThanOrEqual(0);
+    });
+});

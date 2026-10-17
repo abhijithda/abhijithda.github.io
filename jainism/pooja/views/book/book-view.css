@@ -536,6 +536,16 @@ body[data-paper-size="a3"] .book-nav {
         box-sizing: border-box;
     }
 
+    /* A standalone photo page is also a separator page, so it fills one page
+       column too and centres its content (it already centres via
+       justify-content: center; without a height it just hugged the top).
+       min-height, not height: a photo + caption taller than the column grows
+       the card exactly as before instead of being clipped. */
+    .book-columns .standalone-image {
+        min-height: calc(100cqh - 70px);
+        box-sizing: border-box;
+    }
+
     .title-style-image-wrap {
         flex: 0 1 auto;
         min-height: 0;

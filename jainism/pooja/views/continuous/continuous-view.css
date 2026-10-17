@@ -171,11 +171,17 @@ body[data-paper-size="a3"] #continuous-container {
    when a block does split: a Ref strip stays with the block it introduces,
    and a paragraph never leaves just one or two lines on either page. */
 @media print {
+    /* Page break after every insert; before every insert EXCEPT the first
+       card (a forced break before the document's first content gave a blank
+       first page, pushing the cover to page 2). */
     .card.insert {
-        break-before: page;
         break-after: page;
-        page-break-before: always;
         page-break-after: always;
+    }
+
+    .card + .card.insert {
+        break-before: page;
+        page-break-before: always;
     }
 
     .reply-excerpt {

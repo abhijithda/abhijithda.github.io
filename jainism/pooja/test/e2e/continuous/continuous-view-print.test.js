@@ -113,12 +113,18 @@ test.describe('Continuous View - Print Mode - Paper size screenshots', () => {
         const breaks = await page.locator('.card.insert').evaluateAll(cards =>
             cards.map(c => {
                 const s = getComputedStyle(c);
-                return { before: s.breakBefore, after: s.breakAfter };
+                return {
+                    isFirstCard: !c.previousElementSibling,
+                    before: s.breakBefore,
+                    after: s.breakAfter,
+                };
             }));
         expect(breaks.length).toBeGreaterThan(0);
         for (const b of breaks) {
-            expect(b.before).toBe('page');
             expect(b.after).toBe('page');
+            // A forced break before the document's very first card would
+            // print a blank first page, so only later inserts break before.
+            expect(b.before).toBe(b.isFirstCard ? 'auto' : 'page');
         }
     });
 

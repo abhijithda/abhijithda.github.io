@@ -93,6 +93,33 @@ body.show-qrs .col-media:not(:empty) {
     border-radius: 8px;
 }
 
+/* Play badge in the bottom-left corner (the QR overlay is bottom-right), so
+   it still says "this is a video" without covering the speaker's face. Same
+   idea as book view's .book-vid-play badge. The anchor wraps the whole
+   thumbnail, so the entire thumbnail stays clickable. .media-wrap sets
+   line-height: 0, hence the explicit line-height here. */
+.video-card a {
+    position: relative;
+    display: block;
+}
+
+.video-card a::after {
+    content: '▶';
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    padding-left: 1px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    color: white;
+    font-size: 9px;
+    line-height: 20px;
+    text-align: center;
+}
+
 .qr-code {
     display: none;
     position: absolute;
