@@ -27,6 +27,39 @@ test.describe('Continuous View - Print Mode', () => {
         await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
+    test('print keeps the page itself plain white (block colours stay, the app\'s grey page background does not)', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const bg = await page.evaluate(() => ({
+            body: getComputedStyle(document.body).backgroundColor,
+            html: getComputedStyle(document.documentElement).backgroundColor,
+        }));
+        expect(bg.body).toBe('rgb(255, 255, 255)');
+        expect(bg.html).toBe('rgb(255, 255, 255)');
+    });
+
+    test('answer cards may split across pages, while question cards, inserts and image blocks stay whole', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const breakInside = async selector => page.locator(selector).first()
+            .evaluate(el => getComputedStyle(el).breakInside);
+
+        expect(await breakInside('.card.answer')).toBe('auto');
+        expect(await breakInside('.card.question')).toBe('avoid');
+        expect(await breakInside('.card.insert')).toBe('avoid');
+        expect(await breakInside('.block-row.media-only')).toBe('avoid');
+    });
+
+    test('a printed image card is not height-capped, so its captions stay inside it', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const card = page.locator('.block-row.media-only .image-card').first();
+        await expect(card).toBeAttached();
+        const caps = await card.evaluate(c => ({
+            card: getComputedStyle(c).maxHeight,
+            img: getComputedStyle(c.querySelector('img')).maxHeight,
+        }));
+        expect(caps.card).toBe('none');
+        expect(caps.img).not.toBe('none');
+    });
+
     test('Videos-only state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
         await page.locator('#toggle-qrs').uncheck();
 

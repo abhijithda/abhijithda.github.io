@@ -183,7 +183,17 @@ body:not(.show-videos).show-qrs .qr-code {
         width: 100% !important;
     }
 
-    body .block-row.media-only .image-card,
+    /* Cap the PHOTO's height, never the .image-card around it: the card also
+       holds the Kannada/English captions, and capping the card made them
+       overflow its box and print on top of the next block (seen on the tall
+       Adinatha photo). The card just grows to fit photo + captions. */
+    body .block-row.media-only .image-card {
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: none !important;
+    }
+
     body .block-row.media-only .image-card img {
         width: auto !important;
         height: auto !important;

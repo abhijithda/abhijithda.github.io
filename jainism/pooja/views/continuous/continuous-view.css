@@ -480,10 +480,21 @@ input:checked + .slider::before {
         border-color: black;
     }
 
+    /* Cards may split across pages — a tall answer card used to jump whole to
+       the next page, leaving the previous page mostly empty. Only things that
+       are small or indivisible are kept whole: question cards, insert pages,
+       and image blocks (the id label stays with its photo and captions). */
     .card {
-        break-inside: avoid;
+        break-inside: auto;
         border: 1px solid #eee;
         margin: 10px 0;
+    }
+
+    .card.question,
+    .card.insert,
+    .block-row.media-only {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
     .block-row {

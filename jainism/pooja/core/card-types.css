@@ -72,4 +72,11 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
+
+    /* ...but the page itself stays plain white: forcing colours on would
+       otherwise also print the app's grey page background (and waste ink). */
+    html,
+    body {
+        background: #fff !important;
+    }
 }
