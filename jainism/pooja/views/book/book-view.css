@@ -450,6 +450,23 @@ body[data-paper-size="a3"] .book-nav {
     align-self: flex-start;
 }
 
+/* On a photo insert page the id badge is a page label, so pin it to the
+   page's top-left corner and centre only the photo + caption in the page
+   (centring the badge with them left the number floating mid-page). The extra
+   top padding keeps a tall photo from running under the badge. Title-style
+   pages keep their badge in the flow: with their id hidden there's nothing to
+   pin, and when shown it sits above the centred title. */
+.book-columns .standalone-image {
+    position: relative;
+    padding-top: 28px;
+}
+
+.book-columns .standalone-image .book-bid {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+}
+
 /* ── "insert" items — the front cover, section dividers, and pure blank
    pages, all one item type (distinct from block-level "images" to avoid
    the same word meaning two different things), distinguished purely by

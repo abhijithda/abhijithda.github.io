@@ -37,6 +37,18 @@ test.describe('Continuous View - Print Mode', () => {
         expect(bg.html).toBe('rgb(255, 255, 255)');
     });
 
+    test('item cards print white with only their coloured left bar, matching book view', async ({ page }) => {
+        const colourOf = sel => page.locator(sel).first()
+            .evaluate(el => getComputedStyle(el).backgroundColor);
+
+        // On screen the cards keep their tint...
+        expect(await colourOf('.card.answer')).not.toBe('rgb(255, 255, 255)');
+        // ...in print they are white.
+        await page.emulateMedia({ media: 'print' });
+        expect(await colourOf('.card.question')).toBe('rgb(255, 255, 255)');
+        expect(await colourOf('.card.answer')).toBe('rgb(255, 255, 255)');
+    });
+
     test('answer cards may split across pages, while question cards, inserts and image blocks stay whole', async ({ page }) => {
         await page.emulateMedia({ media: 'print' });
         const breakInside = async selector => page.locator(selector).first()
