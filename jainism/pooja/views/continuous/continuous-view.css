@@ -486,8 +486,57 @@ input:checked + .slider::before {
        and image blocks (the id label stays with its photo and captions). */
     .card {
         break-inside: auto;
-        border: 1px solid #eee;
         margin: 10px 0;
+    }
+
+    /* The coloured left bar is drawn on each ROW, not as the card's own
+       border. A card that splits across pages gets its box stretched to the
+       bottom of the first page by the browser, so a card-level border ran
+       down the whole empty remainder of the page. Per-row bars stop exactly
+       where the content stops. Mechanics: the card keeps no border/outline
+       and no gap; each row gets a transparent border for the old 5px gap
+       (25px at the card's top and bottom, replacing the card padding), and
+       the bar is an outside box-shadow, which is painted over that border
+       too, so the bar is continuous down the card. background-clip keeps
+       the row's own fill (shloka, note, mantra) out of the transparent
+       border, so those fills look exactly as before. */
+    .card.question { --bar: #d32f2f; }
+    .card.answer   { --bar: #4caf50; }
+    .card.images   { --bar: #607d8b; }
+
+    /* Block flow instead of the screen's flex layout, for the container, the
+       cards and the Ref strips. Page-break hints (break-after: avoid on the
+       Ref strip) are only honoured between block siblings, not flex items, and
+       a flex-box Ref strip got stretched into an empty grey slab stranded at
+       the bottom of a page. As block siblings the strip stays with its card. */
+    #continuous-container,
+    .reply-excerpt {
+        display: block !important;
+    }
+
+    .card {
+        display: block !important;
+        border: 0 !important;
+        border-radius: 0;
+        box-shadow: none;
+        padding-top: 0;
+        padding-bottom: 0;
+        gap: 0;
+    }
+
+    .card > * {
+        border-top: 0 solid transparent;
+        border-bottom: 5px solid transparent;
+        background-clip: padding-box;
+        box-shadow: inset 4px 0 0 0 var(--bar, transparent);
+    }
+
+    .card > :first-child {
+        border-top-width: 25px;
+    }
+
+    .card > :last-child {
+        border-bottom-width: 25px;
     }
 
     .card.question,

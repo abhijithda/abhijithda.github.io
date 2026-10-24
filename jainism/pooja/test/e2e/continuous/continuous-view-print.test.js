@@ -49,6 +49,29 @@ test.describe('Continuous View - Print Mode', () => {
         expect(await colourOf('.card.answer')).toBe('rgb(255, 255, 255)');
     });
 
+    test('print lays container, cards and Ref strips out as block flow, with the card bar drawn per row', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const info = await page.evaluate(() => {
+            const card = [...document.querySelectorAll('.card.answer')]
+                .find(c => c.querySelector('.reply-excerpt'));
+            const row = card.querySelector('.block-row');
+            return {
+                container: getComputedStyle(document.querySelector('#continuous-container')).display,
+                card: getComputedStyle(card).display,
+                strip: getComputedStyle(card.querySelector('.reply-excerpt')).display,
+                cardBorderLeft: getComputedStyle(card).borderLeftWidth,
+                rowShadow: getComputedStyle(row).boxShadow,
+            };
+        });
+        expect(info.container).toBe('block');
+        expect(info.card).toBe('block');
+        expect(info.strip).toBe('block');
+        // The card itself has no border (a split card's border would stretch to the
+        // page bottom); each row carries the coloured bar instead.
+        expect(info.cardBorderLeft).toBe('0px');
+        expect(info.rowShadow).toContain('inset');
+    });
+
     test('answer cards may split across pages, while question cards, inserts and image blocks stay whole', async ({ page }) => {
         await page.emulateMedia({ media: 'print' });
         const breakInside = async selector => page.locator(selector).first()
