@@ -8,9 +8,8 @@
 //
 // Both views (continuous, book) are rendered at each paper size, one PDF each:
 //   Jaina-Pooja-Vichara-Sankalana-<View>-<Size>-<YYYY-MM-DD>.pdf
-// By default the sizes are dynamic, a4 and a3. 'dynamic' prints as A4 and is
-// meant to be identical to it; it stays in the set for now so that can be
-// confirmed over a few updates, after which it can be dropped (--sizes=a4,a3).
+// Paper sizes: a4 and a3. (The app's 'dynamic' paper size prints exactly like
+// A4 — confirmed over several runs — so it isn't rendered separately.)
 //
 // Each page has a small footer (no URL): the date on the left and, for
 // continuous view, "Page X of Y" on the right. Book view shows the date only —
@@ -18,7 +17,7 @@
 // mislabel the pages; real folios belong in the app itself.
 //
 // Usage:
-//   npm run render:prints                      # all sizes
+//   npm run render:prints                      # A4 and A3
 //   npm run render:prints -- --sizes=a3        # just one paper size
 
 const fs = require('fs');
@@ -30,9 +29,9 @@ const ROOT = path.join(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'prints');
 const TITLE = 'Jaina Pooja Vichara Sankalana';
 
-const ALL_SIZES = ['dynamic', 'a4', 'a3'];
+const ALL_SIZES = ['a4', 'a3'];
 const argSizes = process.argv.find(a => a.startsWith('--sizes='));
-const PAPER_SIZES = (argSizes ? argSizes.slice('--sizes='.length) : 'dynamic,a4,a3')
+const PAPER_SIZES = (argSizes ? argSizes.slice('--sizes='.length) : 'a4,a3')
     .split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
 const badSize = PAPER_SIZES.find(x => !ALL_SIZES.includes(x));
 if (badSize) {
@@ -136,7 +135,7 @@ async function imagesLoaded(page) {
                 await view.ready(page);
                 await imagesLoaded(page);
 
-                const sizeLabel = paperSize === 'dynamic' ? 'Dynamic' : paperSize.toUpperCase();
+                const sizeLabel = paperSize.toUpperCase();
                 // Chrome uses document.title as the PDF's title (what a viewer
                 // shows in its title bar).
                 await page.evaluate(t => { document.title = t; },
@@ -146,7 +145,7 @@ async function imagesLoaded(page) {
                 await page.pdf({
                     path: path.join(OUT_DIR, fileName),
                     preferCSSPageSize: true,   // honour the app's own @page rule (size + orientation)
-                    printBackground: false,    // matches Chrome's default print dialog
+                    printBackground: true,     // keep the block colours; readers can print grayscale
                     displayHeaderFooter: true,
                     headerTemplate: '<span></span>',
                     footerTemplate: footerTemplate(view.pageNumbers),

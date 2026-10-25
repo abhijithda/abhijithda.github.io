@@ -9,9 +9,8 @@ name: Publish Pooja Prints
 #              (no expiry), ready to share
 # Always renders the repo's real data.json; test data is never rendered or
 # published. Output is one PDF per view (continuous, book) and paper size
-# (Dynamic, A4, A3), named like
+# (A4, A3), named like
 #   Jaina-Pooja-Vichara-Sankalana-Book-A4-2026-10-10.pdf
-# Dynamic prints as A4 and stays in the set for now to confirm that.
 #
 # The release job is separate so only it gets write access (it creates the
 # release and its tag, prints-<date>-<run#>, on the branch's current commit);
@@ -106,4 +105,4 @@ jobs:
           --repo "${{ github.repository }}" \
           --target "${{ github.sha }}" \
           --title "Jaina Pooja Vichara Sankalana — Prints (${DATE})" \
-          --notes "Print-ready PDFs of the continuous and book layouts (Dynamic, A4 and A3), generated on ${DATE}."
+          --notes "Print-ready PDFs of the continuous and book layouts (A4 and A3), generated on ${DATE}."
