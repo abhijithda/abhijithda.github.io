@@ -492,23 +492,25 @@ input:checked + .slider::before {
     /* The coloured left bar is drawn on each ROW, not as the card's own
        border. A card that splits across pages gets its box stretched to the
        bottom of the first page by the browser, so a card-level border ran
-       down the whole empty remainder of the page. Per-row bars stop exactly
-       where the content stops. Mechanics: the card keeps no border/outline
-       and no gap; each row gets a transparent border for the old 5px gap
-       (25px at the card's top and bottom, replacing the card padding), and
-       the bar is an outside box-shadow, which is painted over that border
-       too, so the bar is continuous down the card. background-clip keeps
-       the row's own fill (shloka, note, mantra) out of the transparent
-       border, so those fills look exactly as before. */
+       down the whole empty remainder of the page.
+
+       Per-row bars only paint a row's own box, so ALL the spacing between
+       rows has to live inside the rows or it shows as a gap in the bar. The
+       card therefore keeps no border/outline, gap or padding, and every row's
+       margin becomes a transparent border instead (same total spacing: 15px
+       between rows, 20px under a Ref strip, 30px at the top/bottom of a
+       card). The bar is an inset box-shadow, painted over those borders too,
+       so it is continuous down the whole card and ends where the content
+       ends. background-clip keeps a row's own fill (strip grey, shloka,
+       note, mantra) out of the transparent borders. */
     .card.question { --bar: #d32f2f; }
     .card.answer   { --bar: #4caf50; }
     .card.images   { --bar: #607d8b; }
 
-    /* Block flow instead of the screen's flex layout, for the container, the
-       cards and the Ref strips. Page-break hints (break-after: avoid on the
-       Ref strip) are only honoured between block siblings, not flex items, and
-       a flex-box Ref strip got stretched into an empty grey slab stranded at
-       the bottom of a page. As block siblings the strip stays with its card. */
+    /* Block flow, not the screen's flex layout, for the container, cards and
+       Ref strips: break-after: avoid on the strip is only honoured between
+       block siblings (as flex items the strip got stranded alone at the
+       bottom of a page). */
     #continuous-container,
     .reply-excerpt {
         display: block !important;
@@ -517,6 +519,7 @@ input:checked + .slider::before {
     .card {
         display: block !important;
         border: 0 !important;
+        border-left: 4px solid transparent !important;   /* keeps content where the old bar kept it */
         border-radius: 0;
         box-shadow: none;
         padding-top: 0;
@@ -525,18 +528,60 @@ input:checked + .slider::before {
     }
 
     .card > * {
-        border-top: 0 solid transparent;
-        border-bottom: 5px solid transparent;
-        background-clip: padding-box;
-        box-shadow: inset 4px 0 0 0 var(--bar, transparent);
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        border-top: 7px solid transparent;
+        border-bottom: 8px solid transparent;
+        /* The bar is a background layer that is positioned and clipped to the
+           BORDER box, so it paints across the transparent spacing borders
+           (an inset box-shadow would stop at the padding edge and leave a gap
+           in the bar). The second layer is a dummy whose padding-box clip is
+           what the row's own background-color (strip grey, shloka, note,
+           mantra) gets clipped to, so those fills stay out of the spacing.
+           All !important because later rules set the `background` shorthand,
+           which would reset every one of these. */
+        background-image:
+            linear-gradient(var(--bar, transparent), var(--bar, transparent)),
+            linear-gradient(transparent, transparent) !important;
+        background-size: 4px 100%, 100% 100% !important;
+        background-position: left top, left top !important;
+        background-repeat: no-repeat !important;
+        background-origin: border-box, padding-box !important;
+        background-clip: border-box, padding-box !important;
     }
 
-    .card > :first-child {
-        border-top-width: 25px;
+    /* The Ref strip's own margins are !important in the base rules. */
+    .card > .reply-excerpt.multi-block {
+        margin: 0 !important;
+        border-top-width: 0;
+    }
+
+    .reply-excerpt + * {
+        border-top-width: 20px;
+    }
+
+    /* A Ref strip must never be separated from its card: not split across
+       pages itself (break-inside), and held to the first row after it
+       (break-after on the strip + break-before on that row). Without
+       break-inside the browser was free to break between a multi-reference
+       strip's rows, leaving part of it stranded — and stretched — at the end
+       of the previous page. */
+    .reply-excerpt {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .reply-excerpt + * {
+        break-before: avoid;
+        page-break-before: avoid;
+    }
+
+    .card > :first-child:not(.reply-excerpt) {
+        border-top-width: 30px;
     }
 
     .card > :last-child {
-        border-bottom-width: 25px;
+        border-bottom-width: 30px;
     }
 
     .card.question,

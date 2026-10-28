@@ -49,27 +49,30 @@ test.describe('Continuous View - Print Mode', () => {
         expect(await colourOf('.card.answer')).toBe('rgb(255, 255, 255)');
     });
 
-    test('print lays container, cards and Ref strips out as block flow, with the card bar drawn per row', async ({ page }) => {
+    test('a Ref strip is held together with its card, and the card bar is drawn per row across the spacing', async ({ page }) => {
         await page.emulateMedia({ media: 'print' });
         const info = await page.evaluate(() => {
             const card = [...document.querySelectorAll('.card.answer')]
                 .find(c => c.querySelector('.reply-excerpt'));
-            const row = card.querySelector('.block-row');
+            const strip = card.querySelector('.reply-excerpt');
+            const next = strip.nextElementSibling;
             return {
-                container: getComputedStyle(document.querySelector('#continuous-container')).display,
-                card: getComputedStyle(card).display,
-                strip: getComputedStyle(card.querySelector('.reply-excerpt')).display,
-                cardBorderLeft: getComputedStyle(card).borderLeftWidth,
-                rowShadow: getComputedStyle(row).boxShadow,
+                stripBreakInside: getComputedStyle(strip).breakInside,
+                stripBreakAfter: getComputedStyle(strip).breakAfter,
+                nextBreakBefore: getComputedStyle(next).breakBefore,
+                cardBorderLeft: getComputedStyle(card).borderLeftColor,
+                rowBg: getComputedStyle(next).backgroundImage,
+                rowBgClip: getComputedStyle(next).backgroundClip,
             };
         });
-        expect(info.container).toBe('block');
-        expect(info.card).toBe('block');
-        expect(info.strip).toBe('block');
-        // The card itself has no border (a split card's border would stretch to the
-        // page bottom); each row carries the coloured bar instead.
-        expect(info.cardBorderLeft).toBe('0px');
-        expect(info.rowShadow).toContain('inset');
+        expect(info.stripBreakInside).toBe('avoid');
+        expect(info.stripBreakAfter).toBe('avoid');
+        expect(info.nextBreakBefore).toBe('avoid');
+        // The card itself draws no coloured bar (it would stretch to the page bottom)...
+        expect(info.cardBorderLeft).toBe('rgba(0, 0, 0, 0)');
+        // ...each row paints it as a border-box background layer instead.
+        expect(info.rowBg).toContain('linear-gradient');
+        expect(info.rowBgClip).toContain('border-box');
     });
 
     test('answer cards may split across pages, while question cards, inserts and image blocks stay whole', async ({ page }) => {
