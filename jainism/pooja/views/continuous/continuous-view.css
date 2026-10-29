@@ -486,7 +486,7 @@ input:checked + .slider::before {
        and image blocks (the id label stays with its photo and captions). */
     .card {
         break-inside: auto;
-        margin: 10px 0;
+        margin: 6px 0;
     }
 
     /* The coloured left bar is drawn on each ROW, not as the card's own
@@ -497,9 +497,9 @@ input:checked + .slider::before {
        Per-row bars only paint a row's own box, so ALL the spacing between
        rows has to live inside the rows or it shows as a gap in the bar. The
        card therefore keeps no border/outline, gap or padding, and every row's
-       margin becomes a transparent border instead (same total spacing: 15px
-       between rows, 20px under a Ref strip, 30px at the top/bottom of a
-       card). The bar is an inset box-shadow, painted over those borders too,
+       margin becomes a transparent border instead. The spacing is kept
+       compact, close to book view's print density: 6px between rows, 6px
+       under a Ref strip, 10px at the top/bottom of a card. The bar is an inset box-shadow, painted over those borders too,
        so it is continuous down the whole card and ends where the content
        ends. background-clip keeps a row's own fill (strip grey, shloka,
        note, mantra) out of the transparent borders. */
@@ -530,8 +530,8 @@ input:checked + .slider::before {
     .card > * {
         margin-top: 0 !important;
         margin-bottom: 0 !important;
-        border-top: 7px solid transparent;
-        border-bottom: 8px solid transparent;
+        border-top: 3px solid transparent;
+        border-bottom: 3px solid transparent;
         /* The bar is a background layer that is positioned and clipped to the
            BORDER box, so it paints across the transparent spacing borders
            (an inset box-shadow would stop at the padding edge and leave a gap
@@ -557,7 +557,7 @@ input:checked + .slider::before {
     }
 
     .reply-excerpt + * {
-        border-top-width: 20px;
+        border-top-width: 6px;
     }
 
     /* A Ref strip must never be separated from its card: not split across
@@ -577,11 +577,11 @@ input:checked + .slider::before {
     }
 
     .card > :first-child:not(.reply-excerpt) {
-        border-top-width: 30px;
+        border-top-width: 10px;
     }
 
     .card > :last-child {
-        border-bottom-width: 30px;
+        border-bottom-width: 10px;
     }
 
     .card.question,
@@ -596,6 +596,8 @@ input:checked + .slider::before {
         flex-flow: row !important;
         width: 100% !important;
         gap: 15px !important;
+        padding-top: 4px;       /* screen uses 8px; print is kept compact like book view */
+        padding-bottom: 4px;
     }
 
     .block-row.media-only {
