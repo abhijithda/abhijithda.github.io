@@ -151,12 +151,48 @@ body[data-paper-size="a3"] #continuous-container {
     min-height: 4em;
 }
 
+/* Dynamic prints as A4 (see core/paper-size.js), so give it the same 210mm
+   layout width A4 gets above. Without this, Dynamic printed at the fluid
+   screen width instead — larger text, ~44 pages vs A4's ~34. */
 @media print {
-    .card.insert-blank {
-        break-before: page;
+    body:not([data-paper-size="a3"]) #continuous-container {
+        width: 210mm;
+        max-width: none;
+    }
+}
+
+/* Print flow. Every "insert" item (cover, dividers, plain standalone photos,
+   blank pages) is a separator page: forced onto its own page before AND
+   after — continuous view otherwise has no per-item page-break mechanism
+   (unlike book view's break-after: column). Everything else flows
+   normally, and may split across pages.
+
+   The two small rules below stop a stranded scrap from being left behind
+   when a block does split: a Ref strip stays with the block it introduces,
+   and a paragraph never leaves just one or two lines on either page. */
+@media print {
+    /* Page break after every insert; before every insert EXCEPT the first
+       card (a forced break before the document's first content gave a blank
+       first page, pushing the cover to page 2). */
+    .card.insert {
         break-after: page;
-        page-break-before: always;
         page-break-after: always;
+    }
+
+    .card + .card.insert {
+        break-before: page;
+        page-break-before: always;
+    }
+
+    .reply-excerpt {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    .col-kn,
+    .col-en {
+        orphans: 3;
+        widows: 3;
     }
 }
 
@@ -444,10 +480,115 @@ input:checked + .slider::before {
         border-color: black;
     }
 
+    /* Cards may split across pages — a tall answer card used to jump whole to
+       the next page, leaving the previous page mostly empty. Only things that
+       are small or indivisible are kept whole: question cards, insert pages,
+       and image blocks (the id label stays with its photo and captions). */
     .card {
+        break-inside: auto;
+        margin: 6px 0;
+    }
+
+    /* The coloured left bar is drawn on each ROW, not as the card's own
+       border. A card that splits across pages gets its box stretched to the
+       bottom of the first page by the browser, so a card-level border ran
+       down the whole empty remainder of the page.
+
+       Per-row bars only paint a row's own box, so ALL the spacing between
+       rows has to live inside the rows or it shows as a gap in the bar. The
+       card therefore keeps no border/outline, gap or padding, and every row's
+       margin becomes a transparent border instead. The spacing is kept
+       compact, close to book view's print density: 6px between rows, 6px
+       under a Ref strip, 10px at the top/bottom of a card. The bar is an inset box-shadow, painted over those borders too,
+       so it is continuous down the whole card and ends where the content
+       ends. background-clip keeps a row's own fill (strip grey, shloka,
+       note, mantra) out of the transparent borders. */
+    .card.question { --bar: #d32f2f; }
+    .card.answer   { --bar: #4caf50; }
+    .card.images   { --bar: #607d8b; }
+
+    /* Block flow, not the screen's flex layout, for the container, cards and
+       Ref strips: break-after: avoid on the strip is only honoured between
+       block siblings (as flex items the strip got stranded alone at the
+       bottom of a page). */
+    #continuous-container,
+    .reply-excerpt {
+        display: block !important;
+    }
+
+    .card {
+        display: block !important;
+        border: 0 !important;
+        border-left: 4px solid transparent !important;   /* keeps content where the old bar kept it */
+        border-radius: 0;
+        box-shadow: none;
+        padding-top: 0;
+        padding-bottom: 0;
+        gap: 0;
+    }
+
+    .card > * {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        border-top: 3px solid transparent;
+        border-bottom: 3px solid transparent;
+        /* The bar is a background layer that is positioned and clipped to the
+           BORDER box, so it paints across the transparent spacing borders
+           (an inset box-shadow would stop at the padding edge and leave a gap
+           in the bar). The second layer is a dummy whose padding-box clip is
+           what the row's own background-color (strip grey, shloka, note,
+           mantra) gets clipped to, so those fills stay out of the spacing.
+           All !important because later rules set the `background` shorthand,
+           which would reset every one of these. */
+        background-image:
+            linear-gradient(var(--bar, transparent), var(--bar, transparent)),
+            linear-gradient(transparent, transparent) !important;
+        background-size: 4px 100%, 100% 100% !important;
+        background-position: left top, left top !important;
+        background-repeat: no-repeat !important;
+        background-origin: border-box, padding-box !important;
+        background-clip: border-box, padding-box !important;
+    }
+
+    /* The Ref strip's own margins are !important in the base rules. */
+    .card > .reply-excerpt.multi-block {
+        margin: 0 !important;
+        border-top-width: 0;
+    }
+
+    .reply-excerpt + * {
+        border-top-width: 6px;
+    }
+
+    /* A Ref strip must never be separated from its card: not split across
+       pages itself (break-inside), and held to the first row after it
+       (break-after on the strip + break-before on that row). Without
+       break-inside the browser was free to break between a multi-reference
+       strip's rows, leaving part of it stranded — and stretched — at the end
+       of the previous page. */
+    .reply-excerpt {
         break-inside: avoid;
-        border: 1px solid #eee;
-        margin: 10px 0;
+        page-break-inside: avoid;
+    }
+
+    .reply-excerpt + * {
+        break-before: avoid;
+        page-break-before: avoid;
+    }
+
+    .card > :first-child:not(.reply-excerpt) {
+        border-top-width: 10px;
+    }
+
+    .card > :last-child {
+        border-bottom-width: 10px;
+    }
+
+    .card.question,
+    .card.insert,
+    .block-row.media-only {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
     .block-row {
@@ -455,6 +596,8 @@ input:checked + .slider::before {
         flex-flow: row !important;
         width: 100% !important;
         gap: 15px !important;
+        padding-top: 4px;       /* screen uses 8px; print is kept compact like book view */
+        padding-bottom: 4px;
     }
 
     .block-row.media-only {

@@ -44,8 +44,9 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
         await page.locator('#settings-btn').click();
         await expect(page.locator('#toggle-videos')).toBeVisible();
 
-        // Videos is ON and QR is OFF by default — turn Videos off too.
+        // Videos and QR are both ON by default — turn both off.
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
         await page.waitForTimeout(300);
 
         await expect(page.locator('#i_001_b_1 .image-card img')).toBeVisible();
@@ -53,6 +54,7 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
 
     test('a media-only photo block inside a text-heavy answer stays visible when both toggles are off', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
         await page.waitForTimeout(300);
 
         // a_002_b_4: content-less image block inside the a_002 answer item
@@ -63,6 +65,7 @@ test.describe('Media Visibility - Images independent of Video/QR toggles', () =>
 
     test('a photo stays visible (and its sibling video stays hidden) when both toggles are off', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
         await page.waitForTimeout(300);
 
         // a_004_b_1: mixed-media block — both a video and an image together
@@ -130,5 +133,27 @@ test.describe('Media Layout - standalone photo alignment (screen)', () => {
             const c = await captions.nth(i).boundingBox();
             expect(c.y + c.height).toBeLessThanOrEqual(cardBox.y + cardBox.height + 1);
         }
+    });
+});
+
+test.describe('Media Layout - video play badge (continuous)', () => {
+
+    test('a video thumbnail carries a small play badge in its bottom-left corner', async ({ page }) => {
+        await page.route('**/data.json', route => {
+            route.fulfill({ path: path.join(__dirname, '..', '..', 'data.json') });
+        });
+        await page.goto('/');
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
+        const link = page.locator('.video-card a').first();
+        await expect(link).toBeVisible();
+
+        const badge = await link.evaluate(a => {
+            const s = getComputedStyle(a, '::after');
+            return { content: s.content, position: s.position, left: s.left, bottom: s.bottom };
+        });
+        expect(badge.content).toContain('▶');
+        expect(badge.position).toBe('absolute');
+        expect(parseFloat(badge.left)).toBeGreaterThanOrEqual(0);
+        expect(parseFloat(badge.bottom)).toBeGreaterThanOrEqual(0);
     });
 });

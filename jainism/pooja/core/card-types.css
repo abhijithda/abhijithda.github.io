@@ -61,3 +61,33 @@
 .book-card.note   { background: #fdfaf2; box-shadow: inset 5px 0 0 0 #b38f4f; }
 .book-card.mantra { background: rgb(249, 126, 3); box-shadow: inset 5px 0 0 0 rgb(255, 0, 0); }
 .book-card.shloka { background: #fffde7; box-shadow: inset 5px 0 0 0 #d4a017; }
+
+/* Print keeps the card/block colours (question, answer, shloka, mantra, ...)
+   in every view, whether or not the person's print dialog has "Background
+   graphics" ticked — the colours are part of how the content reads. They can
+   still print in black and white / grayscale from the printer dialog to save
+   ink. (print-color-adjust is inherited, so setting it on <body> covers all.) */
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* ...but the page itself stays plain white: forcing colours on would
+       otherwise also print the app's grey page background (and waste ink). */
+    html,
+    body {
+        background: #fff !important;
+    }
+
+    /* Item cards (question / answer / images) print white with just their
+       coloured left bar — same as book view, which only ever coloured the
+       bar. The large pink/green tinted areas were pure ink and, when a card
+       split across pages, filled whole pages. The small block fills inside
+       cards (shloka yellow, note cream, mantra orange) are kept. */
+    .card.question,
+    .card.answer,
+    .card.images {
+        background-color: #fff;
+    }
+}

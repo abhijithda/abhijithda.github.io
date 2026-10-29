@@ -27,7 +27,80 @@ test.describe('Continuous View - Print Mode', () => {
         await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
-    test('Default state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
+    test('print keeps the page itself plain white (block colours stay, the app\'s grey page background does not)', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const bg = await page.evaluate(() => ({
+            body: getComputedStyle(document.body).backgroundColor,
+            html: getComputedStyle(document.documentElement).backgroundColor,
+        }));
+        expect(bg.body).toBe('rgb(255, 255, 255)');
+        expect(bg.html).toBe('rgb(255, 255, 255)');
+    });
+
+    test('item cards print white with only their coloured left bar, matching book view', async ({ page }) => {
+        const colourOf = sel => page.locator(sel).first()
+            .evaluate(el => getComputedStyle(el).backgroundColor);
+
+        // On screen the cards keep their tint...
+        expect(await colourOf('.card.answer')).not.toBe('rgb(255, 255, 255)');
+        // ...in print they are white.
+        await page.emulateMedia({ media: 'print' });
+        expect(await colourOf('.card.question')).toBe('rgb(255, 255, 255)');
+        expect(await colourOf('.card.answer')).toBe('rgb(255, 255, 255)');
+    });
+
+    test('a Ref strip is held together with its card, and the card bar is drawn per row across the spacing', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const info = await page.evaluate(() => {
+            const card = [...document.querySelectorAll('.card.answer')]
+                .find(c => c.querySelector('.reply-excerpt'));
+            const strip = card.querySelector('.reply-excerpt');
+            const next = strip.nextElementSibling;
+            return {
+                stripBreakInside: getComputedStyle(strip).breakInside,
+                stripBreakAfter: getComputedStyle(strip).breakAfter,
+                nextBreakBefore: getComputedStyle(next).breakBefore,
+                cardBorderLeft: getComputedStyle(card).borderLeftColor,
+                rowBg: getComputedStyle(next).backgroundImage,
+                rowBgClip: getComputedStyle(next).backgroundClip,
+            };
+        });
+        expect(info.stripBreakInside).toBe('avoid');
+        expect(info.stripBreakAfter).toBe('avoid');
+        expect(info.nextBreakBefore).toBe('avoid');
+        // The card itself draws no coloured bar (it would stretch to the page bottom)...
+        expect(info.cardBorderLeft).toBe('rgba(0, 0, 0, 0)');
+        // ...each row paints it as a border-box background layer instead.
+        expect(info.rowBg).toContain('linear-gradient');
+        expect(info.rowBgClip).toContain('border-box');
+    });
+
+    test('answer cards may split across pages, while question cards, inserts and image blocks stay whole', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const breakInside = async selector => page.locator(selector).first()
+            .evaluate(el => getComputedStyle(el).breakInside);
+
+        expect(await breakInside('.card.answer')).toBe('auto');
+        expect(await breakInside('.card.question')).toBe('avoid');
+        expect(await breakInside('.card.insert')).toBe('avoid');
+        expect(await breakInside('.block-row.media-only')).toBe('avoid');
+    });
+
+    test('a printed image card is not height-capped, so its captions stay inside it', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const card = page.locator('.block-row.media-only .image-card').first();
+        await expect(card).toBeAttached();
+        const caps = await card.evaluate(c => ({
+            card: getComputedStyle(c).maxHeight,
+            img: getComputedStyle(c.querySelector('img')).maxHeight,
+        }));
+        expect(caps.card).toBe('none');
+        expect(caps.img).not.toBe('none');
+    });
+
+    test('Videos-only state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
+        await page.locator('#toggle-qrs').uncheck();
+
         const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
         await page.waitForTimeout(200);
@@ -37,7 +110,8 @@ test.describe('Continuous View - Print Mode', () => {
         await expect(page).toHaveScreenshot('continuous-print-default-state.png', { fullPage: true, timeout: 15000 });
     });
 
-    test('Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
+    test('Default / Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
+        // Both are ON by default; check() is a no-op that documents the state.
         await page.locator('#toggle-qrs').check();
 
         const mediaWrap = page.locator('.media-wrap').first();
@@ -64,6 +138,7 @@ test.describe('Continuous View - Print Mode', () => {
 
     test('None state (Videos OFF, QR OFF): neither prints', async ({ page }) => {
         await page.locator('#toggle-videos').uncheck();
+        await page.locator('#toggle-qrs').uncheck();
 
         const mediaWrap = page.locator('.media-wrap').first();
         await page.emulateMedia({ media: 'print' });
@@ -102,6 +177,26 @@ test.describe('Continuous View - Print Mode - Paper size screenshots', () => {
 
         await page.locator('#settings-btn').click();
         await expect(page.locator('#paper-size-select')).toBeVisible();
+    });
+
+    test('every insert item (cover, standalone photo, ...) prints on its own page', async ({ page }) => {
+        await page.emulateMedia({ media: 'print' });
+        const breaks = await page.locator('.card.insert').evaluateAll(cards =>
+            cards.map(c => {
+                const s = getComputedStyle(c);
+                return {
+                    isFirstCard: !c.previousElementSibling,
+                    before: s.breakBefore,
+                    after: s.breakAfter,
+                };
+            }));
+        expect(breaks.length).toBeGreaterThan(0);
+        for (const b of breaks) {
+            expect(b.after).toBe('page');
+            // A forced break before the document's very first card would
+            // print a blank first page, so only later inserts break before.
+            expect(b.before).toBe(b.isFirstCard ? 'auto' : 'page');
+        }
     });
 
     test('Print screenshot: Dynamic (default) paper size', async ({ page }) => {
