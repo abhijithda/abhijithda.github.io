@@ -1,0 +1,108 @@
+name: Publish Pooja Prints
+
+# Manual only — never runs on push/PR, and never commits anything. Trigger it
+# from the Actions tab ("Run workflow"), pick the branch and a delivery mode:
+#   artifact — renders the print PDFs and uploads them as a downloadable zip
+#              for you to review first (kept 90 days, GitHub's max for public
+#              repos); nothing is published
+#   release  — same, and also attaches the PDFs to a new GitHub Release
+#              (no expiry), ready to share
+# Always renders the repo's real data.json; test data is never rendered or
+# published. Output is one PDF per view (continuous, book) and paper size
+# (A4, A3), named like
+#   Jaina-Pooja-Vichara-Sankalana-Book-A4-2026-10-10.pdf
+#
+# The release job is separate so only it gets write access (it creates the
+# release and its tag, prints-<date>-<run#>, on the branch's current commit);
+# the render job stays read-only. Nothing is committed or pushed to a branch.
+# Separate from update-snapshots.yml on purpose: that one regenerates test
+# baselines (and can push).
+on:
+  workflow_dispatch:
+    inputs:
+      delivery:
+        description: 'How to deliver the prints'
+        required: true
+        type: choice
+        default: artifact
+        options:
+          - artifact
+          - release
+
+permissions:
+  contents: read
+
+jobs:
+  render-prints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      artifact_name: ${{ steps.meta.outputs.artifact_name }}
+      date: ${{ steps.meta.outputs.date }}
+
+    defaults:
+      run:
+        working-directory: ./jainism/pooja
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🏷️ Name this build
+      id: meta
+      working-directory: .
+      run: |
+        echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+        echo "artifact_name=pooja-prints-$(date -u +%Y%m%d)-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: './jainism/pooja/package-lock.json'
+
+    - name: 📦 Install dependencies
+      run: npm ci
+
+    - name: 🌐 Install Playwright Browsers & OS Dependencies
+      run: npx playwright install --with-deps
+
+    - name: 🖨️ Render print PDFs
+      run: node scripts/render-prints.js
+
+    - name: 📦 Upload prints for review
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.meta.outputs.artifact_name }}
+        path: jainism/pooja/prints/
+        retention-days: 90   # GitHub's max for public repos
+        if-no-files-found: error
+
+  publish-release:
+    if: inputs.delivery == 'release'
+    needs: render-prints
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Only this job can write to the repo (to create the release + tag).
+    permissions:
+      contents: write
+
+    steps:
+    - name: 📥 Download rendered prints
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.render-prints.outputs.artifact_name }}
+        path: prints
+
+    - name: 🏷️ Create release with the prints attached
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        DATE="${{ needs.render-prints.outputs.date }}"
+        gh release create "prints-${DATE}-${{ github.run_number }}" prints/*.pdf \
+          --repo "${{ github.repository }}" \
+          --target "${{ github.sha }}" \
+          --title "Jaina Pooja Vichara Sankalana — Prints (${DATE})" \
+          --notes "Print-ready PDFs of the continuous and book layouts (A4 and A3), generated on ${DATE}."

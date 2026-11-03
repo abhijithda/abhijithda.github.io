@@ -207,7 +207,7 @@ describe('initLangPicker', () => {
 });
 
 describe('updateMediaVisibility', () => {
-    test('shows videos and hides QR codes by default', () => {
+    test('shows videos and hides QR codes when the QR toggle is off', () => {
         document.body.insertAdjacentHTML('beforeend',
             '<div class="video-card"></div><div class="qr-code"></div>');
 

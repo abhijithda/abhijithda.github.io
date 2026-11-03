@@ -279,27 +279,32 @@ body[data-paper-size="a3"] .book-nav {
     border: 0.5px solid #ddd;
 }
 
+/* The play badge sits in the bottom-left corner (not the centre), so it
+   still says "this is a video" without covering the speaker's face. The
+   anchor itself still covers the whole thumbnail, so the entire thumbnail
+   stays clickable. */
 .book-vid-play {
     position: absolute;
     inset: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 4px;
     text-decoration: none;
 }
 
 .book-vid-play::before {
     content: '▶';
-    width: 20px;
-    height: 20px;
-    background: rgba(0, 0, 0, 0.5);
+    width: 14px;
+    height: 14px;
+    background: rgba(0, 0, 0, 0.45);
     border-radius: 50%;
     color: white;
-    font-size: calc(9px * var(--font-scale));
+    font-size: calc(7px * var(--font-scale));
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-left: 2px;
+    padding-left: 1px;
 }
 
 .book-vid-qr {
@@ -445,6 +450,23 @@ body[data-paper-size="a3"] .book-nav {
     align-self: flex-start;
 }
 
+/* On a photo insert page the id badge is a page label, so pin it to the
+   page's top-left corner and centre only the photo + caption in the page
+   (centring the badge with them left the number floating mid-page). The extra
+   top padding keeps a tall photo from running under the badge. Title-style
+   pages keep their badge in the flow: with their id hidden there's nothing to
+   pin, and when shown it sits above the centred title. */
+.book-columns .standalone-image {
+    position: relative;
+    padding-top: 28px;
+}
+
+.book-columns .standalone-image .book-bid {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+}
+
 /* ── "insert" items — the front cover, section dividers, and pure blank
    pages, all one item type (distinct from block-level "images" to avoid
    the same word meaning two different things), distinguished purely by
@@ -528,6 +550,16 @@ body[data-paper-size="a3"] .book-nav {
 @media screen {
     .book-columns .title-style-page {
         height: calc(100cqh - 70px);
+        box-sizing: border-box;
+    }
+
+    /* A standalone photo page is also a separator page, so it fills one page
+       column too and centres its content (it already centres via
+       justify-content: center; without a height it just hugged the top).
+       min-height, not height: a photo + caption taller than the column grows
+       the card exactly as before instead of being clipped. */
+    .book-columns .standalone-image {
+        min-height: calc(100cqh - 70px);
         box-sizing: border-box;
     }
 
@@ -824,6 +856,29 @@ body[data-paper-size="a3"] .book-nav {
         /* A3 landscape's real usable height is 297mm - 2×15mm = 267mm —
            genuine headroom the A4 default above doesn't have. */
         max-height: 250mm !important;
+    }
+
+    /* Insert pages (standalone photo, cover/divider) are separator pages, so
+       centre their content vertically instead of leaving it pinned to the top
+       with the rest of the page blank. min-height matches the max-height
+       cap above (the usable page height with room to spare), so it can
+       never push the card onto a second page. These cards are already
+       flex columns that centre horizontally. */
+    .standalone-image,
+    .book-columns .title-style-page {
+        min-height: 170mm;
+        justify-content: center;
+    }
+
+    body[data-paper-size="a3"] .standalone-image,
+    body[data-paper-size="a3"] .book-columns .title-style-page {
+        min-height: 250mm;
+    }
+
+    /* A paragraph that splits across pages never strands 1-2 lines. */
+    .book-columns {
+        orphans: 3;
+        widows: 3;
     }
 
     .standalone-image:not(:first-child) {

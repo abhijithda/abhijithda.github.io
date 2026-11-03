@@ -5,5 +5,5 @@ node_modules/
 test-results/
 playwright-report/
 
-# Output of scripts/render-artifacts.js (uploaded as a workflow artifact, never committed)
-artifacts/
+# Output of scripts/render-prints.js (published by the workflow, never committed)
+prints/

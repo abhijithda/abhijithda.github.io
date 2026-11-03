@@ -162,6 +162,24 @@ test.describe('Paper size setting', () => {
         expect(pageCss).toContain('A3');
     });
 
+    test('continuous view lays out at the same width when printed on Dynamic as on A4', async ({ page }) => {
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
+        await expect(page.locator('.card').first()).toBeVisible();
+        await openSettings(page);
+
+        // The settings dropdown is hidden in print media, so pick the size on
+        // screen, then measure the layout under print media.
+        const widthFor = async size => {
+            await page.emulateMedia({ media: 'screen' });
+            await page.locator('#paper-size-select').selectOption(size);
+            await page.emulateMedia({ media: 'print' });
+            return (await page.locator('#continuous-container').boundingBox()).width;
+        };
+        const dynamicWidth = await widthFor('dynamic');
+        const a4Width = await widthFor('a4');
+        expect(Math.abs(dynamicWidth - a4Width)).toBeLessThanOrEqual(1);
+    });
+
     test('print orientation follows the active view (landscape for book, portrait for continuous)', async ({ page }) => {
         // Book view is the default on load.
         let pageCss = await page.locator('#print-page-size').textContent();

@@ -116,11 +116,15 @@ test.describe('Book View — using the small controlled fixture', () => {
         const thumb = page.locator('#book-columns .book-vid-thumb').first();
         const qr = page.locator('#book-columns .book-vid-qr').first();
 
-        // Default: Videos on, QR off.
+        // Default: Videos on, QR on.
         await expect(thumb).toBeVisible();
-        await expect(qr).toBeHidden();
+        await expect(qr).toBeVisible();
 
         await page.locator('#settings-btn').click();
+        await page.locator('#toggle-qrs').uncheck();
+        await expect(qr).toBeHidden();
+        await expect(thumb).toBeVisible();
+
         await page.locator('#toggle-qrs').check();
         await expect(qr).toBeVisible();
 

@@ -26,20 +26,20 @@ test.describe('Book View - Screenshot Tests (Display Options)', () => {
         await expect(page.locator('#toggle-videos')).toBeVisible();
     });
 
-    test('Screenshot: Default state (Videos ON, QR OFF)', async ({ page }) => {
+    test('Screenshot: Default state (Videos ON, QR ON)', async ({ page }) => {
         const videosCheckbox = page.locator('#toggle-videos');
         const qrsCheckbox = page.locator('#toggle-qrs');
 
         await page.waitForSelector('#book-columns .book-vid-row');
 
         await expect(videosCheckbox).toBeChecked();
-        await expect(qrsCheckbox).not.toBeChecked();
+        await expect(qrsCheckbox).toBeChecked();
 
         const rowWithMedia = page.locator('#book-columns .book-vid-row').first();
         await expect(rowWithMedia.locator('.book-vid-thumb')).toBeVisible();
-        await expect(rowWithMedia.locator('.book-vid-qr')).toBeHidden();
+        await expect(rowWithMedia.locator('.book-vid-qr')).toBeVisible();
 
-        await expect(page).toHaveScreenshot('book-screenshot-default-state-videos-on-qr-off.png', {
+        await expect(page).toHaveScreenshot('book-screenshot-default-state-videos-on-qr-on.png', {
             fullPage: true,
             timeout: 20000
         });

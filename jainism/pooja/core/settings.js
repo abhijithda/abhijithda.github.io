@@ -55,7 +55,7 @@ export function loadSettings() {
     return {
         langs:        langs.length ? langs : defaultLangs(),
         videos:       typeof saved?.videos       === 'boolean' ? saved.videos       : true,
-        qrs:          typeof saved?.qrs          === 'boolean' ? saved.qrs          : false,
+        qrs:          typeof saved?.qrs          === 'boolean' ? saved.qrs          : true,
         readTracking: typeof saved?.readTracking === 'boolean' ? saved.readTracking : false,
         paperSize,
         fontScale,
