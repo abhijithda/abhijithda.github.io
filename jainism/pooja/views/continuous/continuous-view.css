@@ -604,6 +604,28 @@ input:checked + .slider::before {
         flex-flow: row wrap !important;
     }
 
+    /* Standalone photos: keep the photo in the column beside the id, left-
+       aligned with the text columns (same as on screen). The generic
+       media-only print rules above and in core/media.css force the media
+       column to 100% width and centre the card, which wraps the photo under
+       the id at the far-left edge. Cover/divider images (.title-style-image-row)
+       keep their centred layout. The :not() raises specificity so these win
+       over the !important rules in core/media.css. */
+    .block-row.media-only:not(.title-style-image-row) {
+        flex-flow: row nowrap !important;
+    }
+
+    body .block-row.media-only:not(.title-style-image-row) .col-media {
+        flex: 1 1 0% !important;
+        width: auto !important;
+        min-width: 0 !important;
+        align-items: flex-start !important;
+    }
+
+    .block-row.media-only:not(.title-style-image-row) .image-card {
+        margin: 0 !important;
+    }
+
     .col-kn,
     .col-en {
         overflow-wrap: break-word;
