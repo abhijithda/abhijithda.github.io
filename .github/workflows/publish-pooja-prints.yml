@@ -8,9 +8,18 @@ name: Publish Pooja Prints
 #   release  — same, and also attaches the PDFs to a new GitHub Release
 #              (no expiry), ready to share
 # Always renders the repo's real data.json; test data is never rendered or
-# published. Output is one PDF per view (continuous, book) and paper size
-# (A4, A3), named like
+# published. Output is six PDFs, named like
 #   Jaina-Pooja-Vichara-Sankalana-Book-A4-2026-10-10.pdf
+#   Continuous-A4 / Continuous-A3  whole-page layout, for reading
+#   Book-A4 / Book-A3              one numbered book page per PDF page
+#                                  (A4 sheet = A5 pages, A3 sheet = A4 pages)
+#   Booklet-A4 / Booklet-A3        the Book pages arranged on sheets in booklet
+#                                  order: print double-sided, flip on short
+#                                  edge, actual size, then fold (PRINTING.md)
+# The booklets are made by scripts/render-prints.js itself (via
+# scripts/impose-booklet.js, which needs pdf-lib from package.json), so there
+# is nothing extra to run here; the check step below just fails the run if any
+# of the six is missing.
 #
 # The release job is separate so only it gets write access (it creates the
 # release and its tag, prints-<date>-<run#>, on the branch's current commit);
@@ -68,8 +77,22 @@ jobs:
     - name: 🌐 Install Playwright Browsers & OS Dependencies
       run: npx playwright install --with-deps
 
-    - name: 🖨️ Render print PDFs
+    - name: 🖨️ Render print PDFs (continuous, book, and booklet)
       run: node scripts/render-prints.js
+
+    - name: ✅ Check all six PDFs were produced
+      run: |
+        missing=0
+        for kind in Continuous Book Booklet; do
+          for size in A4 A3; do
+            if ! ls prints/*-"${kind}"-"${size}"-*.pdf >/dev/null 2>&1; then
+              echo "::error::Missing ${kind} ${size} PDF in prints/"
+              missing=1
+            fi
+          done
+        done
+        ls -l prints/
+        exit $missing
 
     - name: 📦 Upload prints for review
       uses: actions/upload-artifact@v4
@@ -105,4 +128,10 @@ jobs:
           --repo "${{ github.repository }}" \
           --target "${{ github.sha }}" \
           --title "Jaina Pooja Vichara Sankalana — Prints (${DATE})" \
-          --notes "Print-ready PDFs of the continuous and book layouts (A4 and A3), generated on ${DATE}."
+          --notes "Generated on ${DATE}. In every file name, A4 / A3 is the sheet of paper you print on.
+
+        **Booklet-A4 / Booklet-A3: print these to make a folded book.** Print double-sided, flip on SHORT edge, actual size (100%, not fit-to-page), then fold the stack in half (Booklet-A4 gives an A5 book, Booklet-A3 an A4 book). Longer books are split into 16-page signatures to fold and sew separately.
+
+        **Book-A4 / Book-A3:** one numbered book page per PDF page, for reading on screen or for your printer's own booklet mode.
+
+        **Continuous-A4 / Continuous-A3:** whole-page layout for reading or loose pages (not for binding)."

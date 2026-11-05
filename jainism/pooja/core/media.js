@@ -74,10 +74,43 @@ export function createVideoCard(url) {
     `;
 }
 
+/**
+ * Photo size tracking.
+ *
+ * Print CSS sizes photos as "as wide as the column/page allows, never taller
+ * than a page, never stretched, and never blown up past what the photo's own
+ * pixels support" (see --min-dpi in the view stylesheets). CSS can't read an
+ * image's natural size, so every <img> publishes it as two custom properties
+ * once it has loaded:
+ *   --ar  natural width / natural height  (aspect ratio)
+ *   --nw  natural width in pixels
+ * Photos are created in several places (both views, some via innerHTML), so
+ * instead of patching each one this listens once, in the capture phase (load
+ * events don't bubble), for every image in the document.
+ */
+export function publishImageSize(img) {
+    if (!img || !img.naturalWidth || !img.naturalHeight) return;
+    img.style.setProperty('--ar', (img.naturalWidth / img.naturalHeight).toFixed(4));
+    img.style.setProperty('--nw', String(img.naturalWidth));
+}
+
+export function installImageSizeTracking(doc = (typeof document !== 'undefined' ? document : null)) {
+    if (!doc || doc.__imageSizeTracking) return;
+    doc.__imageSizeTracking = true;
+    doc.addEventListener('load', e => {
+        if (e.target && e.target.tagName === 'IMG') publishImageSize(e.target);
+    }, true);
+    // Images that finished loading before this ran.
+    doc.querySelectorAll('img').forEach(img => { if (img.complete) publishImageSize(img); });
+}
+
+installImageSizeTracking();
+
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
         escapeHtml, linkify, extractYouTubeId,
         buildQrUrl, buildYouTubeThumbnailUrl, createVideoCard,
+        publishImageSize, installImageSizeTracking,
     });
 }

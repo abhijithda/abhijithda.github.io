@@ -620,10 +620,50 @@ input:checked + .slider::before {
         width: auto !important;
         min-width: 0 !important;
         align-items: flex-start !important;
+        container-type: inline-size;   /* so the photo can size itself as 100cqw */
     }
 
     .block-row.media-only:not(.title-style-image-row) .image-card {
         margin: 0 !important;
+    }
+
+    /* Photo size: as wide as the column allows (100cqw = the width of the
+       .col-media the photo sits in), but
+         - never taller than one page: --img-cap leaves room on the page for
+           the captions, so photo + captions never split across pages;
+         - never past what its own pixels support at --min-dpi, so a small
+           photo stays small and sharp instead of being stretched.
+       Big photos therefore use the full width instead of being shrunk by a
+       flat height cap (the old fixed 7in made a portrait painting less than
+       half the width of an A3 page). --ar / --nw are published per photo by
+       core/media.js once it loads; before that the width formula is invalid,
+       falls back to auto, and max-height still applies.
+
+       Continuous lays out at 210mm (A4) / 297mm (A3) wide and Chrome then
+       shrinks the whole page to fit the printable width (180mm / 267mm), so
+       every CSS length here is in *layout* units, i.e. real size / scale:
+           A4: scale 180/210 = 0.857     A3: scale 267/297 = 0.899
+       --min-dpi is therefore 150 x scale (so the PRINTED photo is never
+       enlarged past 150 dpi), and --img-cap is the real page-fit height
+       (A4: 220mm of 267mm usable, A3: 340mm of 390mm; the remaining ~50mm
+       holds the captions and padding, enough for about 7 lines of captions
+       before a card could outgrow its page) divided by the scale. Book view has no such
+       shrink (width: 100% of the page), so its numbers are plain mm. */
+    .block-row.media-only:not(.title-style-image-row) {
+        --min-dpi: 128.6;            /* 150 x 180/210 */
+        --img-cap: 257mm;            /* 220mm real / 0.857 */
+        break-inside: avoid;
+    }
+
+    body[data-paper-size="a3"] .block-row.media-only:not(.title-style-image-row) {
+        --min-dpi: 134.8;            /* 150 x 267/297 */
+        --img-cap: 378mm;            /* 340mm real / 0.899 */
+    }
+
+    body .block-row.media-only:not(.title-style-image-row) .image-card img {
+        width: min(100cqw,
+                   calc(var(--img-cap) * var(--ar)),
+                   calc(var(--nw) * 1px * 96 / var(--min-dpi))) !important;
     }
 
     .col-kn,

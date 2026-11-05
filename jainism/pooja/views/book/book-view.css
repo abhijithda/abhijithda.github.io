@@ -341,7 +341,17 @@ body[data-paper-size="a3"] .book-nav {
 }
 
 .book-image {
+    box-sizing: border-box; /* the 0.5px frame must not push the photo past the column */
     width: 100%;
+    /* Never wider than the column, and never wider than the photo's own
+       pixels allow at --min-dpi (96 = natural size on screen; print raises it
+       to 150 below). Small photos therefore stay small instead of being
+       stretched to fill the width; big photos are unaffected and use the full
+       width. --nw is published by core/media.js once the photo has loaded
+       (the huge fallback means "no limit" until then). */
+    max-width: min(100%, calc(var(--nw, 100000) * 1px * 96 / var(--min-dpi, 96)));
+    margin-left: auto;
+    margin-right: auto;
     height: auto;
 
     /* CRITICAL FIX FOR YOUR SCREENSHOT: Caps inline images so they don't 
@@ -358,6 +368,18 @@ body[data-paper-size="a3"] .book-nav {
     break-after: avoid; 
     page-break-after: avoid;
     -webkit-column-break-after: avoid;
+}
+
+/* Inline photos (inside Q&A cards): as wide as the column allows, but never
+   taller than --img-cap, always at the photo's true aspect ratio. --ar is set
+   by trackAspectRatio() in book-view.js. Width = min(column, cap x ratio), so
+   when the cap is the limit the box shrinks with it (frame hugs the photo, no
+   white bands) instead of letterboxing. Without --ar (not loaded yet) the
+   declaration is invalid at computed-value time and falls back to width:auto
+   with the max-height cap below. Standalone and title-style images keep their
+   own rules. */
+.book-image:not(.title-style-image) {
+    width: min(100%, calc(var(--img-cap, 70cqh) * var(--ar)));
 }
 
 .book-image-caption {
@@ -690,7 +712,8 @@ body[data-paper-size="a3"] .book-nav {
 
 /* ── Print — entire book ─────────────────────────────────────────────────── */
 @media print {
-    /* Paper size + orientation (A4/A3, landscape for this 2-column spread)
+    /* Paper size + margins (book pages are half a sheet: A4 sheet -> A5 portrait pages,
+       A3 sheet -> A4 portrait pages, with mirrored binding margins and page numbers)
        is set dynamically by header.js's applyPaperSize() into the
        #print-page-size <style> element in index.html — not hardcoded here —
        so it can vary with the Settings paper-size choice. */
@@ -767,8 +790,23 @@ body[data-paper-size="a3"] .book-nav {
     }
 
     .book-image {
-        /* Safe fallback for inline images so they don't break pages */
-        max-height: 140mm !important; 
+        /* Print quality floor: a photo is never enlarged past 150 dpi, so a
+           small photo prints small and sharp instead of stretched and soft.
+           Photos with enough pixels still use the full column width. Lower
+           this (e.g. 120) to allow more enlargement, raise it for crisper
+           but smaller prints. */
+        --min-dpi: 150;
+        /* Inline photo cap: the photo must stay whole on one page. 145mm +
+           id + caption(s) + card padding stays under the book page's 180mm
+           usable height (A5 page, i.e. A4 sheet). */
+        --img-cap: 145mm;
+        max-height: 145mm !important;
+    }
+
+    /* A3 sheet = A4 book pages: 267mm usable height. */
+    body[data-paper-size="a3"] .book-image {
+        --img-cap: 215mm;
+        max-height: 215mm !important;
     }
 
     /* Standalone images should use most of the page height, not the
@@ -790,15 +828,15 @@ body[data-paper-size="a3"] .book-nav {
        The value itself has to respect the *physical page's actual usable
        height*, which the card-level max-height below does not by itself
        guarantee — an earlier fix here (220mm, matching the card's old
-       flat 250mm cap) overshot A4 landscape's real usable height
-       (210mm - 2×15mm margin = 180mm) once the caption and card padding
+       flat 250mm cap) overshot an A4-sheet book page's (A5) real usable height
+       (A5 page: 210mm - 12mm top - 18mm bottom = 180mm) once the caption and card padding
        are added on top of the image. A `break-inside: avoid` block taller
        than a full page can't actually be kept unbroken (there's no page
        left to avoid breaking onto), and what browsers do with that
        impossible request is to silently clip whatever comes after the
        point where the page ends — the caption, since it's the last thing
        in the card. 150mm (image) + ~15-20mm (caption(s) + card padding)
-       stays comfortably under 180mm. A3 landscape has real headroom to
+       stays comfortably under 180mm. an A3-sheet book page has real headroom to
        spare (297mm - 30mm margin = 267mm usable), so it gets a taller
        cap below rather than being stuck with A4's conservative number. */
     .book-columns .standalone-image .book-image {
@@ -819,13 +857,23 @@ body[data-paper-size="a3"] .book-nav {
         max-height: 250mm !important;
     }
 
+    /* One BOOK PAGE per PRINTED PAGE (see core/paper-size.js: A4 sheet ->
+       A5 pages, A3 sheet -> A4 pages). The old print put two columns (two
+       book pages) on each landscape sheet, which made real page numbers
+       impossible (CSS can only count sheets) and gave a PDF that doesn't fold
+       into a book. With single pages, Chrome's page counter *is* the book's
+       page number, @page :left/:right can mirror the binding margin, and
+       scripts/impose-booklet.js arranges the pages onto sheets in booklet
+       order. Pages break exactly where the old columns did: a column was
+       the same height as a page's usable area. */
     .book-columns {
         display: block !important;
-        column-count: 2 !important; /* Retains your exact book layout */
-        column-gap: 25mm !important; /* Creates a clean physical gutter */
+        columns: auto !important;
+        column-count: auto !important;
+        column-gap: normal !important;
         transform: none !important; /* Stops the JS from sliding pages off the paper */
         padding: 0 !important;
-        height: auto !important; /* Lets the columns flow to the next sheet of paper */
+        height: auto !important; /* Lets the content flow onto as many pages as it needs */
         overflow: visible !important;
     }
 
@@ -843,8 +891,8 @@ body[data-paper-size="a3"] .book-nav {
         page-break-inside: avoid;
         break-after: page;
 
-        /* Fits safely inside A4 landscape's real usable height
-           (210mm - 2×15mm margin = 180mm) alongside the image cap above,
+        /* Fits safely inside an A4-sheet book page's (A5) real usable height
+           (A5 page: 210mm - 12mm top - 18mm bottom = 180mm) alongside the image cap above,
            with room for the caption(s) and card padding. See the comment
            on .book-columns .standalone-image .book-image above for why
            this number matters, not just the image's own cap. */
@@ -853,7 +901,7 @@ body[data-paper-size="a3"] .book-nav {
     }
 
     body[data-paper-size="a3"] .standalone-image {
-        /* A3 landscape's real usable height is 297mm - 2×15mm = 267mm —
+        /* an A3-sheet book page's (A4) real usable height is 297mm - 14mm top - 16mm bottom = 267mm —
            genuine headroom the A4 default above doesn't have. */
         max-height: 250mm !important;
     }

@@ -5,6 +5,8 @@ const {
     buildQrUrl,
     buildYouTubeThumbnailUrl,
     createVideoCard,
+    publishImageSize,
+    installImageSizeTracking,
 } = require('./media');
 
 describe('escapeHtml', () => {
@@ -82,5 +84,43 @@ describe('createVideoCard', () => {
 
     test('returns an empty string for a non-YouTube URL', () => {
         expect(createVideoCard('https://example.com/not-youtube')).toBe('');
+    });
+});
+
+describe('publishImageSize', () => {
+    function fakeImg(w, h) {
+        const img = document.createElement('img');
+        Object.defineProperty(img, 'naturalWidth', { value: w });
+        Object.defineProperty(img, 'naturalHeight', { value: h });
+        return img;
+    }
+
+    test('publishes the natural aspect ratio and pixel width as CSS custom properties', () => {
+        const img = fakeImg(1249, 2048);
+        publishImageSize(img);
+        expect(img.style.getPropertyValue('--ar')).toBe((1249 / 2048).toFixed(4));
+        expect(img.style.getPropertyValue('--nw')).toBe('1249');
+    });
+
+    test('does nothing until the image has real dimensions (not loaded / broken)', () => {
+        const img = fakeImg(0, 0);
+        publishImageSize(img);
+        expect(img.style.getPropertyValue('--ar')).toBe('');
+        expect(img.style.getPropertyValue('--nw')).toBe('');
+        expect(() => publishImageSize(null)).not.toThrow();
+    });
+
+    test('a capture-phase load listener covers images created later, including from innerHTML', () => {
+        document.body.innerHTML = '';
+        installImageSizeTracking(document);
+        const holder = document.createElement('div');
+        holder.innerHTML = '<img src="x.jpg">';
+        document.body.appendChild(holder);
+        const img = holder.querySelector('img');
+        Object.defineProperty(img, 'naturalWidth', { value: 800 });
+        Object.defineProperty(img, 'naturalHeight', { value: 400 });
+        img.dispatchEvent(new Event('load'));   // load doesn't bubble: only a capture listener sees it
+        expect(img.style.getPropertyValue('--ar')).toBe('2.0000');
+        expect(img.style.getPropertyValue('--nw')).toBe('800');
     });
 });
