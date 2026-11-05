@@ -13,14 +13,54 @@
 // "whatever fits your screen", so 'dynamic' always prints as A4, same as an
 // explicit 'a4' choice — only 'a3' changes the printed sheet. Since @page
 // can't be scoped to a class/attribute selector in plain CSS, the effective
-// size+orientation is written as text into the #print-page-size <style>
-// element (orientation follows whichever view is currently active — book is
-// a landscape two-page spread, continuous is a portrait single column).
+// @page rules are written as text into the #print-page-size <style> element.
+//
+//   Continuous: one portrait A4/A3 page per printed page, 15mm margins.
+//
+//   Book: the paper size is the SHEET you will print on and fold, and a book
+//   page is half a sheet — A4 sheet -> A5 portrait pages, A3 sheet -> A4
+//   portrait pages. Every printed page is ONE book page, so Chrome's page
+//   counter is the real page number (printed bottom-centre, hidden on the
+//   title page), and @page :right / :left give mirrored margins with a wider
+//   inner (binding) margin. scripts/impose-booklet.js then arranges those
+//   pages onto sheets in booklet order for folding. (The old print put two
+//   book pages side by side on a landscape sheet; CSS can only count sheets,
+//   so real page numbers were impossible, and the PDF didn't fold into a book.)
 
 import { loadSettings, saveSettings, PAPER_SIZES } from './settings.js';
 import { notifyLayoutChanged } from './layout-signal.js';
 
 export { PAPER_SIZES };
+
+// Book page geometry per sheet size (mm). top + bottom always leave the same
+// usable height the print CSS's photo caps are written against: 180mm on an A5
+// page, 267mm on an A4 page. `inner` is the binding side.
+const BOOK_PAGE = {
+    a4: { size: 'A5 portrait', top: 12, bottom: 18, inner: 17, outer: 11 },
+    a3: { size: 'A4 portrait', top: 14, bottom: 16, inner: 19, outer: 13 },
+};
+
+/**
+ * The @page rules for a paper size and view. Exported for tests.
+ * 'dynamic' prints exactly like 'a4'.
+ */
+export function buildPageCss(paperSize, mode) {
+    const sheet = paperSize === 'a3' ? 'a3' : 'a4';
+
+    if (mode !== 'book') {
+        return `@page { size: ${sheet === 'a3' ? 'A3' : 'A4'} portrait; margin: 15mm; }`;
+    }
+
+    const g = BOOK_PAGE[sheet];
+    // Chrome numbers the first page :right (recto), so right pages have their
+    // inner margin on the left and left pages on the right.
+    return [
+        `@page { size: ${g.size}; margin: ${g.top}mm ${g.outer}mm ${g.bottom}mm ${g.inner}mm; }`,
+        `@page :left { margin: ${g.top}mm ${g.inner}mm ${g.bottom}mm ${g.outer}mm; }`,
+        `@page { @bottom-center { content: counter(page); font: 9pt Arial, sans-serif; color: #555; } }`,
+        `@page :first { @bottom-center { content: none; } }`,
+    ].join('\n');
+}
 
 export function applyPaperSize() {
     const { paperSize } = loadSettings();
@@ -30,12 +70,10 @@ export function applyPaperSize() {
     const select = document.getElementById('paper-size-select');
     if (select) select.value = paperSize;
 
-    const printSize   = paperSize === 'a3' ? 'A3' : 'A4';
-    const mode        = (typeof localStorage !== 'undefined' && localStorage.getItem('viewMode')) || 'book';
-    const orientation = mode === 'book' ? 'landscape' : 'portrait';
+    const mode = (typeof localStorage !== 'undefined' && localStorage.getItem('viewMode')) || 'book';
 
     const pageStyle = document.getElementById('print-page-size');
-    if (pageStyle) pageStyle.textContent = `@page { size: ${printSize} ${orientation}; margin: 15mm; }`;
+    if (pageStyle) pageStyle.textContent = buildPageCss(paperSize, mode);
 
     notifyLayoutChanged();
     return paperSize;

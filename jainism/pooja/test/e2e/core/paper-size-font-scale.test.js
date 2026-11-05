@@ -143,23 +143,26 @@ test.describe('Paper size setting', () => {
         expect(leftGapAtStart).toBeGreaterThanOrEqual(0);
     });
 
-    test('Dynamic always prints as A4 regardless of screen state; only A3 changes the printed sheet', async ({ page }) => {
+    test('Dynamic always prints as A4 sheets regardless of screen state; only A3 changes the printed sheet', async ({ page }) => {
+        // Book view is the default: the paper size is the SHEET, and a book
+        // page is half of it (A4 sheet -> A5 pages, A3 sheet -> A4 pages).
         await openSettings(page);
 
         // Dynamic (default)
         let pageCss = await page.locator('#print-page-size').textContent();
-        expect(pageCss).toContain('A4');
+        expect(pageCss).toContain('size: A5 portrait');
+        const dynamicCss = pageCss;
 
         // Explicit A4 — identical printed result to Dynamic
         await page.locator('#paper-size-select').selectOption('a4');
         pageCss = await page.locator('#print-page-size').textContent();
-        expect(pageCss).toContain('A4');
+        expect(pageCss).toBe(dynamicCss);
         expect(pageCss).not.toContain('A3');
 
         // A3 — the one choice that actually changes the printed sheet
         await page.locator('#paper-size-select').selectOption('a3');
         pageCss = await page.locator('#print-page-size').textContent();
-        expect(pageCss).toContain('A3');
+        expect(pageCss).toContain('size: A4 portrait');
     });
 
     test('continuous view lays out at the same width when printed on Dynamic as on A4', async ({ page }) => {
@@ -180,15 +183,21 @@ test.describe('Paper size setting', () => {
         expect(Math.abs(dynamicWidth - a4Width)).toBeLessThanOrEqual(1);
     });
 
-    test('print orientation follows the active view (landscape for book, portrait for continuous)', async ({ page }) => {
-        // Book view is the default on load.
+    test('both views print portrait pages: book = half-sheet pages with page numbers and a binding margin, continuous = whole pages', async ({ page }) => {
+        // Book view is the default on load. One book page per printed page
+        // (never a landscape two-page spread), so Chrome's page counter is
+        // the real page number.
         let pageCss = await page.locator('#print-page-size').textContent();
-        expect(pageCss).toContain('landscape');
+        expect(pageCss).toContain('portrait');
+        expect(pageCss).not.toContain('landscape');
+        expect(pageCss).toContain('counter(page)');
+        expect(pageCss).toContain('@page :left');
 
         await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
         pageCss = await page.locator('#print-page-size').textContent();
-        expect(pageCss).toContain('portrait');
+        expect(pageCss).toContain('size: A4 portrait');
+        expect(pageCss).not.toContain('counter(page)');
     });
 
     test('the choice persists across a reload, via the same unified settings key', async ({ page }) => {

@@ -593,9 +593,43 @@ and `core/font-scale.js`.
 - Since `@page` can't be scoped to a body attribute/class in plain CSS, the
   effective print size is written as text into the `#print-page-size
   <style>` element in `index.html` by `applyPaperSize()` — `A3` only for the
-  `a3` choice, `A4` otherwise. Orientation follows whichever view is
-  active (book = landscape two-page spread, continuous = portrait single
-  column), re-applied on every view toggle (`app.js`'s `setViewMode()`).
+  `a3` choice, `A4` otherwise, re-applied on every view toggle (`app.js`'s
+  `setViewMode()`). **Continuous**: the paper size is the printed page
+  (portrait, 15mm margins). **Book**: the paper size is the *sheet you print
+  on and fold*, and a book page is half a sheet — A4 sheet → **A5** portrait
+  pages, A3 sheet → **A4** portrait pages — with one book page per printed
+  page, mirrored binding margins (`@page :left` / `:right`, inner margin
+  wider than outer) and real page numbers (`@page` bottom-centre margin box,
+  hidden on the title page via `@page :first`). `buildPageCss()` generates the
+  rules. Why single pages: CSS cannot do arithmetic across `@page` margin
+  boxes (`counter-increment` doesn't accumulate), so with two book pages per
+  landscape sheet only *sheet* numbers were possible, and the PDF didn't fold
+  into a book. The usable page height stays 180mm (A5) / 267mm (A4) so the
+  mm-based photo caps in `book-view.css` are unchanged. `scripts/impose-
+  booklet.js` rearranges the pages onto sheets in booklet order — see
+  `PRINTING.md`.
+
+**Print photo sizing** (both views) — one rule: *as wide as the column/page
+allows, never stretched, never taller than a page, never enlarged past what
+the photo's pixels support*:
+- `core/media.js` listens once (capture-phase `load` on `document`) and
+  publishes every `<img>`'s natural size as `--ar` (width/height) and `--nw`
+  (pixel width). CSS can't read an image's natural size, and photos are
+  created in many places (some via `innerHTML`), so one global hook beats
+  patching each creation site.
+- Book: inline photos use `width: min(100%, var(--img-cap) * var(--ar))`
+  (so the 0.5px frame hugs the picture — no letterbox bands) and every
+  `.book-image` has `max-width: min(100%, --nw × 96/--min-dpi)`. Print sets
+  `--min-dpi: 150`, `--img-cap` 145mm (A4 sheet) / 215mm (A3 sheet).
+- Continuous (print, standalone photos): same formula using `100cqw` (the
+  `.col-media` is a size container). **Continuous prints scaled**: it lays out
+  at 210mm / 297mm and Chrome shrinks it to the 180mm / 267mm printable
+  width (scale 0.857 / 0.899), so its `--min-dpi` and `--img-cap` are written
+  in layout units (real value ÷ scale). Book has no such shrink.
+- `--img-cap` leaves room for ~7 lines of captions beside the photo; longer
+  captions can make a card taller than its page.
+- Verify with `pdfimages -list <pdf>`: x ppi must equal y ppi (aspect kept)
+  and small photos must not print below ~150 ppi-worth of enlargement.
 
 **Font scaling**, applied via the `--font-scale` CSS custom property:
 - A **multiplier**, not an absolute override (e.g. 110% means "1.1× each

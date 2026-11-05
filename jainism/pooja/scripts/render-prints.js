@@ -6,15 +6,23 @@
 // downloadable artifact and, if asked, attaches it to a GitHub Release. Nothing
 // is ever committed. (Test fixtures are never rendered or published.)
 //
-// Both views (continuous, book) are rendered at each paper size, one PDF each:
+// Both views (continuous, book) are rendered at each paper size:
 //   Jaina-Pooja-Vichara-Sankalana-<View>-<Size>-<YYYY-MM-DD>.pdf
 // Paper sizes: a4 and a3. (The app's 'dynamic' paper size prints exactly like
 // A4 — confirmed over several runs — so it isn't rendered separately.)
 //
-// Each page has a small footer (no URL): the date on the left and, for
-// continuous view, "Page X of Y" on the right. Book view shows the date only —
-// Chrome would number printed *sheets* (two book pages each), which would
-// mislabel the pages; real folios belong in the app itself.
+// For the Book view <Size> is the SHEET of paper you will print on and fold,
+// and a book page is half a sheet: Book-A4 = A5 pages, Book-A3 = A4 pages.
+// Each Book PDF page is one numbered book page with mirrored binding margins.
+// Every Book PDF also gets a Booklet twin (Booklet-A4 / Booklet-A3, made by
+// scripts/impose-booklet.js): the same pages arranged onto sheets in booklet
+// order. Print the BOOKLET one double-sided ("flip on short edge", actual
+// size), fold the stack in half — see PRINTING.md.
+//
+// Footer: the date on the left; for continuous view also "Page X of Y" on the
+// right. Book view gets its page numbers from the app itself (CSS @page
+// margin boxes, bottom-centre, none on the title page) — each printed page is
+// one book page, so Chrome's page counter is the real folio.
 //
 // Usage:
 //   npm run render:prints                      # A4 and A3
@@ -24,6 +32,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { chromium } = require('@playwright/test');
+const { imposeBooklet } = require('./impose-booklet');
 
 const ROOT = path.join(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'prints');
@@ -151,6 +160,13 @@ async function imagesLoaded(page) {
                     footerTemplate: footerTemplate(view.pageNumbers),
                 });
                 console.log(`rendered ${fileName}`);
+
+                if (view.name === 'book') {
+                    const bookletName = fileName.replace('-Book-', '-Booklet-');
+                    const r = await imposeBooklet(path.join(OUT_DIR, fileName), path.join(OUT_DIR, bookletName));
+                    console.log(`rendered ${bookletName}  (${r.pages} pages -> ${r.sheets} sheets` +
+                        `, ${r.signatures} signature${r.signatures > 1 ? 's' : ''})`);
+                }
                 await context.close();
             }
         }
