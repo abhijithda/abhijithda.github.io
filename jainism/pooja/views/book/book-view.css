@@ -711,7 +711,32 @@ body[data-paper-size="a3"] .book-nav {
 }
 
 /* ── Print — entire book ─────────────────────────────────────────────────── */
+
+/* Page numbers. One book page per printed page (see the note in the print
+   block below), so Chrome's page counter is the real page number: bottom
+   centre, none on the title page. These are a NAMED page applied to
+   #book-container only (not a plain `@page`), so Continuous view's prints,
+   which have their own footer, never get them. They live here, not in the
+   #print-page-size text that core/paper-size.js generates, because jsdom's CSS
+   parser rejects nested margin-box at-rules and logged an error on every
+   applyPaperSize() call in the unit tests. */
+@page book {
+    @bottom-center {
+        content: counter(page);
+        font: 9pt Arial, sans-serif;
+        color: #555;
+    }
+}
+
+@page book:first {
+    @bottom-center { content: none; }
+}
+
 @media print {
+    #book-container {
+        page: book;
+    }
+
     /* Paper size + margins (book pages are half a sheet: A4 sheet -> A5 portrait pages,
        A3 sheet -> A4 portrait pages, with mirrored binding margins and page numbers)
        is set dynamically by header.js's applyPaperSize() into the
