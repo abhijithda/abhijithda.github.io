@@ -135,10 +135,16 @@ describe('buildPageCss', () => {
         expect(css).not.toContain('counter(page)');
     });
 
-    test('book: real page numbers bottom-centre, hidden on the title page', () => {
-        const css = buildPageCss('a4', 'book');
-        expect(css).toContain('@bottom-center { content: counter(page);');
-        expect(css).toMatch(/@page :first \{ @bottom-center \{ content: none;/);
+    test('the generated text is plain @page blocks only: no nested margin-box at-rules (jsdom cannot parse those)', () => {
+        for (const mode of ['book', 'continuous']) {
+            for (const size of ['dynamic', 'a4', 'a3']) {
+                const css = buildPageCss(size, mode);
+                // Remove every flat `@page ... { declarations }` block; nothing may be left.
+                expect(css.replace(/@page[^{}]*\{[^{}]*\}/g, '').trim()).toBe('');
+                expect(css).not.toContain('@bottom');
+                expect(css).not.toContain('counter(');
+            }
+        }
     });
 
     test('book: binding margin is mirrored and larger than the outer margin (right pages: inner on the left)', () => {
@@ -163,5 +169,27 @@ describe('buildPageCss', () => {
         };
         expect(usable('a4', 210)).toBe(180);
         expect(usable('a3', 297)).toBe(267);
+    });
+});
+
+// The page numbers are static CSS (a named page), not part of the generated
+// text above — see the note in buildPageCss().
+describe('book page numbers (static CSS)', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const css = fs.readFileSync(path.join(__dirname, '..', 'views', 'book', 'book-view.css'), 'utf8');
+
+    test('numbered bottom-centre with Chrome\'s page counter, on a named page', () => {
+        expect(css).toMatch(/@page book \{\s*@bottom-center \{\s*content: counter\(page\);/);
+    });
+
+    test('hidden on the title page', () => {
+        expect(css).toMatch(/@page book:first \{\s*@bottom-center \{ content: none; \}/);
+    });
+
+    test('applied to the book container only, so continuous view prints are not numbered by it', () => {
+        expect(css).toMatch(/@media print \{\s*#book-container \{\s*page: book;/);
+        const continuous = fs.readFileSync(path.join(__dirname, '..', 'views', 'continuous', 'continuous-view.css'), 'utf8');
+        expect(continuous).not.toContain('counter(page)');
     });
 });

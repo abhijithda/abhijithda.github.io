@@ -183,21 +183,20 @@ test.describe('Paper size setting', () => {
         expect(Math.abs(dynamicWidth - a4Width)).toBeLessThanOrEqual(1);
     });
 
-    test('both views print portrait pages: book = half-sheet pages with page numbers and a binding margin, continuous = whole pages', async ({ page }) => {
+    test('both views print portrait pages: book = half-sheet pages with a binding margin, continuous = whole pages', async ({ page }) => {
         // Book view is the default on load. One book page per printed page
         // (never a landscape two-page spread), so Chrome's page counter is
         // the real page number.
         let pageCss = await page.locator('#print-page-size').textContent();
         expect(pageCss).toContain('portrait');
         expect(pageCss).not.toContain('landscape');
-        expect(pageCss).toContain('counter(page)');
-        expect(pageCss).toContain('@page :left');
+        expect(pageCss).toContain('@page :left');   // mirrored binding margin
 
         await page.locator('.view-toggle-btn[data-view="continuous"]').click();
         await expect(page.locator('.card').first()).toBeVisible();
         pageCss = await page.locator('#print-page-size').textContent();
         expect(pageCss).toContain('size: A4 portrait');
-        expect(pageCss).not.toContain('counter(page)');
+        expect(pageCss).not.toContain('@page :left');   // whole pages: no binding margin
     });
 
     test('the choice persists across a reload, via the same unified settings key', async ({ page }) => {

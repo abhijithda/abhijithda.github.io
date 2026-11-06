@@ -21,8 +21,8 @@
 //   page is half a sheet — A4 sheet -> A5 portrait pages, A3 sheet -> A4
 //   portrait pages. Every printed page is ONE book page, so Chrome's page
 //   counter is the real page number (printed bottom-centre, hidden on the
-//   title page), and @page :right / :left give mirrored margins with a wider
-//   inner (binding) margin. scripts/impose-booklet.js then arranges those
+//   title page; see `@page book` in book-view.css), and @page :right / :left
+//   give mirrored margins with a wider inner (binding) margin. scripts/impose-booklet.js then arranges those
 //   pages onto sheets in booklet order for folding. (The old print put two
 //   book pages side by side on a landscape sheet; CSS can only count sheets,
 //   so real page numbers were impossible, and the PDF didn't fold into a book.)
@@ -54,11 +54,16 @@ export function buildPageCss(paperSize, mode) {
     const g = BOOK_PAGE[sheet];
     // Chrome numbers the first page :right (recto), so right pages have their
     // inner margin on the left and left pages on the right.
+    //
+    // Only plain @page blocks go here. The page NUMBERS are static CSS in
+    // book-view.css (a named page, `@page book`, applied to #book-container):
+    // that keeps them out of Continuous view's prints, and keeps nested
+    // margin-box at-rules (`@page { @bottom-center {...} }`) out of this
+    // <style> text, which jsdom's CSS parser rejects ("Could not parse CSS
+    // stylesheet") every time a unit test calls applyPaperSize().
     return [
         `@page { size: ${g.size}; margin: ${g.top}mm ${g.outer}mm ${g.bottom}mm ${g.inner}mm; }`,
         `@page :left { margin: ${g.top}mm ${g.inner}mm ${g.bottom}mm ${g.outer}mm; }`,
-        `@page { @bottom-center { content: counter(page); font: 9pt Arial, sans-serif; color: #555; } }`,
-        `@page :first { @bottom-center { content: none; } }`,
     ].join('\n');
 }
 

@@ -1,3 +1,4 @@
+const path = require('path');
 const { bookletOrder, defaultOutPath } = require('./impose-booklet');
 
 // Pages are 0-based here; the comments use the 1-based numbers a reader sees.
@@ -64,11 +65,14 @@ describe('bookletOrder (saddle-stitch imposition)', () => {
     });
 });
 
+// path.join uses the OS separator (backslashes on Windows), so expectations
+// are built with path.join too instead of hard-coding '/'.
 describe('defaultOutPath', () => {
     test('Book -> Booklet in the file name, same folder', () => {
-        expect(defaultOutPath('/x/Pooja-Book-A4-2026-11-03.pdf')).toBe('/x/Pooja-Booklet-A4-2026-11-03.pdf');
+        expect(defaultOutPath(path.join('x', 'Pooja-Book-A4-2026-11-03.pdf')))
+            .toBe(path.join('x', 'Pooja-Booklet-A4-2026-11-03.pdf'));
     });
     test('other names get a -booklet suffix', () => {
-        expect(defaultOutPath('/x/mybook.pdf')).toBe('/x/mybook-booklet.pdf');
+        expect(defaultOutPath(path.join('x', 'mybook.pdf'))).toBe(path.join('x', 'mybook-booklet.pdf'));
     });
 });

@@ -599,9 +599,15 @@ and `core/font-scale.js`.
   on and fold*, and a book page is half a sheet — A4 sheet → **A5** portrait
   pages, A3 sheet → **A4** portrait pages — with one book page per printed
   page, mirrored binding margins (`@page :left` / `:right`, inner margin
-  wider than outer) and real page numbers (`@page` bottom-centre margin box,
-  hidden on the title page via `@page :first`). `buildPageCss()` generates the
-  rules. Why single pages: CSS cannot do arithmetic across `@page` margin
+  wider than outer) and real page numbers. `buildPageCss()` generates the
+  size/margin rules as plain `@page` blocks only; the page numbers are static
+  CSS in `book-view.css`: a **named page** (`@page book` with a bottom-centre
+  `counter(page)` margin box, `@page book:first` hiding it on the title page)
+  applied via `#book-container { page: book }` in `@media print`, so
+  Continuous prints don't get them. They are deliberately not in the
+  generated text: jsdom's CSS parser rejects nested margin-box at-rules and
+  logged "Could not parse CSS stylesheet" on every `applyPaperSize()` call in
+  the unit tests. Why single pages: CSS cannot do arithmetic across `@page` margin
   boxes (`counter-increment` doesn't accumulate), so with two book pages per
   landscape sheet only *sheet* numbers were possible, and the PDF didn't fold
   into a book. The usable page height stays 180mm (A5) / 267mm (A4) so the

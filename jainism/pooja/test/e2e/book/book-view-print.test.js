@@ -50,7 +50,7 @@ test.describe('Book View - Print Mode', () => {
 
     // Per REQUIREMENTS.md: "Print view should print the entire book, not
     // just the current page." Book view achieves this purely via the
-    // @media print rules in book-view.css (column-count, transform: none,
+    // @media print rules in book-view.css (single-flow columns: auto, transform: none,
     // height: auto — see the print block at the bottom of the file), not
     // via the renderPrintBook()/#book-print-container pipeline described
     // in earlier design notes, which was never built. This asserts the
