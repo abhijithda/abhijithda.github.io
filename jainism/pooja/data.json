@@ -527,13 +527,224 @@
   {
     "id": "q_006",
     "type": "question",
-    "timestamp": "2026-06-15T10:25:00Z",
+    "timestamp": "2026-11-07T10:00:00Z",
     "references": [
       "a_005"
     ],
     "blocks": [
       {
         "id": "q_006_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ವೀತರಾಗಿಗಳಾದ ನಮ್ಮ ಭಗವಂತರ ಹತ್ತಿರ ಯಾರು / ಹೇಗೆ ಕೇಳುತ್ತಾರೆ?"
+          ],
+          "en": [
+            "Our Bhagawan is Veetaragi. Who asks Him, and how?"
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Abhisheka",
+          "Shantidhara"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_006",
+    "type": "answer",
+    "timestamp": "2026-11-07T10:01:00Z",
+    "references": [
+      "q_006"
+    ],
+    "blocks": [
+      {
+        "id": "a_006_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಅಭಿಷೇಕ ಶಾಂತಿಧಾರಾ ಮಾಡುವವರು ಪ್ರತಿ ನಿತ್ಯ ಭಯ, ಕಷ್ಟ, ಕರ್ಮ ನಿವಾರಣೆ (ಛಿಂದಿ ಛಿಂದಿ ಭಿಂದಿ ಭಿಂದಿ) ಮಾಡಿ ಎಂದು, ಹಾಗು ಆನಂದ, ಶಾಂತಿ ಆದಿ ಪ್ರಾಪ್ತವಾಗಲಿ (ಕುರು ಕುರು / ಸ್ವಾಹಾ) ಎಂದು ಕೇಳುತ್ತಾರೆ."
+          ],
+          "en": [
+            "Those who perform Abhisheka Shantidhara daily ask for the destruction of fear, difficulties and karma (by saying 'chhindi chhindi bhindi bhindi'), and ask for happiness, peace and so on (kuru kuru / swaahaa)."
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Abhisheka",
+          "Shantidhara"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_007",
+    "type": "question",
+    "timestamp": "2026-11-07T10:02:00Z",
+    "references": [
+      "a_006"
+    ],
+    "blocks": [
+      {
+        "id": "q_007_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಆದರೆ ನಮ್ಮ ಭಗವಂತರು ವೀತರಾಗಿಗಳು. ಅವರು ಏನೂ ಕೊಡುವುದಿಲ್ಲ ಎಂದು ಹಲವರು ಹೇಳುತ್ತಾರೆ - ಅದು ಸರಿಯೇ?"
+          ],
+          "en": [
+            "Our Bhagawan is Veetaraagi, and many say He doesn't give anything - is that true?"
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Daana",
+          "NishchayaNaya",
+          "VyavaharaNaya"
+        ],
+        "videos": [],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "a_007",
+    "type": "answer",
+    "timestamp": "2026-11-07T10:03:00Z",
+    "references": [
+      "q_007"
+    ],
+    "blocks": [
+      {
+        "id": "a_007_b_1",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ಇದಕ್ಕೆ ನಿಶ್ಚಯ ನಯ ಹಾಗು ವ್ಯವಹಾರ ನಯಗಳನ್ನು ತಿಳಿಯಬೇಕು...",
+            "ಪರಾಶ್ರಿತೋ ವ್ಯವಹಾರ ನಯ, ಆತ್ಮಾಶ್ರಿತೋ ನಿಶ್ಚಯ ನಯ"
+          ],
+          "en": [
+            "For this, one should understand the Nishchaya and Vyavahara Nayas (viewpoints)...",
+            "Parāśritō vyavahāra naya, ātmāśritō niścaya naya"
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Daana",
+          "NishchayaNaya",
+          "VyavaharaNaya"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_007_b_2",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ನಿಶ್ಚಯ ನಯ: ಒಂದು ಆತ್ಮವನ್ನು ಹಿಡಿದು ಅದರ ವರ್ಣನೆ ಮಾಡುವುದು ನಿಶ್ಚಯ ನಯ.",
+            "ಉದಾಹರಣೆ: ಆತ್ಮವು ಅನಂತ ಶಕ್ತಿಶಾಲಿ, ಅನಂತ ಜ್ಞಾನಿ ಆದಿ. ಇಲ್ಲಿ ಬೇರೆ ತತ್ವಗಳು (ಕರ್ಮ, ಆದಿ) ಹಾಗು ಬೇರೆ ಆತ್ಮವು ಇರುವುದಿಲ್ಲ. ಆದ್ದರಿಂದಲೇ ನಿಶ್ಚಯ ನಯದಿಂದ ಎಲ್ಲ ಆತ್ಮಗಳು ದೇವರೇ."
+          ],
+          "en": [
+            "Nishchaya Naya: In Nishchaya Naya, one item of one tatva is considered while describing/studying it. (This helps in knowing the highest/pure state of the matter.)",
+            "For example, you take only one item of one tatva (matter), say one atma (soul) of jeeva tatva, and study it. This is known as Adhyatma (study of atma). Here you are not taking Karma or other items into account. So in the Nishchaya viewpoint, you select any soul, it has the same characteristics. Hence, all souls are equal."
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Daana",
+          "NishchayaNaya",
+          "VyavaharaNaya"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_007_b_3",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ನಿಶ್ಚಯ ನಯ ತತ್ವದ ಶುದ್ಧತೆಯನ್ನು ವರ್ಣಿಸುತ್ತದೆ.",
+            "ಆತ್ಮದ ಅಧ್ಯಯನ / ವರ್ಣನೆ ಮಾಡುವ ಗ್ರಂಥಗಳು - ಆಧ್ಯಾತ್ಮ ಗ್ರಂಥಗಳು.",
+            "ಕರ್ಮದ ಅಧ್ಯಯನ / ವರ್ಣನೆ ಮಾಡುವ ಗ್ರಂಥಗಳು - ಕರ್ಮ ಸಿದ್ಧಾಂತ ಗ್ರಂಥಗಳು."
+          ],
+          "en": [
+            "Nishchaya Naya describes the purity of a tatva.",
+            "Scriptures that study/describe the atma - Adhyatma granthas.",
+            "Scriptures that study/describe karma - Karma Siddhanta granthas."
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Daana",
+          "NishchayaNaya",
+          "VyavaharaNaya"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_007_b_4",
+        "type": "paragraph",
+        "content": {
+          "kn": [
+            "ನಿಶ್ಚಯ ನಯದಲ್ಲಿ ಭಗವಂತರು ದಾನ ಮಾಡುವುದಿಲ್ಲ."
+          ],
+          "en": [
+            "In Nishchaya Naya, Bhagawan does not do daana."
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Daana",
+          "NishchayaNaya",
+          "VyavaharaNaya"
+        ],
+        "videos": [],
+        "images": []
+      },
+      {
+        "id": "a_007_b_5",
+        "type": "note",
+        "content": {
+          "kn": [
+            "ವಿಶೇಷ ಸೂಚನೆ: ಈ ನಯದಲ್ಲಿ ಸಾಮಾನ್ಯ ವ್ಯಕ್ತಿಯೂ ದಾನ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಏಕೆಂದರೆ ದಾನಕ್ಕೆ ಎರಡು ಜೀವ ಬೇಕು, ಹಾಗು ಪುದ್ಗಲ ವಸ್ತು ಬೇಕು. ಇದು ಪರಾಶ್ರಿತ ಕಾರ್ಯ. ಆದ್ದರಿಂದ ದಾನ ನಿಶ್ಚಯ ನಯದಿಂದ ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."
+          ],
+          "en": [
+            "NOTE: In the Nishchaya viewpoint, not just Bhagawan, even a normal person cannot do daana. For daana to happen, at least two jeevas and an object (pudgala) are needed. So daana is para-ashrit (depends on others), and is not possible from the Nishchaya naya."
+          ]
+        },
+        "tags": [
+          "Bhagawan",
+          "Daana",
+          "NishchayaNaya",
+          "VyavaharaNaya"
+        ],
+        "videos": [
+          {
+            "url": "https://www.youtube.com/watch?v=LKrPVbXnM14",
+            "youtubeId": "LKrPVbXnM14"
+          }
+        ],
+        "images": []
+      }
+    ]
+  },
+  {
+    "id": "q_008",
+    "type": "question",
+    "timestamp": "2026-06-15T10:25:00Z",
+    "references": [
+      "a_005"
+    ],
+    "blocks": [
+      {
+        "id": "q_008_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -553,15 +764,15 @@
     ]
   },
   {
-    "id": "a_006",
+    "id": "a_008",
     "type": "answer",
     "timestamp": "2026-06-15T10:26:00Z",
     "references": [
-      "q_006"
+      "q_008"
     ],
     "blocks": [
       {
-        "id": "a_006_b_1",
+        "id": "a_008_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -579,7 +790,7 @@
         "images": []
       },
       {
-        "id": "a_006_b_2",
+        "id": "a_008_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -597,7 +808,7 @@
         "images": []
       },
       {
-        "id": "a_006_b_3",
+        "id": "a_008_b_3",
         "type": "shloka",
         "content": {
           "kn": [
@@ -635,15 +846,15 @@
     ]
   },
   {
-    "id": "q_007",
+    "id": "q_009",
     "type": "question",
     "timestamp": "2026-06-15T10:30:00Z",
     "references": [
-      "a_006"
+      "a_008"
     ],
     "blocks": [
       {
-        "id": "q_007_b_1",
+        "id": "q_009_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -663,15 +874,15 @@
     ]
   },
   {
-    "id": "a_007",
+    "id": "a_009",
     "type": "answer",
     "timestamp": "2026-06-15T10:31:00Z",
     "references": [
-      "q_007"
+      "q_009"
     ],
     "blocks": [
       {
-        "id": "a_007_b_1",
+        "id": "a_009_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -689,7 +900,7 @@
         "images": []
       },
       {
-        "id": "a_007_b_2",
+        "id": "a_009_b_2",
         "type": "shloka",
         "content": {
           "kn": [
@@ -713,7 +924,7 @@
     ]
   },
   {
-    "id": "q_008",
+    "id": "q_010",
     "type": "question",
     "timestamp": "2026-06-15T10:35:00Z",
     "references": [
@@ -721,7 +932,7 @@
     ],
     "blocks": [
       {
-        "id": "q_008_b_1",
+        "id": "q_010_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -742,15 +953,15 @@
     ]
   },
   {
-    "id": "a_008",
+    "id": "a_010",
     "type": "answer",
     "timestamp": "2026-06-15T10:36:00Z",
     "references": [
-      "q_008"
+      "q_010"
     ],
     "blocks": [
       {
-        "id": "a_008_b_1",
+        "id": "a_010_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -769,7 +980,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_2",
+        "id": "a_010_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -793,7 +1004,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_3",
+        "id": "a_010_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -812,7 +1023,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_4",
+        "id": "a_010_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -836,7 +1047,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_5",
+        "id": "a_010_b_5",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -855,7 +1066,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_6",
+        "id": "a_010_b_6",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -874,7 +1085,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_7",
+        "id": "a_010_b_7",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -893,7 +1104,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_8",
+        "id": "a_010_b_8",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -912,7 +1123,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_9",
+        "id": "a_010_b_9",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -931,7 +1142,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_10",
+        "id": "a_010_b_10",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -950,7 +1161,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_11",
+        "id": "a_010_b_11",
         "type": "mantra",
         "content": {
           "kn": [
@@ -970,7 +1181,7 @@
         "images": []
       },
       {
-        "id": "a_008_b_12",
+        "id": "a_010_b_12",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -991,7 +1202,7 @@
     ]
   },
   {
-    "id": "q_009",
+    "id": "q_011",
     "type": "question",
     "timestamp": "2026-02-05T11:02:00Z",
     "references": [
@@ -999,7 +1210,7 @@
     ],
     "blocks": [
       {
-        "id": "q_009_b_1",
+        "id": "q_011_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1016,7 +1227,7 @@
         "images": []
       },
       {
-        "id": "q_009_b_2",
+        "id": "q_011_b_2",
         "type": "shloka",
         "content": {
           "kn": [
@@ -1040,15 +1251,15 @@
     ]
   },
   {
-    "id": "a_009",
+    "id": "a_011",
     "type": "answer",
     "timestamp": "2026-02-05T11:02:00Z",
     "references": [
-      "q_009"
+      "q_011"
     ],
     "blocks": [
       {
-        "id": "a_009_b_1",
+        "id": "a_011_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1065,7 +1276,7 @@
         "images": []
       },
       {
-        "id": "a_009_b_2",
+        "id": "a_011_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1082,7 +1293,7 @@
         "images": []
       },
       {
-        "id": "a_009_b_3",
+        "id": "a_011_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1104,7 +1315,7 @@
         "images": []
       },
       {
-        "id": "a_009_b_4",
+        "id": "a_011_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1121,7 +1332,7 @@
         "images": []
       },
       {
-        "id": "a_009_b_5",
+        "id": "a_011_b_5",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1145,15 +1356,15 @@
     ]
   },
   {
-    "id": "q_010",
+    "id": "q_012",
     "type": "question",
     "timestamp": "2026-02-05T11:02:00Z",
     "references": [
-      "a_009"
+      "a_011"
     ],
     "blocks": [
       {
-        "id": "q_010_b_1",
+        "id": "q_012_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1172,15 +1383,15 @@
     ]
   },
   {
-    "id": "a_010",
+    "id": "a_012",
     "type": "answer",
     "timestamp": "2026-02-05T11:02:00Z",
     "references": [
-      "q_010"
+      "q_012"
     ],
     "blocks": [
       {
-        "id": "a_010_b_1",
+        "id": "a_012_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1197,7 +1408,7 @@
         "images": []
       },
       {
-        "id": "a_010_b_2",
+        "id": "a_012_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1218,7 +1429,7 @@
         "images": []
       },
       {
-        "id": "a_010_b_3",
+        "id": "a_012_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1235,7 +1446,7 @@
         "images": []
       },
       {
-        "id": "a_010_b_4",
+        "id": "a_012_b_4",
         "type": "paragraph",
         "content": {
           "kn": [],
@@ -1250,7 +1461,7 @@
         "images": []
       },
       {
-        "id": "a_010_b_5",
+        "id": "a_012_b_5",
         "type": "paragraph",
         "content": {
           "kn": [],
@@ -1265,7 +1476,7 @@
         "images": []
       },
       {
-        "id": "a_010_b_6",
+        "id": "a_012_b_6",
         "type": "paragraph",
         "content": {
           "kn": [],
@@ -1282,13 +1493,13 @@
     ]
   },
   {
-    "id": "q_011",
+    "id": "q_013",
     "type": "question",
     "timestamp": "2026-06-06T10:20:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_011_b_1",
+        "id": "q_013_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1309,15 +1520,15 @@
     ]
   },
   {
-    "id": "a_011",
+    "id": "a_013",
     "type": "answer",
     "timestamp": "2026-06-06T10:21:00Z",
     "references": [
-      "q_011"
+      "q_013"
     ],
     "blocks": [
       {
-        "id": "a_011_b_1",
+        "id": "a_013_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1335,7 +1546,7 @@
         "images": []
       },
       {
-        "id": "a_011_b_2",
+        "id": "a_013_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1355,7 +1566,7 @@
         "images": []
       },
       {
-        "id": "a_011_b_3",
+        "id": "a_013_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1374,7 +1585,7 @@
         "images": []
       },
       {
-        "id": "a_011_b_4",
+        "id": "a_013_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1397,7 +1608,7 @@
         "images": []
       },
       {
-        "id": "a_011_b_5",
+        "id": "a_013_b_5",
         "type": "note",
         "content": {
           "kn": [],
@@ -1415,15 +1626,15 @@
     ]
   },
   {
-    "id": "q_012",
+    "id": "q_014",
     "type": "question",
     "timestamp": "2026-06-06T10:23:00Z",
     "references": [
-      "a_008"
+      "a_010"
     ],
     "blocks": [
       {
-        "id": "q_012_b_1",
+        "id": "q_014_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1444,15 +1655,15 @@
     ]
   },
   {
-    "id": "a_012",
+    "id": "a_014",
     "type": "answer",
     "timestamp": "2026-06-15T10:56:00Z",
     "references": [
-      "q_012"
+      "q_014"
     ],
     "blocks": [
       {
-        "id": "a_012_b_1",
+        "id": "a_014_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1471,7 +1682,7 @@
         "images": []
       },
       {
-        "id": "a_012_b_2",
+        "id": "a_014_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1490,7 +1701,7 @@
         "images": []
       },
       {
-        "id": "a_012_b_3",
+        "id": "a_014_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1509,7 +1720,7 @@
         "images": []
       },
       {
-        "id": "a_012_b_4",
+        "id": "a_014_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1535,15 +1746,15 @@
     ]
   },
   {
-    "id": "q_013",
+    "id": "q_015",
     "type": "question",
     "timestamp": "2026-06-15T11:00:00Z",
     "references": [
-      "a_012"
+      "a_014"
     ],
     "blocks": [
       {
-        "id": "q_013_b_1",
+        "id": "q_015_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1563,15 +1774,15 @@
     ]
   },
   {
-    "id": "a_013",
+    "id": "a_015",
     "type": "answer",
     "timestamp": "2026-06-15T11:01:00Z",
     "references": [
-      "q_013"
+      "q_015"
     ],
     "blocks": [
       {
-        "id": "a_013_b_1",
+        "id": "a_015_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1596,7 +1807,7 @@
         "images": []
       },
       {
-        "id": "a_013_b_2",
+        "id": "a_015_b_2",
         "type": "shloka",
         "content": {
           "kn": [
@@ -1614,7 +1825,7 @@
         "images": []
       },
       {
-        "id": "a_013_b_3",
+        "id": "a_015_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1636,7 +1847,7 @@
         "images": []
       },
       {
-        "id": "a_013_b_4",
+        "id": "a_015_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1660,7 +1871,7 @@
         "images": []
       },
       {
-        "id": "i_013_b_4",
+        "id": "i_015_b_4",
         "type": "images",
         "tags": [
           "personal"
@@ -1677,7 +1888,7 @@
         ]
       },
       {
-        "id": "a_013_b_5",
+        "id": "a_015_b_5",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1696,7 +1907,7 @@
         "images": []
       },
       {
-        "id": "i_013_b_5",
+        "id": "i_015_b_5",
         "type": "images",
         "tags": [
           "personal"
@@ -1713,7 +1924,7 @@
         ]
       },
       {
-        "id": "a_013_b_6",
+        "id": "a_015_b_6",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1737,7 +1948,7 @@
         ]
       },
       {
-        "id": "m_013_b_6",
+        "id": "m_015_b_6",
         "type": "mantra",
         "content": {
           "en": [
@@ -1751,7 +1962,7 @@
         }
       },
       {
-        "id": "a_013_b_7",
+        "id": "a_015_b_7",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1770,7 +1981,7 @@
         "images": []
       },
       {
-        "id": "a_013_b_8",
+        "id": "a_015_b_8",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1794,15 +2005,15 @@
     ]
   },
   {
-    "id": "q_014",
+    "id": "q_016",
     "type": "question",
     "timestamp": "2026-06-15T11:05:00Z",
     "references": [
-      "a_007"
+      "a_009"
     ],
     "blocks": [
       {
-        "id": "q_014_b_1",
+        "id": "q_016_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1823,15 +2034,15 @@
     ]
   },
   {
-    "id": "a_014",
+    "id": "a_016",
     "type": "answer",
     "timestamp": "2026-06-15T11:06:00Z",
     "references": [
-      "q_014"
+      "q_016"
     ],
     "blocks": [
       {
-        "id": "a_014_b_1",
+        "id": "a_016_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1854,7 +2065,7 @@
         "images": []
       },
       {
-        "id": "a_014_b_2",
+        "id": "a_016_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1872,14 +2083,14 @@
         "images": []
       },
       {
-        "id": "a_014_b_3",
+        "id": "a_016_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
             "ಶ್ರೀಪಾಲನ ಕುಷ್ಠ ರೋಗವನ್ನು, ಮದನಸುಂದರಿ (ಮೈನಾ ಸುಂದರಿ ಎಂಬ ಹೆಸರಲ್ಲೂ ಪ್ರಸಿದ್ಧಳಾದವಳು) ಸಿದ್ಧಚಕ್ರ ವಿಧಾನ ಮಾಡುವ ಮೂಲಕ ನಿವಾರಿಸುತ್ತಾಳೆ :"
           ],
           "en": [
-            "Shreepaala gets cured of kusta rog (leprosy) with help of madana sundari (also known by maina sundari name) doing siddha chakra vidhaan."
+            "Shreepaala gets cured of kusta rog (leprosy) with help of madana sundari (also known as maina sundari) doing siddha chakra vidhaan."
           ]
         },
         "tags": [
@@ -1891,7 +2102,7 @@
         "images": []
       },
       {
-        "id": "a_014_b_4",
+        "id": "a_016_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1914,7 +2125,7 @@
         "images": []
       },
       {
-        "id": "a_014_b_5",
+        "id": "a_016_b_5",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1932,7 +2143,7 @@
         "images": []
       },
       {
-        "id": "a_014_b_6",
+        "id": "a_016_b_6",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1950,7 +2161,7 @@
         "images": []
       },
       {
-        "id": "a_014_b_7",
+        "id": "a_016_b_7",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -1975,16 +2186,16 @@
     ]
   },
   {
-    "id": "q_015",
+    "id": "q_017",
     "type": "question",
     "timestamp": "2026-06-15T11:10:00Z",
     "references": [
-      "a_007_b_1",
-      "a_014"
+      "a_009_b_1",
+      "a_016"
     ],
     "blocks": [
       {
-        "id": "q_015_b_1",
+        "id": "q_017_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2004,15 +2215,15 @@
     ]
   },
   {
-    "id": "a_015",
+    "id": "a_017",
     "type": "answer",
     "timestamp": "2026-06-15T11:11:00Z",
     "references": [
-      "q_015"
+      "q_017"
     ],
     "blocks": [
       {
-        "id": "a_015_b_1",
+        "id": "a_017_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2029,7 +2240,7 @@
         "images": []
       },
       {
-        "id": "a_015_b_2",
+        "id": "a_017_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2057,7 +2268,7 @@
         "images": []
       },
       {
-        "id": "a_015_b_3",
+        "id": "a_017_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2082,15 +2293,15 @@
     ]
   },
   {
-    "id": "q_016",
+    "id": "q_018",
     "type": "question",
     "timestamp": "2026-06-15T11:15:00Z",
     "references": [
-      "a_015"
+      "a_017"
     ],
     "blocks": [
       {
-        "id": "q_016_b_1",
+        "id": "q_018_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2110,15 +2321,15 @@
     ]
   },
   {
-    "id": "a_016",
+    "id": "a_018",
     "type": "answer",
     "timestamp": "2026-06-15T11:16:00Z",
     "references": [
-      "q_016"
+      "q_018"
     ],
     "blocks": [
       {
-        "id": "a_016_b_1",
+        "id": "a_018_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2144,15 +2355,15 @@
     ]
   },
   {
-    "id": "q_017",
+    "id": "q_019",
     "type": "question",
     "timestamp": "2026-06-15T11:20:00Z",
     "references": [
-      "a_015"
+      "a_017"
     ],
     "blocks": [
       {
-        "id": "q_017_b_1",
+        "id": "q_019_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2173,22 +2384,26 @@
     ]
   },
   {
-    "id": "a_017",
+    "id": "a_019",
     "type": "answer",
     "timestamp": "2026-06-15T11:21:00Z",
     "references": [
-      "q_017"
+      "q_019"
     ],
     "blocks": [
       {
-        "id": "a_017_b_1",
+        "id": "a_019_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
-            "ಗೌತಮ ಚರಿತ್ರೆ - ಸರ್ಗ ೩: ವಾಸುಪೂಜ್ಯ ತೀರ್ಥಂಕರರ ಕಾಲದಲ್ಲಿ, ರಾಣಿ ವಿಶಾಲಾಕ್ಷಿ (ಗೌತಮ ಸ್ವಾಮಿಯ ಹಿಂದಿನ ಜನ್ಮ) ಒಬ್ಬ ಮುನಿಗಳಿಗೆ ಉಪಸರ್ಗ ನೀಡುತ್ತಾಳೆ. ನಂತರ ಸರಿಯಾದ ಹಾದಿಗೆ ಬಂದ ನಂತರ, ನರಕಕ್ಕೆ ಹೋಗುವುದರಿಂದ ತನ್ನನ್ನು ರಕ್ಷಿಸಿ ಎಂದು ಅದೇ ಮುನಿಯ ಬಳಿ ಪ್ರಾಯಶ್ಚಿತ್ತ ಕೇಳುತ್ತಾಳೆ. ಆಗ ಮುನಿಗಳು ಮಹಾವೀರ ಸ್ವಾಮಿಯ ಪ್ರತಿಮೆಗೆ ಇಕ್ಷು ರಸ (ಕಬ್ಬಿನ ರಸ), ಉತ್ತಮ ಘೃತ (ತುಪ್ಪ), ದಧಿ (ಮೊಸರು), ಜಲ (ನೀರು) ಇತ್ಯಾದಿಗಳಿಂದ ಅಭಿಷೇಕ ಮಾಡುವ 'ಲಬ್ಧಿ ವಿಧಾನ ವ್ರತ'ವನ್ನು ಸೂಚಿಸುತ್ತಾರೆ."
+            "ಶ್ರೀ ಮಂಗಳಾಚಾರ್ಯ ಧರ್ಮಚಂದ್ ವಿರಚಿತ \"ಶ್ರೀ ಗೌತಮ ಚರಿತ್ರ\"",
+            "ಗೌತಮ ಚರಿತ್ರ - ಸರ್ಗ ೩: ವಾಸುಪೂಜ್ಯ ತೀರ್ಥಂಕರರ ಕಾಲದಲ್ಲಿ, ರಾಣಿ ವಿಶಾಲಾಕ್ಷಿ (ಗೌತಮ ಸ್ವಾಮಿಯ ಹಿಂದಿನ ಜನ್ಮ) ಒಬ್ಬ ಮುನಿಗಳಿಗೆ ಉಪಸರ್ಗ ನೀಡುತ್ತಾಳೆ. ನಂತರ ಸರಿಯಾದ ಹಾದಿಗೆ ಬಂದ ನಂತರ, ನರಕಕ್ಕೆ ಹೋಗುವುದರಿಂದ ತನ್ನನ್ನು ರಕ್ಷಿಸಿ ಎಂದು ಅದೇ ಮುನಿಯ ಬಳಿ ಪ್ರಾಯಶ್ಚಿತ್ತ ಕೇಳುತ್ತಾಳೆ. ಆಗ ಮುನಿಗಳು ಮಹಾವೀರ ಸ್ವಾಮಿಯ ಪ್ರತಿಮೆಗೆ ಇಕ್ಷು ರಸ (ಕಬ್ಬಿನ ರಸ), ಉತ್ತಮ ಘೃತ (ತುಪ್ಪ), ದಧಿ (ಮೊಸರು), ಜಲ (ನೀರು) ಇತ್ಯಾದಿಗಳಿಂದ ಅಭಿಷೇಕ ಮಾಡುವ 'ಲಬ್ಧಿ ವಿಧಾನ ವ್ರತ'ವನ್ನು ಸೂಚಿಸುತ್ತಾರೆ.",
+            "ಈ ಕಥೆಗಾಗಿ ವೀಡಿಯೊದ ೧೮:೧೮ ರಿಂದ ವೀಕ್ಷಿಸಿ ಮತ್ತು ಶ್ಲೋಕಕ್ಕಾಗಿ ೨೪:೧೪ ರಿಂದ ವೀಕ್ಷಿಸಿ:"
           ],
           "en": [
-            "Rani Vishalakshi - Watch 18:18 and 26:14 of this video:"
+            "\"Shri Gautama Charitra\", composed by Shri Mangalacharya Dharmachand",
+            "Gautama Charitra - Sarga 3: During the time of Vasupujya Tirthankara, Queen Vishalakshi (a previous birth of Gautama Swami) causes an upasarga to a muni. Later, after coming to her senses, she asks the same muni for prayashchitta to be saved from going to hell. The muni then suggests the 'Labdhi Vidhana Vrata' - doing abhisheka to the idol of Mahavira Swami with sugarcane juice, ghee, curd, water and so on.",
+            "Rani Vishalakshi - Watch 18:18 for the story and 24:14 for the shloka of this video:"
           ]
         },
         "tags": [
@@ -2196,11 +2411,16 @@
           "RaniVishalakshi",
           "Abhisheka"
         ],
-        "videos": [],
+        "videos": [
+          {
+            "url": "https://youtu.be/B1eE9dUCnq4?t=1098",
+            "youtubeId": "B1eE9dUCnq4"
+          }
+        ],
         "images": []
       },
       {
-        "id": "a_017_b_2",
+        "id": "a_019_b_2",
         "type": "shloka",
         "content": {
           "kn": [
@@ -2229,7 +2449,7 @@
         "images": []
       },
       {
-        "id": "a_017_b_3",
+        "id": "a_019_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2248,7 +2468,7 @@
         "images": []
       },
       {
-        "id": "a_017_b_4",
+        "id": "a_019_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2271,7 +2491,7 @@
         "images": []
       },
       {
-        "id": "a_017_b_5",
+        "id": "a_019_b_5",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2290,7 +2510,7 @@
         "images": []
       },
       {
-        "id": "a_017_b_6",
+        "id": "a_019_b_6",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2314,7 +2534,7 @@
         "images": []
       },
       {
-        "id": "a_017_b_7",
+        "id": "a_019_b_7",
         "type": "shloka",
         "content": {
           "kn": [
@@ -2342,7 +2562,7 @@
         "images": []
       },
       {
-        "id": "a_017_b_8",
+        "id": "a_019_b_8",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2364,7 +2584,7 @@
         "images": []
       },
       {
-        "id": "a_017_b_9",
+        "id": "a_019_b_9",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2412,11 +2632,11 @@
         "images": []
       },
       {
-        "id": "a_017_b_10",
+        "id": "a_019_b_10",
         "type": "note",
         "content": {
           "kn": [
-            "ಪಂಚಾಮೃತ ಶ್ಲೋಕ ಇರುವುದರಿಂದ, ದೇವತೆಗಳು ಮೊಸರು, ತುಪ್ಪ, ನೀರುಗಳಿಂದಲೂ ಅಭಿಷೇಕ ಮಾಡಿರಬಹುದೇ ಎಂಬ ಒಂದು ಪ್ರಶ್ನೆ?!."
+            "ಪಂಚಾಮೃತ ಶ್ಲೋಕ ಇರುವುದರಿಂದ, ದೇವತೆಗಳು ಮೊಸರು, ತುಪ್ಪ, ನೀರುಗಳಿಂದಲೂ ಅಭಿಷೇಕ ಮಾಡಿರಬಹುದೇ ಎಂಬ ಒಂದು ಪ್ರಶ್ನೆ?!"
           ],
           "en": [
             "I wonder since panchamruta shloka exists, do devatas also perform abhisheka with curd, ghee, and water?"
@@ -2432,17 +2652,17 @@
     ]
   },
   {
-    "id": "a_018",
+    "id": "a_020",
     "type": "answer",
     "timestamp": "2026-01-16T21:36:00Z",
     "references": [
-      "a_017_b_6",
-      "a_017_b_7",
-      "a_017_b_10"
+      "a_019_b_6",
+      "a_019_b_7",
+      "a_019_b_10"
     ],
     "blocks": [
       {
-        "id": "a_018_b_1",
+        "id": "a_020_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2472,13 +2692,13 @@
     ]
   },
   {
-    "id": "q_019",
+    "id": "q_021",
     "type": "question",
     "timestamp": "2026-06-15T11:30:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_019_b_1",
+        "id": "q_021_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2498,15 +2718,15 @@
     ]
   },
   {
-    "id": "a_019",
+    "id": "a_021",
     "type": "answer",
     "timestamp": "2026-06-15T11:31:00Z",
     "references": [
-      "q_019"
+      "q_021"
     ],
     "blocks": [
       {
-        "id": "a_019_b_1",
+        "id": "a_021_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2529,7 +2749,7 @@
         "images": []
       },
       {
-        "id": "a_019_b_2",
+        "id": "a_021_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2553,13 +2773,13 @@
     ]
   },
   {
-    "id": "q_020",
+    "id": "q_022",
     "type": "question",
     "timestamp": "2026-06-15T11:35:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_020_b_1",
+        "id": "q_022_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2579,15 +2799,15 @@
     ]
   },
   {
-    "id": "a_020",
+    "id": "a_022",
     "type": "answer",
     "timestamp": "2026-06-15T11:36:00Z",
     "references": [
-      "q_020"
+      "q_022"
     ],
     "blocks": [
       {
-        "id": "a_020_b_1",
+        "id": "a_022_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2608,7 +2828,7 @@
         "images": []
       },
       {
-        "id": "a_020_b_2",
+        "id": "a_022_b_2",
         "type": "note",
         "content": {
           "kn": [
@@ -2626,13 +2846,13 @@
     ]
   },
   {
-    "id": "q_021",
+    "id": "q_023",
     "type": "question",
     "timestamp": "2026-06-15T11:40:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_021_b_1",
+        "id": "q_023_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2652,15 +2872,15 @@
     ]
   },
   {
-    "id": "a_021",
+    "id": "a_023",
     "type": "answer",
     "timestamp": "2026-06-15T11:41:00Z",
     "references": [
-      "q_021"
+      "q_023"
     ],
     "blocks": [
       {
-        "id": "a_021_b_1",
+        "id": "a_023_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2680,7 +2900,7 @@
         "images": []
       },
       {
-        "id": "a_021_b_2",
+        "id": "a_023_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2707,7 +2927,7 @@
         "images": []
       },
       {
-        "id": "a_021_b_3",
+        "id": "a_023_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2731,7 +2951,7 @@
         "images": []
       },
       {
-        "id": "a_021_b_4",
+        "id": "a_023_b_4",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2739,8 +2959,8 @@
             "ದಕ್ಷಿಣ ಭಾರತ ಆಗಮ ಪರಂಪರೆ"
           ],
           "en": [
-            "Muni Shree SudhaSagar Swami:",
-            "Dakshina Bharata is (follows) Aagama Parampare"
+            "Muni Shree Sudhasagar:",
+            "Dakshina Bharata follows the Aagama parampare (tradition)"
           ]
         },
         "tags": [
@@ -2755,7 +2975,7 @@
         "images": []
       },
       {
-        "id": "a_021_b_5",
+        "id": "a_023_b_5",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2780,13 +3000,13 @@
     ]
   },
   {
-    "id": "q_022",
+    "id": "q_024",
     "type": "question",
     "timestamp": "2026-06-15T11:45:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_022_b_1",
+        "id": "q_024_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2806,15 +3026,15 @@
     ]
   },
   {
-    "id": "a_022",
+    "id": "a_024",
     "type": "answer",
     "timestamp": "2026-06-15T11:46:00Z",
     "references": [
-      "q_022"
+      "q_024"
     ],
     "blocks": [
       {
-        "id": "a_022_b_1",
+        "id": "a_024_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2835,7 +3055,7 @@
         "images": []
       },
       {
-        "id": "a_022_b_2",
+        "id": "a_024_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2858,7 +3078,7 @@
         "images": []
       },
       {
-        "id": "a_022_b_3",
+        "id": "a_024_b_3",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2876,13 +3096,13 @@
     ]
   },
   {
-    "id": "q_023",
+    "id": "q_025",
     "type": "question",
     "timestamp": "2026-06-15T11:50:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_023_b_1",
+        "id": "q_025_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2904,15 +3124,15 @@
     ]
   },
   {
-    "id": "a_023",
+    "id": "a_025",
     "type": "answer",
     "timestamp": "2026-06-15T11:51:00Z",
     "references": [
-      "q_023"
+      "q_025"
     ],
     "blocks": [
       {
-        "id": "a_023_b_1",
+        "id": "a_025_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2936,7 +3156,7 @@
         "images": []
       },
       {
-        "id": "a_023_b_2",
+        "id": "a_025_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2961,13 +3181,13 @@
     ]
   },
   {
-    "id": "q_024",
+    "id": "q_026",
     "type": "question",
     "timestamp": "2026-06-15T11:55:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_024_b_1",
+        "id": "q_026_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -2986,15 +3206,15 @@
     ]
   },
   {
-    "id": "a_024",
+    "id": "a_026",
     "type": "answer",
     "timestamp": "2026-06-15T11:56:00Z",
     "references": [
-      "q_024"
+      "q_026"
     ],
     "blocks": [
       {
-        "id": "a_024_b_1",
+        "id": "a_026_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -3016,14 +3236,14 @@
         "images": []
       },
       {
-        "id": "a_024_b_2",
+        "id": "a_026_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
-            "ಆಚಾರ್ಯ ವಿದ್ಯಾಸಾಗರ ಮಹಾರಾಜರ ಸಾನ್ನಿಧ್ಯದಲ್ಲಿ ಪಂಚಾಮೃತ ಮತ್ತು ಸ್ತ್ರೀ–ಅಭಿಷೇಕದ ಬಗ್ಗೆ ಉಲ್ಲೇಖ, ಹಾಗೂ ಇನ್ನೂ ಅನೇಕ ಪ್ರಶ್ನೆಗಳ ಉತ್ತರ"
+            "ಆಚಾರ್ಯ ವಿದ್ಯಾಸಾಗರ ಸ್ವಾಮಿಗಳ ಸಾನ್ನಿಧ್ಯದಲ್ಲಿ ಪಂಚಾಮೃತ ಮತ್ತು ಸ್ತ್ರೀ–ಅಭಿಷೇಕದ ಬಗ್ಗೆ ಉಲ್ಲೇಖ, ಹಾಗೂ ಇನ್ನೂ ಅನೇಕ ಪ್ರಶ್ನೆಗಳ ಉತ್ತರ"
           ],
           "en": [
-            "Acharya Vidyasagar Swami's presence Panchamruta and Stree abhisheka, and many other questions' answers."
+            "In Acharya Vidyasagar Swami's presence, Panchamruta and Stree abhisheka, and answers to many other questions in the video."
           ]
         },
         "tags": [
@@ -3041,13 +3261,13 @@
     ]
   },
   {
-    "id": "q_025",
+    "id": "q_027",
     "type": "question",
     "timestamp": "2026-06-15T12:00:00Z",
     "references": null,
     "blocks": [
       {
-        "id": "q_025_b_1",
+        "id": "q_027_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -3067,15 +3287,15 @@
     ]
   },
   {
-    "id": "a_025",
+    "id": "a_027",
     "type": "answer",
     "timestamp": "2026-06-15T12:01:00Z",
     "references": [
-      "q_025"
+      "q_027"
     ],
     "blocks": [
       {
-        "id": "a_025_b_1",
+        "id": "a_027_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -3107,7 +3327,7 @@
         "images": []
       },
       {
-        "id": "a_025_b_2",
+        "id": "a_027_b_2",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -3132,17 +3352,17 @@
     ]
   },
   {
-    "id": "q_026",
+    "id": "q_028",
     "type": "question",
     "timestamp": "2026-06-15T12:05:00Z",
     "references": [
-      "a_017_b_6",
-      "a_018_b_1",
-      "a_025"
+      "a_019_b_6",
+      "a_020_b_1",
+      "a_027"
     ],
     "blocks": [
       {
-        "id": "q_026_b_1",
+        "id": "q_028_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -3162,15 +3382,15 @@
     ]
   },
   {
-    "id": "a_026",
+    "id": "a_028",
     "type": "answer",
     "timestamp": "2026-06-15T12:06:00Z",
     "references": [
-      "q_026"
+      "q_028"
     ],
     "blocks": [
       {
-        "id": "a_026_b_1",
+        "id": "a_028_b_1",
         "type": "paragraph",
         "content": {
           "kn": [
@@ -3196,7 +3416,7 @@
         "images": []
       },
       {
-        "id": "a_026_b_2",
+        "id": "a_028_b_2",
         "type": "paragraph",
         "content": {
           "kn": [],
