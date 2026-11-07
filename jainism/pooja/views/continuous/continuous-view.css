@@ -191,8 +191,8 @@ body[data-paper-size="a3"] #continuous-container {
 
     .col-kn,
     .col-en {
-        orphans: 3;
-        widows: 3;
+        orphans: var(--print-orphans);
+        widows: var(--print-widows);
     }
 }
 
@@ -486,7 +486,7 @@ input:checked + .slider::before {
        and image blocks (the id label stays with its photo and captions). */
     .card {
         break-inside: auto;
-        margin: 6px 0;
+        margin: var(--print-block-gap) 0;
     }
 
     /* The coloured left bar is drawn on each ROW, not as the card's own
@@ -530,8 +530,8 @@ input:checked + .slider::before {
     .card > * {
         margin-top: 0 !important;
         margin-bottom: 0 !important;
-        border-top: 3px solid transparent;
-        border-bottom: 3px solid transparent;
+        border-top: calc(var(--print-block-gap) / 2) solid transparent;
+        border-bottom: calc(var(--print-block-gap) / 2) solid transparent;
         /* The bar is a background layer that is positioned and clipped to the
            BORDER box, so it paints across the transparent spacing borders
            (an inset box-shadow would stop at the padding edge and leave a gap
@@ -557,7 +557,7 @@ input:checked + .slider::before {
     }
 
     .reply-excerpt + * {
-        border-top-width: 6px;
+        border-top-width: var(--print-ref-gap);
     }
 
     /* A Ref strip must never be separated from its card: not split across
@@ -577,11 +577,11 @@ input:checked + .slider::before {
     }
 
     .card > :first-child:not(.reply-excerpt) {
-        border-top-width: 10px;
+        border-top-width: var(--print-card-edge);
     }
 
     .card > :last-child {
-        border-bottom-width: 10px;
+        border-bottom-width: var(--print-card-edge);
     }
 
     .card.question,
@@ -596,8 +596,8 @@ input:checked + .slider::before {
         flex-flow: row !important;
         width: 100% !important;
         gap: 15px !important;
-        padding-top: 4px;       /* screen uses 8px; print is kept compact like book view */
-        padding-bottom: 4px;
+        padding-top: var(--print-row-pad);       /* screen uses 8px; print is kept compact like book view */
+        padding-bottom: var(--print-row-pad);
     }
 
     .block-row.media-only {

@@ -137,10 +137,12 @@ to a real file) as part of building this structure.
 | `header/header.js` | Settings dropdown, lang picker, media/read-tracking toggle wiring | ✅ Current |
 | `views/continuous/continuous-view.js` | Continuous scroll view rendering (verbatim from original `script.js`) | ✅ Current |
 | `views/book/book-view.js` | Book spread view: pagination (CSS columns), card creation, navigation | ✅ Current |
-| `core/blocks.js` | Pure data-model helpers: `formatIdForDisplay`, `buildBlockIndex`, `resolveReference` — shared by both views | ✅ Current |
-| `core/langs.js` | `KNOWN_LANGS` — single source of truth for supported languages | ✅ Current |
-| `core/media.js` | Video/QR utilities (`createVideoCard`, `extractYouTubeId`, `escapeHtml`, `linkify`, etc.) | ✅ Current |
-| `core/read-tracking.js` | Pure read/unread state functions, incl. `isBlockTrackable` — shared by both views | ✅ Current |
+| `core/blocks.js` | Pure data-model helpers shared by both views: `formatIdForDisplay`, `buildBlockIndex`, `resolveReference`, the content helpers (`hasLangText`, `langsWithText`, `hasAnyText`, `imageUrl`) and `classifyInsert()` | ✅ Current |
+| `core/langs.js` | `KNOWN_LANGS` / `LANG_CODES` — single source of truth for supported languages; `activeLangCodes()` turns continuous view's `'kn'\|'en'\|'all'` into a list | ✅ Current |
+| `core/media.js` | Video/QR utilities (`createVideoCard` — THE video markup both views use — `extractYouTubeId`, `escapeHtml`, `linkify`, etc.) and the global photo-size hook (`--ar`/`--nw`) | ✅ Current |
+| `core/read-tracking.js` | Read/unread state functions, incl. `isBlockTrackable` and `countTrackableBlocks` — shared by both views | ✅ Current |
+| `core/read-tick.js` | `buildReadTick()` — the "mark as read" button, built once for both views (`onToggle` hook for view-specific repaint) | ✅ Current |
+| `core/print-vars.css` | Print spacing both views' print blocks read (`--print-orphans`, `--print-ref-gap`, `--print-block-gap`, …) | ✅ Current |
 | `core/settings.js` | The one unified `settings` object — schema, defaults, validation (`loadSettings`/`saveSettings`) for every persisted preference | ✅ Current |
 | `core/layout-signal.js` | `notifyLayoutChanged()` — tells book view to re-measure pagination when a layout-affecting setting changes outside a window resize | ✅ Current |
 | `core/paper-size.js` | Paper size (Dynamic/A4/A3): applies `body[data-paper-size]` + the printed `@page` rule, wires the Settings `<select>` | ✅ Current |
@@ -557,8 +559,10 @@ schema owned by `core/settings.js`:
   `getActiveLangs()` fresh each time a view is activated (boot or toggle
   click) and passes the result into `initBookView`/`renderContinuousView`,
   and both views' media toggles wire through the same `toggle-videos`/
-  `toggle-qrs` checkboxes (book view additionally listens for their
-  `change` event to call `applyBookMediaVisibility()`).
+  `toggle-qrs` checkboxes. `header.js`'s `updateMediaVisibility()` is the
+  only code that reacts to them: it sets `body.show-videos`/`show-qrs` and
+  `core/media.css` does the rest, for both views (book view used to carry its
+  own per-element toggle function; it is gone).
 
 No backward-compat migration was built for an even older two-key design
 (`displaySettings` + `activeLangs`) that predates the unified `settings`
@@ -614,6 +618,42 @@ and `core/font-scale.js`.
   mm-based photo caps in `book-view.css` are unchanged. `scripts/impose-
   booklet.js` rearranges the pages onto sheets in booklet order — see
   `PRINTING.md`.
+
+**Shared code between the two views.** Anything both views need lives in
+`core/`; a view file should only contain what is genuinely about *that view's*
+layout.
+- **Insert classification** — `classifyInsert(item, activeLangs)` returns
+  `{ block, image, hasContent, kind: 'title'|'photo'|'blank', showId }`. Book
+  view maps title → title-style page, photo/blank → standalone page;
+  continuous view renders title/blank as a title-style card and lets a plain
+  photo fall through to a normal row. Add a new insert flavour *here*.
+- **Content helpers** — `hasLangText`, `langsWithText`, `hasAnyText`,
+  `imageUrl`, `activeLangCodes`. Don't write `block.content?.kn?.some(l =>
+  l.trim() !== '')` in a view; both views iterate `langsWithText(block, langs)`
+  (so a new language in `KNOWN_LANGS` needs no view change besides a `.col-xx`
+  style). `imageUrl` accepts absolute URLs everywhere (continuous inline
+  images previously ignored them).
+- **Read tick** — `buildReadTick(block, { isRead, totalBlockCount, onToggle })`.
+  Continuous passes an `onToggle` that also marks the row read.
+- **Video card** — one markup, `.media-wrap > .video-card + .qr-code`, from
+  `createVideoCard()`; QR source is 200px (printed up to 80px). **The play
+  badge is one rule**, `.video-card a::after` in `core/media.css`, sized by
+  `--play-size` / `--play-inset` / `--play-font` (book view sets them on
+  `.book-card`; defaults are continuous view's). To hide or restyle the badge
+  everywhere, that is the only place. Each view only *lays out* the shared
+  elements (`.book-card .media-wrap` … in `book-view.css`); anything
+  continuous-only on the shared classes is scoped under `.col-media`.
+- **Print spacing** — `core/print-vars.css`. Only values that already matched
+  in both views were centralised (orphans/widows, the gap under a Ref strip,
+  the gap between blocks); per-view numbers (photo caps, card padding) stay
+  with their view.
+- **e2e** — the Videos/QR state tests (on screen and print) and the paper-size
+  print screenshots are defined once in `test/e2e/media-states.js` and called
+  from each view's spec inside its own `describe`, so titles and snapshot
+  files are unchanged. View-specific facts live in its `VIEWS` table (how to
+  open the view, read-tick selector, the few documented exceptions). Playwright
+  lists these tests under `media-states.js`, but snapshots still resolve next to
+  the calling spec.
 
 **Print photo sizing** (both views) — one rule: *as wide as the column/page
 allows, never stretched, never taller than a page, never enlarged past what

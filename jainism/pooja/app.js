@@ -3,7 +3,7 @@
 // Both views share the same header; settings apply to whichever view is active.
 
 import { renderContinuousView, filterContinuous, goBackToMessage } from './views/continuous/continuous-view.js';
-import { initBookView, onBookLangChange, applyBookMediaVisibility, searchBookView } from './views/book/book-view.js';
+import { initBookView, onBookLangChange, searchBookView } from './views/book/book-view.js';
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
 import { initHomeControls, refreshHomeView } from './home/home.js';
 
@@ -164,13 +164,6 @@ async function init() {
         // Read-tracking toggle — no re-render needed (CSS class handles visibility)
         () => {},
     );
-
-    // Media toggles also refresh book view (safe even if book hasn't been
-    // opened yet — it just no-ops over an empty #book-container).
-    ['toggle-videos', 'toggle-qrs'].forEach(id => {
-        document.getElementById(id)
-            ?.addEventListener('change', applyBookMediaVisibility);
-    });
 
     // ── Home surface — the landing page, not a third view state ────────────
     initHomeControls(data);

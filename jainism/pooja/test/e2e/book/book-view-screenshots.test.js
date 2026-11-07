@@ -1,109 +1,15 @@
 const { test, expect } = require('@playwright/test');
-const path = require('path');
 const { plainPhotoInsert } = require('../test-utils');
-
-async function openBookView(page) {
-    await page.locator('.view-toggle-btn[data-view="book"]').click();
-    await expect(page.locator('#book-container')).toHaveClass(/active/);
-    await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
-}
+const { VIEWS, openViewWithSettings, defineMediaStateScreenTests } = require('../media-states');
 
 test.describe('Book View - Screenshot Tests (Display Options)', () => {
 
     test.beforeEach(async ({ page }) => {
-        await page.route('**/data.json', route => {
-            route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
-            });
-        });
-
-        await page.goto('/');
-        // The app lands on the Home page first — openBookView() handles
-        // switching into book view and waiting for its content.
-        await openBookView(page);
-
-        await page.locator('#settings-btn').click();
-        await expect(page.locator('#toggle-videos')).toBeVisible();
+        await openViewWithSettings(page, VIEWS.book);
     });
 
-    test('Screenshot: Default state (Videos ON, QR ON)', async ({ page }) => {
-        const videosCheckbox = page.locator('#toggle-videos');
-        const qrsCheckbox = page.locator('#toggle-qrs');
-
-        await page.waitForSelector('#book-columns .book-vid-row');
-
-        await expect(videosCheckbox).toBeChecked();
-        await expect(qrsCheckbox).toBeChecked();
-
-        const rowWithMedia = page.locator('#book-columns .book-vid-row').first();
-        await expect(rowWithMedia.locator('.book-vid-thumb')).toBeVisible();
-        await expect(rowWithMedia.locator('.book-vid-qr')).toBeVisible();
-
-        await expect(page).toHaveScreenshot('book-screenshot-default-state-videos-on-qr-on.png', {
-            fullPage: true,
-            timeout: 20000
-        });
-    });
-
-    test('Screenshot: QR-only state (Videos OFF, QR ON)', async ({ page }) => {
-        const videosCheckbox = page.locator('#toggle-videos');
-        const qrsCheckbox = page.locator('#toggle-qrs');
-
-        await page.waitForSelector('#book-columns .book-vid-row');
-
-        await videosCheckbox.uncheck();
-        await qrsCheckbox.check();
-        await page.waitForTimeout(300);
-
-        const rowWithMedia = page.locator('#book-columns .book-vid-row').first();
-        await expect(rowWithMedia.locator('.book-vid-thumb')).toBeHidden();
-        await expect(rowWithMedia.locator('.book-vid-qr')).toBeVisible();
-
-        await expect(page).toHaveScreenshot('book-screenshot-qr-only-state-videos-off-qr-on.png', {
-            fullPage: true,
-            timeout: 20000
-        });
-    });
-
-    test('Screenshot: Both state (Videos ON, QR ON)', async ({ page }) => {
-        const videosCheckbox = page.locator('#toggle-videos');
-        const qrsCheckbox = page.locator('#toggle-qrs');
-
-        await page.waitForSelector('#book-columns .book-vid-row');
-
-        await videosCheckbox.check();
-        await qrsCheckbox.check();
-        await page.waitForTimeout(300);
-
-        const rowWithMedia = page.locator('#book-columns .book-vid-row').first();
-        await expect(rowWithMedia.locator('.book-vid-thumb')).toBeVisible();
-        await expect(rowWithMedia.locator('.book-vid-qr')).toBeVisible();
-
-        await expect(page).toHaveScreenshot('book-screenshot-both-state-videos-on-qr-on.png', {
-            fullPage: true,
-            timeout: 20000
-        });
-    });
-
-    test('Screenshot: None state (Videos OFF, QR OFF)', async ({ page }) => {
-        const videosCheckbox = page.locator('#toggle-videos');
-        const qrsCheckbox = page.locator('#toggle-qrs');
-
-        await page.waitForSelector('#book-columns .book-vid-row');
-
-        await videosCheckbox.uncheck();
-        await qrsCheckbox.uncheck();
-        await page.waitForTimeout(300);
-
-        const rowWithMedia = page.locator('#book-columns .book-vid-row').first();
-        // With both toggles off, the whole row (not just thumb/qr) is hidden — see applyBookMediaVisibility.
-        await expect(rowWithMedia).toBeHidden();
-
-        await expect(page).toHaveScreenshot('book-screenshot-none-state-videos-off-qr-off.png', {
-            fullPage: true,
-            timeout: 20000
-        });
-    });
+    // Default / QR-only / Both / None: shared with continuous view, see ../media-states.js
+    defineMediaStateScreenTests(VIEWS.book);
 
     // Standalone image pages are a book-view-only layout (no equivalent in
     // continuous view's screenshot suite) — worth its own reference shot
@@ -119,7 +25,7 @@ test.describe('Book View - Screenshot Tests (Display Options)', () => {
             json: [plainPhotoInsert('i_001')],
         }));
         await page.reload();
-        await openBookView(page);
+        await VIEWS.book.open(page);
 
         const card = page.locator('#book-i_001');
         await expect(card).toHaveClass(/standalone-image/);

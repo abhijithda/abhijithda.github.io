@@ -1,5 +1,7 @@
 const { test, expect } = require('@playwright/test');
-const path = require('path');
+const {
+    VIEWS, openViewWithSettings, defineMediaStatePrintTests, definePaperSizePrintTests,
+} = require('../media-states');
 
 // Re-enabled from continuous-view-print.test.js.comment — see the header
 // comment in book-view-print.test.js for the full history. Screenshots
@@ -10,21 +12,7 @@ const path = require('path');
 test.describe('Continuous View - Print Mode', () => {
 
     test.beforeEach(async ({ page }) => {
-        await page.route('**/data.json', route => {
-            route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
-            });
-        });
-
-        await page.goto('/');
-        // Book view is the default on a fresh load — switch to continuous
-        // view explicitly before waiting on .card, since these tests are
-        // continuous-view-specific.
-        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
-        await expect(page.locator('.card').first()).toBeVisible();
-
-        await page.locator('#settings-btn').click();
-        await expect(page.locator('#toggle-videos')).toBeVisible();
+        await openViewWithSettings(page, VIEWS.continuous);
     });
 
     test('print keeps the page itself plain white (block colours stay, the app\'s grey page background does not)', async ({ page }) => {
@@ -98,56 +86,8 @@ test.describe('Continuous View - Print Mode', () => {
         expect(caps.img).not.toBe('none');
     });
 
-    test('Videos-only state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
-        await page.locator('#toggle-qrs').uncheck();
-
-        const mediaWrap = page.locator('.media-wrap').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(mediaWrap.locator('.video-card')).toBeVisible();
-        await expect(mediaWrap.locator('.qr-code')).toBeHidden();
-        await expect(page).toHaveScreenshot('continuous-print-default-state.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('Default / Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
-        // Both are ON by default; check() is a no-op that documents the state.
-        await page.locator('#toggle-qrs').check();
-
-        const mediaWrap = page.locator('.media-wrap').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(mediaWrap.locator('.video-card')).toBeVisible();
-        await expect(mediaWrap.locator('.qr-code')).toBeVisible();
-        await expect(page).toHaveScreenshot('continuous-print-both-state.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('QR-only state (Videos OFF, QR ON): the QR prints, the video thumbnail does not', async ({ page }) => {
-        await page.locator('#toggle-qrs').check();
-        await page.locator('#toggle-videos').uncheck();
-
-        const mediaWrap = page.locator('.media-wrap').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(mediaWrap.locator('.video-card')).toBeHidden();
-        await expect(mediaWrap.locator('.qr-code')).toBeVisible();
-        await expect(page).toHaveScreenshot('continuous-print-qr-only-state.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('None state (Videos OFF, QR OFF): neither prints', async ({ page }) => {
-        await page.locator('#toggle-videos').uncheck();
-        await page.locator('#toggle-qrs').uncheck();
-
-        const mediaWrap = page.locator('.media-wrap').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(mediaWrap.locator('.video-card')).toBeHidden();
-        await expect(mediaWrap.locator('.qr-code')).toBeHidden();
-        await expect(page).toHaveScreenshot('continuous-print-none-state.png', { fullPage: true, timeout: 15000 });
-    });
+    // The four video/QR state tests are shared with book view: ../media-states.js
+    defineMediaStatePrintTests(VIEWS.continuous);
 });
 
 // Full-page print screenshots per paper size — see the equivalent describe
@@ -165,18 +105,7 @@ test.describe('Continuous View - Print Mode', () => {
 // update-snapshots.yml CI workflow.
 test.describe('Continuous View - Print Mode - Paper size screenshots', () => {
     test.beforeEach(async ({ page }) => {
-        await page.route('**/data.json', route => {
-            route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
-            });
-        });
-
-        await page.goto('/');
-        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
-        await expect(page.locator('.card').first()).toBeVisible();
-
-        await page.locator('#settings-btn').click();
-        await expect(page.locator('#paper-size-select')).toBeVisible();
+        await openViewWithSettings(page, VIEWS.continuous, '#paper-size-select');
     });
 
     test('every insert item (cover, standalone photo, ...) prints on its own page', async ({ page }) => {
@@ -199,41 +128,5 @@ test.describe('Continuous View - Print Mode - Paper size screenshots', () => {
         }
     });
 
-    test('Print screenshot: Dynamic (default) paper size', async ({ page }) => {
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(300);
-        await expect(page).toHaveScreenshot('continuous-print-paper-size-dynamic.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('Print screenshot: A4 paper size', async ({ page }) => {
-        // QR codes and Read tracking on, alongside Videos (already on by
-        // default) — the fullest useful state for an actual physical
-        // printout, same reasoning as book view's equivalent test. Marks
-        // one tick read so the screenshot actually shows the filled-in
-        // state, not just empty circles. Keeps the same baseline filename
-        // so this shows as a real diff in a PR rather than an unrelated
-        // add/delete.
-        await page.locator('#toggle-qrs').check();
-        await page.locator('#toggle-read-tracking').check();
-        await page.locator('#q_001_b_1 .read-tick').click();
-        await page.locator('#paper-size-select').selectOption('a4');
-        await page.waitForTimeout(200);
-
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(300);
-        await expect(page).toHaveScreenshot('continuous-print-paper-size-a4.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('Print screenshot: A3 paper size', async ({ page }) => {
-        // Same reasoning as the A4 case above.
-        await page.locator('#toggle-qrs').check();
-        await page.locator('#toggle-read-tracking').check();
-        await page.locator('#q_001_b_1 .read-tick').click();
-        await page.locator('#paper-size-select').selectOption('a3');
-        await page.waitForTimeout(200);
-
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(300);
-        await expect(page).toHaveScreenshot('continuous-print-paper-size-a3.png', { fullPage: true, timeout: 15000 });
-    });
+    definePaperSizePrintTests(VIEWS.continuous);
 });

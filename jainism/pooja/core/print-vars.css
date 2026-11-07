@@ -1,0 +1,31 @@
+/* print-vars.css — Print spacing both views' print layouts share, as custom
+   properties, so "how tight is a printed page" is decided in ONE place.
+
+   Continuous view's print comments say its spacing is "kept compact, close to
+   book view's print density". Those numbers used to be typed out separately in
+   each stylesheet (6px here, 3px there, orphans: 3 twice) and could drift
+   apart silently. Now both print blocks read these; change one value and both
+   views follow. Only values that already matched were centralised — changing
+   any of them changes how both views print.
+
+   Defined on :root without a media query so a view's print rules (and tests)
+   can always read them; nothing uses them outside @media print. */
+:root {
+    /* Text flow: never leave fewer than this many lines of a paragraph
+       stranded on either page. */
+    --print-orphans: 3;
+    --print-widows: 3;
+
+    /* Space under a Ref strip, before the block it introduces. */
+    --print-ref-gap: 6px;
+
+    /* Space between two consecutive blocks (rows) of a card. Continuous view
+       draws it as a transparent border of half this size on each row; book
+       view's equivalent is the gap between a card's language lines. */
+    --print-block-gap: 6px;
+
+    /* Continuous view: padding inside a row, and above/below a card's first/
+       last row. (The screen uses 8px row padding; print is kept compact.) */
+    --print-row-pad: 4px;
+    --print-card-edge: 10px;
+}

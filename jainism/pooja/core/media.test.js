@@ -82,6 +82,16 @@ describe('createVideoCard', () => {
         expect(html).toContain('img.youtube.com/vi/dQw4w9WgXcQ/0.jpg');
     });
 
+    test('uses a print-quality 200px QR — both views share this one card', () => {
+        const html = createVideoCard('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+        expect(html).toContain('size=200x200');
+    });
+
+    test('the thumbnail is wrapped in a link to the video, opened in a new tab (the play badge hangs off this anchor)', () => {
+        const html = createVideoCard('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+        expect(html).toMatch(/<a href="https:\/\/www\.youtube\.com\/watch\?v=dQw4w9WgXcQ" target="_blank">\s*<img src="https:\/\/img\.youtube\.com/);
+    });
+
     test('returns an empty string for a non-YouTube URL', () => {
         expect(createVideoCard('https://example.com/not-youtube')).toBe('');
     });

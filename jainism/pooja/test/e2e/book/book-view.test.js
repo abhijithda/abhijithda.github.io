@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 const { hasClass, plainPhotoInsert } = require('../test-utils');
+const { VIEWS } = require('../media-states');
 
 // Switches into book view and waits for the first spread to actually render
 // (initBookView populates cards synchronously, but the first
@@ -9,11 +10,7 @@ const { hasClass, plainPhotoInsert } = require('../test-utils');
 // default spread is the (unnumbered) cover when the data has one, so
 // "some card is visible" is the only thing every caller can rely on.
 // Tests that specifically need numbered content check for it themselves.
-async function openBookView(page) {
-    await page.locator('.view-toggle-btn[data-view="book"]').click();
-    await expect(page.locator('#book-container')).toHaveClass(/active/);
-    await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
-}
+const openBookView = page => VIEWS.book.open(page);   // shared with the other book/continuous e2e files
 
 test.describe('Book View — using the small controlled fixture', () => {
     test.beforeEach(async ({ page }) => {
@@ -111,10 +108,10 @@ test.describe('Book View — using the small controlled fixture', () => {
 
     test('media toggles hide/show the video thumbnail and QR independently in book view', async ({ page }) => {
         await openBookView(page);
-        await page.waitForSelector('#book-columns .book-vid-row');
+        await page.waitForSelector('#book-columns .media-wrap');
 
-        const thumb = page.locator('#book-columns .book-vid-thumb').first();
-        const qr = page.locator('#book-columns .book-vid-qr').first();
+        const thumb = page.locator('#book-columns .video-card').first();
+        const qr = page.locator('#book-columns .qr-code').first();
 
         // Default: Videos on, QR on.
         await expect(thumb).toBeVisible();

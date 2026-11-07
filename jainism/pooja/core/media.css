@@ -93,11 +93,17 @@ body.show-qrs .col-media:not(:empty) {
     border-radius: 8px;
 }
 
-/* Play badge in the bottom-left corner (the QR overlay is bottom-right), so
-   it still says "this is a video" without covering the speaker's face. Same
-   idea as book view's .book-vid-play badge. The anchor wraps the whole
+/* THE play badge — one rule for every view (both views share the same
+   .video-card markup, see createVideoCard() in media.js). It sits in the
+   bottom-left corner (the QR overlay is bottom-right), so it still says "this
+   is a video" without covering the speaker's face. The anchor wraps the whole
    thumbnail, so the entire thumbnail stays clickable. .media-wrap sets
-   line-height: 0, hence the explicit line-height here. */
+   line-height: 0, hence the explicit line-height here.
+
+   A view tunes the badge to its thumbnail size by setting the three
+   variables on a container (book-view.css does, on .book-card); the defaults
+   below are continuous view's 200px thumbnails. To change or hide the badge
+   everywhere (e.g. `display: none`), this is the only place. */
 .video-card a {
     position: relative;
     display: block;
@@ -106,17 +112,17 @@ body.show-qrs .col-media:not(:empty) {
 .video-card a::after {
     content: '▶';
     position: absolute;
-    left: 8px;
-    bottom: 8px;
-    width: 20px;
-    height: 20px;
+    left: var(--play-inset, 8px);
+    bottom: var(--play-inset, 8px);
+    width: var(--play-size, 20px);
+    height: var(--play-size, 20px);
     box-sizing: border-box;
     padding-left: 1px;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.45);
     color: white;
-    font-size: 9px;
-    line-height: 20px;
+    font-size: var(--play-font, 9px);
+    line-height: var(--play-size, 20px);
     text-align: center;
 }
 
@@ -150,8 +156,9 @@ body.show-qrs .qr-code {
     display: block;
 }
 
-/* QR-only view (non-overlay) */
-body:not(.show-videos).show-qrs .qr-code {
+/* QR-only view (non-overlay) — continuous view's media column only; book
+   view lays its own QR out (see ".book-card .qr-code" in book-view.css). */
+body:not(.show-videos).show-qrs .col-media .qr-code {
     position: static;
     width: 120px;
     height: 120px;
@@ -210,7 +217,7 @@ body:not(.show-videos).show-qrs .qr-code {
         max-width: 170px !important;
     }
 
-    .qr-code {
+    .col-media .qr-code {
         border: 1px solid #000 !important;
         bottom: 0 !important;
         right: 0 !important;
