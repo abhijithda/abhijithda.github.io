@@ -254,22 +254,48 @@ body[data-paper-size="a3"] .book-nav {
 }
 
 /* ── Media ───────────────────────────────────────────────────────────────── */
-.book-vid-row {
+/* Book view uses the SAME video markup as continuous view
+   (.media-wrap > .video-card + .qr-code, built by createVideoCard() in
+   core/media.js) — one thumbnail, one play badge, one QR — so everything
+   about what those ARE lives in core/media.css. This block is only book
+   view's LAYOUT of them: a compact row, thumbnail then QR side by side.
+   Visibility is core/media.css's body.show-videos / body.show-qrs rules
+   (kept in sync by header.js's updateMediaVisibility()); the row hides
+   itself when both are off. */
+.book-card {
+    /* Tunes THE play badge (core/media.css) to this view's small thumbnail. */
+    --play-size: 14px;
+    --play-inset: 4px;
+    --play-font: calc(7px * var(--font-scale));
+}
+
+.book-card .media-wrap {
+    position: static;
     display: flex;
     align-items: center;
     gap: 8px;
+    width: auto;
+    line-height: normal;
+    vertical-align: baseline;
     margin-top: 5px;
     margin-bottom: 2px;
 }
 
-.book-vid-thumb {
-    position: relative;
-    flex-shrink: 0;
-    height: 60px;
-    width: auto;
+body:not(.show-videos):not(.show-qrs) .book-card .media-wrap {
+    display: none;
 }
 
-.book-vid-img {
+.book-card .video-card {
+    flex-shrink: 0;
+    width: auto;
+    height: 60px;
+}
+
+.book-card .video-card a {
+    height: 60px;   /* the old thumbnail box: keeps the badge's corner offset exactly where it was */
+}
+
+.book-card .video-card img {
     height: 60px;
     width: auto;
     aspect-ratio: 16 / 9;
@@ -279,44 +305,27 @@ body[data-paper-size="a3"] .book-nav {
     border: 0.5px solid #ddd;
 }
 
-/* The play badge sits in the bottom-left corner (not the centre), so it
-   still says "this is a video" without covering the speaker's face. The
-   anchor itself still covers the whole thumbnail, so the entire thumbnail
-   stays clickable. */
-.book-vid-play {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-start;
-    padding: 4px;
-    text-decoration: none;
-}
-
-.book-vid-play::before {
-    content: '▶';
-    width: 14px;
-    height: 14px;
-    background: rgba(0, 0, 0, 0.45);
-    border-radius: 50%;
-    color: white;
-    font-size: calc(7px * var(--font-scale));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-left: 1px;
-}
-
-.book-vid-qr {
+.book-card .qr-code {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    z-index: auto;
     flex-shrink: 0;
-    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 2px;
 }
 
-.book-qr-img {
+body.show-qrs .book-card .qr-code {
+    display: flex;
+}
+
+.book-card .qr-code img {
     width: 60px;
     height: 60px;
     display: block;
@@ -902,12 +911,22 @@ body[data-paper-size="a3"] .book-nav {
         overflow: visible !important;
     }
 
-    .book-qr-img {
+    .book-card .qr-code img {
         width: 80px !important;
         height: 80px !important;
     }
 
-    .book-vid-img {
+    /* Print density shared with continuous view (core/print-vars.css): the gap
+       under a Ref strip, and the gap between a card's language lines. */
+    .book-excerpt {
+        margin-bottom: var(--print-ref-gap);
+    }
+
+    .book-lang-sep {
+        margin: calc(var(--print-block-gap) / 2) 0;
+    }
+
+    .book-card .video-card img {
         filter: grayscale(100%);
     }
 
@@ -950,8 +969,8 @@ body[data-paper-size="a3"] .book-nav {
 
     /* A paragraph that splits across pages never strands 1-2 lines. */
     .book-columns {
-        orphans: 3;
-        widows: 3;
+        orphans: var(--print-orphans);
+        widows: var(--print-widows);
     }
 
     .standalone-image:not(:first-child) {

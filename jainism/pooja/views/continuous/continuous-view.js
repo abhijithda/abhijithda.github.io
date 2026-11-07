@@ -3,19 +3,13 @@
 // Imports from media.js and read-tracking.js for clean separation.
 
 import { createVideoCard } from '../../core/media.js';
-import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, updateProgressDisplay } from '../../core/read-tracking.js';
-import { formatIdForDisplay, buildBlockIndex, resolveReference } from '../../core/blocks.js';
+import { getReadBlocks, isBlockTrackable, countTrackableBlocks, updateProgressDisplay } from '../../core/read-tracking.js';
+import { buildReadTick } from '../../core/read-tick.js';
+import { formatIdForDisplay, buildBlockIndex, resolveReference, classifyInsert, hasAnyText, langsWithText, imageUrl } from '../../core/blocks.js';
+import { activeLangCodes } from '../../core/langs.js';
 
 // ── Back-navigation stack (verbatim from master) ──────────────────────────
 let backStack = [];
-
-// Purely presentational: whether a block has any text, for the .media-only
-// CSS class. Distinct from read-tracking.js's isBlockTrackable — a
-// video-only block has no text (gets this class) but IS trackable.
-function hasTextContent(block) {
-    return block.content?.kn?.some(l => l.trim() !== '') ||
-           block.content?.en?.some(l => l.trim() !== '');
-}
 
 export function jumpToReference(blockId) {
     const target = document.getElementById(blockId);
@@ -51,12 +45,8 @@ export function renderContinuousView(data, container, lang = 'all') {
     const { blockById, itemById } = buildBlockIndex(data);
 
     const readBlocks      = getReadBlocks(localStorage);
-    // "insert" items (front cover, dividers) are decorative structure, not
-    // content a reader marks as read — excluded from the count entirely,
-    // even if their block happens to carry title text that would otherwise
-    // look "trackable" by the generic per-block rule.
-    const totalBlockCount = data.reduce((sum, item) =>
-        item.type === 'insert' ? sum : sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
+    const totalBlockCount = countTrackableBlocks(data);
+    const langs           = activeLangCodes(lang);   // 'kn' | 'en' | 'all' -> ['kn'] | ['en'] | ['kn','en']
 
     data.forEach(item => {
         const card = document.createElement('div');
@@ -80,13 +70,11 @@ export function renderContinuousView(data, container, lang = 'all') {
         // feature did) shrank the image and lost that left-aligned id
         // column — a real regression, not an intentional restyle.
         if (item.type === 'insert') {
-            const block = item.blocks?.[0];
-            const imgData = block?.images?.[0];
-            const langs = ['kn', 'en'].filter(l => (lang === l || lang === 'all'));
-            const hasContent = langs.some(l => (block?.content?.[l] || []).some(line => line.trim() !== ''));
-            const isBlank = !imgData && !hasContent;
+            // core/blocks.js's classifyInsert(): 'title' | 'photo' | 'blank'.
+            const { block, image: imgData, kind, hasContent, showId } = classifyInsert(item, langs);
+            const isBlank = kind === 'blank';
 
-            if (hasContent || isBlank) {
+            if (kind !== 'photo') {
                 // The card's DOM id is the block's id (not the item's),
                 // same as every other block, so another item's
                 // `references` can jump straight to it via
@@ -97,9 +85,9 @@ export function renderContinuousView(data, container, lang = 'all') {
                 // should ever cite): that suppresses the DOM id and the
                 // badge only — the image/text content itself still
                 // renders exactly as normal.
-                card.id = (block && !item.hideId) ? block.id : '';
+                card.id = showId ? block.id : '';
 
-                if (block && !item.hideId) {
+                if (showId) {
                     const idLabel = document.createElement('span');
                     idLabel.className = 'block-id';
                     idLabel.innerText = formatIdForDisplay(block);
@@ -123,7 +111,7 @@ export function renderContinuousView(data, container, lang = 'all') {
                     imgCard.className = 'image-card';
                     const img = document.createElement('img');
                     img.className = 'title-style-image';
-                    img.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
+                    img.src = imageUrl(imgData.src);
                     img.alt = langs.map(l => (block.content?.[l] || [])[0]).find(Boolean) || '';
                     imgCard.appendChild(img);
                     imgCol.appendChild(imgCard);
@@ -185,18 +173,12 @@ export function renderContinuousView(data, container, lang = 'all') {
                 contentWrap.className = 'excerpt-content-wrap';
                 contentWrap.onclick = () => excerptRow.classList.toggle('expanded');
 
-                if ((lang === 'kn' || lang === 'all') && refBlock.content?.kn?.some(l => l.trim() !== '')) {
-                    const knCol = document.createElement('div');
-                    knCol.className = 'col-kn';
-                    knCol.innerHTML = `<p>${refBlock.content.kn.join(' ')}</p>`;
-                    contentWrap.appendChild(knCol);
-                }
-                if ((lang === 'en' || lang === 'all') && refBlock.content?.en?.some(l => l.trim() !== '')) {
-                    const enCol = document.createElement('div');
-                    enCol.className = 'col-en';
-                    enCol.innerHTML = `<p>${refBlock.content.en.join(' ')}</p>`;
-                    contentWrap.appendChild(enCol);
-                }
+                langsWithText(refBlock, langs).forEach(l => {
+                    const col = document.createElement('div');
+                    col.className = `col-${l}`;
+                    col.innerHTML = `<p>${refBlock.content[l].join(' ')}</p>`;
+                    contentWrap.appendChild(col);
+                });
 
                 excerptRow.appendChild(contentWrap);
                 excerptContainer.appendChild(excerptRow);
@@ -208,7 +190,9 @@ export function renderContinuousView(data, container, lang = 'all') {
         // Blocks (verbatim from master's renderChat block loop)
         item.blocks.forEach(block => {
             const row = document.createElement('div');
-            const hasText   = hasTextContent(block);
+            // .media-only = no text at all; distinct from isBlockTrackable —
+            // a video-only block has no text (gets this class) but IS trackable.
+            const hasText   = hasAnyText(block);
             const trackable = isBlockTrackable(block);
             const isRead    = trackable && readBlocks.has(block.id);
             row.className = `block-row ${block.type}${hasText ? '' : ' media-only'}${isRead ? ' read' : ''}`;
@@ -220,21 +204,13 @@ export function renderContinuousView(data, container, lang = 'all') {
             idLabel.innerText = formatIdForDisplay(block);
             row.appendChild(idLabel);
 
-            // Kannada column
-            if ((lang === 'kn' || lang === 'all') && block.content?.kn?.some(l => l.trim() !== '')) {
-                const knCol = document.createElement('div');
-                knCol.className = 'col-kn';
-                knCol.innerHTML = `<p>${block.content.kn.join('<br>')}</p>`;
-                row.appendChild(knCol);
-            }
-
-            // English column
-            if ((lang === 'en' || lang === 'all') && block.content?.en?.some(l => l.trim() !== '')) {
-                const enCol = document.createElement('div');
-                enCol.className = 'col-en';
-                enCol.innerHTML = `<p>${block.content.en.join('<br>')}</p>`;
-                row.appendChild(enCol);
-            }
+            // One text column per active language that has text (Kannada, English)
+            langsWithText(block, langs).forEach(l => {
+                const col = document.createElement('div');
+                col.className = `col-${l}`;
+                col.innerHTML = `<p>${block.content[l].join('<br>')}</p>`;
+                row.appendChild(col);
+            });
 
             // Media column — images then videos, verbatim from master
             const mediaCol = document.createElement('div');
@@ -258,7 +234,7 @@ export function renderContinuousView(data, container, lang = 'all') {
                     }
                     mediaCol.innerHTML += `
                         <div class="image-card">
-                            <img src="images/${img.src}" alt="${altText}">
+                            <img src="${imageUrl(img.src)}" alt="${altText}">
                             ${captionsHtml}
                         </div>`;
                 });
@@ -273,25 +249,11 @@ export function renderContinuousView(data, container, lang = 'all') {
             // Read tick — skipped only for a block with neither text nor
             // video (e.g. a standalone image); nothing to read or watch.
             if (trackable) {
-                const readTick = document.createElement('button');
-                readTick.type = 'button';
-                readTick.className = `read-tick${isRead ? ' read' : ''}`;
-                readTick.title = isRead ? 'Marked as read' : 'Mark as read';
-                readTick.setAttribute('aria-label', readTick.title);
-                readTick.textContent = isRead ? '✓' : '';
-                readTick.onclick = (e) => {
-                    e.stopPropagation();
-                    const newSet = toggleBlockRead(block.id, getReadBlocks(localStorage));
-                    saveReadBlocks(newSet, localStorage);
-                    const nowRead = newSet.has(block.id);
-                    row.classList.toggle('read', nowRead);
-                    readTick.classList.toggle('read', nowRead);
-                    readTick.textContent = nowRead ? '✓' : '';
-                    readTick.title = nowRead ? 'Marked as read' : 'Mark as read';
-                    readTick.setAttribute('aria-label', readTick.title);
-                    updateProgressDisplay(newSet, totalBlockCount);
-                };
-                row.appendChild(readTick);
+                row.appendChild(buildReadTick(block, {
+                    isRead,
+                    totalBlockCount,
+                    onToggle: nowRead => row.classList.toggle('read', nowRead),
+                }));
             }
 
             card.appendChild(row);

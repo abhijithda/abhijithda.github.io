@@ -4,7 +4,6 @@ const {
     goToPrevSpread,
     goToNextSpread,
     jumpToPage,
-    applyBookMediaVisibility,
     onBookLangChange,
 } = require('./book-view');
 
@@ -484,48 +483,45 @@ describe('Insert item as a blank/divider page — book-view-only pagination tool
     });
 });
 
-describe('applyBookMediaVisibility', () => {
+// Book view builds its videos with the SAME markup as continuous view
+// (createVideoCard in core/media.js); visibility is core/media.css's
+// body.show-videos / body.show-qrs rules, not per-element JS, so what is
+// testable here is the markup.
+describe('video markup in book cards', () => {
+    const videoUrl = 'https://www.youtube.com/watch?v=abc12345678';
     const data = [{
         id: 'a_200', type: 'answer', references: null,
-        blocks: [baseBlock({
-            id: 'a_200_b_1',
-            content: { kn: ['ಪಠ್ಯ'], en: ['Text'] },
-            videos: [{ url: 'https://www.youtube.com/watch?v=abc12345678', youtubeId: 'abc12345678' }],
-        })],
+        blocks: [
+            baseBlock({
+                id: 'a_200_b_1',
+                content: { kn: ['ಪಠ್ಯ'], en: ['Text'] },
+                videos: [{ url: videoUrl, youtubeId: 'abc12345678' }, { url: 'https://example.com/not-youtube' }],
+            }),
+            baseBlock({ id: 'a_200_b_2', content: { kn: ['ಇನ್ನೊಂದು'], en: ['Other'] } }),
+        ],
     }];
 
     beforeEach(() => {
-        document.body.innerHTML =
-            '<div id="book-container"></div>' +
-            '<span id="read-progress"></span>' +
-            '<input type="checkbox" id="toggle-videos">' +
-            '<input type="checkbox" id="toggle-qrs">';
+        document.body.innerHTML = '<div id="book-container"></div><span id="read-progress"></span>';
         initBookView(data, ['kn', 'en']);
     });
 
-    test('hides the whole video row only when both Videos and QR are off', () => {
-        document.getElementById('toggle-videos').checked = false;
-        document.getElementById('toggle-qrs').checked = false;
-        applyBookMediaVisibility();
-        const row = document.querySelector('#book-container .book-vid-row');
-        expect(row.style.display).toBe('none');
+    test('a video becomes .media-wrap > .video-card + .qr-code inside its card', () => {
+        const wrap = document.querySelector('#book-container #book-a_200_b_1 .media-wrap');
+        expect(wrap).not.toBeNull();
+        expect(wrap.querySelector('.video-card a').getAttribute('href')).toBe(videoUrl);
+        expect(wrap.querySelector('.video-card img').src).toContain('img.youtube.com/vi/abc12345678/0.jpg');
+        expect(wrap.querySelector('.qr-code img').src).toContain('size=200x200');
     });
 
-    test('shows the thumbnail and hides the QR when only Videos is on (default)', () => {
-        document.getElementById('toggle-videos').checked = true;
-        document.getElementById('toggle-qrs').checked = false;
-        applyBookMediaVisibility();
-        expect(document.querySelector('#book-container .book-vid-row').style.display).toBe('flex');
-        expect(document.querySelector('#book-container .book-vid-thumb').style.display).toBe('');
-        expect(document.querySelector('#book-container .book-vid-qr').style.display).toBe('none');
+    test('a non-YouTube URL renders nothing, and only video blocks get a media row', () => {
+        expect(document.querySelectorAll('#book-container #book-a_200_b_1 .media-wrap').length).toBe(1);
+        expect(document.querySelector('#book-container #book-a_200_b_2 .media-wrap')).toBeNull();
     });
 
-    test('shows only the QR when QR is on and Videos is off', () => {
-        document.getElementById('toggle-videos').checked = false;
-        document.getElementById('toggle-qrs').checked = true;
-        applyBookMediaVisibility();
-        expect(document.querySelector('#book-container .book-vid-thumb').style.display).toBe('none');
-        expect(document.querySelector('#book-container .book-vid-qr').style.display).toBe('');
+    test('the old book-only video classes are gone (one markup, one badge rule)', () => {
+        expect(document.querySelector('#book-container .book-vid-row')).toBeNull();
+        expect(document.querySelector('#book-container .book-vid-play')).toBeNull();
     });
 });
 

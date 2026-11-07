@@ -1,6 +1,8 @@
 const { test, expect } = require('@playwright/test');
-const path = require('path');
 const { hasClass } = require('../test-utils');
+const {
+    VIEWS, openViewWithSettings, defineMediaStatePrintTests, definePaperSizePrintTests,
+} = require('../media-states');
 
 // Re-enabled from book-view-print.test.js.comment. What changed and why:
 //
@@ -23,29 +25,15 @@ const { hasClass } = require('../test-utils');
 // regression even if it happens to look pixel-identical, and the
 // screenshot catches a visual regression a developer might approve without
 // reading closely, with an actual image diff to review in the PR.
-
-async function openBookView(page) {
-    await page.locator('.view-toggle-btn[data-view="book"]').click();
-    await expect(page.locator('#book-container')).toHaveClass(/active/);
-    await expect(page.locator('#book-columns .book-card').first()).toBeVisible();
-}
+//
+// The four video/QR state tests and the three paper-size screenshots are
+// the same for book and continuous view, so they are defined once, in
+// ../media-states.js, and called below inside each describe.
 
 test.describe('Book View - Print Mode', () => {
 
     test.beforeEach(async ({ page }) => {
-        await page.route('**/data.json', route => {
-            route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
-            });
-        });
-
-        await page.goto('/');
-        // The app lands on the Home page first — openBookView() handles
-        // switching into book view and waiting for its content.
-        await openBookView(page);
-
-        await page.locator('#settings-btn').click();
-        await expect(page.locator('#toggle-videos')).toBeVisible();
+        await openViewWithSettings(page, VIEWS.book);
     });
 
     // Per REQUIREMENTS.md: "Print view should print the entire book, not
@@ -75,62 +63,7 @@ test.describe('Book View - Print Mode', () => {
         await expect(page.locator('.book-nav')).toBeHidden();
     });
 
-    test('Videos-only state (Videos ON, QR OFF): the video thumbnail prints, the QR does not', async ({ page }) => {
-        await page.locator('#toggle-qrs').uncheck();
-
-        const row = page.locator('.book-vid-row').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(row.locator('.book-vid-thumb')).toBeVisible();
-        await expect(row.locator('.book-vid-qr')).toBeHidden();
-        // Alongside the precise checks above (which catch logic
-        // regressions), a full-page screenshot too — so a visual
-        // regression here still shows up as a reviewable image diff in a
-        // PR, not just a passing/failing assertion with no picture to look
-        // at. See the describe block below's header comment for why this
-        // was reintroduced.
-        await expect(page).toHaveScreenshot('book-print-default-state.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('Default / Both state (Videos ON, QR ON): both the thumbnail and the QR print', async ({ page }) => {
-        // Both are ON by default; check() is a no-op that documents the state.
-        await page.locator('#toggle-qrs').check();
-
-        const row = page.locator('.book-vid-row').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(row.locator('.book-vid-thumb')).toBeVisible();
-        await expect(row.locator('.book-vid-qr')).toBeVisible();
-        await expect(page).toHaveScreenshot('book-print-both-state.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('QR-only state (Videos OFF, QR ON): the QR prints, the video thumbnail does not', async ({ page }) => {
-        await page.locator('#toggle-qrs').check();
-        await page.locator('#toggle-videos').uncheck();
-
-        const row = page.locator('.book-vid-row').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(row.locator('.book-vid-thumb')).toBeHidden();
-        await expect(row.locator('.book-vid-qr')).toBeVisible();
-        await expect(page).toHaveScreenshot('book-print-qr-only-state.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('None state (Videos OFF, QR OFF): neither prints', async ({ page }) => {
-        await page.locator('#toggle-videos').uncheck();
-        await page.locator('#toggle-qrs').uncheck();
-
-        const row = page.locator('.book-vid-row').first();
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(200);
-
-        await expect(row.locator('.book-vid-thumb')).toBeHidden();
-        await expect(row.locator('.book-vid-qr')).toBeHidden();
-        await expect(page).toHaveScreenshot('book-print-none-state.png', { fullPage: true, timeout: 15000 });
-    });
+    defineMediaStatePrintTests(VIEWS.book);
 
     // Read progress should carry from screen to printout, per
     // REQUIREMENTS.md. read-tracking.test.js already covers this for
@@ -180,59 +113,8 @@ test.describe('Book View - Print Mode', () => {
 // or the project's update-snapshots.yml CI workflow before these can pass.
 test.describe('Book View - Print Mode - Paper size screenshots', () => {
     test.beforeEach(async ({ page }) => {
-        await page.route('**/data.json', route => {
-            route.fulfill({
-                path: path.join(__dirname, '..', '..', 'data.json')
-            });
-        });
-
-        await page.goto('/');
-        // The app lands on the Home page first — openBookView() handles
-        // switching into book view and waiting for its content.
-        await openBookView(page);
-
-        await page.locator('#settings-btn').click();
-        await expect(page.locator('#paper-size-select')).toBeVisible();
+        await openViewWithSettings(page, VIEWS.book, '#paper-size-select');
     });
 
-    test('Print screenshot: Dynamic (default) paper size', async ({ page }) => {
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(300);
-        await expect(page).toHaveScreenshot('book-print-paper-size-dynamic.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('Print screenshot: A4 paper size', async ({ page }) => {
-        // QR codes and Read tracking on, alongside Videos (already on by
-        // default) — the fullest useful state for an actual physical
-        // printout: a paper printout can't play a video, but a QR code is
-        // exactly the thing that's actually useful once it's on paper (the
-        // reader scans it to reach the video), and read progress is meant
-        // to carry over onto the printout too (see AI.md's Read Tracking
-        // section). Marks one tick read so the screenshot actually shows
-        // the filled-in state, not just empty circles. Keeps the same
-        // baseline filename as before so this shows as a real diff in a
-        // PR rather than an unrelated add/delete.
-        await page.locator('#toggle-qrs').check();
-        await page.locator('#toggle-read-tracking').check();
-        await page.locator('#book-q_001_b_1 .read-tick').click();
-        await page.locator('#paper-size-select').selectOption('a4');
-        await page.waitForTimeout(200);
-
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(300);
-        await expect(page).toHaveScreenshot('book-print-paper-size-a4.png', { fullPage: true, timeout: 15000 });
-    });
-
-    test('Print screenshot: A3 paper size', async ({ page }) => {
-        // Same reasoning as the A4 case above.
-        await page.locator('#toggle-qrs').check();
-        await page.locator('#toggle-read-tracking').check();
-        await page.locator('#book-q_001_b_1 .read-tick').click();
-        await page.locator('#paper-size-select').selectOption('a3');
-        await page.waitForTimeout(200);
-
-        await page.emulateMedia({ media: 'print' });
-        await page.waitForTimeout(300);
-        await expect(page).toHaveScreenshot('book-print-paper-size-a3.png', { fullPage: true, timeout: 15000 });
-    });
+    definePaperSizePrintTests(VIEWS.book);
 });

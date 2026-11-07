@@ -59,7 +59,9 @@ export function buildYouTubeThumbnailUrl(videoId) {
 export function createVideoCard(url) {
     const videoId = extractYouTubeId(url);
     if (!videoId) return '';
-    const qrCodeUrl = buildQrUrl(url);
+    // 200px source: shown at 60-85px on screen, but printed at up to 80px, where
+    // a 100px image gets soft. Both views share this card.
+    const qrCodeUrl = buildQrUrl(url, 200);
     return `
         <div class="media-wrap">
             <div class="video-card">

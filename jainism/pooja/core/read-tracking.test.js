@@ -4,6 +4,7 @@ const {
     saveReadBlocks,
     toggleBlockRead,
     isBlockTrackable,
+    countTrackableBlocks,
     computeProgress,
     updateProgressDisplay,
 } = require('./read-tracking');
@@ -114,5 +115,32 @@ describe('updateProgressDisplay', () => {
     test('does nothing (no throw) when #read-progress is not present in the DOM', () => {
         document.body.innerHTML = '';
         expect(() => updateProgressDisplay(new Set(), 1)).not.toThrow();
+    });
+});
+
+describe('countTrackableBlocks', () => {
+    const text = id => ({ id, content: { kn: ['ಪ'], en: [] }, videos: [] });
+    const image = id => ({ id, content: { kn: [], en: [] }, videos: [], images: [{ src: 'x.jpg' }] });
+    const video = id => ({ id, content: { kn: [], en: [] }, videos: [{ url: 'https://youtu.be/x' }] });
+
+    test('counts blocks with text or a video, across all items', () => {
+        const data = [
+            { id: 'q_1', type: 'question', blocks: [text('q_1_b_1')] },
+            { id: 'a_1', type: 'answer', blocks: [text('a_1_b_1'), video('a_1_b_2'), image('a_1_b_3')] },
+        ];
+        expect(countTrackableBlocks(data)).toBe(3);   // the image-only block is not trackable
+    });
+
+    test('"insert" items never count, even when their block carries title text', () => {
+        const data = [
+            { id: 'i_1', type: 'insert', blocks: [text('i_1_b_1')] },
+            { id: 'a_1', type: 'answer', blocks: [text('a_1_b_1')] },
+        ];
+        expect(countTrackableBlocks(data)).toBe(1);
+    });
+
+    test('items without blocks, and an empty book, count zero', () => {
+        expect(countTrackableBlocks([{ id: 'a_1', type: 'answer' }])).toBe(0);
+        expect(countTrackableBlocks([])).toBe(0);
     });
 });

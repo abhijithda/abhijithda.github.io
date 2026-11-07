@@ -1,5 +1,8 @@
-// read-tracking.js — Pure read/unread state functions.
-// No direct DOM side effects; DOM wiring is done by higher-level code.
+// read-tracking.js — Read/unread state functions.
+// Storage and counting are pure; the only DOM touch is updateProgressDisplay().
+// The tick button itself is built by read-tick.js.
+
+import { hasAnyText } from './blocks.js';
 
 export const READ_BLOCKS_KEY = 'readBlocks';
 
@@ -50,10 +53,22 @@ export function toggleBlockRead(blockId, readSet) {
  * @returns {boolean}
  */
 export function isBlockTrackable(block) {
-    const hasText = !!(block.content?.kn?.some(l => l.trim() !== '') ||
-                       block.content?.en?.some(l => l.trim() !== ''));
     const hasVideo = !!(block.videos && block.videos.length > 0);
-    return hasText || hasVideo;
+    return hasAnyText(block) || hasVideo;
+}
+
+/**
+ * How many blocks count toward read progress. "insert" items (front cover,
+ * dividers, standalone photos, blank pages) are decorative structure, not
+ * content a reader marks as read, so they are excluded entirely — even if
+ * their block happens to carry title text that would otherwise look
+ * trackable by the per-block rule.
+ * @param {Array} data
+ * @returns {number}
+ */
+export function countTrackableBlocks(data) {
+    return data.reduce((sum, item) =>
+        item.type === 'insert' ? sum : sum + (item.blocks || []).filter(isBlockTrackable).length, 0);
 }
 
 /**
@@ -89,6 +104,6 @@ export function updateProgressDisplay(readSet, totalBlockCount) {
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
         READ_BLOCKS_KEY, getReadBlocks, saveReadBlocks, toggleBlockRead,
-        isBlockTrackable, computeProgress, updateProgressDisplay,
+        isBlockTrackable, countTrackableBlocks, computeProgress, updateProgressDisplay,
     });
 }

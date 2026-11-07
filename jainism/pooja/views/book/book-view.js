@@ -1,8 +1,9 @@
 // book-view.js — Book spread view powered by CSS Multi-column Layout.
 
-import { extractYouTubeId, buildYouTubeThumbnailUrl, buildQrUrl } from '../../core/media.js';
-import { getReadBlocks, saveReadBlocks, toggleBlockRead, isBlockTrackable, updateProgressDisplay } from '../../core/read-tracking.js';
-import { formatIdForDisplay, resolveReference } from '../../core/blocks.js';
+import { createVideoCard } from '../../core/media.js';
+import { getReadBlocks, isBlockTrackable, countTrackableBlocks, updateProgressDisplay } from '../../core/read-tracking.js';
+import { buildReadTick } from '../../core/read-tick.js';
+import { formatIdForDisplay, resolveReference, buildBlockIndex, classifyInsert, langsWithText, imageUrl } from '../../core/blocks.js';
 
 const state = {
     data: [],
@@ -48,9 +49,7 @@ function createBookCard(entry, activeLangs, readBlocks) {
     bid.textContent = formatIdForDisplay(block);
     card.appendChild(bid);
 
-    const langLines = activeLangs.filter(lang =>
-        block.content?.[lang]?.some(l => l.trim() !== '')
-    );
+    const langLines = langsWithText(block, activeLangs);
     langLines.forEach((lang, i) => {
         const line = document.createElement('div');
         line.className = `book-lang-line lang-${lang}`;
@@ -64,47 +63,19 @@ function createBookCard(entry, activeLangs, readBlocks) {
         }
     });
 
-    if (block.videos && block.videos.length > 0) {
-        block.videos.forEach(v => {
-            const videoId = extractYouTubeId(v.url);
-            if (!videoId) return;
-
-            const row = document.createElement('div');
-            row.className = 'book-vid-row';
-
-            const thumbWrap = document.createElement('div');
-            thumbWrap.className = 'book-vid-thumb';
-            const thumbImg = document.createElement('img');
-            thumbImg.src = buildYouTubeThumbnailUrl(videoId);
-            thumbImg.alt = 'Watch video';
-            thumbImg.className = 'book-vid-img';
-            const playLink = document.createElement('a');
-            playLink.href = v.url;
-            playLink.target = '_blank';
-            playLink.className = 'book-vid-play';
-            thumbWrap.appendChild(thumbImg);
-            thumbWrap.appendChild(playLink);
-
-            const qrWrap = document.createElement('div');
-            qrWrap.className = 'book-vid-qr';
-            const qrImg = document.createElement('img');
-            qrImg.src = buildQrUrl(v.url, 200);
-            qrImg.alt = 'Scan to watch';
-            qrImg.className = 'book-qr-img';
-            qrWrap.appendChild(qrImg);
-
-            row.appendChild(thumbWrap);
-            row.appendChild(qrWrap);
-            card.appendChild(row);
-        });
-    }
+    // Same markup as continuous view (.media-wrap > .video-card + .qr-code),
+    // so the play badge, thumbnail and QR are styled by one set of rules;
+    // only the LAYOUT differs per view (see ".book-card .media-wrap" in
+    // book-view.css). Visibility follows the body.show-videos / show-qrs
+    // classes, exactly as in continuous view.
+    (block.videos || []).forEach(v => card.insertAdjacentHTML('beforeend', createVideoCard(v.url)));
 
     if (block.images && block.images.length > 0) {
         block.images.forEach(img => {
             const wrap = document.createElement('div');
             wrap.className = 'book-image-wrap';
             const imgEl = document.createElement('img');
-            imgEl.src = img.src.includes('://') ? img.src : `images/${img.src}`;
+            imgEl.src = imageUrl(img.src);
             imgEl.alt = img.caption?.[activeLangs[0]] || img.caption?.kn || img.caption?.en || '';
             imgEl.className = 'book-image';
             wrap.appendChild(imgEl);
@@ -129,25 +100,10 @@ function createBookCard(entry, activeLangs, readBlocks) {
     // with neither (e.g. an inline image-only block) has nothing to mark
     // read; see read-tracking.js's isBlockTrackable for the shared rule.
     if (isBlockTrackable(block)) {
-        const isRead = readBlocks.has(block.id);
-        const tick = document.createElement('button');
-        tick.type = 'button';
-        tick.className = `read-tick${isRead ? ' read' : ''}`;
-        tick.title = isRead ? 'Marked as read' : 'Mark as read';
-        tick.setAttribute('aria-label', tick.title);
-        tick.textContent = isRead ? '✓' : '';
-        tick.onclick = (e) => {
-            e.stopPropagation();
-            const newSet = toggleBlockRead(block.id, getReadBlocks(localStorage));
-            saveReadBlocks(newSet, localStorage);
-            const nowRead = newSet.has(block.id);
-            tick.classList.toggle('read', nowRead);
-            tick.textContent = nowRead ? '✓' : '';
-            tick.title = nowRead ? 'Marked as read' : 'Mark as read';
-            tick.setAttribute('aria-label', tick.title);
-            updateProgressDisplay(newSet, state.totalBlockCount);
-        };
-        card.appendChild(tick);
+        card.appendChild(buildReadTick(block, {
+            isRead: readBlocks.has(block.id),
+            totalBlockCount: state.totalBlockCount,
+        }));
     }
 
     return card;
@@ -161,26 +117,15 @@ function populateBookColumns() {
 
     state.data.forEach(item => {
         // --- 0. HANDLE "insert" ITEMS ---
-        // The front cover, section dividers, plain standalone photos, and
-        // pure blank pages are all one item type now — a standalone photo
-        // is really just an "insert" with a per-image caption instead of a
-        // page title. Distinguished only by which fields its one block has:
-        //   block.images[0].caption -> small caption text (the old plain
-        //                              "images" look)
-        //   block.content           -> big centered title-style text
-        //                              (dash-ruled), which wins if both are
-        //                              somehow present
-        //   neither                 -> no text at all
-        //   no image either         -> a genuinely blank page
-        // Forced onto its own column, so it never shares a page with
+        // The front cover, section dividers, plain standalone photos and
+        // pure blank pages are one item type; core/blocks.js's
+        // classifyInsert() tells them apart (title / photo / blank). Each is
+        // forced onto its own column, so it never shares a page with
         // anything else.
         if (item.type === 'insert') {
-            const insertBlock = item.blocks && item.blocks[0];
-            const imgData = insertBlock && insertBlock.images && insertBlock.images[0];
-
-            const hasContent = state.activeLangs.some(lang =>
-                (insertBlock?.content?.[lang] || []).some(line => line.trim() !== ''));
-            const titleStyle = hasContent; // block.content present -> big style
+            const { block: insertBlock, image: imgData, kind, showId } =
+                classifyInsert(item, state.activeLangs);
+            const titleStyle = kind === 'title'; // block.content present -> big style
 
             const card = document.createElement('div');
             card.className = `book-card ${titleStyle ? 'title-style-page' : 'standalone-image'}`;
@@ -192,7 +137,7 @@ function populateBookColumns() {
             // exactly. An earlier version never rendered this badge at all
             // for inserts, in either style, which was a book-view-only
             // regression once continuous view's badge was restored.
-            if (insertBlock && !item.hideId) {
+            if (showId) {
                 const bid = document.createElement('span');
                 bid.className = 'book-bid';
                 bid.textContent = formatIdForDisplay(insertBlock);
@@ -203,7 +148,7 @@ function populateBookColumns() {
                 const wrap = document.createElement('div');
                 wrap.className = titleStyle ? 'book-image-wrap title-style-image-wrap' : 'book-image-wrap';
                 const imgEl = document.createElement('img');
-                imgEl.src = imgData.src.includes('://') ? imgData.src : `images/${imgData.src}`;
+                imgEl.src = imageUrl(imgData.src);
                 imgEl.className = titleStyle ? 'book-image title-style-image' : 'book-image';
                 wrap.appendChild(imgEl);
 
@@ -311,7 +256,6 @@ export function renderCurrentSpread() {
     if (prevBtn) prevBtn.disabled = state.currentSpread <= 0;
     if (nextBtn) nextBtn.disabled = state.currentSpread >= totalSpreads - 1;
 
-    applyBookMediaVisibility();
 }
 
 export function goToPrevSpread() {
@@ -362,21 +306,10 @@ export function searchBookView(query) {
     }
 }
 
-// ── Media & Print ─────────────────────────────────────────────────────────
-export function applyBookMediaVisibility() {
-    const showVideos = document.getElementById('toggle-videos')?.checked ?? true;
-    const showQrs = document.getElementById('toggle-qrs')?.checked ?? false;
-
-    document.querySelectorAll('#book-container .book-vid-row').forEach(row => {
-        row.style.display = (!showVideos && !showQrs) ? 'none' : 'flex';
-    });
-    document.querySelectorAll('#book-container .book-vid-thumb').forEach(el => {
-        el.style.display = showVideos ? '' : 'none';
-    });
-    document.querySelectorAll('#book-container .book-vid-qr').forEach(el => {
-        el.style.display = showQrs ? '' : 'none';
-    });
-}
+// ── Print ─────────────────────────────────────────────────────────────────
+// (Video / QR visibility needs no code here: it is the body.show-videos /
+// body.show-qrs classes that header.js's updateMediaVisibility() maintains,
+// same as continuous view.)
 
 // Stub function to prevent errors from your existing app.js calls
 export function renderPrintBook() { }
@@ -396,18 +329,8 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     state.data = data;
     state.activeLangs = activeLangs;
     state.containerId = containerId;
-    state.blockById = {};
-    state.itemById = {};
-    data.forEach(item => {
-        state.itemById[item.id] = item;
-        (item.blocks || []).forEach(b => { state.blockById[b.id] = b; });
-    });
-    // "insert" items (front cover, dividers) are decorative structure, not
-    // content a reader marks as read — excluded from the count entirely,
-    // even if their block happens to carry title text that would otherwise
-    // look "trackable" by the generic per-block rule.
-    state.totalBlockCount = data.reduce((s, item) =>
-        item.type === 'insert' ? s : s + (item.blocks || []).filter(isBlockTrackable).length, 0);
+    ({ blockById: state.blockById, itemById: state.itemById } = buildBlockIndex(data));
+    state.totalBlockCount = countTrackableBlocks(data);
     // A cover item, when present, is always the very first entry and always
     // occupies exactly one spread (image page + title page) — see
     // populateBookColumns. Page numbering treats it like a real book's
@@ -500,6 +423,6 @@ if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
         initBookView, renderCurrentSpread,
         goToPrevSpread, goToNextSpread, jumpToPage, searchBookView,
-        applyBookMediaVisibility, onBookLangChange, renderPrintBook,
+        onBookLangChange, renderPrintBook,
     });
 }
