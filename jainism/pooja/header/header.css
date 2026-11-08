@@ -306,3 +306,85 @@ body.zen-mode.zen-header-visible .zen-peek-btn {
     border-radius: 0 0 8px 8px;
     transform: translateX(-50%) rotate(180deg);
 }
+
+/* ── Phones / narrow screens ──────────────────────────────────────────────
+   The header is one desktop-sized row (home, view toggle, search, progress,
+   Focus, Settings) that needs ~700px. On a phone that forced the browser to
+   zoom the whole page out. Below 700px it wraps instead: the controls on the
+   first row (Focus and Settings shrink to icons), the search box full width on
+   a second row. Touch targets are 44px tall, the usual minimum for a
+   fingertip. 700px is the same breakpoint core/media.css and the book view's
+   single-page mode use. */
+@media (max-width: 700px) {
+    .app-header {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 8px 10px;
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+        padding-top: max(8px, env(safe-area-inset-top));
+    }
+
+    .btn-label { display: none; }
+
+    .menu-trigger {
+        height: 44px;
+        min-width: 44px;
+        padding: 6px 12px;
+        justify-content: center;
+        font-size: 16px;
+    }
+
+    .view-toggle-btn {
+        min-height: 42px;
+        padding: 6px 12px;
+    }
+
+    /* Second row, full width. 16px text stops iOS Safari zooming the page in
+       when the box is focused (it does that for anything under 16px). */
+    #search-bar {
+        order: 10;
+        flex: 1 1 100%;
+        margin: 0;
+        padding: 10px 16px;
+        font-size: 16px;
+        box-sizing: border-box;
+        min-height: 44px;
+    }
+
+    .read-progress {
+        order: 5;
+        margin: 0 4px 0 auto;
+    }
+
+    /* Push Focus + Settings to the end of the first row. When the progress
+       counter is showing it already takes the free space (margin-left: auto
+       above), so only the first of the pair needs the push. */
+    #zen-mode-btn { margin-left: auto; }
+    .read-progress ~ #zen-mode-btn { margin-left: 0; }
+
+    /* The Settings dropdown must never be wider or taller than the screen. */
+    .menu-content {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        top: auto;
+        min-width: 0;
+        max-height: calc(100vh - 150px);
+        max-height: calc(100dvh - 150px);
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+    .view-menu-container { position: static; }
+
+    .lang-row { padding: 10px 8px; font-size: 14px; }
+    .lang-row input[type="checkbox"],
+    .menu-section input[type="checkbox"] { width: 22px; height: 22px; }
+    .lang-trigger, .lang-search { font-size: 14px; padding: 10px 8px; }
+    #paper-size-select { font-size: 14px; padding: 8px; }
+    .font-scale-control button { width: 40px; height: 40px; font-size: 14px; }
+
+    /* The peek tab sits just under the (now taller) revealed header. */
+    body.zen-mode.zen-header-visible .zen-peek-btn { top: 112px; }
+}
