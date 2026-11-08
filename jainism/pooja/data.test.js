@@ -54,4 +54,23 @@ describe('Data Layer Validation', () => {
     const missingBlocks = [{ id: 'a_001', type: 'answer' }];
     expect(validate(missingBlocks)).toBe(false);
   });
+
+  test('every local image in data.json follows the naming convention and exists in images/', () => {
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
+    const srcs = [];
+    for (const item of data) {
+      for (const block of item.blocks || []) {
+        for (const img of block.images || []) srcs.push(img.src);
+      }
+    }
+    const local = srcs.filter((s) => !s.includes('://'));
+    expect(local.length).toBeGreaterThan(0);
+
+    // lowercase letters, digits and hyphens only: no spaces or capitals, which break on case-sensitive hosts and in URLs
+    const badNames = local.filter((s) => !/^[a-z0-9-]+\.(jpg|png|webp)$/.test(s));
+    expect(badNames).toEqual([]);
+
+    const missing = local.filter((s) => !fs.existsSync(path.join(__dirname, 'images', s)));
+    expect(missing).toEqual([]);
+  });
 });

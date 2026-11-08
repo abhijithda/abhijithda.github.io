@@ -28,7 +28,7 @@ function plainPhotoInsert(id = 'i_001') {
         blocks: [{
             id: `${id}_b_1`, type: 'images',
             images: [{
-                src: 'Bharata Bahubali Swami.jpeg',
+                src: 'bharata-bahubali-swami.jpg',
                 caption: {
                     kn: 'ಭರತ ಚಕ್ರವರ್ತಿ ಮತ್ತು ಬಾಹುಬಲಿ ಸ್ವಾಮಿ',
                     en: 'Bharata Chakravarthi and Bahubali Swami',
