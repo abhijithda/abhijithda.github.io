@@ -15,15 +15,19 @@ const state = {
 };
 
 // ── Pages per spread ──────────────────────────────────────────────────────
-// Two on a normal screen (a real double-page spread), one on a phone. Must
-// stay in step with the `@media screen and (max-width: 700px)` block at the
+// Two on a normal screen (a real double-page spread), one on a phone in
+// Dynamic paper size. Must stay in step with the `@media screen and (max-width: 700px)` block at the
 // end of book-view.css. matchMedia is missing in jsdom (the unit tests), where
 // this falls back to the desktop two-page behaviour.
 const SINGLE_PAGE_QUERY = '(max-width: 700px)';
 
 function pagesPerSpread() {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 2;
-    return window.matchMedia(SINGLE_PAGE_QUERY).matches ? 1 : 2;
+    if (!window.matchMedia(SINGLE_PAGE_QUERY).matches) return 2;
+    // A4 / A3 are a deliberate real-paper preview: keep the two-page spread
+    // (and let it scroll sideways) exactly as on desktop. Only Dynamic adapts.
+    const paper = document.body && document.body.dataset ? document.body.dataset.paperSize : 'dynamic';
+    return (paper === 'a4' || paper === 'a3') ? 2 : 1;
 }
 
 // The saved position means something different in each mode (a spread of two

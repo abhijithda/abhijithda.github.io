@@ -989,50 +989,52 @@ body.show-qrs .book-card .qr-code {
    because column-gap = 2 x the left/right padding (here 2 x 16 = 32). Keep
    those two in step if either changes.
 
+   Only in Dynamic paper size. A4 / A3 are a deliberate "show me the real
+   paper" preview (794px / 1123px+ wide); on a phone they keep their true
+   width and scroll sideways, like on desktop, and the book stays a two-page
+   spread. Switching back to Dynamic in Settings restores this phone layout.
+
    Screen only: print and the A4/A3 PDFs keep their two-up layout. */
 @media screen and (max-width: 700px) {
-    #book-container {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) #book-container {
         padding: 10px 8px 24px;
         min-height: 0;
     }
 
-    /* A4/A3 preview widths are fixed physical sizes; on a phone use the screen. */
-    body[data-paper-size] .book-shell,
-    body[data-paper-size] .book-nav,
-    .book-shell,
-    .book-nav {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-shell,
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-nav {
         width: 100%;
         max-width: none;
     }
 
     /* The page fills the screen between the header and the Prev/Next row.
        cq units below need a definite height, which this is (no aspect-ratio). */
-    .book-spread {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-spread {
         aspect-ratio: auto;
         height: calc(100vh - 205px);
         height: calc(100dvh - 205px);
         min-height: 360px;
         touch-action: pan-y pinch-zoom;   /* vertical scroll + zoom stay native; our swipe handles horizontal */
     }
-    body.zen-mode .book-spread {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]).zen-mode .book-spread {
         height: calc(100vh - 90px);
         height: calc(100dvh - 90px);
     }
 
-    .book-spine,
-    .book-static-head.right,
-    .book-static-foot.right { display: none; }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-spine,
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-static-head.right,
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-static-foot.right { display: none; }
 
-    .book-static-head.left,
-    .book-static-foot.left {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-static-head.left,
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-static-foot.left {
         left: 16px;
         width: calc(100% - 32px);
         text-align: center;
     }
-    .book-static-head,
-    .book-static-foot { font-size: calc(9px * var(--font-scale)); }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-static-head,
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-static-foot { font-size: calc(9px * var(--font-scale)); }
 
-    .book-columns {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-columns {
         column-count: 1;
         column-gap: 32px;
         padding: 34px 16px 36px;
@@ -1040,39 +1042,39 @@ body.show-qrs .book-card .qr-code {
 
     /* Real reading sizes: the desktop clamp()s bottom out at 7-10px, which is
        fine on a 960px spread and unreadable on a phone. */
-    .book-card {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-card {
         font-size: calc(14px * var(--font-scale));
         padding: 8px 10px 9px;
         margin-bottom: 6px;
     }
-    .book-lang-line.lang-kn { font-size: calc(16px * var(--font-scale)); }
-    .book-lang-line.lang-en { font-size: calc(14.5px * var(--font-scale)); }
-    .book-bid,
-    .book-ref { font-size: calc(11px * var(--font-scale)); }
-    .book-excerpt { font-size: calc(12px * var(--font-scale)); }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-lang-line.lang-kn { font-size: calc(16px * var(--font-scale)); }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-lang-line.lang-en { font-size: calc(14.5px * var(--font-scale)); }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-bid,
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-ref { font-size: calc(11px * var(--font-scale)); }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-excerpt { font-size: calc(12px * var(--font-scale)); }
 
     /* Bigger fingertip target for the read tick; the visible circle stays small. */
-    .read-tick { width: 28px; height: 28px; font-size: 14px; }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .read-tick { width: 28px; height: 28px; font-size: 14px; }
 
     /* Prev / Next / Go: one row, 44px tall, never wrapping their own labels.
        The page box in the middle gives up space first (flex: 1 1 auto,
        min-width: 0) so Prev/Next can never be pushed off the edge. */
-    .book-nav { gap: 6px; flex-wrap: nowrap; }
-    .book-nav-btn {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-nav { gap: 6px; flex-wrap: nowrap; }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-nav-btn {
         flex: 0 0 auto;
         min-height: 44px;
         padding: 8px 10px;
         font-size: 14px;
         white-space: nowrap;
     }
-    .book-jump {
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-jump {
         flex: 1 1 auto;
         min-width: 0;
         justify-content: center;
         padding: 4px 6px;
         gap: 4px;
     }
-    .book-jump-label { font-size: 11px; }
-    #book-jump-input { width: 44px; min-height: 34px; padding: 3px 2px; font-size: 16px; }
-    .book-jump-go { min-height: 34px; padding: 4px 8px; font-size: 13px; }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-jump-label { font-size: 11px; }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) #book-jump-input { width: 44px; min-height: 34px; padding: 3px 2px; font-size: 16px; }
+    body:not([data-paper-size="a4"]):not([data-paper-size="a3"]) .book-jump-go { min-height: 34px; padding: 4px 8px; font-size: 13px; }
 }

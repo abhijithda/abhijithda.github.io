@@ -33,17 +33,78 @@ test.describe('Phone layout', () => {
         await page.goto('/');
     });
 
+    // The continuous view is rendered when its first card is on screen. Measuring
+    // before that would test the previous view, not this one.
+    const showContinuous = async page => {
+        await page.locator('.view-toggle-btn[data-view="continuous"]').click();
+        await expect(page.locator('#continuous-container .card').first()).toBeVisible();
+    };
+
+    // On failure, say what the page was doing (paper size and container width),
+    // not just "expected <= 0, received 808".
+    const expectNoSidewaysScroll = async (page, where) => {
+        const info = await page.evaluate(() => ({
+            over: document.documentElement.scrollWidth - innerWidth,
+            paper: document.body.dataset.paperSize,
+            container: Math.round(document.getElementById('continuous-container').getBoundingClientRect().width),
+            viewport: innerWidth,
+        }));
+        expect(info.over, `${where}: ${JSON.stringify(info)}`).toBeLessThanOrEqual(0);
+    };
+
     for (const width of [320, 360, 390, 430]) {
         test(`nothing scrolls sideways at ${width}px (home, book, continuous)`, async ({ page }) => {
             await page.setViewportSize({ width, height: 800 });
-            const sideways = () => page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
-            expect(await sideways()).toBeLessThanOrEqual(0);
+            await expectNoSidewaysScroll(page, 'home');
             await openBook(page);
-            expect(await sideways()).toBeLessThanOrEqual(0);
-            await page.locator('.view-toggle-btn[data-view="continuous"]').click();
-            expect(await sideways()).toBeLessThanOrEqual(0);
+            await expectNoSidewaysScroll(page, 'book');
+            await showContinuous(page);
+            await expectNoSidewaysScroll(page, 'continuous');
         });
     }
+
+    // Dynamic (the default) adapts to the phone. A4 / A3 are a deliberate "show
+    // me the real paper" preview: they keep their true width (794px / 1123px) and
+    // may scroll sideways, as on desktop. The one hard requirement is that the
+    // reader can always get back out of it via Settings.
+    for (const paperSize of ['a4', 'a3']) {
+        test(`a saved ${paperSize.toUpperCase()} paper size keeps its real width, and Settings can switch back to Dynamic`, async ({ page }) => {
+            await page.addInitScript(size => {
+                localStorage.setItem('settings', JSON.stringify({ paperSize: size }));
+            }, paperSize);
+            await page.goto('/');
+            await expect(page.locator('body')).toHaveAttribute('data-paper-size', paperSize);
+            await showContinuous(page);
+
+            // real paper width: wider than the screen on purpose
+            const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+            expect(over, `${paperSize} should be a wide real-size preview`).toBeGreaterThan(0);
+
+            // Settings is still on screen and can switch the paper size back
+            const settings = await page.locator('#settings-btn').boundingBox();
+            expect(settings.x).toBeGreaterThanOrEqual(0);
+            expect(settings.x + settings.width).toBeLessThanOrEqual(390);
+            await page.locator('#settings-btn').click();
+            await page.locator('#paper-size-select').selectOption('dynamic');
+            await page.locator('#settings-btn').click();
+            await expect(page.locator('body')).toHaveAttribute('data-paper-size', 'dynamic');
+            await expectNoSidewaysScroll(page, `continuous (after ${paperSize} -> dynamic)`);
+        });
+    }
+
+    test('Book view with A4 on a phone stays a two-page spread, and Dynamic brings back the single page', async ({ page }) => {
+        await page.addInitScript(() => {
+            localStorage.setItem('settings', JSON.stringify({ paperSize: 'a4' }));
+        });
+        await page.goto('/');
+        await openBook(page);
+        await expect(page.locator('.book-spine')).toBeVisible();
+        await page.locator('#settings-btn').click();
+        await page.locator('#paper-size-select').selectOption('dynamic');
+        await page.locator('#settings-btn').click();
+        await expect(page.locator('.book-spine')).toBeHidden();
+        await expectNoSidewaysScroll(page, 'book (after a4 -> dynamic)');
+    });
 
     test('the whole header (search and Settings) is on screen, not cut off', async ({ page }) => {
         for (const id of ['#search-bar', '#settings-btn', '#zen-mode-btn']) {
