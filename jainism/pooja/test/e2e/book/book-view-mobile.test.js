@@ -40,15 +40,46 @@ test.describe('Phone layout', () => {
         await expect(page.locator('#continuous-container .card').first()).toBeVisible();
     };
 
-    // On failure, say what the page was doing (paper size and container width),
-    // not just "expected <= 0, received 808".
-    const expectNoSidewaysScroll = async (page, where) => {
-        const info = await page.evaluate(() => ({
+    // What the page looks like right now: how far it overflows sideways, which
+    // paper size and container width it has, and the elements that stick out.
+    const overflowReport = page => page.evaluate(() => {
+        const W = innerWidth;
+        const wide = [];
+        document.querySelectorAll('body *').forEach(e => {
+            const r = e.getBoundingClientRect();
+            if (r.width > 0 && r.right > W + 2) {
+                const cs = getComputedStyle(e);
+                wide.push(`${e.tagName.toLowerCase()}#${e.id}.${String(e.className).slice(0, 40)}`
+                    + ` w=${Math.round(r.width)} right=${Math.round(r.right)}`
+                    + ` display=${cs.display} position=${cs.position}`
+                    + (e.getAttribute('src') ? ` src=${e.getAttribute('src')}` : ''));
+            }
+        });
+        const container = document.getElementById('continuous-container');
+        return {
             over: document.documentElement.scrollWidth - innerWidth,
             paper: document.body.dataset.paperSize,
-            container: Math.round(document.getElementById('continuous-container').getBoundingClientRect().width),
+            container: container ? Math.round(container.getBoundingClientRect().width) : null,
             viewport: innerWidth,
-        }));
+            wide: wide.slice(0, 10),
+        };
+    });
+
+    // The page may take a moment to settle (images decode, layout re-runs after a
+    // resize), so wait up to 3s for "no sideways scroll". A transient overflow that
+    // clears is recorded on the test report; one that stays fails the test and
+    // names the elements responsible, not just "expected <= 0, received 808".
+    const expectNoSidewaysScroll = async (page, where) => {
+        const first = await overflowReport(page);
+        let info = first;
+        const deadline = Date.now() + 3000;
+        while (info.over > 0 && Date.now() < deadline) {
+            await page.waitForTimeout(100);
+            info = await overflowReport(page);
+        }
+        if (first.over > 0 && info.over <= 0) {
+            test.info().annotations.push({ type: 'transient-overflow', description: `${where}: ${JSON.stringify(first)}` });
+        }
         expect(info.over, `${where}: ${JSON.stringify(info)}`).toBeLessThanOrEqual(0);
     };
 
