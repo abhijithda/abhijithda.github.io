@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
     <title>ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ | Jaina Pooja Vichara Sankalana</title>
     <link rel="stylesheet" href="header/header.css">
     <link rel="stylesheet" href="home/home.css">
@@ -22,7 +24,7 @@
 
 <body>
     <header class="app-header">
-        <button id="home-btn" class="menu-trigger home-btn" title="Home — cover, progress and settings at a glance">🏠</button>
+        <button id="home-btn" class="menu-trigger home-btn" title="Home — cover, progress and settings at a glance" aria-label="Home">🏠</button>
 
         <div class="view-toggle">
             <button class="view-toggle-btn" data-view="book" title="Book spread view">📖 Book</button>
@@ -33,10 +35,10 @@
 
         <span id="read-progress" class="read-progress" title="Items you've marked as read"></span>
 
-        <button id="zen-mode-btn" class="menu-trigger" title="Focus mode — hide header and browser chrome (Esc to exit)">⛶ Focus</button>
+        <button id="zen-mode-btn" class="menu-trigger" title="Focus mode — hide header and browser chrome (Esc to exit)" aria-label="Focus mode">⛶<span class="btn-label">&nbsp;Focus</span></button>
 
         <div class="view-menu-container">
-            <button id="settings-btn" class="menu-trigger">Settings ⚙️</button>
+            <button id="settings-btn" class="menu-trigger" aria-label="Settings"><span class="btn-label">Settings&nbsp;</span>⚙️</button>
             <div id="settings-menu" class="menu-content">
                 <!-- Language: searchable multi-select, collapsed by default.
                      Was a single <select id="lang-select"> (All/kn/en); this scales

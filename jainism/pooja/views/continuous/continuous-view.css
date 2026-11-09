@@ -673,3 +673,33 @@ input:checked + .slider::before {
         min-width: 150px !important;
     }
 }
+
+/* ── Phones: tighter vertical rhythm (screen only) ────────────────────────
+   The desktop spacing (40px page margin, 25px card padding, a 15px-padded id
+   badge stacked over the text, 12px gaps) adds up to ~95px of empty space
+   around every block id once the row stacks at <=768px, which is a lot of
+   scrolling on a 390px-wide screen. This trims it for phones only (same 700px
+   breakpoint as the header and book view); print has its own rules above and
+   is untouched. */
+@media screen and (max-width: 700px) {
+    #continuous-container { margin: 10px auto 24px; }
+
+    .card {
+        margin: 10px 0;
+        padding-top: 12px;
+        padding-right: 12px;
+        padding-bottom: 12px;
+        gap: 2px;
+    }
+
+    .block-row {
+        gap: 4px;
+        margin: 2px 0;
+        padding: 4px 8px 4px 14px;
+    }
+
+    .block-id { padding: 2px 5px; flex: 0 0 auto; }
+
+    /* Same fingertip-sized read tick as the book view. */
+    .read-tick { width: 28px; height: 28px; font-size: 14px; }
+}

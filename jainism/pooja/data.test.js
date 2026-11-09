@@ -67,7 +67,7 @@ describe('Data Layer Validation', () => {
     expect(local.length).toBeGreaterThan(0);
 
     // lowercase letters, digits and hyphens only: no spaces or capitals, which break on case-sensitive hosts and in URLs
-    const badNames = local.filter((s) => !/^[a-z0-9-]+\.(jpg|png|webp)$/.test(s));
+    const badNames = local.filter((s) => !/^[a-z0-9-]+\.(jpg|jpeg|png|webp)$/.test(s));
     expect(badNames).toEqual([]);
 
     const missing = local.filter((s) => !fs.existsSync(path.join(__dirname, 'images', s)));

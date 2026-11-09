@@ -14,6 +14,32 @@ const state = {
     activeLangs: ['kn', 'en']
 };
 
+// ── Pages per spread ──────────────────────────────────────────────────────
+// Two on a normal screen (a real double-page spread), one on a phone in
+// Dynamic paper size. Must stay in step with the `@media screen and (max-width: 700px)` block at the
+// end of book-view.css. matchMedia is missing in jsdom (the unit tests), where
+// this falls back to the desktop two-page behaviour.
+const SINGLE_PAGE_QUERY = '(max-width: 700px)';
+
+function pagesPerSpread() {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 2;
+    if (!window.matchMedia(SINGLE_PAGE_QUERY).matches) return 2;
+    // A4 / A3 are a deliberate real-paper preview: keep the two-page spread
+    // (and let it scroll sideways) exactly as on desktop. Only Dynamic adapts.
+    const paper = document.body && document.body.dataset ? document.body.dataset.paperSize : 'dynamic';
+    return (paper === 'a4' || paper === 'a3') ? 2 : 1;
+}
+
+// The saved position means something different in each mode (a spread of two
+// pages vs a single page), so each mode keeps its own.
+function storageKey(ppp = pagesPerSpread()) {
+    return ppp === 1 ? 'bookPage' : 'bookSpread';
+}
+
+function saveSpread() {
+    localStorage.setItem(storageKey(), state.currentSpread);
+}
+
 // ── Card factory (VERBATIM from your original code) ───────────────────────
 function createBookCard(entry, activeLangs, readBlocks) {
     const { item, block, showExcerpt } = entry;
@@ -206,6 +232,28 @@ function populateBookColumns() {
     });
 }
 
+// ── Reading position, by content ─────────────────────────────────────────
+// A page number means nothing across layouts (a phone page holds far less than
+// a desktop spread), so besides the page index we remember WHICH CARD the reader
+// is looking at: the first card that starts on the current spread, or, when the
+// spread only holds the tail of a long card, the last card that started before
+// it. After the layout changes (rotate, resize) we jump to the spread that now
+// contains that card. Uses offsetLeft, like searchBookView, which ignores the
+// sliding transform.
+function findAnchorId(columns, spreadWidth, spreadIndex) {
+    if (!columns || !(spreadWidth > 0)) return null;
+    const start = spreadIndex * spreadWidth;
+    const end = start + spreadWidth;
+    let before = null;
+    for (const card of columns.querySelectorAll('.book-card')) {
+        const left = card.offsetLeft;
+        if (left >= start - 1 && left < end) return card.id || null;
+        if (left < start) before = card;
+        else break;
+    }
+    return before ? (before.id || null) : null;
+}
+
 // ── Spread rendering & Navigation ─────────────────────────────────────────
 export function renderCurrentSpread() {
     const columns = document.getElementById('book-columns');
@@ -225,6 +273,7 @@ export function renderCurrentSpread() {
     if (state.currentSpread < 0) state.currentSpread = 0;
 
     columns.style.transform = `translateX(-${state.currentSpread * spreadWidth}px)`;
+    state.anchorId = findAnchorId(columns, spreadWidth, state.currentSpread);
 
     // Cover spread (spread 0, when present) is a title page: no running
     // head/footer, no page number — matching how a real printed book
@@ -233,15 +282,17 @@ export function renderCurrentSpread() {
     const onCoverSpread = state.hasCoverPage && state.currentSpread === 0;
     spread.classList.toggle('cover-spread', onCoverSpread);
     const spreadOffset = state.hasCoverPage ? 1 : 0;
+    const ppp = pagesPerSpread();
     const numberedSpreads = Math.max(0, totalSpreads - spreadOffset);
-    const totalNumberedPages = numberedSpreads * 2;
+    const totalNumberedPages = numberedSpreads * ppp;
 
-    // Calculate actual Page Numbers (first numbered spread = Pages 1 & 2)
-    const leftPage = ((state.currentSpread - spreadOffset) * 2) + 1;
-    const rightPage = ((state.currentSpread - spreadOffset) * 2) + 2;
+    // Actual page numbers (first numbered spread = pages 1 & 2, or just 1 on
+    // a phone, where each spread is a single page)
+    const leftPage = ((state.currentSpread - spreadOffset) * ppp) + 1;
+    const rightPage = leftPage + 1;
 
     if (leftNum) leftNum.textContent = onCoverSpread ? '' : leftPage;
-    if (rightNum) rightNum.textContent = onCoverSpread ? '' : rightPage;
+    if (rightNum) rightNum.textContent = (onCoverSpread || ppp === 1) ? '' : rightPage;
     if (info) info.textContent = onCoverSpread ? '' : `(of ${totalNumberedPages})`;
 
     // Sync the input box with the current page ---
@@ -262,13 +313,13 @@ export function goToPrevSpread() {
     if (state.currentSpread <= 0) return;
     state.currentSpread--;
     renderCurrentSpread();
-    localStorage.setItem('bookSpread', state.currentSpread);
+    saveSpread();
 }
 
 export function goToNextSpread() {
     state.currentSpread++;
     renderCurrentSpread();
-    localStorage.setItem('bookSpread', state.currentSpread);
+    saveSpread();
 }
 
 export function jumpToPage(pageNumber) {
@@ -280,10 +331,10 @@ export function jumpToPage(pageNumber) {
     if (state.hasCoverPage && pageNumber <= 0) {
         state.currentSpread = 0;
     } else {
-        state.currentSpread = spreadOffset + Math.max(0, Math.floor((pageNumber - 1) / 2));
+        state.currentSpread = spreadOffset + Math.max(0, Math.floor((pageNumber - 1) / pagesPerSpread()));
     }
     renderCurrentSpread();
-    localStorage.setItem('bookSpread', state.currentSpread);
+    saveSpread();
 }
 
 // ── Search ────────────────────────────────────────────────────────────────
@@ -300,7 +351,7 @@ export function searchBookView(query) {
 
             state.currentSpread = Math.max(0, spreadIndex);
             renderCurrentSpread();
-            localStorage.setItem('bookSpread', state.currentSpread);
+            saveSpread();
             return;
         }
     }
@@ -379,20 +430,69 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
     jumpInput.addEventListener('blur', () => {
         if (jumpInput.value === '') {
             const spreadOffset = state.hasCoverPage ? 1 : 0;
-            jumpInput.value = ((state.currentSpread - spreadOffset) * 2) + 1;
+            jumpInput.value = ((state.currentSpread - spreadOffset) * pagesPerSpread()) + 1;
         }
     });
 
     populateBookColumns();
     updateProgressDisplay(getReadBlocks(localStorage), state.totalBlockCount);
-    state.currentSpread = parseInt(localStorage.getItem('bookSpread') || '0', 10);
+    state.mode = pagesPerSpread();
+    state.currentSpread = parseInt(localStorage.getItem(storageKey()) || '0', 10);
+    if (!Number.isFinite(state.currentSpread) || state.currentSpread < 0) state.currentSpread = 0;
+    attachSwipe(document.getElementById('book-spread'));
 
     setTimeout(renderCurrentSpread, 150);
 }
 
+// ── Touch: swipe left/right to turn the page ──────────────────────────────
+// Only a clearly horizontal drag counts (wider than 50px and more sideways
+// than down), so reading by scrolling, pinch-zoom and text selection are
+// untouched. touch-action: pan-y on .book-spread (CSS) leaves vertical
+// scrolling to the browser.
+const SWIPE_MIN_PX = 50;
+
+export function attachSwipe(el) {
+    if (!el) return;
+    let startX = 0, startY = 0, tracking = false;
+    el.addEventListener('touchstart', e => {
+        if (e.touches.length !== 1) { tracking = false; return; }
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        tracking = true;
+    }, { passive: true });
+    el.addEventListener('touchend', e => {
+        if (!tracking) return;
+        tracking = false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        if (dx < 0) goToNextSpread(); else goToPrevSpread();
+    }, { passive: true });
+    el.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
+}
+
+// Crossing the phone breakpoint (rotate, resize, fold) changes what one
+// "spread" is and re-flows every page. Keep the reader on the same CONTENT:
+// land on the spread that now holds the card they were reading (state.anchorId,
+// recorded by renderCurrentSpread under the old layout).
+function syncModeAfterResize() {
+    const ppp = pagesPerSpread();
+    if (state.mode && state.mode !== ppp) {
+        state.mode = ppp;
+        const spread = document.getElementById('book-spread');
+        const anchor = state.anchorId ? document.getElementById(state.anchorId) : null;
+        if (anchor && spread && spread.clientWidth > 0) {
+            state.currentSpread = Math.max(0, Math.floor(anchor.offsetLeft / spread.clientWidth));
+        }
+        saveSpread();
+    }
+    renderCurrentSpread();
+}
+
 // Auto-recalculate the sliding distance if user resizes the window
 window.addEventListener('resize', () => {
-    setTimeout(renderCurrentSpread, 150);
+    setTimeout(syncModeAfterResize, 150);
 });
 
 // A paper-size or font-scale change resizes/rescales the page just like a
@@ -400,7 +500,7 @@ window.addEventListener('resize', () => {
 // fire a native 'resize' event on its own — listen for the explicit signal
 // too so pagination (spread width, total page count) doesn't go stale.
 window.addEventListener('pooja:layout-changed', () => {
-    setTimeout(renderCurrentSpread, 150);
+    setTimeout(syncModeAfterResize, 150);
 });
 
 // Registered once, at module scope — NOT inside initBookView. That function
@@ -423,6 +523,6 @@ if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
         initBookView, renderCurrentSpread,
         goToPrevSpread, goToNextSpread, jumpToPage, searchBookView,
-        onBookLangChange, renderPrintBook,
+        onBookLangChange, renderPrintBook, attachSwipe,
     });
 }
