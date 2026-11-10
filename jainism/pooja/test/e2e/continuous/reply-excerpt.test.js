@@ -59,16 +59,17 @@ test.describe('Reply Excerpt - jump to source and back', () => {
         const scrollBeforeJump = await page.evaluate(() => window.scrollY);
 
         await page.locator('#a_001 .excerpt-row .block-id').click();
-        await page.waitForTimeout(400);
 
-        const scrollAfterJump = await page.evaluate(() => window.scrollY);
-        expect(scrollAfterJump).not.toBe(scrollBeforeJump);
+        // The jump is a smooth scroll; on a busy CI runner it can take longer than
+        // a fixed 400ms, so wait for the scroll position to change instead.
+        await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 4000 })
+            .not.toBe(scrollBeforeJump);
 
         await page.locator('#back-to-message').click();
-        await page.waitForTimeout(400);
-
-        const scrollAfterBack = await page.evaluate(() => window.scrollY);
-        expect(Math.abs(scrollAfterBack - scrollBeforeJump)).toBeLessThan(30);
+        await expect.poll(
+            async () => Math.abs((await page.evaluate(() => window.scrollY)) - scrollBeforeJump),
+            { timeout: 4000 }
+        ).toBeLessThan(30);
     });
 
     test('clicking the excerpt content expands it, and clicking again collapses it', async ({ page }) => {
