@@ -7,6 +7,11 @@
       "id": {
         "type": "string"
       },
+      "num": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Number shown in labels (the 3 in A-3.1). Optional on an answer that references a question: it then shares that question's number."
+      },
       "type": {
         "type": "string",
         "enum": [
@@ -38,6 +43,11 @@
           "properties": {
             "id": {
               "type": "string"
+            },
+            "num": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Block's sub-number within its item (the .1 in A-3.1)."
             },
             "type": {
               "type": "string",
@@ -126,10 +136,16 @@
             "type"
           ],
           "if": {
-            "properties": { "type": { "const": "images" } }
+            "properties": {
+              "type": {
+                "const": "images"
+              }
+            }
           },
           "else": {
-            "required": ["content"]
+            "required": [
+              "content"
+            ]
           }
         }
       }
@@ -139,11 +155,17 @@
       "type"
     ],
     "if": {
-      "properties": { "type": { "const": "insert" } }
+      "properties": {
+        "type": {
+          "const": "insert"
+        }
+      }
     },
     "then": {},
     "else": {
-      "required": ["blocks"]
+      "required": [
+        "blocks"
+      ]
     }
   }
 }

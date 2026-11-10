@@ -7,6 +7,8 @@ import { initBookView, onBookLangChange, searchBookView } from './views/book/boo
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
 import { initHomeControls, refreshHomeView } from './home/home.js';
 import { initOffline } from './core/offline.js';
+import { buildBlockIndex } from './core/blocks.js';
+import { getReadBlocks, saveReadBlocks, pruneUnknownReadIds } from './core/read-tracking.js';
 
 let data;
 const continuous = () => document.getElementById('continuous-container');
@@ -134,6 +136,16 @@ function activateView(mode) {
     setViewMode(mode);
 }
 
+// ── Tidy stored read ticks ───────────────────────────────────────────────
+// Progress is the number of ticks stored, so a tick whose block no longer
+// exists (deleted content, or an id from before ids became permanent) would
+// inflate it. Dropped once per load; costs nothing when there is nothing stale.
+function pruneStaleReadTicks() {
+    const { blockById } = buildBlockIndex(data);
+    const { readSet, changed } = pruneUnknownReadIds(getReadBlocks(localStorage), blockById);
+    if (changed) saveReadBlocks(readSet, localStorage);
+}
+
 // ── Boot ──────────────────────────────────────────────────────────────────
 async function init() {
     // Restore saved settings (langs/videos/QR/read-tracking all live under one key)
@@ -145,6 +157,8 @@ async function init() {
         console.error('Error loading data:', err);
         return;
     }
+
+    pruneStaleReadTicks();
 
     // ── Header controls — shared by both views ────────────────────────────
     initHeaderControls(

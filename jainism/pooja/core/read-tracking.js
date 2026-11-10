@@ -29,6 +29,21 @@ export function saveReadBlocks(readSet, storage) {
 }
 
 /**
+ * Drop read ticks whose block no longer exists (deleted content, or ids from
+ * before they became permanent). Without this, such ticks would still count
+ * toward progress, because progress is the size of the read set. Pure —
+ * returns the cleaned Set and whether anything was dropped, so the caller
+ * only writes storage when needed.
+ * @param {Set<string>} readSet
+ * @param {Object} blockById  from buildBlockIndex
+ * @returns {{readSet: Set<string>, changed: boolean}}
+ */
+export function pruneUnknownReadIds(readSet, blockById) {
+    const kept = new Set([...readSet].filter(id => Object.prototype.hasOwnProperty.call(blockById, id)));
+    return { readSet: kept, changed: kept.size !== readSet.size };
+}
+
+/**
  * Toggle a block's read state. Pure — returns a new Set, does not mutate input.
  * @param {string} blockId
  * @param {Set<string>} readSet - current read set
@@ -103,7 +118,7 @@ export function updateProgressDisplay(readSet, totalBlockCount) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        READ_BLOCKS_KEY, getReadBlocks, saveReadBlocks, toggleBlockRead,
+        READ_BLOCKS_KEY, getReadBlocks, saveReadBlocks, toggleBlockRead, pruneUnknownReadIds,
         isBlockTrackable, countTrackableBlocks, computeProgress, updateProgressDisplay,
     });
 }

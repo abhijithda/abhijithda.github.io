@@ -1,5 +1,5 @@
 const {
-    formatIdForDisplay, buildBlockIndex, resolveReference,
+    formatIdForDisplay, itemNumber, buildBlockIndex, resolveReference,
     hasLangText, langsWithText, hasAnyText, imageUrl, classifyInsert,
 } = require('./blocks');
 
@@ -14,6 +14,49 @@ describe('formatIdForDisplay', () => {
 
     test('uses "N" for a note block regardless of id prefix', () => {
         expect(formatIdForDisplay({ id: 'q_004_b_1', type: 'note' })).toBe('N-4.1');
+    });
+});
+
+describe('formatIdForDisplay with permanent ids', () => {
+    const make = () => [
+        { id: 'qa1', num: 3, type: 'question', blocks: [{ id: 'qb1', num: 1, type: 'paragraph' }] },
+        { id: 'aa1', type: 'answer', references: ['qa1'], blocks: [
+            { id: 'ab1', num: 1, type: 'paragraph' },
+            { id: 'ab2', num: 2, type: 'shloka' },
+            { id: 'ab3', num: 3, type: 'note' },
+            { id: 'ab4', num: 4, type: 'images' },
+            { id: 'ab5', num: 5, type: 'mantra' },
+        ] },
+    ];
+
+    test('label = letter-itemNumber.blockNum; the answer takes its question\'s number', () => {
+        const data = make();
+        buildBlockIndex(data);
+        expect(formatIdForDisplay(data[0].blocks[0])).toBe('Q-3.1');
+        expect(data[1].blocks.map(formatIdForDisplay))
+            .toEqual(['A-3.1', 'S-3.2', 'N-3.3', 'I-3.4', 'M-3.5']);
+    });
+
+    test('renumbering the question alone renumbers its answer; ids never change', () => {
+        const data = make();
+        const answerBlockId = data[1].blocks[0].id;
+        data[0].num = 9;
+        buildBlockIndex(data);
+        expect(data[1].blocks[0].id).toBe(answerBlockId);
+        expect(formatIdForDisplay(data[1].blocks[0])).toBe('A-9.1');
+    });
+
+    test('an answer with its own num (no question to follow) keeps it', () => {
+        expect(itemNumber({ type: 'answer', num: 20, references: ['x'] }, {})).toBe(20);
+    });
+
+    test('an explicit num on an answer wins over the question\'s', () => {
+        const itemById = { q: { type: 'question', num: 2 } };
+        expect(itemNumber({ type: 'answer', num: 7, references: ['q'] }, itemById)).toBe(7);
+    });
+
+    test('an answer replying only to blocks, with no num, has no number', () => {
+        expect(itemNumber({ type: 'answer', references: ['some_block'] }, {})).toBeUndefined();
     });
 });
 
