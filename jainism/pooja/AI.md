@@ -1089,8 +1089,11 @@ the core requirement without needing a separate render pass.
 ## Ids and numbering (Current State)
 
 - Every item and block has a **permanent, opaque id** (6 characters, e.g. `bkr39k`). It only identifies; it is
-  never renamed, so links to a block keep working when content is reordered. Get fresh ones with
-  `node scripts/new-id.js [count]`. `data.test.js` enforces format and uniqueness and that references resolve.
+  never renamed, so links to a block keep working when content is reordered. **Adding content:** write the new
+  item/block without an `id` (or copy one and delete its `id` line), then run `node scripts/new-id.js --fill`; it
+  gives every id-less item and block a fresh id and changes nothing else. (`node scripts/new-id.js 5` just prints
+  ids.) `data.test.js` fails with the fix spelled out if an id is missing, malformed or duplicated, if a `num` is
+  missing, or if a reference points at nothing.
 - The numbers readers see (`A-3.1`) come from `num`. A question has its own `num`; an **answer that references a
   question has no `num` and takes the question's**, so Q and A always share a number. An answer with no question
   to follow (e.g. one that replies to blocks of other answers) keeps its own `num`. Blocks have `num` too (the .1).
