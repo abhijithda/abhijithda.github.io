@@ -3,6 +3,7 @@ const {
     getReadBlocks,
     saveReadBlocks,
     toggleBlockRead,
+    pruneUnknownReadIds,
     isBlockTrackable,
     countTrackableBlocks,
     computeProgress,
@@ -142,5 +143,27 @@ describe('countTrackableBlocks', () => {
     test('items without blocks, and an empty book, count zero', () => {
         expect(countTrackableBlocks([{ id: 'a_1', type: 'answer' }])).toBe(0);
         expect(countTrackableBlocks([])).toBe(0);
+    });
+});
+
+describe('pruneUnknownReadIds', () => {
+    const blockById = { bw4n8c: {}, pq3w7a: {} };
+
+    test('drops ticks for blocks that no longer exist (e.g. old position-based ids) and reports a change', () => {
+        const { readSet, changed } = pruneUnknownReadIds(new Set(['bw4n8c', 'a_003_b_1']), blockById);
+        expect([...readSet]).toEqual(['bw4n8c']);
+        expect(changed).toBe(true);
+    });
+
+    test('keeps everything and reports no change when every tick is still valid', () => {
+        const { readSet, changed } = pruneUnknownReadIds(new Set(['bw4n8c', 'pq3w7a']), blockById);
+        expect(readSet.size).toBe(2);
+        expect(changed).toBe(false);
+    });
+
+    test('does not mutate its input', () => {
+        const input = new Set(['a_003_b_1']);
+        pruneUnknownReadIds(input, blockById);
+        expect([...input]).toEqual(['a_003_b_1']);
     });
 });

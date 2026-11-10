@@ -5,14 +5,54 @@
 
 import { LANG_CODES } from './langs.js';
 
+// Display labels, computed once per dataset by buildBlockIndex (a block does
+// not know its parent item's type or number, which its label needs). A
+// WeakMap keeps this out of the data and lets labels vanish with the blocks.
+const labelOf = new WeakMap();
+
+// Label letter by block type; plain paragraphs take their item's initial (Q / A).
+const BLOCK_LETTERS = { shloka: 'S', note: 'N', images: 'I', mantra: 'M' };
+
+/**
+ * The number shown for an item in labels (the 3 in A-3.1).
+ * An item's own `num` wins. An answer without one takes the number of the
+ * question it replies to (the first item in its `references` that is a
+ * question), so a question and its answer always share a number and only the
+ * question needs renumbering when content is reordered.
+ * @param {Object} item
+ * @param {Object} itemById
+ * @returns {number|undefined}
+ */
+export function itemNumber(item, itemById) {
+    if (item.num !== undefined) return item.num;
+    if (item.type === 'answer') {
+        for (const refId of item.references || []) {
+            const target = itemById[refId];
+            if (target && target.type === 'question' && target.num !== undefined) return target.num;
+        }
+    }
+    return undefined;
+}
+
+function computeLabel(item, number, block) {
+    const letter = BLOCK_LETTERS[block.type] || (item.type ? item.type[0] : 'x');
+    return `${letter.toUpperCase()}-${number}.${block.num}`;
+}
+
 /**
  * Format a block's short display label, e.g. "A-3.1" for an answer block,
- * "S-3.2" for a shloka, "N-4.1" for a note (type overrides the id's own
- * first letter for these two).
+ * "S-3.2" for a shloka, "N-4.1" for a note.
+ *
+ * Ids are opaque and permanent (they only identify); the numbers shown come
+ * from the item's number (see itemNumber) and the block's `num`. Labels are
+ * computed by buildBlockIndex(data), so call that first. Legacy ids of the
+ * form "a_003_b_1" (the e2e fixtures) still work: with no computed label, the
+ * number and letter are read from the id itself.
  * @param {Object} block
  * @returns {string}
  */
 export function formatIdForDisplay(block) {
+    if (labelOf.has(block)) return labelOf.get(block);
     let typeInitial = block.id[0].toUpperCase();
     if (block.type === 'shloka') typeInitial = 'S';
     else if (block.type === 'note') typeInitial = 'N';
@@ -35,6 +75,15 @@ export function buildBlockIndex(data) {
     data.forEach(item => {
         itemById[item.id] = item;
         (item.blocks || []).forEach(block => { blockById[block.id] = block; });
+    });
+    // Second pass: labels need every item indexed first (an answer's number
+    // comes from the question it replies to).
+    data.forEach(item => {
+        const number = itemNumber(item, itemById);
+        if (number === undefined) return;
+        (item.blocks || []).forEach(block => {
+            if (block.num !== undefined) labelOf.set(block, computeLabel(item, number, block));
+        });
     });
     return { blockById, itemById };
 }
@@ -128,7 +177,7 @@ export function classifyInsert(item, activeLangs = LANG_CODES) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        formatIdForDisplay, buildBlockIndex, resolveReference,
+        formatIdForDisplay, itemNumber, buildBlockIndex, resolveReference,
         hasLangText, langsWithText, hasAnyText, imageUrl, classifyInsert,
     });
 }

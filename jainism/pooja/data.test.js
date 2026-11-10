@@ -73,4 +73,39 @@ describe('Data Layer Validation', () => {
     const missing = local.filter((s) => !fs.existsSync(path.join(__dirname, 'images', s)));
     expect(missing).toEqual([]);
   });
+
+  describe('permanent ids (shared links depend on these never changing)', () => {
+    const { ID_PATTERN } = require('./scripts/new-id');
+    const { itemNumber } = require('./core/blocks');
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
+    const everyId = data.flatMap((item) => [item.id, ...(item.blocks || []).map((b) => b.id)]);
+    const itemById = Object.fromEntries(data.map((i) => [i.id, i]));
+
+    test('every item and block id is opaque, well-formed and unique across the whole file', () => {
+      expect(everyId.filter((id) => !ID_PATTERN.test(id))).toEqual([]);
+      const dupes = everyId.filter((id, i) => everyId.indexOf(id) !== i);
+      expect(dupes).toEqual([]);
+    });
+
+    test('every item resolves to a number and every block has a num (they drive the A-3.1 style labels)', () => {
+      const badItems = data.filter((i) => itemNumber(i, itemById) === undefined).map((i) => i.id);
+      const badBlocks = data.flatMap((i) => (i.blocks || []).filter((b) => !Number.isInteger(b.num)).map((b) => b.id));
+      expect([...badItems, ...badBlocks]).toEqual([]);
+    });
+
+    test('an answer never carries a number that differs from the question it replies to', () => {
+      const clashes = data.filter((i) => {
+        if (i.type !== 'answer' || i.num === undefined) return false;
+        const q = (i.references || []).map((r) => itemById[r]).find((t) => t && t.type === 'question');
+        return q && q.num !== i.num;
+      }).map((i) => i.id);
+      expect(clashes).toEqual([]);
+    });
+
+    test('every reference points at an item or block that exists', () => {
+      const known = new Set(everyId);
+      const broken = data.flatMap((i) => (i.references || []).filter((r) => !known.has(r)).map((r) => `${i.id} -> ${r}`));
+      expect(broken).toEqual([]);
+    });
+  });
 });

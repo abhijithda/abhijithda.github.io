@@ -1083,3 +1083,18 @@ A hidden `#book-print-container` pre-rendering every spread with explicit
 page breaks, QR codes enlarged to 80px, greyscale video thumbnails. Superseded
 by the CSS-reflow approach that's actually shipped, which already satisfies
 the core requirement without needing a separate render pass.
+
+---
+
+## Ids and numbering (Current State)
+
+- Every item and block has a **permanent, opaque id** (6 characters, e.g. `bkr39k`). It only identifies; it is
+  never renamed, so links to a block keep working when content is reordered. Get fresh ones with
+  `node scripts/new-id.js [count]`. `data.test.js` enforces format and uniqueness and that references resolve.
+- The numbers readers see (`A-3.1`) come from `num`. A question has its own `num`; an **answer that references a
+  question has no `num` and takes the question's**, so Q and A always share a number. An answer with no question
+  to follow (e.g. one that replies to blocks of other answers) keeps its own `num`. Blocks have `num` too (the .1).
+  The label letter comes from the block/item type (S shloka, N note, I images, M mantra; otherwise Q / A).
+- Reordering = move the objects in `data.json` and edit the questions' `num` (and any standalone answers').
+- Read ticks are stored by block id. On load, ticks whose block no longer exists are dropped
+  (`pruneUnknownReadIds`), otherwise they would inflate the progress count.
