@@ -60,6 +60,18 @@ describe('formatIdForDisplay with permanent ids', () => {
     });
 });
 
+describe('formatIdForDisplay without a computed label', () => {
+    test('a permanent id that was never indexed (or has no num) shows "?", not NaN', () => {
+        expect(formatIdForDisplay({ id: 'qkdn2f', type: 'images' })).toBe('?');
+        const data = [{ id: 'it1', type: 'answer', blocks: [{ id: 'bk1', type: 'paragraph' }] }];   // no nums
+        buildBlockIndex(data);
+        expect(formatIdForDisplay(data[0].blocks[0])).toBe('?');
+    });
+    test('old-style ids still read their label from the id', () => {
+        expect(formatIdForDisplay({ id: 'a_003_b_1', type: 'paragraph' })).toBe('A-3.1');
+    });
+});
+
 describe('buildBlockIndex', () => {
     const data = [
         { id: 'q_001', blocks: [{ id: 'q_001_b_1' }, { id: 'q_001_b_2' }] },
