@@ -55,3 +55,59 @@ Alignment: Media containers must use line-height: 0 to prevent the common browse
 Compact View: Hide header, search bar, and UI toggles.
 Column Preservation: Force text to stay in row format (display: flex) even on paper, but ensure a min-width so words don't break into single characters.
 Ink Optimization: Hide media columns for paragraphs that don't have active Video/QR content to reduce total page count.
+
+
+## Offline use and link preview
+
+### Offline use
+
+`sw.js` is a service worker that lets the book be opened with no signal after
+one visit on a good connection. What it does:
+
+- **Saves the app itself.** On install it crawls `index.html` → its `<script>`
+  and `<link>` tags → every module each script imports → every `url()` in the
+  CSS, and saves all of it plus `data.json`. There is no file list to maintain;
+  a new module is picked up the next time the worker updates.
+- **Saves the pictures.** After activating, it saves every image `data.json`
+  uses, one at a time. A missing image is reported but never breaks the rest.
+- **Shows progress on Home.** One line under the progress counter: *Saving a
+  copy…*, *Ready to use offline*, *Offline copy incomplete*, or *You're offline —
+  showing the copy saved on this device*.
+- **Online readers always get the latest.** Pages, scripts, styles and
+  `data.json` are network-first; the saved copy is used when offline or when
+  the network does not answer within 3 seconds. After one timeout the saved
+  copy is used straight away for 30 seconds (otherwise each file in the page's
+  load chain would wait its own 3 seconds).
+- **Leaves other sites alone.** YouTube thumbnails and the QR-code service are
+  not saved, so offline they show as empty boxes; videos need a connection anyway.
+
+Things to know:
+
+- A device has to open the site **once online** (and stay on Home until the
+  line says *Ready*). That is the whole setup.
+- **iPhone/iPad:** Safari may delete a website's saved data after about a week
+  of not using it (unless the site is added to the Home Screen). Offline can
+  therefore quietly disappear for someone who opens the book rarely.
+- Change `VERSION` at the top of `sw.js` to make every device discard its saved
+  copy and download everything again. Normal content changes don't need it.
+- It only runs over https or `localhost`, and is skipped under automation
+  (Playwright, Puppeteer, `scripts/render-prints.js`) so it can't interfere with
+  mocked requests or print rendering. Tests that need it open `/?sw=on`
+  (`test/e2e/core/offline.test.js`).
+- To reset while developing: DevTools → Application → Service Workers →
+  *Unregister*, and Storage → *Clear site data*.
+
+### Link preview (WhatsApp, Facebook, Telegram, X)
+
+The `<meta property="og:…">` tags in `index.html` give shared links a title,
+description and picture, using `images/og-image.jpg` (1200×630, about 160 KB: WhatsApp
+may ignore images much over ~300 KB). Chat apps read these tags from the raw
+HTML and never run JavaScript, so they can't be generated in the browser. The
+only address that has to be written out is the one in `og:image`, which must be
+an absolute https URL (`https://abhijithda.github.io/jainism/pooja/images/og-image.jpg`).
+If the site moves, change that one line. `og:url` is left out on purpose
+(optional), and X reuses the `og:` title, description and image.
+
+Chat apps remember a link's preview. After changing `images/og-image.jpg` or the text,
+an already-shared link can keep the old preview for days; sharing the link with
+a changed ending (`…/pooja/?v=2`) shows the new one straight away.

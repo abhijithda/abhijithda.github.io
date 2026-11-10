@@ -6,6 +6,7 @@ import { renderContinuousView, filterContinuous, goBackToMessage } from './views
 import { initBookView, onBookLangChange, searchBookView } from './views/book/book-view.js';
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
 import { initHomeControls, refreshHomeView } from './home/home.js';
+import { initOffline } from './core/offline.js';
 
 let data;
 const continuous = () => document.getElementById('continuous-container');
@@ -232,3 +233,8 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+
+// Offline use: registers sw.js and keeps the status line on Home up to date.
+// Independent of init() on purpose — if data.json can't be loaded right now,
+// the saved copy is exactly what should be set up or repaired.
+initOffline();
