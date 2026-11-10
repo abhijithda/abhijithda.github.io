@@ -1101,3 +1101,21 @@ the core requirement without needing a separate render pass.
 - Reordering = move the objects in `data.json` and edit the questions' `num` (and any standalone answers').
 - Read ticks are stored by block id. On load, ticks whose block no longer exists are dropped
   (`pruneUnknownReadIds`), otherwise they would inflate the progress count.
+
+---
+
+## Share links (Current State)
+
+- Link = page address + `#/s/<id>[,<id>…]` (hash routing: the site is static, no server to route paths). An **item id**
+  shows the whole card; a **block id** shows just that block. Ids only — never numbers — so reordering never breaks links.
+- `core/share.js` (pure: parse/build links, what a link resolves to), `core/share-ui.js` (the share icon and the sheet:
+  bottom sheet on phones, popover beside the icon on wide screens; Copy link, native "Share…" where the browser has it),
+  `core/share.css`. Icons: every block in both views, plus one per card in continuous view. Hidden in print.
+- The page a link opens (`renderSharedView` in `app.js`) is the continuous renderer fed only the shared items, with
+  `opts.indexData` = full data so labels (A-3.2) and the question excerpt above a shared answer still resolve. It has a
+  plain-text title bar and **no header, Home, book view or links** — and it never touches the visitor's saved
+  `lastScreen` / `viewMode` / scroll / read ticks. Editing the hash while open reloads the page into the right mode.
+- Not a secret: `data.json` is still public and anyone can open the site's root address. This only controls what a
+  shared link shows.
+- Not built yet: per-block link previews for WhatsApp etc. (those apps ignore everything after `#`; needs a generated
+  static page per block).

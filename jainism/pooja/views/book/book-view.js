@@ -3,6 +3,7 @@
 import { createVideoCard } from '../../core/media.js';
 import { getReadBlocks, isBlockTrackable, countTrackableBlocks, updateProgressDisplay } from '../../core/read-tracking.js';
 import { buildReadTick } from '../../core/read-tick.js';
+import { buildShareButton } from '../../core/share-ui.js';
 import { formatIdForDisplay, resolveReference, buildBlockIndex, classifyInsert, langsWithText, imageUrl } from '../../core/blocks.js';
 
 const state = {
@@ -131,6 +132,8 @@ function createBookCard(entry, activeLangs, readBlocks) {
             totalBlockCount: state.totalBlockCount,
         }));
     }
+
+    card.appendChild(buildShareButton({ blockId: block.id }));
 
     return card;
 }

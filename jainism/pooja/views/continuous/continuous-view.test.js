@@ -273,3 +273,36 @@ describe('renderContinuousView against the real test/data.json fixture', () => {
         expect(document.getElementById('a_001').querySelector('.reply-excerpt')).not.toBeNull();
     });
 });
+
+describe('renderContinuousView for a share link (partial data + opts.indexData)', () => {
+    const full = () => [
+        { id: 'qa1', num: 3, type: 'question', blocks: [
+            { id: 'qb1', num: 1, type: 'paragraph', content: { kn: [], en: ['Why do we do pooja?'] } }] },
+        { id: 'aa1', type: 'answer', references: ['qa1'], blocks: [
+            { id: 'ab1', num: 1, type: 'paragraph', content: { kn: [], en: ['First answer'] } },
+            { id: 'ab2', num: 2, type: 'paragraph', content: { kn: [], en: ['Second answer'] } }] },
+    ];
+
+    test('shows only the shared block, with its A-3.2 label and its question as the excerpt', () => {
+        const data = full();
+        const shared = [{ ...data[1], blocks: [data[1].blocks[1]] }];
+        const container = document.getElementById('continuous-container');
+        renderContinuousView(shared, container, 'en', { indexData: data });
+        expect(container.querySelectorAll('.card')).toHaveLength(1);
+        expect(container.textContent).toContain('Second answer');
+        expect(container.textContent).not.toContain('First answer');
+        // (jsdom has no innerText layout; the view sets innerText, so read it back the same way)
+        expect(container.querySelector('.card > .block-row .block-id').innerText).toBe('A-3.2');
+        expect(container.querySelector('.reply-excerpt').textContent).toContain('Why do we do pooja?');
+        expect(container.querySelector('.reply-excerpt .block-id').innerText).toBe('Q-3.1');
+    });
+
+    test('every normal card gets a whole-item share icon and every block a block share icon', () => {
+        const data = full();
+        const container = document.getElementById('continuous-container');
+        renderContinuousView(data, container, 'en');
+        expect(container.querySelectorAll('.card > .share-btn.share-item')).toHaveLength(2);
+        expect(container.querySelectorAll('.card > .block-row .share-btn')).toHaveLength(3);
+    });
+});
+
