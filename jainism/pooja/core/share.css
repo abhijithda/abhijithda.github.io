@@ -21,7 +21,9 @@
 .share-btn::before {            /* bigger tap target without changing layout */
     content: '';
     position: absolute;
-    inset: -8px;
+    /* top right bottom left — right is 0 on purpose: the icon sits 2-3px from the
+       edge of its card, so any extension past it makes the page scroll sideways */
+    inset: -8px 0 -8px -8px;
 }
 .share-btn:hover, .share-btn:focus-visible { opacity: 1; background: rgba(0, 0, 0, 0.06); }
 .card > .share-btn.share-item { top: 0; right: 3px; padding: 0; }

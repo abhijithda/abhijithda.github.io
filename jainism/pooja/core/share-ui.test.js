@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { setShareData, buildShareButton, openShareSheet } = require('./share-ui');
 
 const data = () => [
@@ -102,3 +104,16 @@ describe('share sheet', () => {
         expect(navigator.share).toHaveBeenCalledWith(expect.objectContaining({ url: link() }));
     });
 });
+
+describe('share.css', () => {
+    test('the tap-target area never extends past the right edge of the icon (it caused a sideways scroll at phone widths)', () => {
+        const css = fs.readFileSync(path.join(__dirname, 'share.css'), 'utf8');
+        const rule = css.match(/\.share-btn::before\s*{([^}]*)}/)[1];
+        const [top, right, bottom, left] = rule.match(/inset:\s*([^;]+);/)[1].trim().split(/\s+/);
+        expect(right).toMatch(/^0(px)?$/);
+        expect(parseInt(top, 10)).toBeLessThan(0);   // still a bigger target above, below and to the left
+        expect(parseInt(bottom, 10)).toBeLessThan(0);
+        expect(parseInt(left, 10)).toBeLessThan(0);
+    });
+});
+
