@@ -113,12 +113,14 @@ function renderSettingsMirror() {
     const videos = document.getElementById('home-toggle-videos');
     const qrs = document.getElementById('home-toggle-qrs');
     const readTracking = document.getElementById('home-toggle-read-tracking');
+    const offline = document.getElementById('home-toggle-offline');
     const paperSize = document.getElementById('home-paper-size-select');
     const fontDisplay = document.getElementById('home-font-scale-display');
 
     if (videos) videos.checked = saved.videos;
     if (qrs) qrs.checked = saved.qrs;
     if (readTracking) readTracking.checked = saved.readTracking;
+    if (offline) offline.checked = saved.offline;
     if (paperSize) paperSize.value = saved.paperSize;
     if (fontDisplay) fontDisplay.textContent = `${Math.round(saved.fontScale * 100)}%`;
 
@@ -149,6 +151,9 @@ export function initHomeControls(data) {
     });
     document.getElementById('home-toggle-read-tracking')?.addEventListener('change', (e) => {
         proxyToHeader('toggle-read-tracking', (headerChk) => { headerChk.checked = e.target.checked; });
+    });
+    document.getElementById('home-toggle-offline')?.addEventListener('change', (e) => {
+        proxyToHeader('toggle-offline', (headerChk) => { headerChk.checked = e.target.checked; });
     });
     document.getElementById('home-paper-size-select')?.addEventListener('change', (e) => {
         proxyToHeader('paper-size-select', (headerSelect) => { headerSelect.value = e.target.value; });

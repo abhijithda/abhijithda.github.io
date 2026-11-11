@@ -1,6 +1,6 @@
 // core/settings.js — The single unified `settings` object: one
 // localStorage key, one load/save pair, for every persisted preference
-// (languages, videos, QR codes, read-tracking, paper size, font scale).
+// (languages, videos, QR codes, read-tracking, offline copy, paper size, font scale).
 // Feature modules (paper-size.js, font-scale.js, the lang picker in
 // header.js) read/write through loadSettings()/saveSettings() here rather
 // than owning storage of their own — so any caller can save "everything",
@@ -57,6 +57,9 @@ export function loadSettings() {
         videos:       typeof saved?.videos       === 'boolean' ? saved.videos       : true,
         qrs:          typeof saved?.qrs          === 'boolean' ? saved.qrs          : true,
         readTracking: typeof saved?.readTracking === 'boolean' ? saved.readTracking : false,
+        // Off by default: saving the book for offline use downloads a few MB, so
+        // it only starts when the reader turns it on (see core/offline.js).
+        offline:      typeof saved?.offline      === 'boolean' ? saved.offline      : false,
         paperSize,
         fontScale,
     };

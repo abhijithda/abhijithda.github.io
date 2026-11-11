@@ -18,14 +18,14 @@ beforeEach(() => {
 
 describe('loadSettings / saveSettings', () => {
     test('defaults every field when nothing has ever been saved', () => {
-        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: true, readTracking: false, ...DEFAULT_PAPER_FONT });
+        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: true, readTracking: false, offline: false, ...DEFAULT_PAPER_FONT });
     });
 
     test('saveSettings merges a partial update into the existing saved settings', () => {
         saveSettings({ qrs: true });
         saveSettings({ readTracking: true });
 
-        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: true, readTracking: true, ...DEFAULT_PAPER_FONT });
+        expect(loadSettings()).toEqual({ langs: ['kn', 'en'], videos: true, qrs: true, readTracking: true, offline: false, ...DEFAULT_PAPER_FONT });
     });
 
     test('drops unknown/stale lang codes and falls back to defaults if none remain valid', () => {
@@ -64,8 +64,16 @@ describe('loadSettings / saveSettings', () => {
         expect(localStorage.length).toBe(1);
         const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
         expect(raw).toEqual({
-            langs: ['kn', 'en'], videos: true, readTracking: false,
+            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false,
             qrs: true, fontScale: 1.1, paperSize: 'a3',
         });
+    });
+
+    test('offline copy is off by default, can be turned on, and ignores junk values', () => {
+        expect(loadSettings().offline).toBe(false);
+        saveSettings({ offline: true });
+        expect(loadSettings().offline).toBe(true);
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ offline: 'yes' }));
+        expect(loadSettings().offline).toBe(false);
     });
 });

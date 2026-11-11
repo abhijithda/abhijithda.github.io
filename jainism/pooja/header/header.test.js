@@ -13,7 +13,7 @@ const {
 } = require('./header');
 
 // Every assertion below that checks the full loadSettings() object includes
-// these two defaults alongside langs/videos/qrs/readTracking. Paper size and
+// these two defaults alongside langs/videos/qrs/readTracking/offline. Paper size and
 // font scale each have their own module and their own test file — see
 // paper-size.test.js and font-scale.test.js — and the shared schema/
 // validation behind both lives in settings.js, tested in settings.test.js.
@@ -79,7 +79,7 @@ describe('getActiveLangs / saveActiveLangs', () => {
         saveActiveLangs(['en']);
 
         const saved = loadSettings();
-        expect(saved).toEqual({ langs: ['en'], videos: false, qrs: true, readTracking: true, ...DEFAULT_PAPER_FONT });
+        expect(saved).toEqual({ langs: ['en'], videos: false, qrs: true, readTracking: true, offline: false, ...DEFAULT_PAPER_FONT });
     });
 });
 
