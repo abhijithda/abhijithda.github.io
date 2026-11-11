@@ -7,6 +7,7 @@ import { getReadBlocks, isBlockTrackable, countTrackableBlocks, updateProgressDi
 import { buildReadTick } from '../../core/read-tick.js';
 import { formatIdForDisplay, buildBlockIndex, resolveReference, classifyInsert, hasAnyText, langsWithText, imageUrl } from '../../core/blocks.js';
 import { activeLangCodes } from '../../core/langs.js';
+import { buildShareButton } from '../../core/share-ui.js';
 
 // ── Back-navigation stack (verbatim from master) ──────────────────────────
 let backStack = [];
@@ -37,15 +38,19 @@ export function filterContinuous(query) {
 }
 
 // ── Main render (verbatim from master's renderChat) ───────────────────────
-export function renderContinuousView(data, container, lang = 'all') {
+// `opts.indexData`: the full dataset, when `data` is only part of it (the page a
+// share link opens). Labels and reply excerpts are resolved against the full
+// data, so a shared answer still shows its question and its A-3.1 label.
+export function renderContinuousView(data, container, lang = 'all', opts = {}) {
     if (!container) return;
     container.innerHTML = '';
     backStack = [];
 
-    const { blockById, itemById } = buildBlockIndex(data);
+    const indexData = opts.indexData || data;
+    const { blockById, itemById } = buildBlockIndex(indexData);
 
     const readBlocks      = getReadBlocks(localStorage);
-    const totalBlockCount = countTrackableBlocks(data);
+    const totalBlockCount = countTrackableBlocks(indexData);
     const langs           = activeLangCodes(lang);   // 'kn' | 'en' | 'all' -> ['kn'] | ['en'] | ['kn','en']
 
     data.forEach(item => {
@@ -187,6 +192,9 @@ export function renderContinuousView(data, container, lang = 'all') {
             if (excerptContainer.children.length > 0) card.appendChild(excerptContainer);
         }
 
+        // Share the whole item (not for covers/dividers, which are `insert` items)
+        if (item.type !== 'insert') card.appendChild(buildShareButton({ itemId: item.id }));
+
         // Blocks (verbatim from master's renderChat block loop)
         item.blocks.forEach(block => {
             const row = document.createElement('div');
@@ -255,6 +263,8 @@ export function renderContinuousView(data, container, lang = 'all') {
                     onToggle: nowRead => row.classList.toggle('read', nowRead),
                 }));
             }
+
+            row.appendChild(buildShareButton({ blockId: block.id }));
 
             card.appendChild(row);
         });

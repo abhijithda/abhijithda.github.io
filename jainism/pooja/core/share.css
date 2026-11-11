@@ -1,0 +1,102 @@
+/* share.css — Share icons, the share sheet, and the page a share link opens. */
+
+/* ── Icons ── */
+.share-btn {
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #7a2e1f;
+    opacity: 0.45;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.share-btn::before {            /* bigger tap target without changing layout */
+    content: '';
+    position: absolute;
+    /* top right bottom left — right is 0 on purpose: the icon sits 2-3px from the
+       edge of its card, so any extension past it makes the page scroll sideways */
+    inset: -8px 0 -8px -8px;
+}
+.share-btn:hover, .share-btn:focus-visible { opacity: 1; background: rgba(0, 0, 0, 0.06); }
+.card > .share-btn.share-item { top: 0; right: 3px; padding: 0; }
+.book-card .share-btn { width: 18px; height: 18px; top: 2px; right: 2px; }
+.book-card .share-btn svg { width: 12px; height: 12px; }
+
+/* ── Sheet ── */
+.share-backdrop { position: fixed; inset: 0; background: rgba(43, 33, 24, 0.45); z-index: 2000; }
+.share-sheet {
+    position: fixed;
+    z-index: 2001;
+    left: 0; right: 0; bottom: 0;
+    box-sizing: border-box;
+    padding: 18px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+    background: #fbf6ec;
+    color: #2b2118;
+    border-radius: 18px 18px 0 0;
+    font: 15px/1.4 system-ui, sans-serif;
+}
+@media (min-width: 700px) {
+    .share-sheet {
+        right: auto; bottom: auto;
+        width: 340px;
+        padding-bottom: 18px;
+        border: 1px solid #d9c9aa;
+        border-radius: 12px;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+    }
+    .share-backdrop { background: rgba(43, 33, 24, 0.15); }
+}
+.share-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.share-title { font-size: 18px; font-weight: 600; }
+.share-close { width: 40px; height: 40px; border: 0; background: transparent; font-size: 18px; color: #7a2e1f; cursor: pointer; }
+.share-choices { display: flex; gap: 8px; margin-bottom: 12px; }
+.share-choice {
+    flex: 1; min-height: 44px; padding: 6px 8px;
+    border: 1px solid #cdbb9c; border-radius: 10px; background: #fff;
+    color: inherit; font: 600 14px system-ui, sans-serif; cursor: pointer;
+}
+.share-choice[aria-pressed="true"] { border: 2px solid #7a2e1f; background: #f4e2c4; }
+.share-link-label { display: block; font-size: 13px; color: #6b5b4a; }
+.share-link {
+    display: block; width: 100%; box-sizing: border-box; min-height: 44px; margin: 4px 0 12px; padding: 0 12px;
+    border: 1px solid #cdbb9c; border-radius: 10px; background: #fff; color: inherit;
+    font: 14px ui-monospace, monospace;
+}
+.share-actions { display: flex; gap: 8px; }
+.share-primary, .share-secondary {
+    flex: 1; min-height: 48px; border-radius: 10px; font: 600 15px system-ui, sans-serif; cursor: pointer;
+}
+.share-primary { border: 0; background: #7a2e1f; color: #fbf6ec; }
+.share-secondary { border: 1px solid #7a2e1f; background: transparent; color: #7a2e1f; }
+.share-status { min-height: 1.4em; margin: 10px 0 0; font-size: 13px; color: #6b5b4a; }
+
+/* ── The page a share link opens: only the shared card(s), no way into the rest ── */
+.shared-bar {
+    padding: 14px 16px;
+    text-align: center;
+    font-weight: 600;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+}
+body.shared-view .app-header,
+body.shared-view #home-view,
+body.shared-view #book-container,
+body.shared-view #back-to-message,
+body.shared-view #zen-exit-btn,
+body.shared-view #zen-peek-btn { display: none !important; }
+body.shared-view .read-tick,
+body.shared-view .share-btn { display: none !important; }
+body.shared-view #continuous-container { margin: 16px auto; padding: 0 12px; box-sizing: border-box; }
+.shared-empty { text-align: center; color: #6b5b4a; margin: 40px 16px; }
+
+@media print {
+    .share-btn, .share-backdrop, .share-sheet { display: none !important; }
+}

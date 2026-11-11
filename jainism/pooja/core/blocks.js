@@ -47,12 +47,15 @@ function computeLabel(item, number, block) {
  * from the item's number (see itemNumber) and the block's `num`. Labels are
  * computed by buildBlockIndex(data), so call that first. Legacy ids of the
  * form "a_003_b_1" (the e2e fixtures) still work: with no computed label, the
- * number and letter are read from the id itself.
+ * number and letter are read from the id itself; any other id shows "?".
  * @param {Object} block
  * @returns {string}
  */
 export function formatIdForDisplay(block) {
     if (labelOf.has(block)) return labelOf.get(block);
+    // Not indexed (or its item/block has no number): only an old-style id
+    // carries a number to read. Anything else shows "?", never "Q-NaN.undefined".
+    if (!/^[a-z]_\d+_b_\d+$/.test(block.id)) return '?';
     let typeInitial = block.id[0].toUpperCase();
     if (block.type === 'shloka') typeInitial = 'S';
     else if (block.type === 'note') typeInitial = 'N';

@@ -8,6 +8,8 @@ import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLang
 import { initHomeControls, refreshHomeView } from './home/home.js';
 import { initOffline } from './core/offline.js';
 import { buildBlockIndex } from './core/blocks.js';
+import { parseShareHash, resolveShared } from './core/share.js';
+import { setShareData } from './core/share-ui.js';
 import { getReadBlocks, saveReadBlocks, pruneUnknownReadIds } from './core/read-tracking.js';
 
 let data;
@@ -136,6 +138,42 @@ function activateView(mode) {
     setViewMode(mode);
 }
 
+// ── Page a share link opens ───────────────────────────────────────────────
+// Shows only the shared item(s)/block(s) — a shared answer with its question as
+// a muted excerpt above it — and nothing that leads elsewhere: no header, no
+// Home, no book view. Deliberately touches none of the visitor's saved state
+// (lastScreen, viewMode, scroll position, read ticks).
+function renderSharedView(ids) {
+    document.body.classList.add('shared-view');
+    const cssBook = document.getElementById('css-book');
+    if (cssBook) cssBook.disabled = true;
+    const bar = document.getElementById('shared-bar');
+    if (bar) bar.hidden = false;
+
+    const container = continuous();
+    container.style.display = 'flex';
+    const { items } = resolveShared(data, ids);
+    if (items.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'shared-empty';
+        p.textContent = 'This link doesn\u2019t match anything. It may have been moved or removed.';
+        container.replaceChildren(p);
+        return;
+    }
+    const activeLangs = getActiveLangs();
+    const cLang = activeLangs.length === 1 ? activeLangs[0] : 'all';
+    renderContinuousView(items, container, cLang, { indexData: data });
+    updateMediaVisibility();
+}
+
+// Opening or editing a share link while the page is already open must switch
+// modes, which is simplest and safest as a reload.
+window.addEventListener('hashchange', () => {
+    if (document.body.classList.contains('shared-view') || parseShareHash(location.hash)) {
+        location.reload();
+    }
+});
+
 // ── Tidy stored read ticks ───────────────────────────────────────────────
 // Progress is the number of ticks stored, so a tick whose block no longer
 // exists (deleted content, or an id from before ids became permanent) would
@@ -157,6 +195,13 @@ async function init() {
         console.error('Error loading data:', err);
         return;
     }
+
+    const sharedIds = parseShareHash(location.hash);
+    if (sharedIds) {
+        renderSharedView(sharedIds);
+        return;
+    }
+    setShareData(data);
 
     pruneStaleReadTicks();
 
