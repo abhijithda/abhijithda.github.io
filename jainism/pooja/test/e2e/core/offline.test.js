@@ -84,6 +84,57 @@ test.describe('Offline copy (opt-in service worker)', () => {
         expect(await savedState(page)).toEqual({ registrations: 0, caches: [] });
     });
 
+    // The status line flickered between "Saving… 7/7" and "incomplete — 0 pictures
+    // not saved yet" when the browser handed back a worker that was switched off, or
+    // whose app files were gone: every "incomplete" made the page ask for a retry
+    // that could not fix it. These guard both ways into that state.
+    test('turning it off and straight back on, without reloading, still saves a copy', async ({ page }) => {
+        test.setTimeout(60000);
+        await page.goto('/?sw=on');
+        await toggleOfflineCopy(page);
+        await expect(page.locator('#home-offline-status')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+
+        await toggleOfflineCopy(page);                    // off
+        await toggleOfflineCopy(page);                    // and on again, same page
+        await expect(page.locator('#home-offline-status')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+
+        const saved = await page.evaluate(async () => {
+            const shell = await (await caches.open('pooja-shell-v1')).keys();
+            return shell.map(r => new URL(r.url).pathname);
+        });
+        expect(saved.some(p => p.endsWith('/index.html'))).toBe(true);
+        expect(saved.some(p => p.endsWith('/data.json'))).toBe(true);
+    });
+
+    test('if the saved app files go missing it repairs itself and the status settles (no flicker)', async ({ page }) => {
+        test.setTimeout(60000);
+        await page.goto('/?sw=on');
+        await toggleOfflineCopy(page);
+        await expect(page.locator('#home-offline-status')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+
+        // app files gone, pictures still saved: the state seen in the bug reports
+        await page.evaluate(() => caches.delete('pooja-shell-v1'));
+        await page.evaluate(() => {
+            window.__stateChanges = 0;
+            new MutationObserver(() => { window.__stateChanges += 1; })
+                .observe(document.getElementById('home-offline-status'), { attributes: true, attributeFilter: ['data-state'] });
+        });
+        await page.reload();
+        await page.evaluate(() => {
+            window.__stateChanges = 0;
+            new MutationObserver(() => { window.__stateChanges += 1; })
+                .observe(document.getElementById('home-offline-status'), { attributes: true, attributeFilter: ['data-state'] });
+        });
+        await expect(page.locator('#home-offline-status')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+        await page.waitForTimeout(3000);                  // a loop would keep changing it
+        expect(await page.evaluate(() => window.__stateChanges)).toBeLessThanOrEqual(4);
+        const hasIndex = await page.evaluate(async () => {
+            const keys = await (await caches.open('pooja-shell-v1')).keys();
+            return keys.some(r => r.url.endsWith('/index.html'));
+        });
+        expect(hasIndex).toBe(true);
+    });
+
     test('is not registered when the page is opened by automation without ?sw=on', async ({ page }) => {
         await page.goto('/');
         const count = await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length);

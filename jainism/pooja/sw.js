@@ -144,25 +144,35 @@ function imageUrlsFromData(text) {
     return [...urls];
 }
 
+async function shellPresent() {
+    if (!(await caches.has(SHELL_CACHE))) return false;
+    const shell = await caches.open(SHELL_CACHE);
+    return !!(await shell.match(INDEX_URL)) && !!(await shell.match(DATA_URL));
+}
+
 async function savedImageUrls() {
+    if (!(await caches.has(SHELL_CACHE))) return [];
     const shell = await caches.open(SHELL_CACHE);
     const res = await shell.match(DATA_URL);
     return res ? imageUrlsFromData(await res.text()) : [];
 }
 
+// caches.open() quietly creates a cache that doesn't exist, so check with
+// caches.has() first: a report must never "repair" the thing it is reporting on.
 async function status() {
-    // caches.open() would quietly re-create a cache that was just deleted
     if (disabled) return { type: 'offline-status', state: 'off', done: 0, total: 0 };
-    const shell = await caches.open(SHELL_CACHE);
-    const haveShell = !!(await shell.match(INDEX_URL)) && !!(await shell.match(DATA_URL));
+    const haveShell = await shellPresent();
     const urls = await savedImageUrls();
-    const images = await caches.open(IMAGE_CACHE);
     let done = 0;
-    for (const u of urls) if (await images.match(u)) done++;
+    if (await caches.has(IMAGE_CACHE)) {
+        const images = await caches.open(IMAGE_CACHE);
+        for (const u of urls) if (await images.match(u)) done++;
+    }
     let state = 'ready';
-    if (!haveShell) state = precacheRunning ? 'preparing' : 'incomplete';
-    else if (done < urls.length) state = precacheRunning ? 'preparing' : 'incomplete';
-    return { type: 'offline-status', state, done, total: urls.length };
+    if (!haveShell || done < urls.length) state = precacheRunning ? 'preparing' : 'incomplete';
+    // reason: what is missing, so the page (and the console) can say so
+    const reason = !haveShell ? 'app' : (done < urls.length ? 'pictures' : '');
+    return { type: 'offline-status', state, done, total: urls.length, reason };
 }
 
 async function broadcast(message) {
@@ -194,6 +204,19 @@ async function precacheImages() {
     }
 }
 
+// Turning "Offline copy" on again after off, in the same tab, reuses the
+// worker the browser kept (it only goes away once the tab is closed or
+// reloaded), and that worker may be switched off or have lost its saved files.
+// So "enable" and "retry" both do a full repair: switch back on, re-save the
+// app files if they're missing, then the pictures.
+async function repair() {
+    disabled = false;
+    if (!(await shellPresent())) {
+        try { await cacheShell(); } catch { /* offline: reported as incomplete below */ }
+    }
+    await precacheImages();
+}
+
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 
 self.addEventListener('install', event => {
@@ -220,8 +243,8 @@ self.addEventListener('message', event => {
     const type = event.data && event.data.type;
     if (type === 'get-status') {
         event.waitUntil(status().then(s => event.source && event.source.postMessage(s)));
-    } else if (type === 'retry') {
-        event.waitUntil(precacheImages());
+    } else if (type === 'enable' || type === 'retry') {
+        event.waitUntil(repair());
     } else if (type === 'uninstall') {
         event.waitUntil(removeEverything());
     }

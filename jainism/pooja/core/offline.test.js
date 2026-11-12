@@ -1,6 +1,6 @@
 const {
     offlineSupported, shouldRegisterServiceWorker, describeStatus, formatSize,
-    initOffline, removeOfflineCopy, STATUS_ELEMENT_ID, TOGGLE_ID,
+    initOffline, removeOfflineCopy, STATUS_ELEMENT_ID, TOGGLE_ID, MAX_AUTO_RETRIES,
 } = require('./offline');
 
 const https = { protocol: 'https:', search: '' };
@@ -65,6 +65,19 @@ describe('describeStatus', () => {
         expect(describeStatus({ state: 'incomplete', done: 4, total: 7 }, true).text).toContain('3 pictures not saved');
     });
 
+    test('incomplete because the app files are missing says so, not "0 pictures"', () => {
+        const d = describeStatus({ state: 'incomplete', done: 7, total: 7, reason: 'app' }, true);
+        expect(d.text).toContain('the app files weren’t saved');
+        expect(d.text).not.toContain('picture');
+    });
+
+    test('once automatic retries are used up, tells the reader how to try again', () => {
+        const d = describeStatus({ state: 'incomplete', done: 6, total: 7, reason: 'pictures', giveUp: true }, true);
+        expect(d.text).toContain('Turn the switch off and on to try again.');
+        expect(describeStatus({ state: 'incomplete', done: 6, total: 7, reason: 'pictures' }, true).text)
+            .toContain('Keep this page open');
+    });
+
     test('offline with a saved copy says the saved copy is being shown', () => {
         const d = describeStatus({ state: 'ready', done: 7, total: 7 }, false);
         expect(d.state).toBe('offline-ready');
@@ -91,8 +104,9 @@ function makeEnv({ webdriver = false, search = '', supported = true, enabled = f
             Promise.resolve().then(() => emit({ type: 'offline-status', state: 'off', done: 0, total: 0 }));
         }
     });
-    const register = jest.fn(() => Promise.resolve());
-    const unregister = jest.fn(() => Promise.resolve());
+    const order = [];
+    const register = jest.fn(() => { order.push('register'); return Promise.resolve(); });
+    const unregister = jest.fn(() => { order.push('unregister'); return Promise.resolve(); });
     const regs = registrations.map(() => ({ active: { postMessage }, unregister }));
     const nav = {
         webdriver,
@@ -127,7 +141,7 @@ function makeEnv({ webdriver = false, search = '', supported = true, enabled = f
     };
     let stored = enabled;
     const saveEnabled = jest.fn(v => { stored = v; });
-    return { nav, doc, win, status, toggle, homeToggle, register, unregister, postMessage, emit, winListeners, deleted, saveEnabled, getEnabled: () => stored };
+    return { nav, doc, win, status, toggle, homeToggle, register, unregister, order, postMessage, emit, winListeners, deleted, saveEnabled, getEnabled: () => stored };
 }
 
 const flush = () => new Promise(r => setTimeout(r, 0));
@@ -142,13 +156,13 @@ describe('initOffline', () => {
         expect(t.toggle.checked).toBe(false);
     });
 
-    test('with the switch saved as on: registers sw.js next to the page and asks for its status', async () => {
+    test('with the switch saved as on: registers sw.js next to the page and tells it to enable (a full repair)', async () => {
         const t = makeEnv({ enabled: true });
         initOffline(t);
         await flush();
         expect(t.toggle.checked).toBe(true);
         expect(t.register).toHaveBeenCalledWith('https://example.org/jainism/pooja/sw.js');
-        expect(t.postMessage).toHaveBeenCalledWith({ type: 'get-status' });
+        expect(t.postMessage).toHaveBeenCalledWith({ type: 'enable' });
     });
 
     test('turning the switch on saves the choice and starts straight away', async () => {
@@ -233,6 +247,58 @@ describe('initOffline', () => {
         t.emit({ type: 'offline-status', state: 'incomplete', done: 2, total: 7 });
         await flush();
         expect(t.postMessage).toHaveBeenCalledWith({ type: 'retry' });
+    });
+
+    test('gives up after a few automatic retries instead of looping (the flicker bug)', async () => {
+        const t = makeEnv({ enabled: true });
+        initOffline(t);
+        await flush();
+        const incomplete = { type: 'offline-status', state: 'incomplete', done: 7, total: 7, reason: 'app' };
+        for (let i = 0; i < 6; i++) { t.emit(incomplete); await flush(); }
+        const retries = t.postMessage.mock.calls.filter(c => c[0] && c[0].type === 'retry').length;
+        expect(retries).toBe(MAX_AUTO_RETRIES);
+        expect(t.status.textContent).toContain('Turn the switch off and on to try again.');
+    });
+
+    test('a successful report resets the retry allowance', async () => {
+        const t = makeEnv({ enabled: true });
+        initOffline(t);
+        await flush();
+        const incomplete = { type: 'offline-status', state: 'incomplete', done: 6, total: 7, reason: 'pictures' };
+        t.emit(incomplete); t.emit(incomplete);
+        t.emit({ type: 'offline-status', state: 'ready', done: 7, total: 7 });
+        await flush();
+        t.emit(incomplete); await flush();
+        const retries = t.postMessage.mock.calls.filter(c => c[0] && c[0].type === 'retry').length;
+        expect(retries).toBe(3);
+    });
+
+    test('turning off and straight back on: the clean-up finishes before the new copy starts', async () => {
+        const t = makeEnv({ enabled: true, registrations: [1] });
+        initOffline(t);
+        await flush();
+        t.order.length = 0;
+        t.toggle.checked = false; t.toggle.listeners.change();      // off ...
+        await Promise.resolve();                                    // (the off clean-up has begun)
+        t.toggle.checked = true;  t.toggle.listeners.change();      // ... and on again
+        await flush(); await flush(); await flush(); await flush();
+        expect(t.order[0]).toBe('unregister');
+        expect(t.order[t.order.length - 1]).toBe('register');
+        expect(t.postMessage).toHaveBeenCalledWith({ type: 'enable' });
+        expect(t.getEnabled()).toBe(true);
+    });
+
+    test('two flips in the same instant just settle on the final choice', async () => {
+        const t = makeEnv({ enabled: true, registrations: [1] });
+        initOffline(t);
+        await flush();
+        t.order.length = 0;
+        t.toggle.checked = false; t.toggle.listeners.change();
+        t.toggle.checked = true;  t.toggle.listeners.change();
+        await flush(); await flush(); await flush();
+        expect(t.getEnabled()).toBe(true);
+        expect(t.order).toContain('register');
+        expect(t.postMessage).toHaveBeenCalledWith({ type: 'enable' });
     });
 
     test('switches to the offline message when the connection drops', async () => {

@@ -89,6 +89,10 @@ signal. What it does:
   the network does not answer within 3 seconds. After one timeout the saved
   copy is used straight away for 30 seconds (otherwise each file in the page's
   load chain would wait its own 3 seconds).
+- **Repairs itself.** If the saved app files go missing (storage cleared, or the
+  switch turned off and on again in the same tab), turning on or retrying re-saves
+  them as well as the pictures. It retries at most twice per page load and then
+  says how to try again (*turn the switch off and on*) instead of looping.
 - **Leaves other sites alone.** YouTube thumbnails and the QR-code service are
   not saved, so offline they may show as empty boxes; videos need a connection anyway.
 

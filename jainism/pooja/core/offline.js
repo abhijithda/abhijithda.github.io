@@ -72,11 +72,15 @@ export function describeStatus(status, online, usageBytes = 0) {
                     ? `📥 Saving a copy for offline use… ${status.done}/${status.total}`
                     : '📥 Saving a copy for offline use…',
             };
-        case 'incomplete':
-            return {
-                state: 'incomplete',
-                text: `⚠️ Offline copy incomplete — ${missing} picture${missing === 1 ? '' : 's'} not saved yet. Keep this page open on a good connection.`,
-            };
+        case 'incomplete': {
+            const what = status.reason === 'app'
+                ? 'the app files weren’t saved'
+                : `${missing} picture${missing === 1 ? '' : 's'} not saved yet`;
+            const next = status.giveUp
+                ? 'Turn the switch off and on to try again.'
+                : 'Keep this page open on a good connection.';
+            return { state: 'incomplete', text: `⚠️ Offline copy incomplete — ${what}. ${next}` };
+        }
         default:
             return null;       // 'off' and anything unknown: show nothing
     }
@@ -125,6 +129,11 @@ export async function removeOfflineCopy(nav, win) {
     }
 }
 
+// Automatic "retry" requests per page load when the worker reports the copy is
+// incomplete. Retrying forever is what made the status line flicker when a
+// retry couldn't fix the problem, so give up after a couple and say so.
+export const MAX_AUTO_RETRIES = 2;
+
 export function initOffline({
     nav = navigator,
     win = window,
@@ -137,7 +146,9 @@ export function initOffline({
     let lastStatus = null;
     let usageBytes = 0;
     let enabled = false;
-    let started = false;
+    let started = false;       // the reader has used the switch in this page (vs. page start-up)
+    let retries = 0;
+    let queue = Promise.resolve();
 
     const online = () => nav.onLine !== false;
     const redraw = () => {
@@ -156,54 +167,81 @@ export function initOffline({
         if (!supported) toggle.disabled = true;
     }
 
+    const activeWorker = () => nav.serviceWorker.ready.then(reg => reg.active);
+
     if (nav.serviceWorker) {
         nav.serviceWorker.addEventListener('message', event => {
             const msg = event.data;
             if (!msg || msg.type !== 'offline-status') return;
-            lastStatus = msg;
+            if (msg.state === 'ready') retries = 0;
+            let giveUp = false;
+            if (enabled && msg.state === 'incomplete' && online()) {
+                console.warn('Offline copy incomplete:', msg);
+                if (retries < MAX_AUTO_RETRIES) {
+                    retries += 1;
+                    activeWorker().then(worker => worker && worker.postMessage({ type: 'retry' }));
+                } else {
+                    giveUp = true;
+                }
+            }
+            lastStatus = { ...msg, giveUp };
             if (msg.state === 'ready' && nav.storage && nav.storage.estimate) {
                 nav.storage.estimate().then(e => { usageBytes = (e && e.usage) || 0; redraw(); }).catch(() => {});
             }
             redraw();
-            // Something didn't download (signal dropped): try again now that we're here
-            if (enabled && msg.state === 'incomplete' && online()) {
-                nav.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ type: 'retry' }));
-            }
         });
     }
 
     win.addEventListener('online', () => {
         redraw();
         if (enabled && nav.serviceWorker) {
-            nav.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ type: 'get-status' }));
+            retries = 0;
+            activeWorker().then(worker => worker && worker.postMessage({ type: 'get-status' }));
         }
     });
     win.addEventListener('offline', redraw);
 
-    function enable() {
+    async function doEnable() {
         enabled = true;
+        retries = 0;
         if (!shouldRegisterServiceWorker(nav, win.location)) { redraw(); return; }
         lastStatus = { state: 'preparing', done: 0, total: 0 };
         redraw();
-        const register = () => {
-            nav.serviceWorker.register(new URL(SW_PATH, doc.baseURI).href)
-                .then(() => nav.serviceWorker.ready)
-                .then(reg => { if (reg.active) reg.active.postMessage({ type: 'get-status' }); })
-                .catch(err => console.warn('Offline support unavailable:', err));
-        };
         // At page start, wait for the page to finish loading so saving the copy
         // never competes with showing it. When the reader has just flipped the
         // switch, start right away.
-        if (started || doc.readyState === 'complete') register();
-        else win.addEventListener('load', register, { once: true });
+        if (!started && doc.readyState !== 'complete') {
+            await new Promise(resolve => win.addEventListener('load', resolve, { once: true }));
+        }
+        try {
+            await nav.serviceWorker.register(new URL(SW_PATH, doc.baseURI).href);
+            const worker = await activeWorker();
+            // "enable" = full repair. The browser may hand back the worker it
+            // kept from before the switch was turned off (still switched off, or
+            // missing its saved files), so switching on must revive it, not just
+            // register.
+            if (worker) worker.postMessage({ type: 'enable' });
+        } catch (err) {
+            console.warn('Offline support unavailable:', err);
+        }
     }
 
-    async function disable() {
+    async function doDisable() {
         enabled = false;
         lastStatus = null;
         redraw();
         if (!shouldRegisterServiceWorker(nav, win.location)) return;
         try { await removeOfflineCopy(nav, win); } catch (err) { console.warn('Could not remove the offline copy:', err); }
+    }
+
+    // One action at a time, always aiming at the latest choice. Turning the
+    // switch off and straight back on must not let the "off" clean-up run while
+    // the "on" is saving (it would delete what was just saved).
+    function sync() {
+        queue = queue
+            .then(() => (getEnabled() ? doEnable() : doDisable()))
+            .catch(err => console.warn('Offline copy:', err));
+        return queue;
     }
 
     if (toggle) {
@@ -213,16 +251,12 @@ export function initOffline({
             const homeToggle = doc.getElementById('home-' + TOGGLE_ID);
             if (homeToggle) homeToggle.checked = toggle.checked;
             saveEnabled(toggle.checked);
-            if (toggle.checked) enable(); else disable();
+            sync();
         });
     }
 
     // Start-up: honour the saved choice. When it is off, also sweep away any
     // copy left over (e.g. from an earlier version) so "off" really means off.
-    if (supported) {
-        if (getEnabled()) enable();
-        else disable();
-    } else {
-        redraw();
-    }
+    if (supported) sync();
+    else redraw();
 }
