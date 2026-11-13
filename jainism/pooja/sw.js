@@ -1,5 +1,7 @@
 // sw.js — Service worker: lets the book be opened and read with no signal
 // (a temple, a train, a bad connection) after one visit on a good connection.
+// It is OPT-IN: the page (core/offline.js) only registers it when the reader
+// turns on Settings → Offline copy, and removes it again when they turn it off.
 //
 // How it works
 //   • On install it crawls the app itself (index.html → its <script>/<link>
@@ -38,6 +40,9 @@ const DATA_URL = new URL('data.json', SCOPE).href;
 
 let precacheRunning = false;
 let slowUntil = 0;
+// Set when the reader turns "Offline copy" off: from then on this worker saves
+// nothing and answers nothing (the page unregisters it right after).
+let disabled = false;
 
 // ── URL helpers ───────────────────────────────────────────────────────────
 
@@ -139,23 +144,35 @@ function imageUrlsFromData(text) {
     return [...urls];
 }
 
+async function shellPresent() {
+    if (!(await caches.has(SHELL_CACHE))) return false;
+    const shell = await caches.open(SHELL_CACHE);
+    return !!(await shell.match(INDEX_URL)) && !!(await shell.match(DATA_URL));
+}
+
 async function savedImageUrls() {
+    if (!(await caches.has(SHELL_CACHE))) return [];
     const shell = await caches.open(SHELL_CACHE);
     const res = await shell.match(DATA_URL);
     return res ? imageUrlsFromData(await res.text()) : [];
 }
 
+// caches.open() quietly creates a cache that doesn't exist, so check with
+// caches.has() first: a report must never "repair" the thing it is reporting on.
 async function status() {
-    const shell = await caches.open(SHELL_CACHE);
-    const haveShell = !!(await shell.match(INDEX_URL)) && !!(await shell.match(DATA_URL));
+    if (disabled) return { type: 'offline-status', state: 'off', done: 0, total: 0 };
+    const haveShell = await shellPresent();
     const urls = await savedImageUrls();
-    const images = await caches.open(IMAGE_CACHE);
     let done = 0;
-    for (const u of urls) if (await images.match(u)) done++;
+    if (await caches.has(IMAGE_CACHE)) {
+        const images = await caches.open(IMAGE_CACHE);
+        for (const u of urls) if (await images.match(u)) done++;
+    }
     let state = 'ready';
-    if (!haveShell) state = precacheRunning ? 'preparing' : 'incomplete';
-    else if (done < urls.length) state = precacheRunning ? 'preparing' : 'incomplete';
-    return { type: 'offline-status', state, done, total: urls.length };
+    if (!haveShell || done < urls.length) state = precacheRunning ? 'preparing' : 'incomplete';
+    // reason: what is missing, so the page (and the console) can say so
+    const reason = !haveShell ? 'app' : (done < urls.length ? 'pictures' : '');
+    return { type: 'offline-status', state, done, total: urls.length, reason };
 }
 
 async function broadcast(message) {
@@ -165,25 +182,39 @@ async function broadcast(message) {
 }
 
 async function precacheImages() {
-    if (precacheRunning) return;
+    if (precacheRunning || disabled) return;
     precacheRunning = true;
     try {
         const urls = await savedImageUrls();
         const cache = await caches.open(IMAGE_CACHE);
         await broadcast(await status());
         for (const url of urls) {
+            if (disabled) break;
             if (!(await cache.match(url))) {
                 try {
                     const res = await fetch(url, { credentials: 'same-origin' });
-                    if (res.ok) await cache.put(url, res);
+                    if (res.ok && !disabled) await cache.put(url, res);
                 } catch { /* offline or missing: carry on, report as incomplete */ }
             }
             await broadcast(await status());
         }
     } finally {
         precacheRunning = false;
-        await broadcast(await status());
+        if (!disabled) await broadcast(await status());
     }
+}
+
+// Turning "Offline copy" on again after off, in the same tab, reuses the
+// worker the browser kept (it only goes away once the tab is closed or
+// reloaded), and that worker may be switched off or have lost its saved files.
+// So "enable" and "retry" both do a full repair: switch back on, re-save the
+// app files if they're missing, then the pictures.
+async function repair() {
+    disabled = false;
+    if (!(await shellPresent())) {
+        try { await cacheShell(); } catch { /* offline: reported as incomplete below */ }
+    }
+    await precacheImages();
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -212,10 +243,23 @@ self.addEventListener('message', event => {
     const type = event.data && event.data.type;
     if (type === 'get-status') {
         event.waitUntil(status().then(s => event.source && event.source.postMessage(s)));
-    } else if (type === 'retry') {
-        event.waitUntil(precacheImages());
+    } else if (type === 'enable' || type === 'retry') {
+        event.waitUntil(repair());
+    } else if (type === 'uninstall') {
+        event.waitUntil(removeEverything());
     }
 });
+
+// "Offline copy" turned off: stop saving, delete every saved file, and
+// unregister. Pages already open keep working over the network.
+async function removeEverything() {
+    disabled = true;
+    for (const name of await caches.keys()) {
+        if (name.startsWith('pooja-')) await caches.delete(name);
+    }
+    await broadcast({ type: 'offline-status', state: 'off', done: 0, total: 0 });
+    await self.registration.unregister();
+}
 
 // ── Serving requests ──────────────────────────────────────────────────────
 
@@ -223,7 +267,7 @@ self.addEventListener('fetch', event => {
     const req = event.request;
     if (req.method !== 'GET') return;
     const url = new URL(req.url);
-    if (!inScope(url) || url.pathname.endsWith('/sw.js')) return;
+    if (disabled || !inScope(url) || url.pathname.endsWith('/sw.js')) return;
     event.respondWith(isImage(req, url) ? imageResponse(event) : networkFirst(event));
 });
 
@@ -232,7 +276,7 @@ self.addEventListener('fetch', event => {
 async function fetchFresh(href) {
     const res = await fetch(href, { cache: 'no-cache', credentials: 'same-origin' });
     // A redirected response can't be replayed for a navigation, so don't save it
-    if (res.ok && res.type === 'basic' && !res.redirected) {
+    if (res.ok && res.type === 'basic' && !res.redirected && !disabled) {
         const cache = await caches.open(SHELL_CACHE);
         await cache.put(keyFor(href), res.clone());
     }
@@ -277,7 +321,7 @@ async function imageResponse(event) {
     const key = keyFor(href);
     const cached = await cache.match(key);
     const refresh = fetch(href, { cache: 'no-cache', credentials: 'same-origin' }).then(async res => {
-        if (res.ok && res.type === 'basic') await cache.put(key, res.clone());
+        if (res.ok && res.type === 'basic' && !disabled) await cache.put(key, res.clone());
         return res;
     });
     if (cached) {

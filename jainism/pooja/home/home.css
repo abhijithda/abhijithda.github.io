@@ -72,10 +72,17 @@
     margin: 6px 0 24px;
 }
 
-/* One line under the progress: whether this device has a saved offline copy.
-   core/offline.js fills it in and sets data-state. */
+/* Offline copy: a short explanation under its switch, and below that one line
+   showing what is happening. core/offline.js fills the line in and sets
+   data-state. */
+.home-offline-hint {
+    margin: -4px 0 8px;
+    font-size: calc(13px * var(--font-scale));
+    color: #666;
+    line-height: 1.4;
+}
 .home-offline-status {
-    margin: -12px 24px 20px;
+    margin: 0 0 12px;
     padding: 8px 14px;
     border-radius: 10px;
     text-align: center;
@@ -89,6 +96,7 @@
 .home-offline-status[data-state="incomplete"] { background: #fff8e1; color: #7a5200; }
 .home-offline-status[data-state="offline-ready"],
 .home-offline-status[data-state="offline"] { background: #ede7f6; color: #311b92; }
+.home-offline-status[data-state="unsupported"] { background: #f1f3f4; color: #555; }
 
 .home-view-options {
     display: grid;
