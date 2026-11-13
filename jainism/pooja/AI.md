@@ -1145,15 +1145,34 @@ ai/
   `retrieval.js` if the eval harness (phase 2) shows lexical search falls short.
   Kannada-script words are indexed as character trigrams (agglutinative
   suffixes); there is no Kannada-script <-> transliterated-Latin mapping yet.
-- **Grounding:** answers use only retrieved passages, cite block labels, and
-  nothing relevant found = "not covered" with no model call. Citations the
+- **Grounding (enforced in code, `rag.js`, not just in the prompt):**
+  - Nothing relevant found = "not covered", with no model call.
+  - An answer that cites no real passage is **never shown**; the reader gets the closest passages, word for word.
+  - The on-device model only writes a two-sentence pointer; the passages are shown verbatim under it ("From the book").
+    The hosted model's answer shows just the passages it cited, collapsed.
+  - Raw model text is not displayed while it is being written, because it hasn't been checked yet.
+  - A follow-up that matches nothing alone ("really?") is searched together with the previous question.
+  - Limit: a citation proves the model *pointed at* a passage, not that it described it correctly
+    (an on-device model once reversed a passage's meaning). The verbatim passages beside the answer are the safeguard. Citations the
   model invents are never linked. Model output is rendered with
   `textContent`, never `innerHTML`.
 - **Privacy:** Cloud sends the question + retrieved passages to your proxy;
   the API key lives only in the proxy. Local sends nothing.
+- **Local failures:** WebGPU shader-compile errors ("Invalid ShaderModule…") happen on
+  some browser/GPU/driver combinations. The engine checks for a real GPU adapter, retries
+  once after clearing WebLLM's cached wasm, then shows a plain message with a
+  "Try compatibility mode" button (f32 build of the model, larger download).
+  Once compatibility mode has worked it is remembered (localStorage key `aiLocalCompat`,
+  expires after 30 days, tied to the model id) so reloads skip the failing build.
 - **Known gaps:** citation chips open the block in *continuous* view (book view
   has no jump-to-block yet); the Home page's mirrored settings don't include the
   AI picker; Cloud is non-streaming; Local needs WebGPU and a pinned WebLLM
   version/model id that must be re-verified before deploy.
+- **Retrieval eval (`ai/eval/`, run `npx jest ai/eval --verbose`):** 41 draft questions (English, Kannada, Kannada in
+  English letters, one-word queries, and some the book doesn't cover). Gold answers are permanent block ids, so
+  renumbering doesn't break them (the test flags stale labels). Baseline when drafted: recall@5 86%
+  (en 83%, kn 100% on 8 questions, translit 83% on 6), recall@1 68%. `floors.json` makes a regression fail the build;
+  raise the floors when retrieval improves. **The questions and gold labels are my draft: please review them,
+  especially the Kannada and transliterated wording.** Measures search only, not answer quality or model cost.
 - **Planned (measured, not assumed):** eval harness, optional agent step
   (follow-up/search tools for Cloud), embeddings only if the eval shows a gap.

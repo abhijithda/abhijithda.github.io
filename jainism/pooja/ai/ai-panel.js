@@ -10,10 +10,12 @@ import { createIndex } from './retrieval.js';
 import { answerQuestion } from './rag.js';
 import { getEngine } from './engines/index.js';
 import { LOCAL_MODEL_SIZE_HINT } from './config.js';
+import { LOCAL_GPU_FAILED } from './engines/local.js';
 
+// Short on purpose: it sits under the picker in the Settings menu.
 const PRIVACY = {
-    cloud: 'Cloud: your question and the book passages found for it are sent to an AI service to write the answer.',
-    local: 'Local: everything stays on this device. The first use downloads a model (' + LOCAL_MODEL_SIZE_HINT + ').',
+    cloud: 'Sends your question and the passages found for it to an AI service.',
+    local: 'Runs on this device. The first use downloads a model (' + LOCAL_MODEL_SIZE_HINT + ').',
 };
 
 let state = { data: null, index: null, onCite: null, history: [], abort: null, busy: false };
@@ -40,6 +42,46 @@ export function renderAnswer(container, text, citations, onCite) {
     });
 }
 
+const PASSAGE_PREVIEW_CHARS = 500;
+
+/**
+ * The book's own words, word for word, under an answer: one card per passage,
+ * with a chip that opens it in the book. Text goes in as plain text.
+ * @param {HTMLElement} container
+ * @param {Object[]} passages  [{id, label, text: {lang: string}}]
+ * @param {(blockId: string) => void} onCite
+ * @param {{title: string, open: boolean}} opts
+ */
+export function renderPassages(container, passages, onCite, { title, open }) {
+    if (!passages.length) return;
+    const details = document.createElement('details');
+    details.className = 'ai-sources';
+    details.open = open;
+    const summary = document.createElement('summary');
+    summary.textContent = title;
+    details.appendChild(summary);
+
+    passages.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'ai-passage';
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'ai-cite';
+        chip.textContent = p.label;
+        chip.title = 'Open this passage in the book';
+        chip.addEventListener('click', () => onCite && onCite(p.id));
+        card.appendChild(chip);
+        Object.values(p.text).forEach(text => {
+            const line = document.createElement('div');
+            line.className = 'ai-passage-text';
+            line.textContent = text.length > PASSAGE_PREVIEW_CHARS ? text.slice(0, PASSAGE_PREVIEW_CHARS).trimEnd() + '\u2026' : text;
+            card.appendChild(line);
+        });
+        details.appendChild(card);
+    });
+    container.appendChild(details);
+}
+
 function addMessage(role, text = '') {
     const list = $('ai-messages');
     const el = document.createElement('div');
@@ -63,16 +105,18 @@ function currentEngine() {
 export function applyAiSetting() {
     const choice = loadSettings().aiEngine;
     const engine = getEngine(choice);
-    const select = $('ai-engine-select');
-    const note = $('ai-engine-note');
-    if (select) select.value = choice;
+    // The picker exists twice (header Settings menu and the Home page's mirror);
+    // both always show the same value and the same one-line note.
+    const selects = [$('ai-engine-select'), $('home-ai-engine-select')];
+    const notes = [$('ai-engine-note'), $('home-ai-engine-note')];
+    selects.forEach(sel => { if (sel) sel.value = choice; });
 
     let reason = '';
     if (engine) {
         const a = engine.available();
         if (!a.ok) reason = a.reason;
     }
-    if (note) note.textContent = reason || PRIVACY[choice] || 'The assistant is off.';
+    notes.forEach(note => { if (note) note.textContent = reason || PRIVACY[choice] || ''; });
     const usable = !!engine && !reason;
     const btn = $('ai-btn');
     if (btn) btn.hidden = !usable;
@@ -82,12 +126,12 @@ export function applyAiSetting() {
 export function openDrawer() { const d = $('ai-drawer'); if (d) { d.hidden = false; $('ai-input')?.focus(); } }
 export function closeDrawer() { const d = $('ai-drawer'); if (d) d.hidden = true; }
 
-async function ask(question) {
+async function ask(question, { retry = false } = {}) {
     const engine = currentEngine();
     if (!engine || state.busy) return;
     state.busy = true;
     $('ai-send').disabled = true;
-    addMessage('user', question);
+    if (!retry) addMessage('user', question);
     const reply = addMessage('assistant', '…');
     state.abort = new AbortController();
 
@@ -101,9 +145,16 @@ async function ask(question) {
         const result = await answerQuestion({
             question, index: state.index, engine, langs,
             history: state.history, signal: state.abort.signal,
-            onToken: text => { reply.textContent = text; },
+            // Raw model text is not shown while it is written: it hasn't been
+            // checked against the book yet (see rag.js).
+            onToken: () => setStatus('Writing the answer\u2026'),
         });
+        setStatus('');
         renderAnswer(reply, result.text, result.citations, state.onCite);
+        renderPassages(reply, result.shown, state.onCite, {
+            title: result.fallback ? 'Closest passages in the book' : (engine.id === 'local' ? 'From the book' : 'Passages cited'),
+            open: result.fallback || engine.id === 'local',
+        });
         if (result.grounded) {
             state.history.push({ role: 'user', content: question }, { role: 'assistant', content: result.text });
         }
@@ -111,6 +162,20 @@ async function ask(question) {
         reply.textContent = err?.name === 'AbortError' ? 'Stopped.' : (err?.message || 'Something went wrong.');
         reply.classList.add('ai-msg--error');
         setStatus('');
+        // The on-device model couldn't start: offer the one thing that may
+        // still work, without downloading anything until the reader agrees.
+        if (err?.code === LOCAL_GPU_FAILED && !err.compat && typeof engine.setCompatMode === 'function') {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ai-retry';
+            btn.textContent = 'Try compatibility mode';
+            btn.addEventListener('click', () => {
+                btn.disabled = true;
+                engine.setCompatMode(true);
+                ask(question, { retry: true });
+            });
+            reply.append(document.createElement('br'), btn);
+        }
     } finally {
         state.busy = false;
         state.abort = null;

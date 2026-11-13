@@ -1,4 +1,4 @@
-const { renderAnswer, applyAiSetting, initAi } = require('./ai-panel');
+const { renderAnswer, renderPassages, applyAiSetting, initAi } = require('./ai-panel');
 const { saveSettings } = require('../core/settings');
 
 beforeEach(() => {
@@ -37,6 +37,43 @@ describe('renderAnswer', () => {
     });
 });
 
+describe('renderPassages', () => {
+    const passages = [
+        { id: 'blk1', label: 'A-1.1', text: { kn: 'ದಾನ', en: 'Giving is dharma.' } },
+        { id: 'blk2', label: 'Q-1.1', text: { en: 'x'.repeat(900) } },
+    ];
+
+    test('one card per passage, each with its words and a chip that opens it in the book', () => {
+        const box = document.createElement('div');
+        const onCite = jest.fn();
+        renderPassages(box, passages, onCite, { title: 'From the book', open: true });
+        expect(box.querySelector('summary').textContent).toBe('From the book');
+        expect(box.querySelectorAll('.ai-passage').length).toBe(2);
+        expect(box.querySelector('details').open).toBe(true);
+        expect(box.textContent).toContain('Giving is dharma.');
+        box.querySelectorAll('button.ai-cite')[1].click();
+        expect(onCite).toHaveBeenCalledWith('blk2');
+    });
+
+    test('long passages are cut with an ellipsis; closed when asked', () => {
+        const box = document.createElement('div');
+        renderPassages(box, passages, jest.fn(), { title: 't', open: false });
+        expect(box.querySelector('details').open).toBe(false);
+        const long = [...box.querySelectorAll('.ai-passage-text')].pop().textContent;
+        expect(long.length).toBeLessThan(520);
+        expect(long.endsWith('\u2026')).toBe(true);
+    });
+
+    test('passage text is never parsed as HTML; nothing is drawn for no passages', () => {
+        const box = document.createElement('div');
+        renderPassages(box, [{ id: 'b', label: 'A-1.1', text: { en: '<img src=x onerror=alert(1)>' } }], jest.fn(), { title: 't', open: true });
+        expect(box.querySelector('img')).toBeNull();
+        const empty = document.createElement('div');
+        renderPassages(empty, [], jest.fn(), { title: 't', open: true });
+        expect(empty.children.length).toBe(0);
+    });
+});
+
 describe('applyAiSetting', () => {
     test('off: Ask button hidden', () => {
         applyAiSetting();
@@ -62,8 +99,25 @@ describe('applyAiSetting', () => {
         saveSettings({ aiEngine: 'local' });
         applyAiSetting();
         expect(document.getElementById('ai-btn').hidden).toBe(false);
-        expect(document.getElementById('ai-engine-note').textContent).toMatch(/stays on this device/);
+        expect(document.getElementById('ai-engine-note').textContent).toMatch(/Runs on this device/);
         delete navigator.gpu;
+    });
+});
+
+describe('Settings note', () => {
+    test('off: the note is empty so the row stays one line', () => {
+        applyAiSetting();
+        expect(document.getElementById('ai-engine-note').textContent).toBe('');
+    });
+
+    test('cloud (when usable) says what is sent', () => {
+        jest.resetModules();
+        jest.doMock('./config.js', () => ({ ...jest.requireActual('./config.js'), CLOUD_ENDPOINT: 'https://x.test' }));
+        const fresh = require('./ai-panel');
+        saveSettings({ aiEngine: 'cloud' });
+        fresh.applyAiSetting();
+        expect(document.getElementById('ai-engine-note').textContent).toMatch(/Sends your question/);
+        jest.dontMock('./config.js');
     });
 });
 

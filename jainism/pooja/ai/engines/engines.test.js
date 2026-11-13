@@ -1,5 +1,5 @@
 const { createCloudEngine } = require('./cloud');
-const { createLocalEngine } = require('./local');
+const { createLocalEngine, LOCAL_GPU_FAILED, COMPAT_STORAGE_KEY } = require('./local');
 const { getEngine } = require('./index');
 
 const msgs = [{ role: 'system', content: 'rules' }, { role: 'user', content: 'hi' }];
@@ -74,6 +74,128 @@ describe('local engine', () => {
         const engine = createLocalEngine({ loadLibrary: async () => { if (n++ === 0) throw new Error('offline'); return lib; } });
         await expect(engine.prepare()).rejects.toThrow('offline');
         await expect(engine.prepare()).resolves.toBeUndefined();
+    });
+});
+
+describe('local engine: remembering compatibility mode', () => {
+    const okLib = (create) => ({ CreateMLCEngine: create });
+    const okEngine = () => ({ chat: { completions: { create: async () => (async function* () {})() } }, interruptGenerate() {} });
+    const DAY = 24 * 60 * 60 * 1000;
+    beforeEach(() => localStorage.clear());
+
+    test('after compatibility mode works, a fresh engine (a reload) starts in it and never tries the f16 build', async () => {
+        const first = jest.fn(async () => okEngine());
+        const e1 = createLocalEngine({ loadLibrary: async () => okLib(first), modelId: 'f16', compatModelId: 'f32' });
+        e1.setCompatMode(true);
+        await e1.prepare();
+        expect(JSON.parse(localStorage.getItem(COMPAT_STORAGE_KEY)).model).toBe('f32');
+
+        const second = jest.fn(async () => okEngine());
+        const e2 = createLocalEngine({ loadLibrary: async () => okLib(second), modelId: 'f16', compatModelId: 'f32' });
+        expect(e2.compatMode).toBe(true);
+        await e2.prepare();
+        expect(second.mock.calls.map(c => c[0])).toEqual(['f32']);
+    });
+
+    test('is not remembered when compatibility mode itself fails, and a remembered one that stops working is forgotten', async () => {
+        const fail = jest.fn().mockRejectedValue(new Error('[Invalid ShaderModule (unlabeled)] is invalid'));
+        const e = createLocalEngine({ loadLibrary: async () => okLib(fail), clearCache: async () => {}, modelId: 'f16', compatModelId: 'f32' });
+        e.setCompatMode(true);
+        await e.prepare().catch(() => {});
+        expect(localStorage.getItem(COMPAT_STORAGE_KEY)).toBeNull();
+
+        localStorage.setItem(COMPAT_STORAGE_KEY, JSON.stringify({ model: 'f32', at: Date.now() }));
+        const e2 = createLocalEngine({ loadLibrary: async () => okLib(fail), clearCache: async () => {}, modelId: 'f16', compatModelId: 'f32' });
+        expect(e2.compatMode).toBe(true);
+        await e2.prepare().catch(() => {});
+        expect(localStorage.getItem(COMPAT_STORAGE_KEY)).toBeNull();
+        expect(createLocalEngine({ modelId: 'f16', compatModelId: 'f32' }).compatMode).toBe(false);
+    });
+
+    test('a note older than 30 days, or for a different model id, is ignored', () => {
+        const now = 1_000_000_000_000;
+        localStorage.setItem(COMPAT_STORAGE_KEY, JSON.stringify({ model: 'f32', at: now - 31 * DAY }));
+        expect(createLocalEngine({ compatModelId: 'f32', now: () => now }).compatMode).toBe(false);
+        localStorage.setItem(COMPAT_STORAGE_KEY, JSON.stringify({ model: 'f32', at: now - 29 * DAY }));
+        expect(createLocalEngine({ compatModelId: 'f32', now: () => now }).compatMode).toBe(true);
+        expect(createLocalEngine({ compatModelId: 'other', now: () => now }).compatMode).toBe(false);
+    });
+
+    test('unreadable or missing storage never breaks the engine', async () => {
+        localStorage.setItem(COMPAT_STORAGE_KEY, '{not json');
+        expect(createLocalEngine().compatMode).toBe(false);
+        const broken = { getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); }, removeItem() { throw new Error('denied'); } };
+        const e = createLocalEngine({ storage: broken, loadLibrary: async () => okLib(async () => okEngine()) });
+        e.setCompatMode(true);
+        await expect(e.prepare()).resolves.toBeUndefined();
+        expect(createLocalEngine({ storage: null }).compatMode).toBe(false);
+    });
+});
+
+describe('local engine: GPU failures', () => {
+    beforeEach(() => localStorage.clear());
+    const shaderError = () => new Error('[Invalid ShaderModule (unlabeled)] is invalid due to a previous error.');
+    const okEngine = () => ({ chat: { completions: { create: async () => (async function* () {})() } }, interruptGenerate() {} });
+
+    test('retries once after clearing the cached model code, and then works', async () => {
+        const create = jest.fn()
+            .mockRejectedValueOnce(shaderError())
+            .mockResolvedValueOnce(okEngine());
+        const clearCache = jest.fn(async () => {});
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), clearCache });
+        await expect(engine.prepare()).resolves.toBeUndefined();
+        expect(clearCache).toHaveBeenCalledTimes(1);
+        expect(create).toHaveBeenCalledTimes(2);
+    });
+
+    test('if the retry fails too, gives a plain-language error flagged for the compatibility-mode button', async () => {
+        const create = jest.fn().mockRejectedValue(shaderError());
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), clearCache: async () => {} });
+        const err = await engine.prepare().catch(e => e);
+        expect(err.code).toBe(LOCAL_GPU_FAILED);
+        expect(err.compat).toBe(false);
+        expect(err.message).not.toMatch(/ShaderModule/);
+        expect(err.message).toMatch(/compatibility mode/);
+    });
+
+    test('compatibility mode loads the f32 model id; a failure there points away from compat mode', async () => {
+        const create = jest.fn().mockRejectedValue(shaderError());
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), clearCache: async () => {}, modelId: 'f16', compatModelId: 'f32' });
+        await engine.prepare().catch(() => {});
+        engine.setCompatMode(true);
+        const err = await engine.prepare().catch(e => e);
+        expect(create.mock.calls.some(c => c[0] === 'f32')).toBe(true);
+        expect(err.compat).toBe(true);
+        expect(err.message).not.toMatch(/try compatibility mode/i);
+    });
+
+    test('errors that are not GPU errors are passed through untouched (e.g. offline)', async () => {
+        const create = jest.fn().mockRejectedValue(new Error('Failed to fetch'));
+        const clearCache = jest.fn();
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), clearCache });
+        await expect(engine.prepare()).rejects.toThrow('Failed to fetch');
+        expect(clearCache).not.toHaveBeenCalled();
+        expect(create).toHaveBeenCalledTimes(1);
+    });
+
+    test('no usable GPU adapter is reported before anything is downloaded', async () => {
+        Object.defineProperty(navigator, 'gpu', { value: { requestAdapter: async () => null }, configurable: true });
+        const load = jest.fn();
+        const err = await createLocalEngine({ loadLibrary: load }).prepare().catch(e => e);
+        delete navigator.gpu;
+        expect(err.code).toBe('LOCAL_NO_GPU');
+        expect(err.message).toMatch(/no usable graphics/);
+        expect(load).not.toHaveBeenCalled();
+    });
+
+    test('progress that arrives after a failure is not reported', async () => {
+        let progressCb;
+        const create = jest.fn(async (_id, { initProgressCallback }) => { progressCb = initProgressCallback; throw new Error('Failed to fetch'); });
+        const onProgress = jest.fn();
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }) });
+        await engine.prepare(onProgress).catch(() => {});
+        progressCb({ text: 'Loading GPU shader modules[7/75]', progress: 0.09 });
+        expect(onProgress).not.toHaveBeenCalled();
     });
 });
 

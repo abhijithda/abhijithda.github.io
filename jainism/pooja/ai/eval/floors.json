@@ -1,0 +1,6 @@
+{
+  "all":      { "recall@5": 0.80, "model sees it": 0.72 },
+  "en":       { "recall@5": 0.77, "model sees it": 0.70 },
+  "kn":       { "recall@5": 0.85, "model sees it": 0.75 },
+  "translit": { "recall@5": 0.65, "model sees it": 0.50 }
+}

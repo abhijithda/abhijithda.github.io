@@ -26,12 +26,31 @@
     border: 1px solid #2e7d32; border-radius: 10px; background: #e8f5e9; color: #1b5e20; cursor: pointer;
 }
 
+.ai-sources { margin-top: 10px; border-top: 1px solid #ddd; padding-top: 6px; }
+.ai-sources summary { cursor: pointer; font-size: .85em; color: #555; }
+.ai-passage { margin-top: 8px; padding: 8px; background: #fff; border: 1px solid #e3e3e3; border-radius: 6px; }
+.ai-passage-text { margin-top: 4px; font-size: .92em; line-height: 1.45; }
+.ai-passage-text + .ai-passage-text { color: #444; }
+
 .ai-status { padding: 0 12px; font-size: .85em; color: #555; min-height: 1.2em; }
 .ai-form { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid #ddd; }
 .ai-form textarea { flex: 1; resize: none; font: inherit; padding: 6px; }
 .ai-form button { padding: 0 14px; cursor: pointer; }
 .ai-disclaimer { padding: 6px 12px 10px; font-size: .75em; color: #666; }
 
-#ai-engine-note { display: block; font-size: .75em; color: #666; margin-top: 4px; max-width: 260px; }
+/* Settings row: label + picker on one line like the other rows, with the
+   one-line explanation underneath instead of squeezed in beside them. */
+.menu-section--ai { flex-wrap: wrap; row-gap: 4px; }
+.menu-section--ai label { white-space: nowrap; }
+#ai-engine-select {
+    font-size: 12px; padding: 4px 6px; border: 1px solid #ddd;
+    border-radius: 6px; background: #fff; color: #333;
+}
+#ai-engine-note { flex: 1 1 100%; max-width: 260px; font-size: 11px; line-height: 1.35; color: #666; }
+#ai-engine-note:empty, #home-ai-engine-note:empty { display: none; }
+#home-ai-engine-select { font-size: 12px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #333; }
+@media (max-width: 700px) { #ai-engine-select { font-size: 14px; padding: 8px; } #ai-engine-note { max-width: none; } }
+
+.ai-retry { margin-top: 8px; padding: 6px 10px; cursor: pointer; }
 
 @media print { .ai-drawer, #ai-btn { display: none !important; } }

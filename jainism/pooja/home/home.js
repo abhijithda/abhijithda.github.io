@@ -115,6 +115,7 @@ function renderSettingsMirror() {
     const readTracking = document.getElementById('home-toggle-read-tracking');
     const offline = document.getElementById('home-toggle-offline');
     const paperSize = document.getElementById('home-paper-size-select');
+    const aiEngine = document.getElementById('home-ai-engine-select');
     const fontDisplay = document.getElementById('home-font-scale-display');
 
     if (videos) videos.checked = saved.videos;
@@ -122,6 +123,7 @@ function renderSettingsMirror() {
     if (readTracking) readTracking.checked = saved.readTracking;
     if (offline) offline.checked = saved.offline;
     if (paperSize) paperSize.value = saved.paperSize;
+    if (aiEngine) aiEngine.value = saved.aiEngine;
     if (fontDisplay) fontDisplay.textContent = `${Math.round(saved.fontScale * 100)}%`;
 
     renderLangList();
@@ -158,6 +160,9 @@ export function initHomeControls(data) {
     document.getElementById('home-paper-size-select')?.addEventListener('change', (e) => {
         proxyToHeader('paper-size-select', (headerSelect) => { headerSelect.value = e.target.value; });
     });
+    document.getElementById('home-ai-engine-select')?.addEventListener('change', (e) => {
+        proxyToHeader('ai-engine-select', (headerSelect) => { headerSelect.value = e.target.value; });
+    });
     document.getElementById('home-font-scale-increase')?.addEventListener('click', () => {
         document.getElementById('font-scale-increase')?.click();
         renderSettingsMirror();
@@ -165,6 +170,22 @@ export function initHomeControls(data) {
     document.getElementById('home-font-scale-decrease')?.addEventListener('click', () => {
         document.getElementById('font-scale-decrease')?.click();
         renderSettingsMirror();
+    });
+
+    // Header -> Home. Home -> header is proxied above; this is the other way:
+    // a change made in the header's Settings menu while the Home page is on
+    // screen must show up here at once, not only when Home is reopened.
+    // The header's own handlers run first (they are on the control itself) and
+    // have saved the setting by the time the event bubbles up to the document.
+    // Changes that start inside the Home settings are skipped: they're already
+    // shown, and rebuilding the list under the reader's finger is needless.
+    const fromHeader = (e) => !e.target.closest?.('.home-settings');
+    document.addEventListener('change', (e) => { if (fromHeader(e)) renderSettingsMirror(); });
+    // Font size is two buttons, not a form control, so it fires clicks.
+    document.addEventListener('click', (e) => {
+        if (fromHeader(e) && e.target.closest?.('#font-scale-increase, #font-scale-decrease')) {
+            setTimeout(renderSettingsMirror, 0);
+        }
     });
 
     refreshHomeView();

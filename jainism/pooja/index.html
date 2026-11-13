@@ -111,12 +111,12 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-                <div class="menu-section">
+                <div class="menu-section menu-section--ai">
                     <label for="ai-engine-select" title="Ask questions about the book. Off by default.">💬 AI assistant:</label>
                     <select id="ai-engine-select">
                         <option value="off">Off</option>
                         <option value="cloud">Cloud</option>
-                        <option value="local">Local (on this device)</option>
+                        <option value="local">Local</option>
                     </select>
                     <span id="ai-engine-note"></span>
                 </div>
@@ -205,6 +205,15 @@
             </div>
             <p class="home-offline-hint">Saves the whole book, pictures included, on this device so it opens without internet. It downloads a few MB once, so Wi‑Fi is best. Turning it off removes the saved copy.</p>
             <p id="home-offline-status" class="home-offline-status" role="status" aria-live="polite" hidden></p>
+            <div class="home-section home-row">
+                <label for="home-ai-engine-select">💬 AI assistant</label>
+                <select id="home-ai-engine-select">
+                    <option value="off">Off</option>
+                    <option value="cloud">Cloud</option>
+                    <option value="local">Local</option>
+                </select>
+            </div>
+            <p id="home-ai-engine-note" class="home-offline-hint"></p>
             <div class="home-section home-row">
                 <label for="home-paper-size-select">🖨️ Paper size</label>
                 <select id="home-paper-size-select">
