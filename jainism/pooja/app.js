@@ -2,11 +2,12 @@
 // Loaded via <script type="module" src="app.js"> in index.html.
 // Both views share the same header; settings apply to whichever view is active.
 
-import { renderContinuousView, filterContinuous, goBackToMessage } from './views/continuous/continuous-view.js';
+import { renderContinuousView, filterContinuous, goBackToMessage, jumpToReference } from './views/continuous/continuous-view.js';
 import { initBookView, onBookLangChange, searchBookView } from './views/book/book-view.js';
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
 import { initHomeControls, refreshHomeView } from './home/home.js';
 import { initOffline } from './core/offline.js';
+import { initAi, closeDrawer } from './ai/ai-panel.js';
 import { buildBlockIndex } from './core/blocks.js';
 import { parseShareHash, resolveShared } from './core/share.js';
 import { setShareData } from './core/share-ui.js';
@@ -227,6 +228,17 @@ async function init() {
 
     // ── Home surface — the landing page, not a third view state ────────────
     initHomeControls(data);
+
+    // ── AI assistant (opt-in; see ai/). A citation chip opens the cited block
+    // in continuous view — book view has no jump-to-block yet (follow-up).
+    initAi({
+        data,
+        onCite: (blockId) => {
+            activateView('continuous');
+            setTimeout(() => jumpToReference(blockId), 150);
+            if (window.innerWidth < 700) closeDrawer();
+        },
+    });
     document.getElementById('home-btn')?.addEventListener('click', showHome);
     document.getElementById('home-open-book')?.addEventListener('click', () => activateView('book'));
     document.getElementById('home-open-continuous')?.addEventListener('click', () => activateView('continuous'));

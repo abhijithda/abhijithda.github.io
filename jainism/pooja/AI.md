@@ -1119,3 +1119,41 @@ the core requirement without needing a separate render pass.
   shared link shows.
 - Not built yet: per-block link previews for WhatsApp etc. (those apps ignore everything after `#`; needs a generated
   static page per block).
+
+---
+
+## AI assistant ("Ask the book") — ✅ Phase 1 current
+
+Opt-in (**Settings → 💬 AI assistant: Off | Cloud | Local**, setting `aiEngine`
+in `core/settings.js`, default `off`). A header **Ask** button appears only when
+the chosen engine is usable; it opens an overlay drawer (an overlay, never a
+column, so book pagination is unaffected; hidden in print).
+
+```
+ai/
+├── config.js          deploy-time values: CLOUD_ENDPOINT, WebLLM URL/model
+├── retrieval.js       in-browser BM25 + tag boost over data.json (no build step)
+├── prompt.js          system rules, message building, [A-3.1] citation parsing
+├── rag.js             single-shot RAG: retrieve -> one engine call
+├── ai-panel.js / .css Settings picker, Ask button, drawer, citation chips
+├── engines/           cloud.js (via proxy), local.js (WebLLM/WebGPU), index.js
+└── proxy/worker.js    reference Cloudflare Worker for Cloud (not part of the site)
+```
+
+- **Retrieval is the swappable seam.** Everything else only calls
+  `createIndex / search / getContext`; a semantic retriever can replace
+  `retrieval.js` if the eval harness (phase 2) shows lexical search falls short.
+  Kannada-script words are indexed as character trigrams (agglutinative
+  suffixes); there is no Kannada-script <-> transliterated-Latin mapping yet.
+- **Grounding:** answers use only retrieved passages, cite block labels, and
+  nothing relevant found = "not covered" with no model call. Citations the
+  model invents are never linked. Model output is rendered with
+  `textContent`, never `innerHTML`.
+- **Privacy:** Cloud sends the question + retrieved passages to your proxy;
+  the API key lives only in the proxy. Local sends nothing.
+- **Known gaps:** citation chips open the block in *continuous* view (book view
+  has no jump-to-block yet); the Home page's mirrored settings don't include the
+  AI picker; Cloud is non-streaming; Local needs WebGPU and a pinned WebLLM
+  version/model id that must be re-verified before deploy.
+- **Planned (measured, not assumed):** eval harness, optional agent step
+  (follow-up/search tools for Cloud), embeddings only if the eval shows a gap.

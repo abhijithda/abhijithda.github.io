@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="core/share.css">
     <link rel="stylesheet" href="core/card-types.css">
     <link rel="stylesheet" href="core/font-scale.css">
+    <link rel="stylesheet" href="ai/ai-panel.css">
     <link rel="stylesheet" id="css-continuous" href="views/continuous/continuous-view.css">
     <link rel="stylesheet" id="css-book"       href="views/book/book-view.css">
     <!-- @page can't be scoped to a body attribute/class in plain CSS, so the
@@ -56,6 +57,8 @@
         <input type="text" id="search-bar" placeholder="Search topics - ಅಭಿಷೇಕ, Daana...">
 
         <span id="read-progress" class="read-progress" title="Items you've marked as read"></span>
+
+        <button id="ai-btn" class="menu-trigger" title="Ask a question about this book" aria-label="Ask the book" hidden>💬<span class="btn-label">&nbsp;Ask</span></button>
 
         <button id="zen-mode-btn" class="menu-trigger" title="Focus mode — hide header and browser chrome (Esc to exit)" aria-label="Focus mode">⛶<span class="btn-label">&nbsp;Focus</span></button>
 
@@ -107,6 +110,15 @@
                         <input type="checkbox" id="toggle-offline">
                         <span class="slider"></span>
                     </label>
+                </div>
+                <div class="menu-section">
+                    <label for="ai-engine-select" title="Ask questions about the book. Off by default.">💬 AI assistant:</label>
+                    <select id="ai-engine-select">
+                        <option value="off">Off</option>
+                        <option value="cloud">Cloud</option>
+                        <option value="local">Local (on this device)</option>
+                    </select>
+                    <span id="ai-engine-note"></span>
                 </div>
                 <div class="menu-section">
                     <label for="paper-size-select">🖨️ Paper size:</label>
