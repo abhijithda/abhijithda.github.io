@@ -114,20 +114,28 @@ test.describe('Offline copy (opt-in service worker)', () => {
 
         // app files gone, pictures still saved: the state seen in the bug reports
         await page.evaluate(() => caches.delete('pooja-shell-v1'));
-        await page.evaluate(() => {
-            window.__stateChanges = 0;
-            new MutationObserver(() => { window.__stateChanges += 1; })
-                .observe(document.getElementById('home-offline-status'), { attributes: true, attributeFilter: ['data-state'] });
+
+        // Record the sequence of states from the start of the next page load. Progress
+        // ticks ("Saving… 3/7") keep the same state, so they don't count; a loop shows up
+        // as the state going back and forth (preparing, incomplete, preparing, ...).
+        await page.addInitScript(() => {
+            window.__states = [];
+            setInterval(() => {
+                const el = document.getElementById('home-offline-status');
+                if (!el) return;
+                const state = el.hidden ? '-' : el.dataset.state;
+                if (window.__states[window.__states.length - 1] !== state) window.__states.push(state);
+            }, 20);
         });
         await page.reload();
-        await page.evaluate(() => {
-            window.__stateChanges = 0;
-            new MutationObserver(() => { window.__stateChanges += 1; })
-                .observe(document.getElementById('home-offline-status'), { attributes: true, attributeFilter: ['data-state'] });
-        });
         await expect(page.locator('#home-offline-status')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
-        await page.waitForTimeout(3000);                  // a loop would keep changing it
-        expect(await page.evaluate(() => window.__stateChanges)).toBeLessThanOrEqual(4);
+        await page.waitForTimeout(3000);                  // a loop would keep going
+
+        const states = await page.evaluate(() => window.__states);
+        expect(states[states.length - 1], `states seen: ${states.join(' > ')}`).toBe('ready');
+        expect(states.length, `states seen: ${states.join(' > ')}`).toBeLessThanOrEqual(6);
+        expect(states.filter(s => s === 'incomplete').length, `states seen: ${states.join(' > ')}`).toBeLessThanOrEqual(1);
+
         const hasIndex = await page.evaluate(async () => {
             const keys = await (await caches.open('pooja-shell-v1')).keys();
             return keys.some(r => r.url.endsWith('/index.html'));

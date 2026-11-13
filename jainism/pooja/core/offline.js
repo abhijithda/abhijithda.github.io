@@ -96,8 +96,10 @@ function render(doc, info) {
         return;
     }
     el.hidden = false;
-    el.textContent = info.text;
-    el.dataset.state = info.state;
+    // Only touch the DOM when something changed: the line is a live region, and
+    // rewriting identical text can make screen readers announce it again.
+    if (el.textContent !== info.text) el.textContent = info.text;
+    if (el.dataset.state !== info.state) el.dataset.state = info.state;
 }
 
 // Unregister the worker(s) and delete everything saved. The worker is asked to
