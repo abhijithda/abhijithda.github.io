@@ -7,3 +7,6 @@ playwright-report/
 
 # Output of scripts/render-prints.js (published by the workflow, never committed)
 prints/
+
+# Local wrangler dev state (ai/proxy)
+.wrangler/
