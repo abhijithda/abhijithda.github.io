@@ -3,11 +3,11 @@
 // Both views share the same header; settings apply to whichever view is active.
 
 import { renderContinuousView, filterContinuous, goBackToMessage, jumpToReference } from './views/continuous/continuous-view.js';
-import { initBookView, onBookLangChange, searchBookView } from './views/book/book-view.js';
+import { initBookView, onBookLangChange, searchBookView, jumpToBlock } from './views/book/book-view.js';
 import { initHeaderControls, applySettings, updateMediaVisibility, getActiveLangs, applyPaperSize } from './header/header.js';
 import { initHomeControls, refreshHomeView } from './home/home.js';
 import { initOffline } from './core/offline.js';
-import { initAi, closeDrawer } from './ai/ai-panel.js';
+import { initAi, collapseToPill, revealTargetWhenSettled } from './ai/ai-panel.js';
 import { buildBlockIndex } from './core/blocks.js';
 import { parseShareHash, resolveShared } from './core/share.js';
 import { setShareData } from './core/share-ui.js';
@@ -229,14 +229,21 @@ async function init() {
     // ── Home surface — the landing page, not a third view state ────────────
     initHomeControls(data);
 
-    // ── AI assistant (opt-in; see ai/). A citation chip opens the cited block
-    // in continuous view — book view has no jump-to-block yet (follow-up).
+    // ── AI assistant (opt-in; see ai/). A citation chip opens the cited block in
+    // the view the reader is already using (Book or Continuous). From Home it
+    // opens the last view they had open.
     initAi({
         data,
         onCite: (blockId) => {
-            activateView('continuous');
-            setTimeout(() => jumpToReference(blockId), 150);
-            if (window.innerWidth < 700) closeDrawer();
+            const mode = localStorage.getItem('viewMode') === 'continuous' ? 'continuous' : 'book';
+            activateView(mode);
+            // Give the view a moment to lay out before scrolling/turning to the block.
+            setTimeout(() => {
+                if (mode === 'continuous') jumpToReference(blockId); else jumpToBlock(blockId);
+                // The drawer steps aside (to a "Back to answer" button) if it would cover the passage.
+                if (window.innerWidth < 700) collapseToPill();
+                else revealTargetWhenSettled(blockId);
+            }, 150);
         },
     });
     document.getElementById('home-btn')?.addEventListener('click', showHome);

@@ -4,6 +4,7 @@ const {
     goToPrevSpread,
     goToNextSpread,
     jumpToPage,
+    jumpToBlock,
     onBookLangChange,
 } = require('./book-view');
 
@@ -546,5 +547,42 @@ describe('initBookView against the real test/data.json fixture', () => {
         expect(() => initBookView(fixtureData, ['kn', 'en'])).not.toThrow();
         expect(document.getElementById('book-ins_001').classList.contains('title-style-page')).toBe(true);
         expect(document.getElementById('book-a_001_b_1').querySelector('.book-excerpt')).not.toBeNull();
+    });
+});
+
+describe('jumpToBlock (used by the AI assistant\u2019s citations)', () => {
+    const data = [{
+        id: 'a_102', type: 'answer', references: null,
+        blocks: [baseBlock({ id: 'a_102_b_1' }), baseBlock({ id: 'a_102_b_2' })],
+    }];
+
+    beforeEach(() => {
+        initBookView(data, ['kn', 'en']);
+        mockSpreadLayout({ spreadWidth: 800, columnsScrollWidth: 3200 });   // 4 spreads
+        renderCurrentSpread();
+    });
+
+    test('turns to the spread that holds the block\u2019s card and flashes it', () => {
+        jest.useFakeTimers();
+        const card = document.getElementById('book-a_102_b_2');
+        Object.defineProperty(card, 'offsetLeft', { value: 1700, configurable: true });   // 3rd spread
+        expect(jumpToBlock('a_102_b_2')).toBe(true);
+        expect(document.getElementById('book-columns').style.transform).toBe('translateX(-1600px)');
+        expect(card.classList.contains('jump-highlight')).toBe(true);
+        jest.advanceTimersByTime(2000);
+        expect(card.classList.contains('jump-highlight')).toBe(false);
+        jest.useRealTimers();
+    });
+
+    test('remembers the new spread like any other page turn', () => {
+        const card = document.getElementById('book-a_102_b_1');
+        Object.defineProperty(card, 'offsetLeft', { value: 900, configurable: true });
+        jumpToBlock('a_102_b_1');
+        expect(JSON.stringify(Object.values(localStorage))).toMatch(/1/);
+    });
+
+    test('returns false and stays put for a block the book has no card for', () => {
+        expect(jumpToBlock('does_not_exist')).toBe(false);
+        expect(document.getElementById('book-columns').style.transform).toBe('translateX(-0px)');
     });
 });

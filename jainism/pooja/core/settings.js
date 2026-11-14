@@ -27,6 +27,11 @@ const DEFAULT_PAPER_SIZE = 'dynamic';
 export const AI_ENGINES = ['off', 'cloud', 'local'];
 const DEFAULT_AI_ENGINE = 'off';
 
+// Width of the assistant drawer in px, set by dragging its edge (see ai/ai-panel.js).
+export const AI_PANEL_WIDTH_MIN = 320;
+export const AI_PANEL_WIDTH_MAX = 1400;
+export const AI_PANEL_WIDTH_DEFAULT = 420;
+
 // Font-scale multiplier bounds/step for the increase/decrease control.
 // Applied as a multiplier (via the --font-scale CSS custom property), not
 // an absolute override, so it composes with paper-size width capping.
@@ -53,6 +58,9 @@ export function loadSettings() {
 
     const paperSize = PAPER_SIZES.includes(saved?.paperSize) ? saved.paperSize : DEFAULT_PAPER_SIZE;
 
+    const aiPanelWidth = Number.isFinite(saved?.aiPanelWidth)
+        ? Math.min(AI_PANEL_WIDTH_MAX, Math.max(AI_PANEL_WIDTH_MIN, Math.round(saved.aiPanelWidth)))
+        : AI_PANEL_WIDTH_DEFAULT;
     const fontScale = typeof saved?.fontScale === 'number' &&
         saved.fontScale >= FONT_SCALE_MIN && saved.fontScale <= FONT_SCALE_MAX
         ? round1(saved.fontScale)
@@ -67,6 +75,7 @@ export function loadSettings() {
         // it only starts when the reader turns it on (see core/offline.js).
         offline:      typeof saved?.offline      === 'boolean' ? saved.offline      : false,
         aiEngine:     AI_ENGINES.includes(saved?.aiEngine) ? saved.aiEngine : DEFAULT_AI_ENGINE,
+        aiPanelWidth,
         paperSize,
         fontScale,
     };
@@ -86,7 +95,7 @@ export function saveSettings(partial) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
         loadSettings, saveSettings, round1,
     });
 }

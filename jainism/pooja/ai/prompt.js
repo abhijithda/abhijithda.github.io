@@ -28,8 +28,11 @@ function langName(code) {
     return KNOWN_LANGS.find(l => l.code === code)?.name || code;
 }
 
+// Topic tags are deliberately not shown to the model: small models copy them
+// into their answers ("The passage [A-1.1] (topics: ...) states ..."), and the
+// tags are editorial labels, not the book's words.
 export function formatPassage(p) {
-    const lines = [`[${p.label}]${p.tags?.length ? ` (topics: ${p.tags.join(', ')})` : ''}${p.viaReference ? ' (the question this replies to)' : ''}`];
+    const lines = [`[${p.label}]${p.viaReference ? ' (the question this replies to)' : ''}`];
     Object.entries(p.text).forEach(([lang, text]) => lines.push(`${langName(lang)}: ${text}`));
     return lines.join('\n');
 }
@@ -65,4 +68,17 @@ export function parseCitations(answer, passages) {
         }
     }
     return found;
+}
+
+/**
+ * Keeps the first `n` sentences. Small models ignore "two short sentences" and
+ * paste whole passages; the passages themselves are shown under the reply, so
+ * the reply is cut to its opening. Also removes "(topics: ...)" if one still
+ * gets echoed.
+ */
+export function firstSentences(text, n = 2) {
+    const clean = String(text).replace(/\s*\(topics?:[^)]*\)/gi, '').replace(/\s+/g, ' ').trim();
+    // A sentence ends at . ! ? followed by space and a capital, quote, citation, or Kannada letter.
+    // (Periods inside a label like [A-3.1] are followed by a digit or "]", so they don't split.)
+    return clean.split(/(?<=[.!?])\s+(?=[A-Z"\u201C\[\u0C80-\u0CFF])/).slice(0, n).join(' ');
 }

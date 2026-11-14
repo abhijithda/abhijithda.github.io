@@ -152,3 +152,18 @@ export function getContext(index, query, { langs = LANG_CODES, k = 5, budgetChar
     }
     return out;
 }
+
+/**
+ * More passages that match a question, past the ones already shown: for "show
+ * me everything about X". Best match first, same minimum score as getContext.
+ * @param {Object} index
+ * @param {string} query
+ * @param {{langs?: string[], exclude?: string[], limit?: number, minScore?: number}} [opts]
+ */
+export function moreMatches(index, query, { langs = LANG_CODES, exclude = [], limit = 12, minScore = 0.5 } = {}) {
+    const skip = new Set(exclude);
+    return search(index, query, { k: 60 })
+        .filter(h => h.score >= minScore && !skip.has(h.chunk.id))
+        .slice(0, limit)
+        .map(h => passageFrom(h.chunk, langs));
+}

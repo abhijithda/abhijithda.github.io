@@ -1,4 +1,4 @@
-const { buildMessages, parseCitations, formatPassage, NOT_COVERED } = require('./prompt');
+const { buildMessages, parseCitations, formatPassage, firstSentences, NOT_COVERED } = require('./prompt');
 
 const passages = [
     { id: 'blk1', label: 'A-1.1', tags: ['Daana'], text: { en: 'Giving is dharma.', kn: 'ದಾನ' } },
@@ -26,7 +26,10 @@ describe('buildMessages', () => {
 
     test('formatPassage marks a passage pulled in as the question being replied to', () => {
         expect(formatPassage(passages[1])).toMatch(/question this replies to/);
-        expect(formatPassage(passages[0])).toMatch(/topics: Daana/);
+    });
+
+    test('topic tags are not shown to the model (small models copy them into their answers)', () => {
+        expect(formatPassage(passages[0])).not.toMatch(/topics|Daana/);
     });
 });
 
@@ -75,4 +78,23 @@ describe('the rules the model is given', () => {
 
 test('NOT_COVERED is a readable sentence', () => {
     expect(NOT_COVERED.length).toBeGreaterThan(20);
+});
+
+describe('firstSentences', () => {
+    test('keeps the first two sentences of a longer reply', () => {
+        expect(firstSentences('One is here [A-1.1]. Two is here. Three is not. Four is not.', 2)).toBe('One is here [A-1.1]. Two is here.');
+    });
+
+    test('does not split inside a citation label like [A-3.1]', () => {
+        expect(firstSentences('See [A-3.1] for this. Then more.', 1)).toBe('See [A-3.1] for this.');
+    });
+
+    test('splits Kannada sentences too, and leaves a short reply alone', () => {
+        expect(firstSentences('ಇದು ಮೊದಲ ವಾಕ್ಯ. ಇದು ಎರಡನೆಯದು. ಇದು ಮೂರನೆಯದು.', 2)).toBe('ಇದು ಮೊದಲ ವಾಕ್ಯ. ಇದು ಎರಡನೆಯದು.');
+        expect(firstSentences('Just one.', 2)).toBe('Just one.');
+    });
+
+    test('removes an echoed "(topics: ...)" and tidies whitespace', () => {
+        expect(firstSentences('The passage [A-1.1] (topics: Abhisheka, Pooja)   states this.', 2)).toBe('The passage [A-1.1] states this.');
+    });
 });

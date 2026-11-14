@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { createIndex } = require('./retrieval');
-const { answerQuestion, NO_RELIABLE_ANSWER } = require('./rag');
+const { answerQuestion, NO_RELIABLE_ANSWER, FOLLOW_UP_LOCAL } = require('./rag');
 const { NOT_COVERED } = require('./prompt');
 
 const index = createIndex(JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf8')));
@@ -100,12 +100,23 @@ describe('follow-up questions', () => {
         { role: 'assistant', content: 'Something [Q-19.1].' },
     ];
 
-    test('a follow-up that matches nothing alone is searched together with the previous question', async () => {
-        const engine = fakeEngine('See [Q-19.1].');
+    test('a follow-up that matches nothing alone is searched with the previous question; the on-device model is not asked again', async () => {
+        const engine = fakeEngine('would just repeat itself [Q-19.1].', 'local');
+        const r = await answerQuestion({ question: 'really?', index, engine, langs: ['en'], history });
+        expect(engine.generate).not.toHaveBeenCalled();
+        expect(r.text).toBe(FOLLOW_UP_LOCAL);
+        expect(r.shown.some(p => p.label === 'Q-19.1')).toBe(true);
+        expect(r.fallback).toBe(false);
+    });
+
+    test('the hosted model is asked, with the earlier passages and the conversation', async () => {
+        const engine = fakeEngine('Yes, see [Q-19.1].', 'cloud');
         const r = await answerQuestion({ question: 'really?', index, engine, langs: ['en'], history });
         expect(engine.generate).toHaveBeenCalledTimes(1);
-        expect(r.passages.length).toBeGreaterThan(0);
+        const sent = engine.generate.mock.calls[0][0];
+        expect(sent.some(m => m.content === 'Something [Q-19.1].')).toBe(true);
         expect(r.passages.some(p => p.label === 'Q-19.1')).toBe(true);
+        expect(r.grounded).toBe(true);
     });
 
     test('with no earlier question there is nothing to combine, so it is still "not covered" without a model call', async () => {
@@ -115,10 +126,46 @@ describe('follow-up questions', () => {
         expect(r.text).toBe(NOT_COVERED);
     });
 
-    test('a question that finds passages by itself is not mixed with the previous one', async () => {
+    test('a question that finds passages by itself is not mixed with the previous one, and is sent to the model', async () => {
         const engine = fakeEngine('See [A-1.1].');
         const alone = await answerQuestion({ question: 'shasana devata', index, engine: fakeEngine('x'), langs: ['en'] });
         const withHistory = await answerQuestion({ question: 'shasana devata', index, engine, langs: ['en'], history });
         expect(withHistory.passages.map(p => p.id)).toEqual(alone.passages.map(p => p.id));
+        expect(engine.generate).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('on-device replies are cut to two sentences', () => {
+    const q = 'what is the result of worshipping shasana devata as bhagawan';
+
+    test('a long reply is cut after the second sentence', async () => {
+        const r = await answerQuestion({ question: q, index, engine: fakeEngine('First point [A-1.1]. Second point. Third point. Fourth point.', 'local'), langs: ['en'] });
+        expect(r.text).toBe('First point [A-1.1]. Second point.');
+    });
+
+    test('if the only citation was in the part that was cut, the reply is withheld', async () => {
+        const r = await answerQuestion({ question: q, index, engine: fakeEngine('First point. Second point. Third point [A-1.1].', 'local'), langs: ['en'] });
+        expect(r.fallback).toBe(true);
+    });
+
+    test('the hosted model\u2019s reply is not cut', async () => {
+        const r = await answerQuestion({ question: q, index, engine: fakeEngine('One [A-1.1]. Two. Three. Four.', 'cloud'), langs: ['en'] });
+        expect(r.text).toBe('One [A-1.1]. Two. Three. Four.');
+    });
+});
+
+describe('more matches', () => {
+    test('are offered beyond what is shown, without repeating shown passages', async () => {
+        const r = await answerQuestion({ question: 'abhisheka', index, engine: fakeEngine('See [Q-19.1].', 'local'), langs: ['en'] });
+        const shownIds = r.shown.map(p => p.id);
+        expect(r.more.length).toBeGreaterThan(0);
+        expect(r.more.length).toBeLessThanOrEqual(12);
+        r.more.forEach(p => expect(shownIds).not.toContain(p.id));
+    });
+
+    test('also when the model\u2019s reply was withheld', async () => {
+        const r = await answerQuestion({ question: 'abhisheka', index, engine: fakeEngine('no citation here', 'local'), langs: ['en'] });
+        expect(r.fallback).toBe(true);
+        expect(r.more.length).toBeGreaterThan(0);
     });
 });

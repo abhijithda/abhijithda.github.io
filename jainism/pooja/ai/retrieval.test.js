@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { tokenize, createIndex, search, getContext } = require('./retrieval');
+const { tokenize, createIndex, search, getContext, moreMatches } = require('./retrieval');
 
 const data = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf8'));
 const index = createIndex(data);
@@ -99,5 +99,20 @@ describe('getContext', () => {
 
     test('returns nothing when no block is relevant', () => {
         expect(getContext(index, 'zzqxv wwkjh')).toEqual([]);
+    });
+});
+
+describe('moreMatches', () => {
+    test('returns further matches, best first, never repeating an excluded passage', () => {
+        const first = getContext(index, 'abhisheka', { langs: ['en'], k: 3 }).map(p => p.id);
+        const more = moreMatches(index, 'abhisheka', { langs: ['en'], exclude: first, limit: 12 });
+        expect(more.length).toBeGreaterThan(3);
+        expect(more.length).toBeLessThanOrEqual(12);
+        more.forEach(p => expect(first).not.toContain(p.id));
+        expect(new Set(more.map(p => p.id)).size).toBe(more.length);
+    });
+
+    test('nothing for a query that matches nothing', () => {
+        expect(moreMatches(index, 'zzqxv wwkjh')).toEqual([]);
     });
 });

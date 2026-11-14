@@ -1,4 +1,4 @@
-const { renderAnswer, renderPassages, applyAiSetting, initAi } = require('./ai-panel');
+const { renderAnswer, renderPassages, applyAiSetting, initAi, setPanelWidth, currentPanelWidth, revealTarget, revealTargetWhenSettled, collapseToPill, openDrawer, closeDrawer } = require('./ai-panel');
 const { saveSettings } = require('../core/settings');
 
 beforeEach(() => {
@@ -62,6 +62,19 @@ describe('renderPassages', () => {
         const long = [...box.querySelectorAll('.ai-passage-text')].pop().textContent;
         expect(long.length).toBeLessThan(520);
         expect(long.endsWith('\u2026')).toBe(true);
+    });
+
+    test('further matches stay hidden behind a button that adds them', () => {
+        const box = document.createElement('div');
+        const more = [{ id: 'm1', label: 'A-2.1', text: { en: 'More one.' } }, { id: 'm2', label: 'A-2.2', text: { en: 'More two.' } }];
+        renderPassages(box, passages, jest.fn(), { title: 't', open: true, more });
+        expect(box.querySelectorAll('.ai-passage').length).toBe(2);
+        const btn = box.querySelector('button.ai-more');
+        expect(btn.textContent).toBe('Show 2 more matching passages');
+        btn.click();
+        expect(box.querySelectorAll('.ai-passage').length).toBe(4);
+        expect(box.querySelector('button.ai-more')).toBeNull();
+        expect(box.textContent).toContain('More two.');
     });
 
     test('passage text is never parsed as HTML; nothing is drawn for no passages', () => {
@@ -129,5 +142,125 @@ describe('initAi', () => {
         select.dispatchEvent(new Event('change'));
         expect(JSON.parse(localStorage.getItem('settings')).aiEngine).toBe('cloud');
         expect(document.getElementById('ai-drawer')).not.toBeNull();
+    });
+});
+
+describe('drawer width', () => {
+    const drawer = () => document.getElementById('ai-drawer');
+    const handle = () => document.getElementById('ai-resize');
+    const saved = () => JSON.parse(localStorage.getItem('settings') || '{}').aiPanelWidth;
+    const pointer = (type, x) => handle().dispatchEvent(Object.assign(new MouseEvent(type, { bubbles: true, clientX: x }), { pointerId: 1 }));
+
+    beforeEach(() => {
+        window.innerWidth = 1400;
+        initAi({ data: [], onCite: jest.fn() });
+    });
+
+    test('starts at the saved width', () => {
+        document.body.innerHTML = '';
+        localStorage.clear();
+        saveSettings({ aiPanelWidth: 555 });
+        initAi({ data: [], onCite: jest.fn() });
+        expect(drawer().style.getPropertyValue('--ai-width')).toBe('555px');
+    });
+
+    test('dragging the edge resizes live and saves when released', () => {
+        pointer('pointerdown', 980);          // drawer's left edge
+        pointer('pointermove', 700);          // dragged left: panel is 1400 - 700 wide
+        expect(drawer().style.getPropertyValue('--ai-width')).toBe('700px');
+        expect(saved()).not.toBe(700);        // not saved mid-drag
+        pointer('pointerup', 700);
+        expect(saved()).toBe(700);
+        expect(document.body.classList.contains('ai-resizing')).toBe(false);
+    });
+
+    test('is kept within limits', () => {
+        expect(setPanelWidth(50)).toBe(320);
+        expect(setPanelWidth(5000)).toBe(1330);    // 95% of a 1400px window
+    });
+
+    test('arrow keys resize, Home and double-click reset', () => {
+        setPanelWidth(500);
+        handle().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+        expect(currentPanelWidth()).toBe(524);
+        handle().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', shiftKey: true, bubbles: true }));
+        expect(currentPanelWidth()).toBe(428);
+        handle().dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+        expect(currentPanelWidth()).toBe(420);
+        setPanelWidth(800);
+        handle().dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+        expect(currentPanelWidth()).toBe(420);
+    });
+
+    test('the expand button toggles between normal and wide', () => {
+        const btn = document.querySelector('.ai-expand');
+        btn.click();
+        expect(currentPanelWidth()).toBe(900);
+        btn.click();
+        expect(currentPanelWidth()).toBe(420);
+    });
+});
+
+describe('stepping aside to read a cited passage', () => {
+    const rect = (left, right) => ({ left, right, top: 100, bottom: 400, width: right - left, height: 300 });
+    const drawer = () => document.getElementById('ai-drawer');
+    const pill = () => document.getElementById('ai-back');
+
+    beforeEach(() => {
+        window.innerWidth = 1400;
+        document.body.innerHTML = '<div id="book-blk1"></div><div id="blk2"></div>';
+        initAi({ data: [], onCite: jest.fn() });
+        openDrawer();
+        drawer().getBoundingClientRect = () => rect(980, 1400);
+    });
+
+    test('a passage under the drawer: the drawer collapses to a "Back to answer" button', () => {
+        document.getElementById('book-blk1').getBoundingClientRect = () => rect(1000, 1300);
+        expect(revealTarget('blk1')).toBe(true);
+        expect(drawer().hidden).toBe(true);
+        expect(pill().hidden).toBe(false);
+    });
+
+    test('a passage clear of the drawer: nothing moves (continuous view uses the plain id)', () => {
+        document.getElementById('blk2').getBoundingClientRect = () => rect(100, 800);
+        expect(revealTarget('blk2')).toBe(false);
+        expect(drawer().hidden).toBe(false);
+        expect(pill().hidden).toBe(true);
+    });
+
+    test('the button brings the conversation back, and closing the drawer never leaves a stray button', () => {
+        const before = document.getElementById('ai-messages');
+        collapseToPill();
+        pill().click();
+        expect(drawer().hidden).toBe(false);
+        expect(pill().hidden).toBe(true);
+        expect(document.getElementById('ai-messages')).toBe(before);   // same conversation, not rebuilt
+        collapseToPill();
+        closeDrawer();
+        expect(pill().hidden).toBe(true);
+    });
+
+    test('waits for a sliding page turn to finish before judging whether the drawer is in the way', () => {
+        jest.useFakeTimers();
+        const el = document.getElementById('book-blk1');
+        let left = 1500;                                  // still off to the right, sliding in
+        el.getBoundingClientRect = () => rect(left, left + 300);
+        revealTargetWhenSettled('blk1', { interval: 100 });
+        jest.advanceTimersByTime(100);  left = 1200;      // moving
+        jest.advanceTimersByTime(100);  left = 1000;      // moving
+        jest.advanceTimersByTime(100);
+        expect(drawer().hidden).toBe(false);              // not judged while moving
+        jest.advanceTimersByTime(200);                    // settled at 1000: under the drawer
+        expect(drawer().hidden).toBe(true);
+        expect(pill().hidden).toBe(false);
+        jest.useRealTimers();
+    });
+
+    test('an unknown block, or a closed drawer, is a no-op', () => {
+        expect(revealTarget('nope')).toBe(false);
+        closeDrawer();
+        document.getElementById('book-blk1').getBoundingClientRect = () => rect(1000, 1300);
+        expect(revealTarget('blk1')).toBe(false);
+        expect(pill().hidden).toBe(true);
     });
 });

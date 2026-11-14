@@ -40,8 +40,8 @@ test('an uncited answer is never shown: the reader sees the closest passages ins
     mockEngine.generate.mockResolvedValue('Abhisheka is a ritual to purify oneself or a deity.');
     await ask('what is the result of worshipping shasana devata as bhagawan');
     expect(last().textContent).not.toMatch(/purify oneself/);
-    expect(last().textContent).toMatch(/couldn.t write a reliable answer/);
-    expect(last().querySelector('summary').textContent).toBe('Closest passages in the book');
+    expect(last().textContent).toMatch(/couldn.t write a reliable summary/);
+    expect(last().querySelector('summary').textContent).toBe('Matching passages in the book');
     expect(last().querySelectorAll('.ai-passage').length).toBeGreaterThan(0);
 });
 
@@ -57,11 +57,37 @@ test('raw text from the model is not shown while it is being written', async () 
     expect(document.getElementById('ai-status').textContent).toBe('');
 });
 
-test('a follow-up uses the previous question; a failed answer is not remembered as history', async () => {
+test('"really?" to the on-device model does not produce the same answer again', async () => {
+    mockEngine.id = 'local';
+    mockEngine.generate.mockResolvedValue('Ok [Q-19.1].');
+    await ask('pooja');
+    const first = last().textContent;
+    await ask('really?');
+    expect(mockEngine.generate).toHaveBeenCalledTimes(1);          // not asked again
+    expect(last().textContent).not.toBe(first);
+    expect(last().textContent).toMatch(/Open one in the book, or ask a more specific question/);
+    expect(last().querySelectorAll('.ai-passage').length).toBeGreaterThan(0);
+});
+
+test('with the hosted model a follow-up is answered using the conversation', async () => {
+    mockEngine.id = 'cloud';
     mockEngine.generate.mockResolvedValue('Ok [Q-19.1].');
     await ask('pooja');
     mockEngine.generate.mockResolvedValue('Still on it [Q-19.1].');
     await ask('really?');
     expect(mockEngine.generate).toHaveBeenCalledTimes(2);
     expect(last().textContent).toContain('Still on it');
+    mockEngine.id = 'local';
+});
+
+test('"show more" adds further matching passages under the answer', async () => {
+    mockEngine.id = 'local';
+    mockEngine.generate.mockResolvedValue('See [Q-19.1].');
+    await ask('abhisheka');
+    const before = last().querySelectorAll('.ai-passage').length;
+    const btn = last().querySelector('button.ai-more');
+    expect(btn.textContent).toMatch(/Show \d+ more matching passage/);
+    btn.click();
+    expect(last().querySelectorAll('.ai-passage').length).toBeGreaterThan(before);
+    expect(last().querySelector('button.ai-more')).toBeNull();
 });

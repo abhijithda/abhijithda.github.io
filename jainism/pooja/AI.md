@@ -1164,8 +1164,16 @@ ai/
   "Try compatibility mode" button (f32 build of the model, larger download).
   Once compatibility mode has worked it is remembered (localStorage key `aiLocalCompat`,
   expires after 30 days, tied to the model id) so reloads skip the failing build.
-- **Known gaps:** citation chips open the block in *continuous* view (book view
-  has no jump-to-block yet); the Home page's mirrored settings don't include the
+- **Drawer behaviour:**
+  - Resize by dragging its left edge (arrow keys too; double-click or Home resets), or the ⤢ button for a wide reading size. Width is saved in Settings (`aiPanelWidth`).
+  - A citation chip opens the passage in the view the reader is already using (Book turns to the right spread; Continuous scrolls to it). If the drawer would sit on top of that passage it steps aside to a "Back to answer" button instead of vanishing; one tap restores the same conversation.
+  - "Show N more matching passages" lists further matches (up to 12) for broad one-word queries.
+  - "really?" and other follow-ups with no searchable words: searched together with the previous question; the on-device model isn't asked again (it would only repeat itself), the hosted model is.
+- **TODO:** keep the chat history across reloads like settings (decide: sessionStorage vs localStorage, a size limit, a "clear" button, and that questions are stored on the device).
+- **TODO (after the tags review):** tag-based ranking boost; related-question chips built from shared tags (no model needed).
+- **Tried and rejected (measured with the eval):** boosting question blocks over answer blocks made recall worse
+  (recall@5 86% -> 81% at 1.15x, 70% at 3x), so retrieval weights are unchanged.
+- **Known gaps:** the Home page's mirrored settings don't include the
   AI picker; Cloud is non-streaming; Local needs WebGPU and a pinned WebLLM
   version/model id that must be re-verified before deploy.
 - **Retrieval eval (`ai/eval/`, run `npx jest ai/eval --verbose`):** 41 draft questions (English, Kannada, Kannada in
