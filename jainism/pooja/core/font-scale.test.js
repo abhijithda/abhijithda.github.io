@@ -70,7 +70,7 @@ describe('changeFontScale', () => {
         expect(localStorage.length).toBe(1);
         const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
         expect(raw).toEqual({
-            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false,
+            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiPanelWidth: 420,
             qrs: true, fontScale: 1.1, paperSize: 'a3',
         });
     });

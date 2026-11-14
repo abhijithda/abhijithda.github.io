@@ -1,6 +1,6 @@
 // core/settings.js — The single unified `settings` object: one
 // localStorage key, one load/save pair, for every persisted preference
-// (languages, videos, QR codes, read-tracking, offline copy, paper size, font scale).
+// (languages, videos, QR codes, read-tracking, offline copy, AI engine, paper size, font scale).
 // Feature modules (paper-size.js, font-scale.js, the lang picker in
 // header.js) read/write through loadSettings()/saveSettings() here rather
 // than owning storage of their own — so any caller can save "everything",
@@ -20,6 +20,17 @@ export const SETTINGS_KEY = 'settings';
 // that paper's physical proportions too.
 export const PAPER_SIZES = ['dynamic', 'a4', 'a3'];
 const DEFAULT_PAPER_SIZE = 'dynamic';
+
+// AI assistant engine (see ai/). 'off' is the default: 'local' downloads a
+// model of hundreds of MB, and 'cloud' sends the reader's question (plus the
+// passages found for it) to a server, so neither happens until chosen.
+export const AI_ENGINES = ['off', 'cloud', 'local'];
+const DEFAULT_AI_ENGINE = 'off';
+
+// Width of the assistant drawer in px, set by dragging its edge (see ai/ai-panel.js).
+export const AI_PANEL_WIDTH_MIN = 320;
+export const AI_PANEL_WIDTH_MAX = 1400;
+export const AI_PANEL_WIDTH_DEFAULT = 420;
 
 // Font-scale multiplier bounds/step for the increase/decrease control.
 // Applied as a multiplier (via the --font-scale CSS custom property), not
@@ -47,6 +58,9 @@ export function loadSettings() {
 
     const paperSize = PAPER_SIZES.includes(saved?.paperSize) ? saved.paperSize : DEFAULT_PAPER_SIZE;
 
+    const aiPanelWidth = Number.isFinite(saved?.aiPanelWidth)
+        ? Math.min(AI_PANEL_WIDTH_MAX, Math.max(AI_PANEL_WIDTH_MIN, Math.round(saved.aiPanelWidth)))
+        : AI_PANEL_WIDTH_DEFAULT;
     const fontScale = typeof saved?.fontScale === 'number' &&
         saved.fontScale >= FONT_SCALE_MIN && saved.fontScale <= FONT_SCALE_MAX
         ? round1(saved.fontScale)
@@ -60,6 +74,8 @@ export function loadSettings() {
         // Off by default: saving the book for offline use downloads a few MB, so
         // it only starts when the reader turns it on (see core/offline.js).
         offline:      typeof saved?.offline      === 'boolean' ? saved.offline      : false,
+        aiEngine:     AI_ENGINES.includes(saved?.aiEngine) ? saved.aiEngine : DEFAULT_AI_ENGINE,
+        aiPanelWidth,
         paperSize,
         fontScale,
     };
@@ -79,7 +95,7 @@ export function saveSettings(partial) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        SETTINGS_KEY, PAPER_SIZES, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
         loadSettings, saveSettings, round1,
     });
 }

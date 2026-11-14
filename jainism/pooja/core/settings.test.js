@@ -3,6 +3,9 @@ const {
     saveSettings,
     SETTINGS_KEY,
     PAPER_SIZES,
+    AI_ENGINES,
+    AI_PANEL_WIDTH_MIN,
+    AI_PANEL_WIDTH_MAX,
 } = require('./settings');
 
 // Every assertion below that checks the full loadSettings() object includes
@@ -10,7 +13,7 @@ const {
 // and font-scale.js each cover their own setting's applied *behavior*; this
 // file only covers the shared schema (defaults/validation) that both of
 // those settings, and every other one, are validated against here.
-const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1 };
+const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1, aiEngine: 'off', aiPanelWidth: 420 };
 
 beforeEach(() => {
     localStorage.clear();
@@ -31,6 +34,26 @@ describe('loadSettings / saveSettings', () => {
     test('drops unknown/stale lang codes and falls back to defaults if none remain valid', () => {
         localStorage.setItem(SETTINGS_KEY, JSON.stringify({ langs: ['xx', 'yy'] }));
         expect(loadSettings().langs).toEqual(['kn', 'en']);
+    });
+
+    test('aiEngine accepts off/cloud/local and falls back to off for anything else', () => {
+        AI_ENGINES.forEach(engine => {
+            saveSettings({ aiEngine: engine });
+            expect(loadSettings().aiEngine).toBe(engine);
+        });
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiEngine: 'gpt' }));
+        expect(loadSettings().aiEngine).toBe('off');
+    });
+
+    test('aiPanelWidth is saved, rounded and kept within its limits; junk falls back to the default', () => {
+        saveSettings({ aiPanelWidth: 640.4 });
+        expect(loadSettings().aiPanelWidth).toBe(640);
+        saveSettings({ aiPanelWidth: 10 });
+        expect(loadSettings().aiPanelWidth).toBe(AI_PANEL_WIDTH_MIN);
+        saveSettings({ aiPanelWidth: 99999 });
+        expect(loadSettings().aiPanelWidth).toBe(AI_PANEL_WIDTH_MAX);
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiPanelWidth: 'wide' }));
+        expect(loadSettings().aiPanelWidth).toBe(420);
     });
 
     test('invalid/unknown paperSize falls back to dynamic', () => {
@@ -64,7 +87,7 @@ describe('loadSettings / saveSettings', () => {
         expect(localStorage.length).toBe(1);
         const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
         expect(raw).toEqual({
-            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false,
+            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiPanelWidth: 420,
             qrs: true, fontScale: 1.1, paperSize: 'a3',
         });
     });

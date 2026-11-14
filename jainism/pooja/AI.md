@@ -1119,3 +1119,68 @@ the core requirement without needing a separate render pass.
   shared link shows.
 - Not built yet: per-block link previews for WhatsApp etc. (those apps ignore everything after `#`; needs a generated
   static page per block).
+
+---
+
+## AI assistant ("Ask the book") — ✅ Phase 1 current
+
+Opt-in (**Settings → 💬 AI assistant: Off | Cloud | Local**, setting `aiEngine`
+in `core/settings.js`, default `off`). A header **Ask** button appears only when
+the chosen engine is usable; it opens an overlay drawer (an overlay, never a
+column, so book pagination is unaffected; hidden in print).
+
+```
+ai/
+├── config.js          deploy-time values: CLOUD_ENDPOINT, WebLLM URL/model
+├── retrieval.js       in-browser BM25 + tag boost over data.json (no build step)
+├── prompt.js          system rules, message building, [A-3.1] citation parsing
+├── rag.js             single-shot RAG: retrieve -> one engine call
+├── ai-panel.js / .css Settings picker, Ask button, drawer, citation chips
+├── engines/           cloud.js (via proxy), local.js (WebLLM/WebGPU), index.js
+└── proxy/worker.js    reference Cloudflare Worker for Cloud (not part of the site)
+```
+
+- **Retrieval is the swappable seam.** Everything else only calls
+  `createIndex / search / getContext`; a semantic retriever can replace
+  `retrieval.js` if the eval harness (phase 2) shows lexical search falls short.
+  Kannada-script words are indexed as character trigrams (agglutinative
+  suffixes); there is no Kannada-script <-> transliterated-Latin mapping yet.
+- **Grounding (enforced in code, `rag.js`, not just in the prompt):**
+  - Nothing relevant found = "not covered", with no model call.
+  - An answer that cites no real passage is **never shown**; the reader gets the closest passages, word for word.
+  - The on-device model only writes a two-sentence pointer; the passages are shown verbatim under it ("From the book").
+    The hosted model's answer shows just the passages it cited, collapsed.
+  - Raw model text is not displayed while it is being written, because it hasn't been checked yet.
+  - A follow-up that matches nothing alone ("really?") is searched together with the previous question.
+  - Limit: a citation proves the model *pointed at* a passage, not that it described it correctly
+    (an on-device model once reversed a passage's meaning). The verbatim passages beside the answer are the safeguard. Citations the
+  model invents are never linked. Model output is rendered with
+  `textContent`, never `innerHTML`.
+- **Privacy:** Cloud sends the question + retrieved passages to your proxy;
+  the API key lives only in the proxy. Local sends nothing.
+- **Local failures:** WebGPU shader-compile errors ("Invalid ShaderModule…") happen on
+  some browser/GPU/driver combinations. The engine checks for a real GPU adapter, retries
+  once after clearing WebLLM's cached wasm, then shows a plain message with a
+  "Try compatibility mode" button (f32 build of the model, larger download).
+  Once compatibility mode has worked it is remembered (localStorage key `aiLocalCompat`,
+  expires after 30 days, tied to the model id) so reloads skip the failing build.
+- **Drawer behaviour:**
+  - Resize by dragging its left edge (arrow keys too; double-click or Home resets), or the ⤢ button for a wide reading size. Width is saved in Settings (`aiPanelWidth`).
+  - A citation chip opens the passage in the view the reader is already using (Book turns to the right spread; Continuous scrolls to it). If the drawer would sit on top of that passage it steps aside to a "Back to answer" button instead of vanishing; one tap restores the same conversation.
+  - "Show N more matching passages" lists further matches (up to 12) for broad one-word queries.
+  - "really?" and other follow-ups with no searchable words: searched together with the previous question; the on-device model isn't asked again (it would only repeat itself), the hosted model is.
+- **TODO:** keep the chat history across reloads like settings (decide: sessionStorage vs localStorage, a size limit, a "clear" button, and that questions are stored on the device).
+- **TODO (after the tags review):** tag-based ranking boost; related-question chips built from shared tags (no model needed).
+- **Tried and rejected (measured with the eval):** boosting question blocks over answer blocks made recall worse
+  (recall@5 86% -> 81% at 1.15x, 70% at 3x), so retrieval weights are unchanged.
+- **Known gaps:** the Home page's mirrored settings don't include the
+  AI picker; Cloud is non-streaming; Local needs WebGPU and a pinned WebLLM
+  version/model id that must be re-verified before deploy.
+- **Retrieval eval (`ai/eval/`, run `npx jest ai/eval --verbose`):** 41 draft questions (English, Kannada, Kannada in
+  English letters, one-word queries, and some the book doesn't cover). Gold answers are permanent block ids, so
+  renumbering doesn't break them (the test flags stale labels). Baseline when drafted: recall@5 86%
+  (en 83%, kn 100% on 8 questions, translit 83% on 6), recall@1 68%. `floors.json` makes a regression fail the build;
+  raise the floors when retrieval improves. **The questions and gold labels are my draft: please review them,
+  especially the Kannada and transliterated wording.** Measures search only, not answer quality or model cost.
+- **Planned (measured, not assumed):** eval harness, optional agent step
+  (follow-up/search tools for Cloud), embeddings only if the eval shows a gap.

@@ -340,6 +340,28 @@ export function jumpToPage(pageNumber) {
     saveSpread();
 }
 
+/**
+ * Turns to the spread that holds a block's card and flashes it, so a link from
+ * elsewhere (the AI assistant's citations) lands in the view the reader is
+ * already using. Returns false when the book has no card for it (e.g. the
+ * block has no text in the selected languages).
+ */
+export function jumpToBlock(blockId) {
+    const columns = document.getElementById('book-columns');
+    const spread = document.getElementById('book-spread');
+    if (!columns || !spread) return false;
+    const card = document.getElementById(`book-${blockId}`);
+    if (!card) return false;
+    const spreadWidth = spread.clientWidth;
+    if (!(spreadWidth > 0)) return false;
+    state.currentSpread = Math.max(0, Math.floor(card.offsetLeft / spreadWidth));
+    renderCurrentSpread();
+    saveSpread();
+    card.classList.add('jump-highlight');
+    setTimeout(() => card.classList.remove('jump-highlight'), 1800);
+    return true;
+}
+
 // ── Search ────────────────────────────────────────────────────────────────
 export function searchBookView(query) {
     if (!query.trim()) return;

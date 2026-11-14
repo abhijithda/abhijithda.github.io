@@ -1,0 +1,568 @@
+{
+ "note": "DRAFT eval set — gold ids are permanent block ids (survive renumbering); goldLabels are as of drafting, for humans. Review gold and wording, esp. kn/translit. An answerable question passes if ANY gold block is retrieved.",
+ "questions": [
+  {
+   "id": "q01",
+   "lang": "en",
+   "q": "Are all gods equal to Jinendra Bhagawan?",
+   "gold": [
+    "qnatqr",
+    "mr6d3w"
+   ],
+   "goldLabels": [
+    "A-1.1",
+    "A-11.3"
+   ]
+  },
+  {
+   "id": "q02",
+   "lang": "en",
+   "q": "What happens if I worship Shasana Devatas thinking of them as Bhagawan?",
+   "gold": [
+    "qnatqr",
+    "rjyq35",
+    "mr6d3w"
+   ],
+   "goldLabels": [
+    "A-1.1",
+    "A-11.2",
+    "A-11.3"
+   ]
+  },
+  {
+   "id": "q03",
+   "lang": "en",
+   "q": "Does asking Padmavati devi for help in troubles harm samyaktva?",
+   "gold": [
+    "naqbwd",
+    "qtt6x5"
+   ],
+   "goldLabels": [
+    "A-3.1",
+    "A-2.2"
+   ]
+  },
+  {
+   "id": "q04",
+   "lang": "en",
+   "q": "Can a vrati ask Shasana Devatas for help?",
+   "gold": [
+    "dgvame",
+    "ct7pep",
+    "zk999y"
+   ],
+   "goldLabels": [
+    "A-3.2",
+    "A-10.1",
+    "A-3.3"
+   ]
+  },
+  {
+   "id": "q05",
+   "lang": "en",
+   "q": "Is doing pooja with a desire for boons wrong?",
+   "gold": [
+    "y6ewga",
+    "qtt6x5"
+   ],
+   "goldLabels": [
+    "A-14.2",
+    "A-2.2"
+   ]
+  },
+  {
+   "id": "q06",
+   "lang": "en",
+   "q": "What are the nine kevala labdhis?",
+   "gold": [
+    "jx88ks",
+    "nzurjg",
+    "q7eye9"
+   ],
+   "goldLabels": [
+    "S-8.3",
+    "A-8.1",
+    "A-8.2"
+   ]
+  },
+  {
+   "id": "q07",
+   "lang": "en",
+   "q": "Who composed the Jina Sahasranama?",
+   "gold": [
+    "mzx8mh"
+   ],
+   "goldLabels": [
+    "A-4.3"
+   ]
+  },
+  {
+   "id": "q08",
+   "lang": "en",
+   "q": "Can you give examples of abhisheka from the scriptures?",
+   "gold": [
+    "v6fgtd",
+    "ras6bp",
+    "qds5fx",
+    "n25a3h",
+    "ytfys5"
+   ],
+   "goldLabels": [
+    "Q-19.1",
+    "A-19.4",
+    "A-19.5",
+    "A-19.6",
+    "A-19.1"
+   ]
+  },
+  {
+   "id": "q09",
+   "lang": "en",
+   "q": "What items are used in panchamruta abhisheka?",
+   "gold": [
+    "b6pf5n",
+    "wt8chk"
+   ],
+   "goldLabels": [
+    "S-19.7",
+    "A-19.8"
+   ]
+  },
+  {
+   "id": "q10",
+   "lang": "en",
+   "q": "Did panchamruta abhisheka come to Jains from Hindus?",
+   "gold": [
+    "ae8fvb",
+    "hq9ctp"
+   ],
+   "goldLabels": [
+    "Q-26.1",
+    "A-26.1"
+   ]
+  },
+  {
+   "id": "q11",
+   "lang": "en",
+   "q": "Can women perform abhisheka?",
+   "gold": [
+    "xtnjp3",
+    "kqv3av",
+    "rmjwnk"
+   ],
+   "goldLabels": [
+    "Q-25.1",
+    "A-25.2",
+    "A-26.2"
+   ]
+  },
+  {
+   "id": "q12",
+   "lang": "en",
+   "q": "How did Acharya Maanatunga get out of prison?",
+   "gold": [
+    "edcm2t",
+    "hj3hzx",
+    "gp55y5"
+   ],
+   "goldLabels": [
+    "A-10.6",
+    "A-16.1",
+    "A-10.5"
+   ]
+  },
+  {
+   "id": "q13",
+   "lang": "en",
+   "q": "Bhagawan is veetaragi, so how can He give anything?",
+   "gold": [
+    "qdvasy",
+    "qdfnn5",
+    "npxstx",
+    "ff5pp6"
+   ],
+   "goldLabels": [
+    "Q-7.1",
+    "A-7.1",
+    "A-7.4",
+    "N-7.5"
+   ]
+  },
+  {
+   "id": "q14",
+   "lang": "en",
+   "q": "What is Deva Moodhata?",
+   "gold": [
+    "twz8hb",
+    "rb6anf",
+    "rjyq35",
+    "s25sce"
+   ],
+   "goldLabels": [
+    "Q-11.1",
+    "S-11.2",
+    "A-11.2",
+    "A-11.5"
+   ]
+  },
+  {
+   "id": "q15",
+   "lang": "en",
+   "q": "How was Shreepaala cured of leprosy?",
+   "gold": [
+    "myhj9z",
+    "x6gt6k"
+   ],
+   "goldLabels": [
+    "A-16.3",
+    "A-16.4"
+   ]
+  },
+  {
+   "id": "q16",
+   "lang": "en",
+   "q": "How does one get saatishaya punya?",
+   "gold": [
+    "hs27xu",
+    "n9pmkf",
+    "k5hyxz"
+   ],
+   "goldLabels": [
+    "A-17.2",
+    "A-17.1",
+    "Q-17.1"
+   ]
+  },
+  {
+   "id": "q17",
+   "lang": "en",
+   "q": "What does yajna mean in Jinendra pooja?",
+   "gold": [
+    "mhuxd6",
+    "vjvw2g"
+   ],
+   "goldLabels": [
+    "A-15.3",
+    "S-15.2"
+   ]
+  },
+  {
+   "id": "q18",
+   "lang": "en",
+   "q": "Which yaksha and yakshi are shown with Adinatha Swami?",
+   "gold": [
+    "ag38se",
+    "kp8chx",
+    "u84af2"
+   ],
+   "goldLabels": [
+    "A-15.8",
+    "A-15.5",
+    "M-15.6"
+   ]
+  },
+  {
+   "id": "q19",
+   "lang": "en",
+   "q": "What is arghya in Abhishek Patha?",
+   "gold": [
+    "hycw28"
+   ],
+   "goldLabels": [
+    "A-15.1"
+   ]
+  },
+  {
+   "id": "q20",
+   "lang": "en",
+   "q": "What is the mantra of the 43rd shloka of Bhaktamara?",
+   "gold": [
+    "ysm7r6",
+    "wdwmwf"
+   ],
+   "goldLabels": [
+    "M-10.11",
+    "A-10.10"
+   ]
+  },
+  {
+   "id": "q21",
+   "lang": "en",
+   "q": "Why did Kundakunda say not to bow to the asanyami?",
+   "gold": [
+    "yacebk",
+    "xatqnk",
+    "yzuq8c"
+   ],
+   "goldLabels": [
+    "Q-13.1",
+    "A-13.1",
+    "A-13.4"
+   ]
+  },
+  {
+   "id": "q22",
+   "lang": "en",
+   "q": "abhisheka",
+   "gold": [
+    "v6fgtd",
+    "ras6bp",
+    "hs27xu"
+   ],
+   "goldLabels": [
+    "Q-19.1",
+    "A-19.4",
+    "A-17.2"
+   ],
+   "note": "one word, as typed in testing"
+  },
+  {
+   "id": "q23",
+   "lang": "en",
+   "q": "arghya",
+   "gold": [
+    "hycw28",
+    "vamtwh"
+   ],
+   "goldLabels": [
+    "A-15.1",
+    "Q-21.1"
+   ],
+   "note": "one word; Q-21.1 is Kannada-only"
+  },
+  {
+   "id": "q24",
+   "lang": "kn",
+   "q": "ಶಾಸನ ದೇವತೆಗಳನ್ನು ಭಗವಂತರಂತೆ ಪೂಜಿಸಿದರೆ ಏನು ಫಲ?",
+   "gold": [
+    "qnatqr",
+    "rjyq35",
+    "mr6d3w"
+   ],
+   "goldLabels": [
+    "A-1.1",
+    "A-11.2",
+    "A-11.3"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q25",
+   "lang": "kn",
+   "q": "ವರದಾನ ಬಯಸಿ ಪೂಜೆ ಮಾಡಿದರೆ ಸಮ್ಯಕ್ತ್ವ ಮಲಿನವಾಗುತ್ತದೆಯೇ?",
+   "gold": [
+    "y6ewga",
+    "qtt6x5"
+   ],
+   "goldLabels": [
+    "A-14.2",
+    "A-2.2"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q26",
+   "lang": "kn",
+   "q": "ಪಂಚಾಮೃತ ಅಭಿಷೇಕ ಎಂದರೇನು?",
+   "gold": [
+    "b6pf5n",
+    "wt8chk"
+   ],
+   "goldLabels": [
+    "S-19.7",
+    "A-19.8"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q27",
+   "lang": "kn",
+   "q": "ಅಭಿಷೇಕದ ಉದಾಹರಣೆಗಳು",
+   "gold": [
+    "v6fgtd",
+    "ras6bp",
+    "qds5fx"
+   ],
+   "goldLabels": [
+    "Q-19.1",
+    "A-19.4",
+    "A-19.5"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q28",
+   "lang": "kn",
+   "q": "ಕೇವಲ ದಾನ ಎಂದರೇನು?",
+   "gold": [
+    "jx88ks",
+    "nzurjg"
+   ],
+   "goldLabels": [
+    "S-8.3",
+    "A-8.1"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q29",
+   "lang": "kn",
+   "q": "ಸ್ತ್ರೀ ಅಭಿಷೇಕ ಮಾಡಬಹುದೇ?",
+   "gold": [
+    "xtnjp3",
+    "kqv3av"
+   ],
+   "goldLabels": [
+    "Q-25.1",
+    "A-25.2"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q30",
+   "lang": "kn",
+   "q": "ವ್ರತಿಗಳು ಶಾಸನ ದೇವತೆಗಳ ಸಹಾಯ ಕೇಳಬಹುದೇ?",
+   "gold": [
+    "dgvame",
+    "ct7pep"
+   ],
+   "goldLabels": [
+    "A-3.2",
+    "A-10.1"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q31",
+   "lang": "kn",
+   "q": "ಅರ್ಘ್ಯ ಕೂಡುವುದು ಎಂದರೇನು?",
+   "gold": [
+    "vamtwh",
+    "hycw28"
+   ],
+   "goldLabels": [
+    "Q-21.1",
+    "A-15.1"
+   ],
+   "note": "draft Kannada: please review wording"
+  },
+  {
+   "id": "q32",
+   "lang": "translit",
+   "q": "shasana devategalannu bhagawanra haage poojisidare enu phala",
+   "gold": [
+    "qnatqr",
+    "rjyq35"
+   ],
+   "goldLabels": [
+    "A-1.1",
+    "A-11.2"
+   ],
+   "note": "draft: please review spelling"
+  },
+  {
+   "id": "q33",
+   "lang": "translit",
+   "q": "panchamruta abhisheka andre enu",
+   "gold": [
+    "b6pf5n",
+    "wt8chk"
+   ],
+   "goldLabels": [
+    "S-19.7",
+    "A-19.8"
+   ],
+   "note": "draft: please review spelling"
+  },
+  {
+   "id": "q34",
+   "lang": "translit",
+   "q": "stree abhisheka maadabahude",
+   "gold": [
+    "xtnjp3",
+    "kqv3av"
+   ],
+   "goldLabels": [
+    "Q-25.1",
+    "A-25.2"
+   ],
+   "note": "draft: please review spelling"
+  },
+  {
+   "id": "q35",
+   "lang": "translit",
+   "q": "kevala daana andre enu",
+   "gold": [
+    "jx88ks",
+    "nzurjg"
+   ],
+   "goldLabels": [
+    "S-8.3",
+    "A-8.1"
+   ],
+   "note": "draft: please review spelling"
+  },
+  {
+   "id": "q36",
+   "lang": "translit",
+   "q": "samyaktva malinatha andre enu",
+   "gold": [
+    "n3a8w9",
+    "qtt6x5",
+    "y6ewga"
+   ],
+   "goldLabels": [
+    "Q-2.1",
+    "A-2.2",
+    "A-14.2"
+   ],
+   "note": "draft: please review spelling"
+  },
+  {
+   "id": "q37",
+   "lang": "translit",
+   "q": "vrati shasana devategala sahaya keLabahude",
+   "gold": [
+    "dgvame",
+    "ct7pep"
+   ],
+   "goldLabels": [
+    "A-3.2",
+    "A-10.1"
+   ],
+   "note": "draft: please review spelling"
+  },
+  {
+   "id": "q38",
+   "lang": "en",
+   "q": "Which day is Paryushan this year?",
+   "gold": [],
+   "goldLabels": [],
+   "note": "not covered by the book"
+  },
+  {
+   "id": "q39",
+   "lang": "en",
+   "q": "Is it okay to eat after sunset?",
+   "gold": [],
+   "goldLabels": [],
+   "note": "not covered by the book"
+  },
+  {
+   "id": "q40",
+   "lang": "en",
+   "q": "How do I perform samayik correctly?",
+   "gold": [],
+   "goldLabels": [],
+   "note": "not covered by the book"
+  },
+  {
+   "id": "q41",
+   "lang": "en",
+   "q": "What is the history of the Taj Mahal?",
+   "gold": [],
+   "goldLabels": [],
+   "note": "not covered by the book"
+  }
+ ]
+}

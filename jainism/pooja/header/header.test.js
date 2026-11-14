@@ -17,7 +17,7 @@ const {
 // font scale each have their own module and their own test file — see
 // paper-size.test.js and font-scale.test.js — and the shared schema/
 // validation behind both lives in settings.js, tested in settings.test.js.
-const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1 };
+const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1, aiEngine: 'off', aiPanelWidth: 420 };
 
 function baseDom() {
     document.body.innerHTML = `
