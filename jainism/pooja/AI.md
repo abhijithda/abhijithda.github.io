@@ -1137,7 +1137,7 @@ ai/
 ├── rag.js             single-shot RAG: retrieve -> one engine call
 ├── ai-panel.js / .css Settings picker, Ask button, drawer, citation chips
 ├── engines/           cloud.js (via proxy), local.js (WebLLM/WebGPU), index.js
-└── proxy/worker.js    reference Cloudflare Worker for Cloud (not part of the site)
+└── proxy/             worker.js (+ test), wrangler.toml, README.md — the Cloud proxy (deployed separately, not part of the site)
 ```
 
 - **Retrieval is the swappable seam.** Everything else only calls
@@ -1158,6 +1158,16 @@ ai/
   `textContent`, never `innerHTML`.
 - **Privacy:** Cloud sends the question + retrieved passages to your proxy;
   the API key lives only in the proxy. Local sends nothing.
+- **Cloud proxy limits (`ai/proxy/`, deploy steps in `ai/proxy/README.md`):** `worker.js` + `wrangler.toml`, deployed by the
+  manual *Deploy AI proxy* workflow (the site itself is still served straight from the repo).
+  Layers, cheapest first: origin allow-list and size/shape checks; Cloudflare rate-limit bindings (per IP and
+  site-wide, per minute — approximate by design); an exact daily budget in a Durable Object (`Budget`: questions/day,
+  questions per IP/day, input and output tokens/day from the API's reported `usage`, UTC reset, IPs stored only as
+  short hashes); and a monthly spend limit on the API key's Console workspace (set by hand — the backstop).
+  The Worker **fails closed**: a missing binding, key, limiter or counter refuses the question rather than skipping the cap.
+  Refusals carry `{ error: <code> }` (`rate`, `busy`, `ip-daily`, `budget`, `unavailable`) and `engines/cloud.js` maps each
+  to a plain message. Covered by `ai/proxy/worker.test.js`; the same Worker was also run under local workerd with a stub
+  upstream. **Not yet done:** deploying it and setting `CLOUD_ENDPOINT` (needs your Cloudflare/Anthropic credentials).
 - **Local failures:** WebGPU shader-compile errors ("Invalid ShaderModule…") happen on
   some browser/GPU/driver combinations. The engine checks for a real GPU adapter, retries
   once after clearing WebLLM's cached wasm, then shows a plain message with a

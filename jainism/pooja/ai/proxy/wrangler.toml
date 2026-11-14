@@ -1,0 +1,46 @@
+# ai/proxy/wrangler.toml — config for the Cloud engine proxy (worker.js).
+# Deploy from this folder:  npx wrangler@4 deploy   (or the "Deploy AI proxy" workflow)
+# Then set the secret:      npx wrangler@4 secret put ANTHROPIC_API_KEY
+
+name = "pooja-ai-proxy"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# Browsers send this as the Origin header (scheme + host, no path). Comma-separate to add more
+# (e.g. "https://abhijithda.github.io,http://localhost:8080" while testing locally).
+ALLOWED_ORIGINS = "https://abhijithda.github.io"
+MODEL = "claude-haiku-5-5"
+
+# Exact daily caps, reset at 00:00 UTC. When one is hit the site shows "daily limit reached".
+# Tune them against your real cost: check the pricing page for the model, then work out what
+# these token counts would cost if used up completely. That worst case is what you could lose in a day.
+DAILY_REQUEST_CAP = "300"          # questions per day, whole site
+PER_IP_DAILY_CAP = "40"            # questions per day, per visitor
+DAILY_INPUT_TOKEN_CAP = "2000000"  # prompt tokens per day
+DAILY_OUTPUT_TOKEN_CAP = "200000"  # answer tokens per day
+
+# Per-minute rate limits. Cloudflare allows period = 10 or 60 only, and counts per location,
+# approximately: a burst filter, not accounting (the Budget counter below does the exact part).
+[[ratelimits]]
+name = "IP_LIMITER"
+namespace_id = "2001"
+  [ratelimits.simple]
+  limit = 5          # questions per minute, per visitor IP
+  period = 60
+
+[[ratelimits]]
+name = "GLOBAL_LIMITER"
+namespace_id = "2002"
+  [ratelimits.simple]
+  limit = 40         # questions per minute, whole site
+  period = 60
+
+# Exact daily counters (class Budget in worker.js).
+[[durable_objects.bindings]]
+name = "BUDGET"
+class_name = "Budget"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Budget"]

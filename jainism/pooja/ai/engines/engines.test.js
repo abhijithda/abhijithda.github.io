@@ -31,6 +31,16 @@ describe('cloud engine', () => {
         await expect(mk(500).generate(msgs)).rejects.toThrow(/error 500/);
     });
 
+    test('turns each of the proxy\u2019s refusal codes into its own message', async () => {
+        const mk = (status, error) => createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => ({ ok: false, status, json: async () => ({ error }) }) });
+        await expect(mk(429, 'rate').generate(msgs)).rejects.toThrow(/Too many questions/);
+        await expect(mk(429, 'busy').generate(msgs)).rejects.toThrow(/very busy/);
+        await expect(mk(429, 'ip-daily').generate(msgs)).rejects.toThrow(/today.s question limit/);
+        await expect(mk(503, 'budget').generate(msgs)).rejects.toThrow(/limit for today/);
+        await expect(mk(503, 'unavailable').generate(msgs)).rejects.toThrow(/temporarily unavailable/);
+        await expect(mk(502, 'upstream').generate(msgs)).rejects.toThrow(/error 502/);
+    });
+
     test('rejects an empty answer', async () => {
         const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => okResponse({ text: '  ' }) });
         await expect(e.generate(msgs)).rejects.toThrow(/empty/);

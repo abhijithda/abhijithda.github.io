@@ -1,8 +1,9 @@
 // ai/config.js — The few values to edit when deploying the assistant.
 
-// Cloud engine: URL of your proxy (see ai/proxy/worker.js). It holds the API
-// key; the browser never does. Leave empty and "Cloud" stays disabled in
-// Settings, with an explanation.
+// Cloud engine: URL of your proxy (see ai/proxy/worker.js and ai/proxy/README.md).
+// It holds the API key; the browser never does. Leave empty and "Cloud" stays
+// disabled in Settings, with an explanation. After deploying the proxy, paste
+// the URL it printed, e.g. 'https://pooja-ai-proxy.<your-subdomain>.workers.dev'.
 export const CLOUD_ENDPOINT = '';
 
 // Local engine: runs in the browser on WebGPU through WebLLM.
