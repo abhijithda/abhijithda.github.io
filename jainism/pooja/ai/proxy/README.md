@@ -24,9 +24,12 @@ Edit the numbers in `wrangler.toml`, then redeploy. When a daily cap is hit, rea
    note your Account ID (Workers & Pages overview).
 3. **GitHub:** repo Settings -> Secrets and variables -> Actions -> add `CLOUDFLARE_API_TOKEN`,
    `CLOUDFLARE_ACCOUNT_ID`, `ANTHROPIC_API_KEY`.
-4. **Run** Actions -> *Deploy AI proxy* -> Run workflow. The log prints the Worker URL
+4. **Put the workflow at the repo root.** GitHub only runs workflows from `.github/workflows/` at the very top of the
+   repository (`abhijithda.github.io/.github/workflows/deploy-ai-proxy.yml`), not from inside `jainism/pooja/`. The
+   workflow's `PROXY_DIR` (`jainism/pooja/ai/proxy`) says where the proxy is inside the repo; commit and push both.
+5. **Run** Actions -> *Deploy AI proxy* -> Run workflow. The log prints the Worker URL
    (`https://pooja-ai-proxy.<your-subdomain>.workers.dev`).
-5. Paste that URL into `CLOUD_ENDPOINT` in `ai/config.js`, commit, push. Settings -> AI assistant -> Cloud
+6. Paste that URL into `CLOUD_ENDPOINT` in `ai/config.js`, commit, push. Settings -> AI assistant -> Cloud
    now works.
 
 Without GitHub Actions: from this folder, `npx wrangler@4 deploy`, then `npx wrangler@4 secret put ANTHROPIC_API_KEY`.
