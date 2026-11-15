@@ -204,7 +204,7 @@ export function createCustomEngine({
                 text = typeof content === 'string' ? content : '';
             }
 
-            if (!text.trim()) throw new Error(`${host} sent an empty answer.`);
+            // An empty answer is not an error: rag.js shows the matching passages from the book instead.
             if (onToken) onToken(text);
             return text;
         },

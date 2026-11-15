@@ -10,7 +10,10 @@
 # One-time setup, repo Settings -> Secrets and variables -> Actions:
 #   CLOUDFLARE_API_TOKEN   token created from the "Edit Cloudflare Workers" template
 #   CLOUDFLARE_ACCOUNT_ID  shown on the Workers & Pages overview page
-#   ANTHROPIC_API_KEY      key created INSIDE a workspace that has a spend limit (ai/proxy/README.md)
+#
+# No AI key is needed: the default backend is Cloudflare Workers AI (free). If you switch the proxy to
+# Anthropic (ai/proxy/wrangler.toml), add that key in the Cloudflare dashboard, never as a GitHub secret.
+
 name: Deploy AI proxy
 
 on:
@@ -33,7 +36,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check the proxy folder and the three secrets exist
+      - name: Check the proxy folder and the two secrets exist
         run: |
           if [ ! -f "$PROXY_DIR/wrangler.toml" ]; then
             echo "::error::No wrangler.toml in '$PROXY_DIR'. Is the proxy committed and pushed, and is PROXY_DIR right? Folders at the top of the repo:"
@@ -43,10 +46,10 @@ jobs:
           for v in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
             [ -n "${!v}" ] || { echo "::error::Missing repo secret $v"; exit 1; }
           done
-          [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ] || { echo "::error::Missing repo secret ANTHROPIC_API_KEY"; exit 1; }
       - name: Deploy the Worker (creates it on first run)
         working-directory: ${{ env.PROXY_DIR }}
         run: npx --yes wrangler@4 deploy
-      - name: Set the API key (stored by Cloudflare, never in the repo or the site)
-        working-directory: ${{ env.PROXY_DIR }}
-        run: printf '%s' "${{ secrets.ANTHROPIC_API_KEY }}" | npx --yes wrangler@4 secret put ANTHROPIC_API_KEY
+      - name: Done
+        run: |
+          echo "Deployed. Copy the workers.dev address printed above into CLOUD_ENDPOINT in ai/config.js."
+          echo "If the deploy had failed on the AI binding, add a Workers AI permission to the API token."

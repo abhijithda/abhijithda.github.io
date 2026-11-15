@@ -268,7 +268,14 @@ export function revealTarget(blockId) {
 
 async function ask(question, { retry = false } = {}) {
     const engine = currentEngine();
-    if (!engine || state.busy) return;
+    if (state.busy) return;
+    if (!engine) {
+        // AI is off (it can be switched off while this panel is open): show the question and say why
+        // nothing is answering, rather than swallowing it.
+        if (!retry) addMessage('user', question);
+        addMessage('assistant', 'The AI assistant is turned off. To ask questions, turn it on in Settings \u2192 AI assistant (Cloud, Custom or Local).');
+        return;
+    }
     state.busy = true;
     $('ai-send').disabled = true;
     if (!retry) addMessage('user', question);

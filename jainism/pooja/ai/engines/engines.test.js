@@ -41,9 +41,14 @@ describe('cloud engine', () => {
         await expect(mk(502, 'upstream').generate(msgs)).rejects.toThrow(/error 502/);
     });
 
-    test('rejects an empty answer', async () => {
-        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => okResponse({ text: '  ' }) });
-        await expect(e.generate(msgs)).rejects.toThrow(/empty/);
+    test('hands an empty answer on as it is, so the site can show the matching passages instead of an error', async () => {
+        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => okResponse({ text: '' }) });
+        await expect(e.generate(msgs)).resolves.toBe('');
+    });
+
+    test('an answer in a form it can\u2019t read is an error', async () => {
+        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => okResponse({ nothing: true }) });
+        await expect(e.generate(msgs)).rejects.toThrow(/can.t read/);
     });
 });
 

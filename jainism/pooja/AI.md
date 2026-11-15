@@ -1178,16 +1178,25 @@ ai/
   memory: choosing another size frees the old one. **Not yet tuned:** medium and large still use the small model's rules in
   `rag.js` (two-sentence pointer, 4 passages); loosen them only after judging real answers from the bigger models.
   Arbitrary model ids from WebLLM's full list are not offered (a conscious choice: each id needs checking).
-- **Cloud proxy limits (`ai/proxy/`, deploy steps in `ai/proxy/README.md`):** `worker.js` + `wrangler.toml`, deployed by the
-  manual *Deploy AI proxy* workflow (the site itself is still served straight from the repo).
+- **Cloud proxy (`ai/proxy/`, deploy steps in `ai/proxy/README.md`):** `worker.js` + `wrangler.toml`, deployed by the
+  manual *Deploy AI proxy* workflow (the site itself is still served straight from the repo). **Free by default:**
+  backend `workers-ai` (Cloudflare Workers AI through the `AI` binding, model Gemma 4 26B A4B, thinking turned off
+  because it can use up the answer budget). Needs no API key and no card; the free plan gives 10,000 neurons a day and
+  Cloudflare itself refuses requests beyond it (no overage billing on Workers Free). `BACKEND = "anthropic"` (paid, needs the
+  ANTHROPIC_API_KEY secret set in the Cloudflare dashboard, never GitHub) remains available.
   Layers, cheapest first: origin allow-list and size/shape checks; Cloudflare rate-limit bindings (per IP and
   site-wide, per minute — approximate by design); an exact daily budget in a Durable Object (`Budget`: questions/day,
-  questions per IP/day, input and output tokens/day from the API's reported `usage`, UTC reset, IPs stored only as
-  short hashes); and a monthly spend limit on the API key's Console workspace (set by hand — the backstop).
-  The Worker **fails closed**: a missing binding, key, limiter or counter refuses the question rather than skipping the cap.
-  Refusals carry `{ error: <code> }` (`rate`, `busy`, `ip-daily`, `budget`, `unavailable`) and `engines/cloud.js` maps each
-  to a plain message. Covered by `ai/proxy/worker.test.js`; the same Worker was also run under local workerd with a stub
-  upstream. **Not yet done:** deploying it and setting `CLOUD_ENDPOINT` (needs your Cloudflare/Anthropic credentials).
+  questions per IP/day, input and output tokens/day from the model's reported usage — estimated if it reports none — UTC
+  reset, IPs stored only as short hashes), with defaults sized so a worst-case day stays under the free allowance; and the
+  provider's own cap. The Worker **fails closed**: a missing binding, limiter or counter refuses the question rather than
+  skipping the cap. Refusals carry `{ error: <code> }` (`rate`, `busy`, `ip-daily`, `budget`, `unavailable`) and
+  `engines/cloud.js` maps each to a plain message. **An empty model answer is not an error:** the Worker logs why
+  (`empty answer ...`, never the question) and returns empty text, and `rag.js` treats it like any uncited answer (shows
+  the matching passages). Covered by `ai/proxy/worker.test.js`. **Not verified against the real service:** the Workers AI
+  call itself (its binding needs a live Cloudflare login even for local runs, so only a fake binding built from Cloudflare's
+  documented response shape is tested) and Gemma 4's answer quality on Kannada: judge from real questions.
+- **Panel with AI off:** the panel can still be open when the assistant is switched off; a question then shows the
+  reader's words and a one-line explanation, never silence.
 - **Local failures:** WebGPU shader-compile errors ("Invalid ShaderModule…") happen on
   some browser/GPU/driver combinations. The engine checks for a real GPU adapter, retries
   once after clearing WebLLM's cached wasm, then shows a plain message with a

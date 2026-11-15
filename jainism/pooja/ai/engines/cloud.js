@@ -47,7 +47,9 @@ export function createCloudEngine({ endpoint = CLOUD_ENDPOINT, fetchImpl = (...a
             });
             if (!res.ok) throw new Error(await refusalMessage(res));
             const { text } = await res.json();
-            if (typeof text !== 'string' || !text.trim()) throw new Error('The cloud assistant sent an empty answer.');
+            if (typeof text !== 'string') throw new Error('The cloud assistant sent an answer in a form this page can\u2019t read.');
+            // An empty answer is not an error: rag.js treats it like any answer with no citation and
+            // shows the matching passages from the book, which is more useful than a message.
             if (onToken) onToken(text);
             return text;
         },

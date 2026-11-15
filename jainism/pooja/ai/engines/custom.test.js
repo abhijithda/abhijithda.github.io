@@ -182,8 +182,8 @@ describe('failures are readable and never contain the key', () => {
         expect(msg).toMatch(/allows requests from a web page/);
         expect(msg).not.toContain(KEY);
     });
-    test('an empty answer is an error; an abort stays an abort', async () => {
-        expect(await fail(anthropic, reply({ content: [] }))).toMatch(/empty answer/);
+    test('an empty answer is handed on as it is (the site then shows the matching passages); an abort stays an abort', async () => {
+        await expect(engineWith(anthropic, async () => reply({ content: [] })).generate(msgs)).resolves.toBe('');
         const abort = Object.assign(new Error('x'), { name: 'AbortError' });
         await expect(engineWith(anthropic, async () => { throw abort; }).generate(msgs)).rejects.toMatchObject({ name: 'AbortError' });
     });
