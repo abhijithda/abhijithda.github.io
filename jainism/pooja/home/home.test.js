@@ -14,12 +14,12 @@ function setup(saved) {
     document.body.innerHTML = `
         <button id="ai-btn" hidden></button>
         <div id="header-menu">
-            <select id="ai-engine-select"><option value="off"></option><option value="cloud"></option><option value="local"></option></select>
+            <select id="ai-engine-select"><option value="off"></option><option value="cloud"></option><option value="custom"></option><option value="local"></option></select>
             <span id="ai-engine-note"></span>
             <button id="font-scale-increase"></button>
         </div>
         <div class="home-settings">
-            <select id="home-ai-engine-select"><option value="off"></option><option value="cloud"></option><option value="local"></option></select>
+            <select id="home-ai-engine-select"><option value="off"></option><option value="cloud"></option><option value="custom"></option><option value="local"></option></select>
             <p id="home-ai-engine-note"></p>
             <span id="home-font-scale-display"></span>
         </div>`;
@@ -49,6 +49,13 @@ test('changing it on Home saves it and updates the header', () => {
     expect(stored()).toBe('local');
     expect(header().value).toBe('local');
     expect(home().value).toBe('local');
+});
+
+test('Custom picked on Home is saved and shown in the header too', () => {
+    setup();
+    fire(home(), 'custom');
+    expect(stored()).toBe('custom');
+    expect(header().value).toBe('custom');
 });
 
 test('both notes always say the same thing', () => {

@@ -9,14 +9,24 @@ import { loadSettings, saveSettings, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_
 import { createIndex } from './retrieval.js';
 import { answerQuestion } from './rag.js';
 import { getEngine } from './engines/index.js';
-import { LOCAL_MODEL_SIZE_HINT } from './config.js';
+import { LOCAL_TIERS } from './config.js';
 import { LOCAL_GPU_FAILED } from './engines/local.js';
+import { destinationHost } from './engines/custom.js';
+import { openAiConfig } from './ai-config.js';
 
 // Short on purpose: it sits under the picker in the Settings menu.
-const PRIVACY = {
-    cloud: 'Sends your question and the passages found for it to an AI service.',
-    local: 'Runs on this device. The first use downloads a model (' + LOCAL_MODEL_SIZE_HINT + ').',
-};
+function privacyNote(choice, settings) {
+    if (choice === 'cloud') return 'Sends your question and the passages found for it to an AI service.';
+    if (choice === 'custom') {
+        const host = destinationHost(settings.aiCustom) || 'the service you chose';
+        return `Sends your question and the passages found for it to ${host}, using your own key.`;
+    }
+    if (choice === 'local') {
+        const t = LOCAL_TIERS[settings.aiLocalModel] || LOCAL_TIERS.small;
+        return `Runs on this device. The first use downloads a model (${t.size}).`;
+    }
+    return '';
+}
 
 let state = { data: null, index: null, onCite: null, history: [], abort: null, busy: false };
 
@@ -118,7 +128,8 @@ function currentEngine() {
 
 /** Show/hide the Ask button and update the Settings note for the chosen engine. */
 export function applyAiSetting() {
-    const choice = loadSettings().aiEngine;
+    const settings = loadSettings();
+    const choice = settings.aiEngine;
     const engine = getEngine(choice);
     // The picker exists twice (header Settings menu and the Home page's mirror);
     // both always show the same value and the same one-line note.
@@ -131,7 +142,10 @@ export function applyAiSetting() {
         const a = engine.available();
         if (!a.ok) reason = a.reason;
     }
-    notes.forEach(note => { if (note) note.textContent = reason || PRIVACY[choice] || ''; });
+    notes.forEach(note => { if (note) note.textContent = reason || privacyNote(choice, settings); });
+    // "Configure" has something to set only for Custom (service and key) and Local (model size).
+    const showConfigure = choice === 'custom' || choice === 'local';
+    [$('ai-config-btn'), $('home-ai-config-btn')].forEach(b => { if (b) b.hidden = !showConfigure; });
     const usable = !!engine && !reason;
     const btn = $('ai-btn');
     if (btn) btn.hidden = !usable;
@@ -395,11 +409,17 @@ export function initAi({ data, onCite }) {
     state.onCite = onCite;
     buildDrawer();
 
+    const configure = () => openAiConfig({ onSaved: () => { state.history = []; applyAiSetting(); } });
     $('ai-engine-select')?.addEventListener('change', e => {
         saveSettings({ aiEngine: e.target.value });
         state.history = [];
         applyAiSetting();
+        // Custom does nothing until it has a service and a key: take the reader straight to that.
+        if (e.target.value === 'custom' && !getEngine('custom').available().ok) configure();
     });
+    $('ai-config-btn')?.addEventListener('click', configure);
+    // Home's button just presses the header's, like the rest of Home's settings.
+    $('home-ai-config-btn')?.addEventListener('click', () => $('ai-config-btn')?.click());
     $('ai-btn')?.addEventListener('click', () => ($('ai-drawer').hidden ? openDrawer() : closeDrawer()));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
     applyAiSetting();

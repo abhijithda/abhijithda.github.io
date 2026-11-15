@@ -24,8 +24,34 @@ const DEFAULT_PAPER_SIZE = 'dynamic';
 // AI assistant engine (see ai/). 'off' is the default: 'local' downloads a
 // model of hundreds of MB, and 'cloud' sends the reader's question (plus the
 // passages found for it) to a server, so neither happens until chosen.
-export const AI_ENGINES = ['off', 'cloud', 'local'];
+//  - 'cloud'  : this site's own hosted assistant (ai/proxy/).
+//  - 'custom' : the reader's own AI service and API key, called straight from
+//               the browser. The key is NOT part of this object (see
+//               ai/engines/custom.js: it has its own storage so it can be
+//               session-only and is never copied along with the settings).
+//  - 'local'  : a model on the reader's own device, in one of three sizes.
+export const AI_ENGINES = ['off', 'cloud', 'custom', 'local'];
 const DEFAULT_AI_ENGINE = 'off';
+
+// Size of the on-device model. The ids are stable; what each one means (model,
+// download size) lives in ai/config.js so it can change without touching saved settings.
+export const AI_LOCAL_TIERS = ['small', 'medium', 'large'];
+const DEFAULT_AI_LOCAL_TIER = 'small';
+
+// Custom service: which request format to speak. 'anthropic' is fixed to
+// Anthropic's own address; 'openai' is the chat-completions format that OpenAI
+// and many other services and local servers share, at a base URL the reader gives.
+export const AI_PROVIDERS = ['anthropic', 'openai'];
+const AI_CUSTOM_FIELD_MAX = 200;
+
+function loadAiCustom(saved) {
+    const clean = v => (typeof v === 'string' ? v.trim().slice(0, AI_CUSTOM_FIELD_MAX) : '');
+    return {
+        provider: AI_PROVIDERS.includes(saved?.provider) ? saved.provider : AI_PROVIDERS[0],
+        baseUrl:  clean(saved?.baseUrl),
+        model:    clean(saved?.model),
+    };
+}
 
 // Width of the assistant drawer in px, set by dragging its edge (see ai/ai-panel.js).
 export const AI_PANEL_WIDTH_MIN = 320;
@@ -75,6 +101,8 @@ export function loadSettings() {
         // it only starts when the reader turns it on (see core/offline.js).
         offline:      typeof saved?.offline      === 'boolean' ? saved.offline      : false,
         aiEngine:     AI_ENGINES.includes(saved?.aiEngine) ? saved.aiEngine : DEFAULT_AI_ENGINE,
+        aiLocalModel: AI_LOCAL_TIERS.includes(saved?.aiLocalModel) ? saved.aiLocalModel : DEFAULT_AI_LOCAL_TIER,
+        aiCustom:     loadAiCustom(saved?.aiCustom),
         aiPanelWidth,
         paperSize,
         fontScale,
@@ -88,6 +116,8 @@ export function loadSettings() {
  */
 export function saveSettings(partial) {
     const merged = { ...loadSettings(), ...partial };
+    // Keep only the known, non-secret fields, so nothing extra (an API key, say) can be saved by accident.
+    if ('aiCustom' in partial) merged.aiCustom = loadAiCustom(partial.aiCustom);
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
     return merged;
 }
@@ -95,7 +125,7 @@ export function saveSettings(partial) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_LOCAL_TIERS, AI_PROVIDERS, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
         loadSettings, saveSettings, round1,
     });
 }

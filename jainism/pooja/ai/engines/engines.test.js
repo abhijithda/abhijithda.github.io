@@ -218,3 +218,17 @@ describe('getEngine', () => {
         expect(getEngine('cloud')).toBe(getEngine('cloud'));   // reused, so a loaded model is kept
     });
 });
+
+describe('local engine: dispose', () => {
+    test('frees the loaded model and lets the next use load again', async () => {
+        const unload = jest.fn();
+        const create = jest.fn(async () => ({ unload, chat: { completions: { create: async () => (async function* () { yield { choices: [{ delta: { content: 'x' } }] }; })() } } }));
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), modelId: 'm' });
+        await engine.prepare();
+        engine.dispose();
+        expect(unload).toHaveBeenCalledTimes(1);
+        await engine.prepare();
+        expect(create).toHaveBeenCalledTimes(2);
+        expect(() => createLocalEngine().dispose()).not.toThrow();   // nothing loaded: harmless
+    });
+});

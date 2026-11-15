@@ -79,6 +79,14 @@ export function createLocalEngine({
 
         get compatMode() { return compat; },
 
+        /** Frees the model's graphics memory (used when the reader picks a different size). */
+        dispose() {
+            const e = engine;
+            engine = null;
+            loading = null;
+            try { e?.unload?.(); } catch (_) { /* already gone */ }
+        },
+
         /** Switches to the f32 build of the model. The next prepare() loads it. */
         setCompatMode(on) {
             if (compat === !!on) return;
