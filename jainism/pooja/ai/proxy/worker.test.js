@@ -358,3 +358,25 @@ describe('anthropic backend: empty answers', () => {
         expect(env.BUDGET.storage._map.get('outTokens')).toBe(800);              // the tokens were spent, so they count
     });
 });
+
+
+describe('wrangler.toml', () => {
+    const toml = require('fs').readFileSync(require('path').join(__dirname, 'wrangler.toml'), 'utf8');
+    const origins = (toml.match(/^ALLOWED_ORIGINS\s*=\s*"([^"]*)"/m) || [])[1].split(',').map(s => s.trim());
+
+    test('keeps the live site\u2019s address, and allows the local dev server so Cloud can be tried before publishing', () => {
+        expect(origins).toContain('https://abhijithda.github.io');
+        expect(origins).toContain('http://127.0.0.1:3000');
+        expect(origins).toContain('http://localhost:3000');
+    });
+
+    test('only lists plain origins (scheme + host [+ port]), never a path or a wildcard', () => {
+        origins.forEach(o => expect(o).toMatch(/^https?:\/\/[a-z0-9.-]+(:\d+)?$/i));
+    });
+
+    test('a listed local origin is answered, an unlisted port is not', async () => {
+        const env = makeEnv({ ALLOWED_ORIGINS: origins.join(',') });
+        expect((await worker.fetch(req(goodBody, { origin: 'http://127.0.0.1:3000' }), env)).status).toBe(200);
+        expect((await worker.fetch(req(goodBody, { origin: 'http://127.0.0.1:4000' }), env)).status).toBe(403);
+    });
+});

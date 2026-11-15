@@ -1195,6 +1195,21 @@ ai/
   the matching passages). Covered by `ai/proxy/worker.test.js`. **Not verified against the real service:** the Workers AI
   call itself (its binding needs a live Cloudflare login even for local runs, so only a fake binding built from Cloudflare's
   documented response shape is tested) and Gemma 4's answer quality on Kannada: judge from real questions.
+- **Surviving a reload:** browsers discard idle background tabs and reload them on return, which used to wipe the panel.
+  `ai-panel.js` now keeps the panel's open/closed state, the conversation (answers, citations, passages cut to what is
+  shown) and the follow-up memory in **sessionStorage** (`aiPanelSession`): it survives a reload or a discarded tab, is
+  confined to that tab, and is gone when the tab closes (nothing is kept on the device afterwards; never localStorage). Last 24
+  entries only. Restored text is drawn as text, never markup; damaged saved data is ignored. It is read at the very start of
+  `initAi`, before anything can overwrite it, and the panel stays closed if the assistant is off or unusable.
+- **Local engine failures while answering** (`engines/local.js`): a lost graphics device (the browser/OS reset the GPU, which
+  can happen while a tab sits idle) or running out of graphics memory used to leave the model object broken until a page
+  reload. They now drop the model (so the next question reloads it from the on-device cache, no new download), and give their
+  own plain message (code `LOCAL_GPU_LOST`). **No "Try compatibility mode" button for these**: that button is for shader-compile
+  failures only, and the f32 build needs *more* memory, so it would make an out-of-memory failure worse.
+- **Cloud unreachable:** a blocked (CORS), offline or wrong-address request is reported by browsers only as "Failed to fetch".
+  `engines/cloud.js` shows "Couldn't reach the cloud assistant" and logs a console hint for the owner. The Worker only answers
+  origins listed in `ALLOWED_ORIGINS` (`wrangler.toml`): the live site plus `http://127.0.0.1:3000` and `http://localhost:3000`
+  for local testing. A page on any other address or port is blocked by the browser; add it there and redeploy.
 - **Panel with AI off:** the panel can still be open when the assistant is switched off; a question then shows the
   reader's words and a one-line explanation, never silence.
 - **Local failures:** WebGPU shader-compile errors ("Invalid ShaderModule…") happen on

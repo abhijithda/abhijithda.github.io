@@ -8,6 +8,7 @@ const { saveSettings } = require('../core/settings');
 
 beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     document.body.innerHTML = `
         <button id="ai-btn" hidden></button>
         <select id="ai-engine-select"><option value="off"></option><option value="cloud"></option><option value="local"></option></select>

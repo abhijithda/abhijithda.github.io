@@ -22,6 +22,7 @@ const last = () => [...document.querySelectorAll('.ai-msg--assistant')].pop();
 
 beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     saveSettings({ aiEngine: 'local' });
     document.body.innerHTML = '<button id="ai-btn"></button><select id="ai-engine-select"><option value="local"></option></select><span id="ai-engine-note"></span>';
     mockOff = false;

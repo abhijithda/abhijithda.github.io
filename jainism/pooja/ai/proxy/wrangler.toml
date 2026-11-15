@@ -16,9 +16,12 @@ enabled = true
 binding = "AI"
 
 [vars]
-# Browsers send this as the Origin header (scheme + host, no path). Comma-separate to add more
-# (e.g. "https://abhijithda.github.io,http://localhost:8080" while testing locally).
-ALLOWED_ORIGINS = "https://abhijithda.github.io"
+# Browsers send this as the Origin header (scheme + host + port, no path). Comma-separated.
+# The 127.0.0.1 / localhost entries let you test Cloud from your own computer's dev server (port 3000);
+# they add no real exposure: the Origin check is only a casual-misuse filter, and the limits below apply to everyone.
+# A page on any other address (or port) is blocked by the browser with a "CORS" error, which is what you see
+# when you test from an address that isn't listed here. Change the port if your dev server uses another one.
+ALLOWED_ORIGINS = "https://abhijithda.github.io,http://127.0.0.1:3000,http://localhost:3000"
 
 # 'workers-ai' (free, default) or 'anthropic' (paid; also needs the ANTHROPIC_API_KEY secret
 # and MODEL = "claude-haiku-5-5", and the caps below raised to suit).

@@ -44,6 +44,14 @@ Without GitHub Actions: from this folder, `npx wrangler@4 deploy`.
 - Rate limit: ask more than 5 questions in a minute -> "Too many questions right now".
 - `npx jest ai/proxy` covers every limit, both backends, and failing closed.
 
+## Testing Cloud from your own computer
+
+The Worker answers only the pages listed in `ALLOWED_ORIGINS` (`wrangler.toml`): the live site, plus
+`http://127.0.0.1:3000` and `http://localhost:3000` for a local dev server on port 3000. From any other address or port
+the browser blocks the request ("blocked by CORS policy" in the console) and the panel says it couldn't reach the cloud
+assistant. Add the origin (scheme + host + port, no path) to `ALLOWED_ORIGINS` and **redeploy**: the list lives in the
+deployed Worker, so editing the file changes nothing until the workflow has run again.
+
 ## If answers come back empty or oddly short
 
 Gemma 4 "thinks" before answering unless told not to, and the thinking can use up the whole answer budget. The
