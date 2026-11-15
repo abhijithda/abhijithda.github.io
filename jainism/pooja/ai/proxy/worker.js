@@ -1,22 +1,31 @@
-// ai/proxy/worker.js — Cloudflare Worker that sits between the site and the
-// Anthropic API for the Cloud engine. NOT part of the site: it is deployed
-// separately (see ai/proxy/README.md) and its URL goes in ai/config.js.
+// ai/proxy/worker.js — Cloudflare Worker that sits between the site and the AI model
+// for the Cloud engine. NOT part of the site: it is deployed separately (see
+// ai/proxy/README.md) and its URL goes in ai/config.js.
 //
-// Why it exists: the API key must never reach the browser, and anyone who finds
-// this URL must not be able to run up the bill. Four layers, cheapest first:
+// Why it exists: the model must be reached from a server (no key in the browser, and a
+// place to enforce limits), and anyone who finds this URL must not be able to run up a bill.
+//
+// Backend (wrangler.toml `BACKEND`):
+//   'workers-ai' (default) : Cloudflare Workers AI, called through the `AI` binding. FREE:
+//        no API key and no card; the account gets 10,000 "neurons" a day, and on the Workers
+//        Free plan the platform itself refuses requests beyond that (no overage billing).
+//   'anthropic'            : Anthropic's API with the ANTHROPIC_API_KEY secret (paid, prepaid credits).
+//
+// Layers, cheapest first:
 //   1. Origin allow-list + size/shape checks.   (stops casual misuse; NOT security,
 //      since a script can fake the Origin header — layers 2-4 are the real protection)
 //   2. Rate limiting (Cloudflare binding): per visitor IP and for the whole site,
 //      per minute. The binding is approximate by design (per Cloudflare location,
 //      eventually consistent), so it is a burst filter, not an accounting system.
 //   3. Exact daily budget (Durable Object `Budget`): requests per day, requests per
-//      IP per day, and input/output tokens per day, counted from the `usage` the
-//      API reports. Resets at 00:00 UTC. Fails CLOSED: if the counter can't be
-//      reached, the question is refused.
-//   4. A spend limit on the API key's workspace in the Anthropic Console. Set by
-//      hand (see README); it is the one cap that holds even if this code is wrong.
+//      IP per day, and input/output tokens per day, counted from the usage the backend
+//      reports. Resets at 00:00 UTC. Fails CLOSED: if the counter can't be reached,
+//      the question is refused. The defaults sit under the free allowance, so readers
+//      see this site's own "limit for today" message, not a provider error.
+//   4. The provider's own cap: Workers AI's free daily allowance (above), or a spend
+//      limit on the API key's workspace in the Anthropic Console (set by hand).
 //
-// Config lives in wrangler.toml (vars, limits, bindings). Secret: ANTHROPIC_API_KEY.
+// Config lives in wrangler.toml (vars, limits, bindings).
 
 const MAX_BODY_CHARS = 40_000;      // question + retrieved passages are a few KB
 const MAX_TOKENS = 800;             // hard ceiling on one answer
@@ -24,11 +33,14 @@ const MAX_MESSAGES = 12;
 const MAX_FIELD_CHARS = 30_000;
 const UPSTREAM_TIMEOUT_MS = 25_000;
 
-const DEFAULTS = {
-    DAILY_REQUEST_CAP: 300,
-    PER_IP_DAILY_CAP: 40,
-    DAILY_INPUT_TOKEN_CAP: 2_000_000,
-    DAILY_OUTPUT_TOKEN_CAP: 200_000,
+const DEFAULT_BACKEND = 'workers-ai';
+const DEFAULT_MODELS = { 'workers-ai': '@cf/google/gemma-4-26b-a4b-it', anthropic: 'claude-haiku-5-5' };
+
+// Used when wrangler.toml doesn't set a cap. The workers-ai numbers keep a worst-case day
+// (all input tokens or all output tokens at the model's neuron rates) under 10,000 neurons.
+const DEFAULT_CAPS = {
+    'workers-ai': { requests: 150, ipRequests: 25, inTokens: 700_000, outTokens: 60_000 },
+    anthropic:    { requests: 300, ipRequests: 40, inTokens: 2_000_000, outTokens: 200_000 },
 };
 
 function num(value, fallback) {
@@ -55,6 +67,97 @@ function validate(body) {
     return messages.every(m => m && typeof m.content === 'string' && m.content.length <= MAX_FIELD_CHARS);
 }
 
+/** A refusal the handler turns into { error: code } with this status. */
+class Refusal extends Error {
+    constructor(status, code, headers = {}) { super(code); this.status = status; this.code = code; this.headers = headers; }
+}
+
+const roleOf = m => (m.role === 'assistant' ? 'assistant' : 'user');
+const estimateTokens = s => Math.ceil(String(s || '').length / 3);
+
+// ── Backends ─────────────────────────────────────────────────────────────
+// Each returns { text, inTokens, outTokens, note } and throws Refusal. `note` says why the
+// text is empty when it is (logged, never returned to the browser).
+
+async function runAnthropic(env, body, maxTokens) {
+    let upstream;
+    try {
+        upstream = await fetch(env.UPSTREAM_URL || 'https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'x-api-key': env.ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01',
+            },
+            body: JSON.stringify({
+                model: env.MODEL || DEFAULT_MODELS.anthropic,
+                system: body.system,
+                messages: body.messages.map(m => ({ role: roleOf(m), content: m.content })),
+                max_tokens: maxTokens,
+            }),
+            signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+        });
+    } catch (err) {
+        console.error('anthropic unreachable', err);
+        throw new Refusal(502, 'upstream');
+    }
+    if (!upstream.ok) {
+        // The status only (never the body or the key), so `wrangler tail` shows why.
+        console.error('anthropic error', upstream.status);
+        throw upstream.status === 429 ? new Refusal(429, 'rate', { 'Retry-After': '60' }) : new Refusal(502, 'upstream');
+    }
+    const data = await upstream.json();
+    const blocks = Array.isArray(data.content) ? data.content : [];
+    const text = blocks.filter(b => b.type === 'text').map(b => b.text).join('');
+    return {
+        text,
+        inTokens: num(data.usage?.input_tokens, 0),
+        outTokens: num(data.usage?.output_tokens, 0),
+        note: text ? '' : `stop_reason=${data.stop_reason} blocks=[${blocks.map(b => b.type).join(',')}]`,
+    };
+}
+
+async function runWorkersAi(env, body, maxTokens) {
+    const messages = [
+        ...(body.system ? [{ role: 'system', content: body.system }] : []),
+        ...body.messages.map(m => ({ role: roleOf(m), content: m.content })),
+    ];
+    const input = { messages, max_tokens: maxTokens };
+    // Gemma 4 "thinks" before answering unless told not to, and the thinking can use up the whole
+    // token budget, leaving an empty answer. Cloudflare's own example turns it off this way.
+    if (env.DISABLE_THINKING !== 'false') input.chat_template_kwargs = { enable_thinking: false };
+
+    let out;
+    try {
+        out = await env.AI.run(env.MODEL || DEFAULT_MODELS['workers-ai'], input);
+    } catch (err) {
+        const message = String(err?.message || err).slice(0, 300);
+        console.error('workers ai error', message);
+        // Past the free daily allowance the platform refuses with an error about the allocation.
+        throw /neuron|allocation|daily|quota|limit|4006/i.test(message) ? new Refusal(503, 'budget') : new Refusal(502, 'upstream');
+    }
+
+    const choice = out?.choices?.[0];
+    const content = choice?.message?.content ?? out?.response;      // current shape, then the older one
+    const text = typeof content === 'string' ? content : '';
+    // Prefer the backend's own token counts; estimate from length if it gives none, so the daily
+    // counter can never silently stand still.
+    const usage = out?.usage || {};
+    const reportedIn = num(usage.prompt_tokens ?? usage.input_tokens, 0);
+    const reportedOut = num(usage.completion_tokens ?? usage.output_tokens, 0);
+    return {
+        text,
+        inTokens: reportedIn || estimateTokens(messages.map(m => m.content).join('')),
+        outTokens: reportedOut || estimateTokens(text),
+        note: text ? '' : `finish_reason=${choice?.finish_reason} keys=[${Object.keys(out || {}).join(',')}]`,
+    };
+}
+
+const BACKENDS = {
+    'workers-ai': { run: runWorkersAi, needs: env => (env.AI ? [] : ['AI']) },
+    anthropic:    { run: runAnthropic, needs: env => (env.ANTHROPIC_API_KEY ? [] : ['ANTHROPIC_API_KEY']) },
+};
+
 export default {
     async fetch(request, env) {
         const origins = allowedOrigins(env);
@@ -80,8 +183,13 @@ export default {
         if (request.method !== 'POST' || !originOk) return reply(403, 'forbidden');
 
         // A cap that silently doesn't apply is worse than no endpoint: refuse to run unconfigured.
-        if (!env.ANTHROPIC_API_KEY || !env.IP_LIMITER || !env.GLOBAL_LIMITER || !env.BUDGET) {
-            console.error('proxy misconfigured: missing', ['ANTHROPIC_API_KEY', 'IP_LIMITER', 'GLOBAL_LIMITER', 'BUDGET'].filter(k => !env[k]));
+        const backendName = env.BACKEND || DEFAULT_BACKEND;
+        const backend = BACKENDS[backendName];
+        const missing = backend
+            ? ['IP_LIMITER', 'GLOBAL_LIMITER', 'BUDGET'].filter(k => !env[k]).concat(backend.needs(env))
+            : ['a valid BACKEND (got ' + backendName + ')'];
+        if (missing.length) {
+            console.error('proxy misconfigured: missing', missing);
             return reply(500, 'misconfigured');
         }
 
@@ -114,14 +222,15 @@ export default {
             if (!res.ok) throw new Error('budget ' + res.status);
             return res.json();
         };
+        const defaults = DEFAULT_CAPS[backendName];
         try {
             const verdict = await call('/check', {
                 ip: await hashIp(ip),
                 caps: {
-                    requests: num(env.DAILY_REQUEST_CAP, DEFAULTS.DAILY_REQUEST_CAP),
-                    ipRequests: num(env.PER_IP_DAILY_CAP, DEFAULTS.PER_IP_DAILY_CAP),
-                    inTokens: num(env.DAILY_INPUT_TOKEN_CAP, DEFAULTS.DAILY_INPUT_TOKEN_CAP),
-                    outTokens: num(env.DAILY_OUTPUT_TOKEN_CAP, DEFAULTS.DAILY_OUTPUT_TOKEN_CAP),
+                    requests: num(env.DAILY_REQUEST_CAP, defaults.requests),
+                    ipRequests: num(env.PER_IP_DAILY_CAP, defaults.ipRequests),
+                    inTokens: num(env.DAILY_INPUT_TOKEN_CAP, defaults.inTokens),
+                    outTokens: num(env.DAILY_OUTPUT_TOKEN_CAP, defaults.outTokens),
                 },
             });
             if (!verdict.ok) {
@@ -134,46 +243,26 @@ export default {
             return reply(503, 'unavailable');
         }
 
-        let upstream;
+        let result;
         try {
-            upstream = await fetch(env.UPSTREAM_URL || 'https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                    'x-api-key': env.ANTHROPIC_API_KEY,
-                    'anthropic-version': '2023-06-01',
-                },
-                body: JSON.stringify({
-                    model: env.MODEL || 'claude-haiku-5-5',
-                    system: body.system,
-                    messages: body.messages.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
-                    max_tokens: Math.min(Number(body.max_tokens) || MAX_TOKENS, MAX_TOKENS),
-                }),
-                signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-            });
+            result = await backend.run(env, body, Math.min(Number(body.max_tokens) || MAX_TOKENS, MAX_TOKENS));
         } catch (err) {
-            console.error('upstream unreachable', err);
+            if (err instanceof Refusal) return reply(err.status, err.code, err.headers);
+            console.error('backend failed', err);
             return reply(502, 'upstream');
         }
 
-        if (!upstream.ok) {
-            // Log the status only (never the body or the key) so `wrangler tail` shows why.
-            console.error('upstream error', upstream.status);
-            return upstream.status === 429 ? reply(429, 'rate', { 'Retry-After': '60' }) : reply(502, 'upstream');
-        }
-
-        const data = await upstream.json();
         try {
-            await call('/record', {
-                inTokens: num(data.usage?.input_tokens, 0),
-                outTokens: num(data.usage?.output_tokens, 0),
-            });
+            await call('/record', { inTokens: result.inTokens, outTokens: result.outTokens });
         } catch (err) {
             console.error('budget record failed', err);   // the answer was already paid for: still deliver it
         }
 
-        const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-        return new Response(JSON.stringify({ text }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+        // An empty answer is not an error: the site falls back to showing the matching passages.
+        // Say why in the logs (never the question or the passages) so it can be fixed.
+        if (!result.text.trim()) console.error('empty answer', backendName, result.note);
+
+        return new Response(JSON.stringify({ text: result.text }), { headers: { ...cors, 'Content-Type': 'application/json' } });
     },
 };
 

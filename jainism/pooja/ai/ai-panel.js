@@ -9,16 +9,63 @@ import { loadSettings, saveSettings, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_
 import { createIndex } from './retrieval.js';
 import { answerQuestion } from './rag.js';
 import { getEngine } from './engines/index.js';
-import { LOCAL_MODEL_SIZE_HINT } from './config.js';
+import { LOCAL_TIERS } from './config.js';
 import { LOCAL_GPU_FAILED } from './engines/local.js';
+import { destinationHost } from './engines/custom.js';
+import { openAiConfig } from './ai-config.js';
 
 // Short on purpose: it sits under the picker in the Settings menu.
-const PRIVACY = {
-    cloud: 'Sends your question and the passages found for it to an AI service.',
-    local: 'Runs on this device. The first use downloads a model (' + LOCAL_MODEL_SIZE_HINT + ').',
-};
+function privacyNote(choice, settings) {
+    if (choice === 'cloud') return 'Sends your question and the passages found for it to an AI service.';
+    if (choice === 'custom') {
+        const host = destinationHost(settings.aiCustom) || 'the service you chose';
+        return `Sends your question and the passages found for it to ${host}, using your own key.`;
+    }
+    if (choice === 'local') {
+        const t = LOCAL_TIERS[settings.aiLocalModel] || LOCAL_TIERS.small;
+        return `Runs on this device. The first use downloads a model (${t.size}).`;
+    }
+    return '';
+}
 
-let state = { data: null, index: null, onCite: null, history: [], abort: null, busy: false };
+let state = { data: null, index: null, onCite: null, history: [], log: [], abort: null, busy: false };
+
+// ── Surviving a reload ───────────────────────────────────────────────────
+// Browsers discard idle background tabs to save memory and reload them when the reader comes back; a reload
+// starts the page afresh, so the panel (and the conversation) used to vanish. The panel's open/closed state
+// and what was said are kept in sessionStorage: it survives a reload or a discarded tab, belongs to this tab
+// only, and is gone when the tab is closed (so questions are not kept on the device after that).
+const SESSION_KEY = 'aiPanelSession';
+const SESSION_MAX_ENTRIES = 24;
+const SESSION_MAX_HISTORY = 12;
+
+function readSession() {
+    try {
+        const v = JSON.parse(sessionStorage.getItem(SESSION_KEY));
+        return v && typeof v === 'object' && Array.isArray(v.log) ? v : null;
+    } catch (_) { return null; }
+}
+
+function saveSession() {
+    try {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+            open: !!$('ai-drawer') && !$('ai-drawer').hidden,
+            log: state.log.slice(-SESSION_MAX_ENTRIES),
+            history: state.history.slice(-SESSION_MAX_HISTORY),
+        }));
+    } catch (_) { /* storage full or blocked: the panel just won't survive a reload */ }
+}
+
+function logEntry(entry) { state.log.push(entry); saveSession(); }
+
+// Passages are shown cut to PASSAGE_PREVIEW_CHARS, so that is all that needs keeping (plus one character,
+// so a cut passage still gets its ellipsis when drawn again).
+function trimPassages(list) {
+    return (list || []).map(p => ({
+        id: p.id, label: p.label,
+        text: Object.fromEntries(Object.entries(p.text || {}).map(([k, v]) => [k, String(v).slice(0, PASSAGE_PREVIEW_CHARS + 1)])),
+    }));
+}
 
 const $ = id => document.getElementById(id);
 
@@ -118,7 +165,8 @@ function currentEngine() {
 
 /** Show/hide the Ask button and update the Settings note for the chosen engine. */
 export function applyAiSetting() {
-    const choice = loadSettings().aiEngine;
+    const settings = loadSettings();
+    const choice = settings.aiEngine;
     const engine = getEngine(choice);
     // The picker exists twice (header Settings menu and the Home page's mirror);
     // both always show the same value and the same one-line note.
@@ -131,7 +179,10 @@ export function applyAiSetting() {
         const a = engine.available();
         if (!a.ok) reason = a.reason;
     }
-    notes.forEach(note => { if (note) note.textContent = reason || PRIVACY[choice] || ''; });
+    notes.forEach(note => { if (note) note.textContent = reason || privacyNote(choice, settings); });
+    // "Configure" has something to set only for Custom (service and key) and Local (model size).
+    const showConfigure = choice === 'custom' || choice === 'local';
+    [$('ai-config-btn'), $('home-ai-config-btn')].forEach(b => { if (b) b.hidden = !showConfigure; });
     const usable = !!engine && !reason;
     const btn = $('ai-btn');
     if (btn) btn.hidden = !usable;
@@ -222,8 +273,13 @@ export function revealTargetWhenSettled(blockId, { interval = 120, maxWait = 150
     setTimeout(tick, interval);
 }
 
-export function openDrawer() { const d = $('ai-drawer'); if (d) { d.hidden = false; $('ai-input')?.focus(); } hideBackPill(); }
-export function closeDrawer() { const d = $('ai-drawer'); if (d) d.hidden = true; hideBackPill(); }
+export function openDrawer({ focus = true } = {}) {
+    const d = $('ai-drawer');
+    if (d) { d.hidden = false; if (focus) $('ai-input')?.focus(); }
+    hideBackPill();
+    saveSession();
+}
+export function closeDrawer() { const d = $('ai-drawer'); if (d) d.hidden = true; hideBackPill(); saveSession(); }
 
 // ── Reading a cited passage ──────────────────────────────────────────────
 // The drawer is an overlay, so it can sit on top of the very passage a citation
@@ -237,6 +293,7 @@ export function collapseToPill() {
     d.hidden = true;
     const b = $('ai-back');
     if (b) b.hidden = false;
+    saveSession();
 }
 
 /** After a citation jump: step aside only if the drawer is covering the target. */
@@ -254,10 +311,19 @@ export function revealTarget(blockId) {
 
 async function ask(question, { retry = false } = {}) {
     const engine = currentEngine();
-    if (!engine || state.busy) return;
+    if (state.busy) return;
+    if (!engine) {
+        // AI is off (it can be switched off while this panel is open): show the question and say why
+        // nothing is answering, rather than swallowing it.
+        const off = 'The AI assistant is turned off. To ask questions, turn it on in Settings \u2192 AI assistant (Cloud, Custom or Local).';
+        if (!retry) { addMessage('user', question); logEntry({ r: 'user', text: question }); }
+        addMessage('assistant', off);
+        logEntry({ r: 'note', text: off });
+        return;
+    }
     state.busy = true;
     $('ai-send').disabled = true;
-    if (!retry) addMessage('user', question);
+    if (!retry) { addMessage('user', question); logEntry({ r: 'user', text: question }); }
     const reply = addMessage('assistant', '…');
     state.abort = new AbortController();
 
@@ -277,17 +343,18 @@ async function ask(question, { retry = false } = {}) {
         });
         setStatus('');
         renderAnswer(reply, result.text, result.citations, state.onCite);
-        renderPassages(reply, result.shown, state.onCite, {
-            title: result.fallback ? 'Matching passages in the book' : (engine.id === 'local' ? 'From the book' : 'Passages cited'),
-            open: result.fallback || engine.id === 'local',
-            more: result.more,
-        });
+        const title = result.fallback ? 'Matching passages in the book' : (engine.id === 'local' ? 'From the book' : 'Passages cited');
+        const open = result.fallback || engine.id === 'local';
+        renderPassages(reply, result.shown, state.onCite, { title, open, more: result.more });
         if (result.grounded) {
             state.history.push({ role: 'user', content: question }, { role: 'assistant', content: result.text });
         }
+        logEntry({ r: 'answer', text: result.text, citations: result.citations, shown: trimPassages(result.shown), more: trimPassages(result.more), title, open });
     } catch (err) {
-        reply.textContent = err?.name === 'AbortError' ? 'Stopped.' : (err?.message || 'Something went wrong.');
+        const failure = err?.name === 'AbortError' ? 'Stopped.' : (err?.message || 'Something went wrong.');
+        reply.textContent = failure;
         reply.classList.add('ai-msg--error');
+        if (err?.name !== 'AbortError') logEntry({ r: 'error', text: failure });
         setStatus('');
         // The on-device model couldn't start: offer the one thing that may
         // still work, without downloading anything until the reader agrees.
@@ -393,14 +460,46 @@ function buildDrawer() {
 export function initAi({ data, onCite }) {
     state.data = data;
     state.onCite = onCite;
+    // Read what a previous load of this tab left behind BEFORE anything below can overwrite it.
+    const saved = readSession();
+    state.log = [];
+    state.history = [];
     buildDrawer();
+    if (saved) restoreSession(saved);
 
+    const configure = () => openAiConfig({ onSaved: () => { state.history = []; applyAiSetting(); } });
     $('ai-engine-select')?.addEventListener('change', e => {
         saveSettings({ aiEngine: e.target.value });
         state.history = [];
         applyAiSetting();
+        // Custom does nothing until it has a service and a key: take the reader straight to that.
+        if (e.target.value === 'custom' && !getEngine('custom').available().ok) configure();
     });
+    $('ai-config-btn')?.addEventListener('click', configure);
+    // Home's button just presses the header's, like the rest of Home's settings.
+    $('home-ai-config-btn')?.addEventListener('click', () => $('ai-config-btn')?.click());
     $('ai-btn')?.addEventListener('click', () => ($('ai-drawer').hidden ? openDrawer() : closeDrawer()));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
     applyAiSetting();
+    // Bring the panel back if it was open (applyAiSetting has by now closed it if the assistant is off or unusable).
+    if (saved?.open && $('ai-btn') && !$('ai-btn').hidden) openDrawer({ focus: false });
+}
+
+/** Draws the earlier conversation again from what was kept. */
+function restoreSession(saved) {
+    state.history = Array.isArray(saved.history) ? saved.history : [];
+    state.log = [];
+    saved.log.forEach(e => {
+        if (!e || typeof e.text !== 'string') return;
+        state.log.push(e);
+        if (e.r === 'user') { addMessage('user', e.text); return; }
+        const el = addMessage('assistant', e.r === 'answer' ? '' : e.text);
+        if (e.r === 'error') el.classList.add('ai-msg--error');
+        if (e.r === 'answer') {
+            renderAnswer(el, e.text, e.citations || [], state.onCite);
+            renderPassages(el, e.shown || [], state.onCite, { title: e.title, open: !!e.open, more: e.more || [] });
+        }
+    });
+    const box = $('ai-messages');
+    if (box) box.scrollTop = box.scrollHeight;
 }

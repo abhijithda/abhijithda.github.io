@@ -1124,19 +1124,20 @@ the core requirement without needing a separate render pass.
 
 ## AI assistant ("Ask the book") — ✅ Phase 1 current
 
-Opt-in (**Settings → 💬 AI assistant: Off | Cloud | Local**, setting `aiEngine`
+Opt-in (**Settings → 💬 AI assistant: Off | Cloud | Custom | Local**, setting `aiEngine`
 in `core/settings.js`, default `off`). A header **Ask** button appears only when
 the chosen engine is usable; it opens an overlay drawer (an overlay, never a
 column, so book pagination is unaffected; hidden in print).
 
 ```
 ai/
-├── config.js          deploy-time values: CLOUD_ENDPOINT, WebLLM URL/model
+├── config.js          deploy-time values: CLOUD_ENDPOINT, WebLLM URL, LOCAL_TIERS (model per size)
 ├── retrieval.js       in-browser BM25 + tag boost over data.json (no build step)
 ├── prompt.js          system rules, message building, [A-3.1] citation parsing
 ├── rag.js             single-shot RAG: retrieve -> one engine call
 ├── ai-panel.js / .css Settings picker, Ask button, drawer, citation chips
-├── engines/           cloud.js (via proxy), local.js (WebLLM/WebGPU), index.js
+├── engines/           cloud.js (via proxy), custom.js (reader's own service + key), local.js (WebLLM/WebGPU), index.js
+├── ai-config.js       the Configure dialog (on-device size; own service and key)
 └── proxy/             worker.js (+ test), wrangler.toml, README.md — the Cloud proxy (deployed separately, not part of the site)
 ```
 
@@ -1158,16 +1159,59 @@ ai/
   `textContent`, never `innerHTML`.
 - **Privacy:** Cloud sends the question + retrieved passages to your proxy;
   the API key lives only in the proxy. Local sends nothing.
-- **Cloud proxy limits (`ai/proxy/`, deploy steps in `ai/proxy/README.md`):** `worker.js` + `wrangler.toml`, deployed by the
-  manual *Deploy AI proxy* workflow (the site itself is still served straight from the repo).
+- **Custom (the reader's own AI service):** engine `custom` (`engines/custom.js`). The reader picks a format in **Configure…**
+  and gives their own key; the browser calls that service directly, so none of it touches the site's proxy, limits or budget.
+  Two formats: `anthropic` (fixed to Anthropic's address, sent with Anthropic's browser opt-in header) and `openai` (the
+  chat-completions format OpenAI and many other services and local servers such as Ollama share, at a base URL the reader
+  gives; falls back to `max_completion_tokens` when a service demands it). Rules enforced in code and tests: the address must
+  be https (plain http only for localhost, so a key is never sent in the clear to anyone else); a stored address is ignored for
+  `anthropic` so that key can only go to Anthropic; the key is **not** in the settings object (`saveSettings` strips anything
+  but provider/address/model) but in its own storage, **this tab only by default**, kept on the device only if the reader ticks
+  "Remember"; "Forget my key" clears both; the dialog never shows the saved key back; errors name the host and never contain the
+  key (an echoed key is scrubbed from the service's message). Custom is treated as a full-size hosted model by `rag.js`
+  (same passages budget and answer style as Cloud, with the same grounding checks and verbatim passages). It needs the service
+  to allow requests from a web page (CORS); if it doesn't, the reader is told that. Picking Custom before it is set up opens
+  Configure at once.
+- **Local sizes:** setting `aiLocalModel` = `small` (Qwen2.5 1.5B, about 1 GB) / `medium` (3B, about 2 GB) / `large` (7B,
+  about 5 GB), defined in `config.js` `LOCAL_TIERS` with each size's f32 compatibility build. All six model ids were checked
+  against WebLLM 0.2.79's own list; re-check when WEBLLM_URL's version changes. Only one on-device model is held in graphics
+  memory: choosing another size frees the old one. **Not yet tuned:** medium and large still use the small model's rules in
+  `rag.js` (two-sentence pointer, 4 passages); loosen them only after judging real answers from the bigger models.
+  Arbitrary model ids from WebLLM's full list are not offered (a conscious choice: each id needs checking).
+- **Cloud proxy (`ai/proxy/`, deploy steps in `ai/proxy/README.md`):** `worker.js` + `wrangler.toml`, deployed by the
+  manual *Deploy AI proxy* workflow (the site itself is still served straight from the repo). **Free by default:**
+  backend `workers-ai` (Cloudflare Workers AI through the `AI` binding, model Gemma 4 26B A4B, thinking turned off
+  because it can use up the answer budget). Needs no API key and no card; the free plan gives 10,000 neurons a day and
+  Cloudflare itself refuses requests beyond it (no overage billing on Workers Free). `BACKEND = "anthropic"` (paid, needs the
+  ANTHROPIC_API_KEY secret set in the Cloudflare dashboard, never GitHub) remains available.
   Layers, cheapest first: origin allow-list and size/shape checks; Cloudflare rate-limit bindings (per IP and
   site-wide, per minute — approximate by design); an exact daily budget in a Durable Object (`Budget`: questions/day,
-  questions per IP/day, input and output tokens/day from the API's reported `usage`, UTC reset, IPs stored only as
-  short hashes); and a monthly spend limit on the API key's Console workspace (set by hand — the backstop).
-  The Worker **fails closed**: a missing binding, key, limiter or counter refuses the question rather than skipping the cap.
-  Refusals carry `{ error: <code> }` (`rate`, `busy`, `ip-daily`, `budget`, `unavailable`) and `engines/cloud.js` maps each
-  to a plain message. Covered by `ai/proxy/worker.test.js`; the same Worker was also run under local workerd with a stub
-  upstream. **Not yet done:** deploying it and setting `CLOUD_ENDPOINT` (needs your Cloudflare/Anthropic credentials).
+  questions per IP/day, input and output tokens/day from the model's reported usage — estimated if it reports none — UTC
+  reset, IPs stored only as short hashes), with defaults sized so a worst-case day stays under the free allowance; and the
+  provider's own cap. The Worker **fails closed**: a missing binding, limiter or counter refuses the question rather than
+  skipping the cap. Refusals carry `{ error: <code> }` (`rate`, `busy`, `ip-daily`, `budget`, `unavailable`) and
+  `engines/cloud.js` maps each to a plain message. **An empty model answer is not an error:** the Worker logs why
+  (`empty answer ...`, never the question) and returns empty text, and `rag.js` treats it like any uncited answer (shows
+  the matching passages). Covered by `ai/proxy/worker.test.js`. **Not verified against the real service:** the Workers AI
+  call itself (its binding needs a live Cloudflare login even for local runs, so only a fake binding built from Cloudflare's
+  documented response shape is tested) and Gemma 4's answer quality on Kannada: judge from real questions.
+- **Surviving a reload:** browsers discard idle background tabs and reload them on return, which used to wipe the panel.
+  `ai-panel.js` now keeps the panel's open/closed state, the conversation (answers, citations, passages cut to what is
+  shown) and the follow-up memory in **sessionStorage** (`aiPanelSession`): it survives a reload or a discarded tab, is
+  confined to that tab, and is gone when the tab closes (nothing is kept on the device afterwards; never localStorage). Last 24
+  entries only. Restored text is drawn as text, never markup; damaged saved data is ignored. It is read at the very start of
+  `initAi`, before anything can overwrite it, and the panel stays closed if the assistant is off or unusable.
+- **Local engine failures while answering** (`engines/local.js`): a lost graphics device (the browser/OS reset the GPU, which
+  can happen while a tab sits idle) or running out of graphics memory used to leave the model object broken until a page
+  reload. They now drop the model (so the next question reloads it from the on-device cache, no new download), and give their
+  own plain message (code `LOCAL_GPU_LOST`). **No "Try compatibility mode" button for these**: that button is for shader-compile
+  failures only, and the f32 build needs *more* memory, so it would make an out-of-memory failure worse.
+- **Cloud unreachable:** a blocked (CORS), offline or wrong-address request is reported by browsers only as "Failed to fetch".
+  `engines/cloud.js` shows "Couldn't reach the cloud assistant" and logs a console hint for the owner. The Worker only answers
+  origins listed in `ALLOWED_ORIGINS` (`wrangler.toml`): the live site plus `http://127.0.0.1:3000` and `http://localhost:3000`
+  for local testing. A page on any other address or port is blocked by the browser; add it there and redeploy.
+- **Panel with AI off:** the panel can still be open when the assistant is switched off; a question then shows the
+  reader's words and a one-line explanation, never silence.
 - **Local failures:** WebGPU shader-compile errors ("Invalid ShaderModule…") happen on
   some browser/GPU/driver combinations. The engine checks for a real GPU adapter, retries
   once after clearing WebLLM's cached wasm, then shows a plain message with a
@@ -1183,8 +1227,7 @@ ai/
 - **TODO (after the tags review):** tag-based ranking boost; related-question chips built from shared tags (no model needed).
 - **Tried and rejected (measured with the eval):** boosting question blocks over answer blocks made recall worse
   (recall@5 86% -> 81% at 1.15x, 70% at 3x), so retrieval weights are unchanged.
-- **Known gaps:** the Home page's mirrored settings don't include the
-  AI picker; Cloud is non-streaming; Local needs WebGPU and a pinned WebLLM
+- **Known gaps:** Cloud and Custom are non-streaming; Local needs WebGPU and a pinned WebLLM
   version/model id that must be re-verified before deploy.
 - **Retrieval eval (`ai/eval/`, run `npx jest ai/eval --verbose`):** 41 draft questions (English, Kannada, Kannada in
   English letters, one-word queries, and some the book doesn't cover). Gold answers are permanent block ids, so

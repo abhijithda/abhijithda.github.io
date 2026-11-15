@@ -41,9 +41,14 @@ describe('cloud engine', () => {
         await expect(mk(502, 'upstream').generate(msgs)).rejects.toThrow(/error 502/);
     });
 
-    test('rejects an empty answer', async () => {
-        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => okResponse({ text: '  ' }) });
-        await expect(e.generate(msgs)).rejects.toThrow(/empty/);
+    test('hands an empty answer on as it is, so the site can show the matching passages instead of an error', async () => {
+        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => okResponse({ text: '' }) });
+        await expect(e.generate(msgs)).resolves.toBe('');
+    });
+
+    test('an answer in a form it can\u2019t read is an error', async () => {
+        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => okResponse({ nothing: true }) });
+        await expect(e.generate(msgs)).rejects.toThrow(/can.t read/);
     });
 });
 
@@ -216,5 +221,85 @@ describe('getEngine', () => {
         expect(getEngine('cloud').id).toBe('cloud');
         expect(getEngine('local').id).toBe('local');
         expect(getEngine('cloud')).toBe(getEngine('cloud'));   // reused, so a loaded model is kept
+    });
+});
+
+describe('local engine: dispose', () => {
+    test('frees the loaded model and lets the next use load again', async () => {
+        const unload = jest.fn();
+        const create = jest.fn(async () => ({ unload, chat: { completions: { create: async () => (async function* () { yield { choices: [{ delta: { content: 'x' } }] }; })() } } }));
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), modelId: 'm' });
+        await engine.prepare();
+        engine.dispose();
+        expect(unload).toHaveBeenCalledTimes(1);
+        await engine.prepare();
+        expect(create).toHaveBeenCalledTimes(2);
+        expect(() => createLocalEngine().dispose()).not.toThrow();   // nothing loaded: harmless
+    });
+});
+
+
+describe('cloud engine: unreachable', () => {
+    test('a blocked or failed request (the browser says only "Failed to fetch") becomes a plain message, with a hint for the owner in the console', async () => {
+        const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => { throw new TypeError('Failed to fetch'); } });
+        await expect(e.generate(msgs)).rejects.toThrow(/Couldn.t reach the cloud assistant/);
+        expect(warn.mock.calls[0].join(' ')).toMatch(/ALLOWED_ORIGINS/);
+        warn.mockRestore();
+    });
+
+    test('an abort stays an abort', async () => {
+        const abort = Object.assign(new Error('x'), { name: 'AbortError' });
+        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => { throw abort; } });
+        await expect(e.generate(msgs)).rejects.toMatchObject({ name: 'AbortError' });
+    });
+});
+
+describe('local engine: failures while answering', () => {
+    const { LOCAL_GPU_LOST, LOCAL_GPU_FAILED } = require('./local');
+    const engineThatFails = (error) => {
+        const unload = jest.fn();
+        let calls = 0;
+        const create = jest.fn(async () => ({
+            unload,
+            chat: { completions: { create: async () => { calls += 1; if (calls === 1) throw error; return (async function* () { yield { choices: [{ delta: { content: 'ok again' } }] }; })(); } } },
+        }));
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), modelId: 'm' });
+        return { engine, create, unload };
+    };
+
+    test('a lost graphics device gives plain advice, no compatibility button, and the next question reloads the model', async () => {
+        const { engine, create, unload } = engineThatFails(new Error('Device was lost.'));
+        await engine.prepare();
+        const err = await engine.generate(msgs).catch(e => e);
+        expect(err.code).toBe(LOCAL_GPU_LOST);
+        expect(err.code).not.toBe(LOCAL_GPU_FAILED);
+        expect(err.message).toMatch(/reset.*idle/);
+        expect(unload).toHaveBeenCalledTimes(1);            // the broken model is dropped
+        await expect(engine.generate(msgs)).resolves.toBe('ok again');
+        expect(create).toHaveBeenCalledTimes(2);            // and loaded afresh, not left broken until a page reload
+    });
+
+    test('running out of graphics memory says so, and does not offer the bigger compatibility build', async () => {
+        const { engine } = engineThatFails(new Error('Out of memory while allocating buffer'));
+        const err = await engine.generate(msgs).catch(e => e);
+        expect(err.code).toBe(LOCAL_GPU_LOST);
+        expect(err.message).toMatch(/ran out of graphics memory/);
+        expect(err.message).toMatch(/smaller size/);
+    });
+
+    test('out of memory while LOADING is also not met with the compatibility offer', async () => {
+        const create = jest.fn(async () => { throw new Error('GPUDevice: out of memory'); });
+        const engine = createLocalEngine({ loadLibrary: async () => ({ CreateMLCEngine: create }), clearCache: async () => {} });
+        const err = await engine.prepare().catch(e => e);
+        expect(err.code).toBe(LOCAL_GPU_LOST);
+        expect(err.message).toMatch(/graphics memory/);
+    });
+
+    test('an abort or an unrelated error is passed through untouched, and the model is kept', async () => {
+        const { engine, unload } = engineThatFails(new Error('something else entirely'));
+        const err = await engine.generate(msgs).catch(e => e);
+        expect(err.message).toBe('something else entirely');
+        expect(unload).not.toHaveBeenCalled();
     });
 });

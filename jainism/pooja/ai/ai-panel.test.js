@@ -1,8 +1,14 @@
+// These tests are about the panel, not about this site's real deployment: pretend the Cloud proxy
+// address is not set, whatever ai/config.js currently says. (Once the real address is filled in,
+// "cloud without an endpoint" would otherwise stop being true.)
+jest.mock('./config.js', () => ({ ...jest.requireActual('./config.js'), CLOUD_ENDPOINT: '' }));
+
 const { renderAnswer, renderPassages, applyAiSetting, initAi, setPanelWidth, currentPanelWidth, revealTarget, revealTargetWhenSettled, collapseToPill, openDrawer, closeDrawer } = require('./ai-panel');
 const { saveSettings } = require('../core/settings');
 
 beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     document.body.innerHTML = `
         <button id="ai-btn" hidden></button>
         <select id="ai-engine-select"><option value="off"></option><option value="cloud"></option><option value="local"></option></select>

@@ -38,6 +38,27 @@ function clearCompat(storage) {
 
 const GPU_ERROR = /ShaderModule|GPUPipelineError|WebGPU|GPUValidation|GPUDevice|out of memory/i;
 
+// Failures that compatibility mode can NOT fix, and that need different advice:
+//  - the graphics device was lost (the browser or OS reset the GPU, which can happen while a tab sits idle);
+//  - the GPU ran out of memory (the f32 compatibility build needs even more, so offering it would make it worse).
+const DEVICE_LOST = /device (was )?lost|DeviceLost|lost.{0,20}(device|context)/i;
+const OUT_OF_MEMORY = /out of memory|\bOOM\b|insufficient (gpu |graphics )?memory|maxBufferSize|maxStorageBufferBindingSize/i;
+export const LOCAL_GPU_LOST = 'LOCAL_GPU_LOST';
+
+export function gpuRuntimeError(cause) {
+    const msg = String(cause?.message || cause);
+    const oom = OUT_OF_MEMORY.test(msg);
+    const lost = !oom && DEVICE_LOST.test(msg);
+    const err = new Error(oom
+        ? 'The on-device model ran out of graphics memory. Choose a smaller size under Configure, close other tabs that use the graphics card, or switch to Cloud in Settings.'
+        : lost
+            ? 'The graphics processor was reset (this can happen while a tab sits idle). Ask again and the model will reload from this device; it won\u2019t download again.'
+            : 'The on-device model stopped working (a graphics error). Ask again to reload it; if it keeps happening, switch to Cloud in Settings.');
+    err.code = LOCAL_GPU_LOST;       // not LOCAL_GPU_FAILED: no "compatibility mode" button for these
+    err.cause = cause;
+    return err;
+}
+
 export function friendlyGpuError(cause, compat) {
     const err = new Error(compat
         ? 'The on-device model still couldn\u2019t start on this browser or graphics card. Try Microsoft Edge, update your graphics driver, or switch to Cloud in Settings.'
@@ -79,6 +100,14 @@ export function createLocalEngine({
 
         get compatMode() { return compat; },
 
+        /** Frees the model's graphics memory (used when the reader picks a different size). */
+        dispose() {
+            const e = engine;
+            engine = null;
+            loading = null;
+            try { e?.unload?.(); } catch (_) { /* already gone */ }
+        },
+
         /** Switches to the f32 build of the model. The next prepare() loads it. */
         setCompatMode(on) {
             if (compat === !!on) return;
@@ -119,6 +148,7 @@ export function createLocalEngine({
                             engine = await create();
                             if (compat && storage) writeCompat(storage, compatModelId, now());
                         } catch (err2) {
+                            if (OUT_OF_MEMORY.test(String(err2?.message || err2))) throw gpuRuntimeError(err2);
                             if (GPU_ERROR.test(String(err2?.message || err2))) {
                                 // A remembered compatibility mode that no longer works is forgotten,
                                 // so the next try starts from the normal build again.
@@ -135,14 +165,26 @@ export function createLocalEngine({
 
         async generate(messages, { signal, onToken } = {}) {
             await this.prepare();
-            const stream = await engine.chat.completions.create({
-                messages, stream: true, temperature: 0.2, max_tokens: MAX_ANSWER_TOKENS,
-            });
             let text = '';
-            for await (const chunk of stream) {
-                if (signal?.aborted) { try { engine.interruptGenerate(); } catch (_) {} break; }
-                text += chunk.choices?.[0]?.delta?.content || '';
-                if (onToken) onToken(text);
+            try {
+                const stream = await engine.chat.completions.create({
+                    messages, stream: true, temperature: 0.2, max_tokens: MAX_ANSWER_TOKENS,
+                });
+                for await (const chunk of stream) {
+                    if (signal?.aborted) { try { engine.interruptGenerate(); } catch (_) {} break; }
+                    text += chunk.choices?.[0]?.delta?.content || '';
+                    if (onToken) onToken(text);
+                }
+            } catch (err) {
+                if (err?.name === 'AbortError') throw err;
+                const msg = String(err?.message || err);
+                if (DEVICE_LOST.test(msg) || OUT_OF_MEMORY.test(msg) || GPU_ERROR.test(msg)) {
+                    // The model object is unusable after this, and prepare() would think it still is.
+                    // Drop it, so the reader's next question loads it afresh instead of failing until a page reload.
+                    this.dispose();
+                    throw gpuRuntimeError(err);
+                }
+                throw err;
             }
             if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
             return text;

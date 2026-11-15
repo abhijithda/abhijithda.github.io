@@ -5,7 +5,8 @@ const fs = require('fs');
 const path = require('path');
 
 const mockEngine = { id: 'local', generate: jest.fn(), prepare: jest.fn(async () => {}), available: () => ({ ok: true }) };
-jest.mock('./engines/index.js', () => ({ getEngine: () => mockEngine }));
+let mockOff = false;
+jest.mock('./engines/index.js', () => ({ getEngine: () => (mockOff ? null : mockEngine) }));
 
 const { initAi } = require('./ai-panel');
 const { saveSettings } = require('../core/settings');
@@ -21,8 +22,10 @@ const last = () => [...document.querySelectorAll('.ai-msg--assistant')].pop();
 
 beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     saveSettings({ aiEngine: 'local' });
     document.body.innerHTML = '<button id="ai-btn"></button><select id="ai-engine-select"><option value="local"></option></select><span id="ai-engine-note"></span>';
+    mockOff = false;
     mockEngine.generate.mockReset();
     initAi({ data, onCite: jest.fn() });
 });
@@ -90,4 +93,26 @@ test('"show more" adds further matching passages under the answer', async () => 
     btn.click();
     expect(last().querySelectorAll('.ai-passage').length).toBeGreaterThan(before);
     expect(last().querySelector('button.ai-more')).toBeNull();
+});
+
+test('an empty answer from the model shows the matching passages, not an error', async () => {
+    mockEngine.id = 'cloud';
+    mockEngine.generate.mockResolvedValue('');
+    await ask('what is the result of worshipping shasana devata as bhagawan');
+    expect(last().classList.contains('ai-msg--error')).toBe(false);
+    expect(last().textContent).toMatch(/couldn.t write a reliable summary/);
+    expect(last().querySelector('summary').textContent).toBe('Matching passages in the book');
+    expect(last().querySelectorAll('.ai-passage').length).toBeGreaterThan(0);
+    mockEngine.id = 'local';
+});
+
+test('with AI off, a question is still shown and the reader is told why nothing answers', async () => {
+    mockOff = true;
+    await ask('abhisheka');
+    const msgs = [...document.querySelectorAll('.ai-msg')].map(m => m.textContent);
+    expect(msgs[0]).toBe('abhisheka');                                   // the reader's own words stay visible
+    expect(msgs[1]).toMatch(/turned off/);
+    expect(msgs[1]).toMatch(/Settings/);
+    expect(mockEngine.generate).not.toHaveBeenCalled();
+    expect(document.getElementById('ai-send').disabled).toBe(false);     // and they can try again
 });

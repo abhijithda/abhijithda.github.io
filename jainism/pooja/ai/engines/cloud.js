@@ -39,15 +39,26 @@ export function createCloudEngine({ endpoint = CLOUD_ENDPOINT, fetchImpl = (...a
         async generate(messages, { signal, onToken } = {}) {
             const system = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
             const rest = messages.filter(m => m.role !== 'system');
-            const res = await fetchImpl(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ system, messages: rest, max_tokens: MAX_ANSWER_TOKENS }),
-                signal,
-            });
+            let res;
+            try {
+                res = await fetchImpl(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ system, messages: rest, max_tokens: MAX_ANSWER_TOKENS }),
+                    signal,
+                });
+            } catch (err) {
+                if (err?.name === 'AbortError') throw err;
+                // The browser reports "offline", "blocked by CORS" and "address wrong" all as the same bare
+                // "Failed to fetch". Readers get a plain message; the hint for the site's owner goes to the console.
+                console.warn('Cloud assistant unreachable. If this page is not on a listed address, add its origin to ALLOWED_ORIGINS in ai/proxy/wrangler.toml and redeploy. Origin:', location.origin);
+                throw new Error('Couldn\u2019t reach the cloud assistant. Check your internet connection and try again.');
+            }
             if (!res.ok) throw new Error(await refusalMessage(res));
             const { text } = await res.json();
-            if (typeof text !== 'string' || !text.trim()) throw new Error('The cloud assistant sent an empty answer.');
+            if (typeof text !== 'string') throw new Error('The cloud assistant sent an answer in a form this page can\u2019t read.');
+            // An empty answer is not an error: rag.js treats it like any answer with no citation and
+            // shows the matching passages from the book, which is more useful than a message.
             if (onToken) onToken(text);
             return text;
         },

@@ -33,6 +33,7 @@ const limiter = (allow = true) => ({ limit: jest.fn(async () => ({ success: allo
 
 function makeEnv(over = {}) {
     return {
+        BACKEND: 'anthropic',           // the suites below test the Anthropic path; Workers AI has its own suite
         ANTHROPIC_API_KEY: 'sk-test',
         ALLOWED_ORIGINS: ORIGIN,
         IP_LIMITER: limiter(),
@@ -249,5 +250,133 @@ describe('upstream call', () => {
     test('a network failure upstream is a 502', async () => {
         global.fetch = jest.fn(async () => { throw new Error('offline'); });
         expect((await worker.fetch(req(), makeEnv())).status).toBe(502);
+    });
+});
+
+
+describe('workers ai backend (the free default)', () => {
+    const okOut = (text = 'free answer [A-1.1]', usage = { prompt_tokens: 1000, completion_tokens: 100 }) =>
+        ({ choices: [{ message: { role: 'assistant', content: text }, finish_reason: 'stop' }], usage });
+    const aiEnv = (run, over = {}) => makeEnv({ BACKEND: undefined, ANTHROPIC_API_KEY: undefined, AI: { run }, MODEL: undefined, ...over });
+
+    test('is the default backend, needs no API key, and never calls the Anthropic API', async () => {
+        const run = jest.fn(async () => okOut());
+        const res = await worker.fetch(req(), aiEnv(run));
+        expect(res.status).toBe(200);
+        expect(await json(res)).toEqual({ text: 'free answer [A-1.1]' });
+        expect(upstream).not.toHaveBeenCalled();
+    });
+
+    test('refuses to run without the AI binding, and on an unknown backend', async () => {
+        expect((await worker.fetch(req(), aiEnv(null, { AI: undefined }))).status).toBe(500);
+        expect((await worker.fetch(req(), makeEnv({ BACKEND: 'bing' }))).status).toBe(500);
+        expect(upstream).not.toHaveBeenCalled();
+    });
+
+    test('sends the system prompt first, clamps max_tokens, uses Gemma 4 by default, and turns thinking off', async () => {
+        const run = jest.fn(async () => okOut());
+        await worker.fetch(req({ ...goodBody, max_tokens: 99999 }), aiEnv(run));
+        const [model, input] = run.mock.calls[0];
+        expect(model).toBe('@cf/google/gemma-4-26b-a4b-it');
+        expect(input.messages).toEqual([{ role: 'system', content: 'rules' }, { role: 'user', content: 'hi' }]);
+        expect(input.max_tokens).toBe(800);
+        expect(input.chat_template_kwargs).toEqual({ enable_thinking: false });
+    });
+
+    test('uses the configured model, and leaves the thinking switch out when told to', async () => {
+        const run = jest.fn(async () => okOut());
+        await worker.fetch(req(), aiEnv(run, { MODEL: '@cf/meta/llama-3.1-8b-instruct-fp8-fast', DISABLE_THINKING: 'false' }));
+        const [model, input] = run.mock.calls[0];
+        expect(model).toBe('@cf/meta/llama-3.1-8b-instruct-fp8-fast');
+        expect(input).not.toHaveProperty('chat_template_kwargs');
+    });
+
+    test('only user/assistant roles go to the model', async () => {
+        const run = jest.fn(async () => okOut());
+        await worker.fetch(req({ system: 's', messages: [{ role: 'system', content: 'sneaky' }, { role: 'assistant', content: 'a' }] }), aiEnv(run));
+        expect(run.mock.calls[0][1].messages.map(m => m.role)).toEqual(['system', 'user', 'assistant']);
+    });
+
+    test('reads the older { response } shape too', async () => {
+        const res = await worker.fetch(req(), aiEnv(async () => ({ response: 'old shape [A-1.1]' })));
+        expect((await json(res)).text).toBe('old shape [A-1.1]');
+    });
+
+    test('counts the tokens it reports, and estimates them when none are reported', async () => {
+        const env = aiEnv(async () => okOut());
+        await worker.fetch(req(), env);
+        expect(env.BUDGET.storage._map.get('inTokens')).toBe(1000);
+        expect(env.BUDGET.storage._map.get('outTokens')).toBe(100);
+
+        const env2 = aiEnv(async () => ({ choices: [{ message: { content: 'x'.repeat(300) } }] }));
+        await worker.fetch(req(), env2);
+        expect(env2.BUDGET.storage._map.get('inTokens')).toBeGreaterThan(0);     // never stands still
+        expect(env2.BUDGET.storage._map.get('outTokens')).toBe(100);
+    });
+
+    test('without caps in the config, defaults keep a day inside the free allowance (25 questions per visitor)', async () => {
+        const env = aiEnv(async () => okOut('ok', { prompt_tokens: 10, completion_tokens: 1 }));
+        for (let i = 0; i < 25; i++) expect((await worker.fetch(req(goodBody, { ip: 'same' }), env)).status).toBe(200);
+        const over = await worker.fetch(req(goodBody, { ip: 'same' }), env);
+        expect(over.status).toBe(429);
+        expect((await json(over)).error).toBe('ip-daily');
+    });
+
+    test('the free daily allowance running out becomes this site\u2019s own "limit for today" (503 budget)', async () => {
+        const run = async () => { throw new Error('4006: you have used up your daily free allocation of 10,000 neurons'); };
+        const res = await worker.fetch(req(), aiEnv(run));
+        expect(res.status).toBe(503);
+        expect((await json(res)).error).toBe('budget');
+    });
+
+    test('any other model error is a 502, and its details are not passed on', async () => {
+        const res = await worker.fetch(req(), aiEnv(async () => { throw new Error('internal secret detail'); }));
+        expect(res.status).toBe(502);
+        expect(await res.text()).not.toContain('secret');
+    });
+
+    test('an empty answer is delivered as empty (the site shows the passages) and the reason is logged', async () => {
+        const res = await worker.fetch(req(), aiEnv(async () => ({ choices: [{ message: { content: null }, finish_reason: 'length' }] })));
+        expect(res.status).toBe(200);
+        expect((await json(res)).text).toBe('');
+        const logged = console.error.mock.calls.map(c => c.join(' ')).join('\n');
+        expect(logged).toMatch(/empty answer workers-ai/);
+        expect(logged).toMatch(/finish_reason=length/);
+        expect(logged).not.toContain('hi');        // never the question
+    });
+});
+
+describe('anthropic backend: empty answers', () => {
+    test('a reply with no text block is delivered as empty, with stop_reason and block types logged', async () => {
+        global.fetch = jest.fn(async () => new Response(JSON.stringify({
+            content: [{ type: 'thinking', thinking: '...' }], stop_reason: 'max_tokens', usage: { input_tokens: 500, output_tokens: 800 },
+        }), { status: 200 }));
+        const env = makeEnv();
+        const res = await worker.fetch(req(), env);
+        expect((await json(res)).text).toBe('');
+        expect(console.error.mock.calls.map(c => c.join(' ')).join('\n')).toMatch(/stop_reason=max_tokens blocks=\[thinking\]/);
+        expect(env.BUDGET.storage._map.get('outTokens')).toBe(800);              // the tokens were spent, so they count
+    });
+});
+
+
+describe('wrangler.toml', () => {
+    const toml = require('fs').readFileSync(require('path').join(__dirname, 'wrangler.toml'), 'utf8');
+    const origins = (toml.match(/^ALLOWED_ORIGINS\s*=\s*"([^"]*)"/m) || [])[1].split(',').map(s => s.trim());
+
+    test('keeps the live site\u2019s address, and allows the local dev server so Cloud can be tried before publishing', () => {
+        expect(origins).toContain('https://abhijithda.github.io');
+        expect(origins).toContain('http://127.0.0.1:3000');
+        expect(origins).toContain('http://localhost:3000');
+    });
+
+    test('only lists plain origins (scheme + host [+ port]), never a path or a wildcard', () => {
+        origins.forEach(o => expect(o).toMatch(/^https?:\/\/[a-z0-9.-]+(:\d+)?$/i));
+    });
+
+    test('a listed local origin is answered, an unlisted port is not', async () => {
+        const env = makeEnv({ ALLOWED_ORIGINS: origins.join(',') });
+        expect((await worker.fetch(req(goodBody, { origin: 'http://127.0.0.1:3000' }), env)).status).toBe(200);
+        expect((await worker.fetch(req(goodBody, { origin: 'http://127.0.0.1:4000' }), env)).status).toBe(403);
     });
 });

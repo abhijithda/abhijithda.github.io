@@ -45,11 +45,13 @@ function lastUserQuestion(history) {
  */
 export async function answerQuestion({ question, index, engine, langs, history = [], signal, onToken }) {
     const started = Date.now();
-    const brief = engine.id !== 'cloud';
+    // 'cloud' (this site's assistant) and 'custom' (the reader's own service) are both full-size hosted models.
+    const hosted = engine.id === 'cloud' || engine.id === 'custom';
+    const brief = !hosted;
     const opts = {
         langs,
-        k: engine.id === 'cloud' ? 8 : 4,
-        budgetChars: BUDGET_CHARS[engine.id] ?? BUDGET_CHARS.local,
+        k: hosted ? 8 : 4,
+        budgetChars: hosted ? BUDGET_CHARS.cloud : BUDGET_CHARS.local,
     };
     const done = (extra) => ({ citations: [], passages: [], shown: [], more: [], grounded: false, fallback: false, ms: Date.now() - started, ...extra });
 

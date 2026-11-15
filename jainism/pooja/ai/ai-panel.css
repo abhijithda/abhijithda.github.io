@@ -72,3 +72,30 @@ body.ai-resizing { user-select: none; cursor: ew-resize; }
 @media (max-width: 700px) { .ai-resize, .ai-expand { display: none; } }
 
 @media print { .ai-drawer, .ai-back, #ai-btn { display: none !important; } }
+
+/* ── Configure dialog (ai/ai-config.js) ─────────────────────────────────── */
+.ai-config-btn { font-size: 12px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #333; cursor: pointer; }
+.ai-config-btn[hidden] { display: none; }
+@media (max-width: 700px) { .ai-config-btn { font-size: 14px; padding: 8px; } }
+
+.ai-config-overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(0, 0, 0, .45); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.ai-config-overlay[hidden] { display: none; }
+.ai-config { box-sizing: border-box; background: #fff; color: #222; width: min(560px, 100%); max-height: 100%; overflow-y: auto; border-radius: 10px; padding: 16px 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, .3); font-size: 14px; line-height: 1.45; }
+.ai-config h2 { margin: 0 0 10px; font-size: 1.15em; }
+.ai-config-section { border: 1px solid #ddd; border-radius: 8px; margin: 0 0 12px; padding: 8px 12px 12px; }
+.ai-config-section legend { font-weight: 600; padding: 0 6px; }
+.ai-config-hint { font-size: .85em; color: #555; }
+.ai-config-tier { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; cursor: pointer; }
+.ai-config-field { display: block; margin: 8px 0; }
+.ai-config-label { display: block; font-size: .85em; font-weight: 600; margin-bottom: 2px; }
+.ai-config-field input[type="text"], .ai-config-field input[type="url"], .ai-config-field input[type="password"], .ai-config-field select { width: 100%; box-sizing: border-box; font: inherit; padding: 6px 8px; border: 1px solid #bbb; border-radius: 6px; }
+.ai-config-check { display: block; margin: 8px 0; font-size: .9em; }
+.ai-config-warn { font-size: .8em; color: #7a4b00; background: #fff6e5; border-radius: 6px; padding: 6px 8px; margin: 10px 0 0; }
+.ai-config-error { color: #b3261e; background: #fdecea; border-radius: 6px; padding: 6px 8px; margin: 0 0 10px; }
+.ai-config-error[hidden] { display: none; }
+/* Pinned to the bottom of the dialog so Save is always in reach, however much is above it. */
+.ai-config-actions { display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: -16px; background: #fff; padding: 10px 0 4px; margin-top: 4px; border-top: 1px solid #eee; }
+.ai-config-actions button, #ai-config-forget { font: inherit; padding: 6px 14px; border: 1px solid #bbb; border-radius: 6px; background: #fff; cursor: pointer; }
+.ai-config-actions .ai-config-primary { background: #2e7d32; border-color: #2e7d32; color: #fff; }
+#ai-config-forget[hidden] { display: none; }
+@media print { .ai-config-overlay { display: none !important; } }

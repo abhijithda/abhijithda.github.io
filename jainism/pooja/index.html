@@ -116,8 +116,10 @@
                     <select id="ai-engine-select">
                         <option value="off">Off</option>
                         <option value="cloud">Cloud</option>
+                        <option value="custom">Custom</option>
                         <option value="local">Local</option>
                     </select>
+                    <button type="button" id="ai-config-btn" class="ai-config-btn" title="Choose the on-device model size, or enter your own AI service" hidden>Configure…</button>
                     <span id="ai-engine-note"></span>
                 </div>
                 <div class="menu-section">
@@ -210,8 +212,10 @@
                 <select id="home-ai-engine-select">
                     <option value="off">Off</option>
                     <option value="cloud">Cloud</option>
+                    <option value="custom">Custom</option>
                     <option value="local">Local</option>
                 </select>
+                <button type="button" id="home-ai-config-btn" class="ai-config-btn" hidden>Configure…</button>
             </div>
             <p id="home-ai-engine-note" class="home-offline-hint"></p>
             <div class="home-section home-row">

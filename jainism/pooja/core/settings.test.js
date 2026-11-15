@@ -4,6 +4,8 @@ const {
     SETTINGS_KEY,
     PAPER_SIZES,
     AI_ENGINES,
+    AI_LOCAL_TIERS,
+    AI_PROVIDERS,
     AI_PANEL_WIDTH_MIN,
     AI_PANEL_WIDTH_MAX,
 } = require('./settings');
@@ -13,7 +15,7 @@ const {
 // and font-scale.js each cover their own setting's applied *behavior*; this
 // file only covers the shared schema (defaults/validation) that both of
 // those settings, and every other one, are validated against here.
-const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1, aiEngine: 'off', aiPanelWidth: 420 };
+const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1, aiEngine: 'off', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiPanelWidth: 420 };
 
 beforeEach(() => {
     localStorage.clear();
@@ -43,6 +45,39 @@ describe('loadSettings / saveSettings', () => {
         });
         localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiEngine: 'gpt' }));
         expect(loadSettings().aiEngine).toBe('off');
+    });
+
+    test('aiEngine includes the reader\u2019s own service (custom)', () => {
+        expect(AI_ENGINES).toEqual(['off', 'cloud', 'custom', 'local']);
+    });
+
+    test('aiLocalModel accepts the three sizes and falls back to small', () => {
+        expect(AI_LOCAL_TIERS).toEqual(['small', 'medium', 'large']);
+        AI_LOCAL_TIERS.forEach(t => {
+            saveSettings({ aiLocalModel: t });
+            expect(loadSettings().aiLocalModel).toBe(t);
+        });
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiLocalModel: 'huge' }));
+        expect(loadSettings().aiLocalModel).toBe('small');
+    });
+
+    test('aiCustom keeps the provider, address and model; junk is cleaned or defaulted', () => {
+        saveSettings({ aiCustom: { provider: 'openai', baseUrl: '  https://x.test/v1  ', model: ' m1 ' } });
+        expect(loadSettings().aiCustom).toEqual({ provider: 'openai', baseUrl: 'https://x.test/v1', model: 'm1' });
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiCustom: { provider: 'bing', baseUrl: 5, model: 'x'.repeat(500) } }));
+        const c = loadSettings().aiCustom;
+        expect(AI_PROVIDERS).toContain(c.provider);
+        expect(c.provider).toBe('anthropic');
+        expect(c.baseUrl).toBe('');
+        expect(c.model.length).toBe(200);
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiCustom: 'nope' }));
+        expect(loadSettings().aiCustom).toEqual({ provider: 'anthropic', baseUrl: '', model: '' });
+    });
+
+    test('the API key is never part of the settings', () => {
+        saveSettings({ aiCustom: { provider: 'anthropic', baseUrl: '', model: '', key: 'sk-secret', apiKey: 'sk-secret' } });
+        expect(JSON.stringify(loadSettings())).not.toContain('sk-secret');
+        expect(localStorage.getItem(SETTINGS_KEY)).not.toContain('sk-secret');
     });
 
     test('aiPanelWidth is saved, rounded and kept within its limits; junk falls back to the default', () => {
@@ -87,7 +122,7 @@ describe('loadSettings / saveSettings', () => {
         expect(localStorage.length).toBe(1);
         const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
         expect(raw).toEqual({
-            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiPanelWidth: 420,
+            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiPanelWidth: 420,
             qrs: true, fontScale: 1.1, paperSize: 'a3',
         });
     });
