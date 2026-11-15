@@ -10,14 +10,19 @@ import { createLocalEngine } from './local.js';
 const cache = {};
 
 /**
- * @param {'cloud'|'custom'|'local'} name
+ * @param {'cloud'|'local'} name  the Settings choice; 'cloud' is this site's assistant or the reader's own service,
+ *                                 depending on the "cloud source" setting
  * @returns {Object|null} null for 'off' or unknown
  */
 export function getEngine(name) {
-    if (name === 'cloud') return cache.cloud ||= createCloudEngine();
-
-    // Reads the reader's service details on every call, so editing them in Settings applies at once.
-    if (name === 'custom') return cache.custom ||= createCustomEngine({ getConfig: () => loadSettings().aiCustom });
+    if (name === 'cloud') {
+        // Read on every call, so switching between the two in Settings applies at once.
+        if (loadSettings().aiCloudSource === 'own') {
+            // Reads the reader's service details on every call, so editing them applies at once.
+            return cache.custom ||= createCustomEngine({ getConfig: () => loadSettings().aiCustom });
+        }
+        return cache.cloud ||= createCloudEngine();
+    }
 
     if (name === 'local') {
         const tier = loadSettings().aiLocalModel;

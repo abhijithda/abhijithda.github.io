@@ -13,20 +13,29 @@ const { LOCAL_TIERS } = require('../config');
 
 beforeEach(() => { localStorage.clear(); });
 
-test('off and unknown give no engine; cloud, custom and local each give their own', () => {
+test('off and unknown give no engine; cloud and local each give their own', () => {
     expect(getEngine('off')).toBeNull();
     expect(getEngine('gpt')).toBeNull();
+    expect(getEngine('custom')).toBeNull();                // no longer a separate choice
     expect(getEngine('cloud').id).toBe('cloud');
-    expect(getEngine('custom').id).toBe('custom');
     expect(getEngine('cloud')).toBe(getEngine('cloud'));
-    expect(getEngine('custom')).toBe(getEngine('custom'));
 });
 
-test('custom reads the reader\u2019s service details afresh each time', () => {
-    const engine = getEngine('custom');
-    expect(engine.available().ok).toBe(false);
+test('cloud is this site\u2019s assistant by default and the reader\u2019s own service when chosen, switching at once', () => {
+    expect(getEngine('cloud').id).toBe('cloud');
+    saveSettings({ aiCloudSource: 'own' });
+    const own = getEngine('cloud');
+    expect(own.id).toBe('custom');
+    expect(getEngine('cloud')).toBe(own);
+    saveSettings({ aiCloudSource: 'site' });
+    expect(getEngine('cloud').id).toBe('cloud');
+});
+
+test('the reader\u2019s own service reads its details afresh each time', () => {
+    saveSettings({ aiCloudSource: 'own' });
+    expect(getEngine('cloud').available().ok).toBe(false);
     saveSettings({ aiCustom: { provider: 'openai', baseUrl: 'http://localhost:11434/v1', model: 'llama' } });
-    expect(getEngine('custom').available().ok).toBe(true);     // no key needed for a local server
+    expect(getEngine('cloud').available().ok).toBe(true);     // no key needed for a local server
 });
 
 test('local uses the model of the chosen size, and its f32 build for compatibility mode', () => {

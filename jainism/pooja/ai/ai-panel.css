@@ -99,3 +99,8 @@ body.ai-resizing { user-select: none; cursor: ew-resize; }
 .ai-config-actions .ai-config-primary { background: #2e7d32; border-color: #2e7d32; color: #fff; }
 #ai-config-forget[hidden] { display: none; }
 @media print { .ai-config-overlay { display: none !important; } }
+
+.ai-config-section[hidden] { display: none; }
+
+.ai-config-own[hidden] { display: none; }
+.ai-config-own { margin-top: 6px; padding-left: 4px; }

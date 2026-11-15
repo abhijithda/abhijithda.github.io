@@ -11,15 +11,19 @@ import { answerQuestion } from './rag.js';
 import { getEngine } from './engines/index.js';
 import { LOCAL_TIERS } from './config.js';
 import { LOCAL_GPU_FAILED } from './engines/local.js';
-import { destinationHost } from './engines/custom.js';
+import { destinationHost, isLocalBaseUrl } from './engines/custom.js';
 import { openAiConfig } from './ai-config.js';
 
 // Short on purpose: it sits under the picker in the Settings menu.
 function privacyNote(choice, settings) {
-    if (choice === 'cloud') return 'Sends your question and the passages found for it to an AI service.';
-    if (choice === 'custom') {
-        const host = destinationHost(settings.aiCustom) || 'the service you chose';
-        return `Sends your question and the passages found for it to ${host}, using your own key.`;
+    if (choice === 'cloud') {
+        if (settings.aiCloudSource === 'own') {
+            const host = destinationHost(settings.aiCustom) || 'the service you chose';
+            // A server on this computer needs no key, and nothing leaves the machine.
+            if (isLocalBaseUrl(settings.aiCustom.baseUrl)) return `Sends your question and the passages found for it to ${host}, a server on this computer.`;
+            return `Sends your question and the passages found for it to ${host}, using your own key.`;
+        }
+        return 'Sends your question and the passages found for it to this site\u2019s cloud assistant. Nothing to set up.';
     }
     if (choice === 'local') {
         const t = LOCAL_TIERS[settings.aiLocalModel] || LOCAL_TIERS.small;
@@ -180,8 +184,9 @@ export function applyAiSetting() {
         if (!a.ok) reason = a.reason;
     }
     notes.forEach(note => { if (note) note.textContent = reason || privacyNote(choice, settings); });
-    // "Configure" has something to set only for Custom (service and key) and Local (model size).
-    const showConfigure = choice === 'custom' || choice === 'local';
+    // Both hosted and on-device engines have something to set: Cloud (whose service, and the key if it is your own),
+    // Local (model size). Only "off" has nothing.
+    const showConfigure = choice === 'cloud' || choice === 'local';
     [$('ai-config-btn'), $('home-ai-config-btn')].forEach(b => { if (b) b.hidden = !showConfigure; });
     const usable = !!engine && !reason;
     const btn = $('ai-btn');
@@ -312,13 +317,18 @@ export function revealTarget(blockId) {
 async function ask(question, { retry = false } = {}) {
     const engine = currentEngine();
     if (state.busy) return;
-    if (!engine) {
-        // AI is off (it can be switched off while this panel is open): show the question and say why
-        // nothing is answering, rather than swallowing it.
-        const off = 'The AI assistant is turned off. To ask questions, turn it on in Settings \u2192 AI assistant (Cloud, Custom or Local).';
+    // Nothing can answer: the assistant is off, or the chosen engine isn't usable (Cloud with no address set,
+    // Local without WebGPU, your own cloud service without a key...). Show the question and say why, instead of calling an
+    // engine that can only fail with something unreadable. (The panel can still be open here: it can be
+    // switched off or become unusable underneath an open panel, or be reopened from the "Back to answer" pill.)
+    const unusable = !engine ? '' : engine.available();
+    if (!engine || !unusable.ok) {
+        const off = 'The AI assistant is turned off. To ask questions, turn it on in Settings \u2192 AI assistant (Cloud or Local).';
+        const why = engine ? unusable.reason : off;
         if (!retry) { addMessage('user', question); logEntry({ r: 'user', text: question }); }
-        addMessage('assistant', off);
-        logEntry({ r: 'note', text: off });
+        const el = addMessage('assistant', why);
+        if (engine) el.classList.add('ai-msg--error');
+        logEntry({ r: engine ? 'error' : 'note', text: why });
         return;
     }
     state.busy = true;
@@ -467,13 +477,13 @@ export function initAi({ data, onCite }) {
     buildDrawer();
     if (saved) restoreSession(saved);
 
-    const configure = () => openAiConfig({ onSaved: () => { state.history = []; applyAiSetting(); } });
+    const configure = () => openAiConfig({ section: loadSettings().aiEngine, onSaved: () => { state.history = []; applyAiSetting(); } });
     $('ai-engine-select')?.addEventListener('change', e => {
         saveSettings({ aiEngine: e.target.value });
         state.history = [];
         applyAiSetting();
-        // Custom does nothing until it has a service and a key: take the reader straight to that.
-        if (e.target.value === 'custom' && !getEngine('custom').available().ok) configure();
+        // Cloud with the reader's own service does nothing until it has a service and a key: take them straight to that.
+        if (e.target.value === 'cloud' && loadSettings().aiCloudSource === 'own' && !getEngine('cloud').available().ok) configure();
     });
     $('ai-config-btn')?.addEventListener('click', configure);
     // Home's button just presses the header's, like the rest of Home's settings.

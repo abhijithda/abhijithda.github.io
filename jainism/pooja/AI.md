@@ -1124,7 +1124,7 @@ the core requirement without needing a separate render pass.
 
 ## AI assistant ("Ask the book") — ✅ Phase 1 current
 
-Opt-in (**Settings → 💬 AI assistant: Off | Cloud | Custom | Local**, setting `aiEngine`
+Opt-in (**Settings → 💬 AI assistant: Off | Cloud | Local**, setting `aiEngine`
 in `core/settings.js`, default `off`). A header **Ask** button appears only when
 the chosen engine is usable; it opens an overlay drawer (an overlay, never a
 column, so book pagination is unaffected; hidden in print).
@@ -1159,8 +1159,9 @@ ai/
   `textContent`, never `innerHTML`.
 - **Privacy:** Cloud sends the question + retrieved passages to your proxy;
   the API key lives only in the proxy. Local sends nothing.
-- **Custom (the reader's own AI service):** engine `custom` (`engines/custom.js`). The reader picks a format in **Configure…**
-  and gives their own key; the browser calls that service directly, so none of it touches the site's proxy, limits or budget.
+- **Cloud has two sources (setting `aiCloudSource`, chosen in Cloud's Configure…):** `site` (the default: this site's own
+  free assistant, the proxy below) or `own` (the reader's own AI service, engine `custom` in `engines/custom.js`). With `own`
+  the reader picks a format in **Configure…** and gives their own key; the browser calls that service directly, so none of it touches the site's proxy, limits or budget.
   Two formats: `anthropic` (fixed to Anthropic's address, sent with Anthropic's browser opt-in header) and `openai` (the
   chat-completions format OpenAI and many other services and local servers such as Ollama share, at a base URL the reader
   gives; falls back to `max_completion_tokens` when a service demands it). Rules enforced in code and tests: the address must
@@ -1168,9 +1169,9 @@ ai/
   `anthropic` so that key can only go to Anthropic; the key is **not** in the settings object (`saveSettings` strips anything
   but provider/address/model) but in its own storage, **this tab only by default**, kept on the device only if the reader ticks
   "Remember"; "Forget my key" clears both; the dialog never shows the saved key back; errors name the host and never contain the
-  key (an echoed key is scrubbed from the service's message). Custom is treated as a full-size hosted model by `rag.js`
+  key (an echoed key is scrubbed from the service's message). The own-service engine is treated as a full-size hosted model by `rag.js`
   (same passages budget and answer style as Cloud, with the same grounding checks and verbatim passages). It needs the service
-  to allow requests from a web page (CORS); if it doesn't, the reader is told that. Picking Custom before it is set up opens
+  to allow requests from a web page (CORS); if it doesn't, the reader is told that. Picking Cloud while it is set to the reader's own service and not yet set up opens
   Configure at once.
 - **Local sizes:** setting `aiLocalModel` = `small` (Qwen2.5 1.5B, about 1 GB) / `medium` (3B, about 2 GB) / `large` (7B,
   about 5 GB), defined in `config.js` `LOCAL_TIERS` with each size's f32 compatibility build. All six model ids were checked
@@ -1195,6 +1196,18 @@ ai/
   the matching passages). Covered by `ai/proxy/worker.test.js`. **Not verified against the real service:** the Workers AI
   call itself (its binding needs a live Cloudflare login even for local runs, so only a fake binding built from Cloudflare's
   documented response shape is tested) and Gemma 4's answer quality on Kannada: judge from real questions.
+- **Configure shows only the chosen engine's settings:** Cloud opens the choice between this site's assistant and the reader's
+  own service (the service form appears only when "my own service" is picked); Local opens just the on-device sizes. Saving
+  one never touches the other's saved values or the key; choosing "this site's assistant" keeps a previously saved own service
+  and key for later. Off has nothing to configure. The dropdown has just three choices (Off / Cloud / Local) on both the
+  Settings menu and Home. No provider is labelled free or paid in the dialog (a reader knows which key they paste). There is no
+  migration of old saved values: the site isn't shared yet; add one (an older `aiEngine: 'custom'` meant "Cloud, own service")
+  before it is.
+- **An unusable engine is never called:** `ask()` checks `engine.available()` first and shows the reason (e.g. "Cloud AI isn't
+  set up for this site yet.") instead of calling it. `cloud.js` also refuses an empty address (an empty address would post to
+  the page itself and get HTML back, which showed up as "Unexpected token '<' ... is not valid JSON") and turns any unreadable
+  reply into a plain message. `config.js` now carries the deployed Worker's address, so a fresh copy of the project doesn't switch
+  Cloud off.
 - **Surviving a reload:** browsers discard idle background tabs and reload them on return, which used to wipe the panel.
   `ai-panel.js` now keeps the panel's open/closed state, the conversation (answers, citations, passages cut to what is
   shown) and the follow-up memory in **sessionStorage** (`aiPanelSession`): it survives a reload or a discarded tab, is
@@ -1223,11 +1236,23 @@ ai/
   - A citation chip opens the passage in the view the reader is already using (Book turns to the right spread; Continuous scrolls to it). If the drawer would sit on top of that passage it steps aside to a "Back to answer" button instead of vanishing; one tap restores the same conversation.
   - "Show N more matching passages" lists further matches (up to 12) for broad one-word queries.
   - "really?" and other follow-ups with no searchable words: searched together with the previous question; the on-device model isn't asked again (it would only repeat itself), the hosted model is.
-- **TODO:** keep the chat history across reloads like settings (decide: sessionStorage vs localStorage, a size limit, a "clear" button, and that questions are stored on the device).
+- **Done, partly:** the conversation now survives a reload (sessionStorage, this tab only, last 24 entries; see "Surviving a
+  reload"). **Still to do:** a "clear conversation" button.
+- **TODO (his idea): Local with a model already on the laptop.** Let Local use a model that is already downloaded on the
+  computer, via a local model server (Ollama, LM Studio, llama.cpp), so nothing is re-downloaded when the browser cache is
+  cleared. The machinery mostly exists (the own-service engine already speaks to `http://localhost...` with no key). To do: a
+  "Use a model on this computer" choice in Local's Configure (address + model name, default `http://localhost:11434/v1`); keep it
+  separate from the Cloud own-service settings; treat it as `local` for the privacy note (nothing leaves the machine) and for
+  `rag.js`'s small-model rules until measured. **Verify first, on his machine:** the server must allow this page's origin (Ollama:
+  `OLLAMA_ORIGINS`; LM Studio: its CORS setting), and recent Chrome/Edge may ask permission before a public page may reach a
+  server on the same computer (local-network access): check what the reader sees and whether the error message can say so.
+  Browser-cached models (WebLLM) can't be pointed at files on disk, which is why a server is the route.
+- **TODO (decide later):** keep or remove the optional Anthropic backend in the proxy (`BACKEND = "anthropic"`, off by default;
+  the free Workers AI backend is the default). He tests with his own Anthropic key meanwhile.
 - **TODO (after the tags review):** tag-based ranking boost; related-question chips built from shared tags (no model needed).
 - **Tried and rejected (measured with the eval):** boosting question blocks over answer blocks made recall worse
   (recall@5 86% -> 81% at 1.15x, 70% at 3x), so retrieval weights are unchanged.
-- **Known gaps:** Cloud and Custom are non-streaming; Local needs WebGPU and a pinned WebLLM
+- **Known gaps:** Cloud (either source) is non-streaming; Local needs WebGPU and a pinned WebLLM
   version/model id that must be re-verified before deploy.
 - **Retrieval eval (`ai/eval/`, run `npx jest ai/eval --verbose`):** 41 draft questions (English, Kannada, Kannada in
   English letters, one-word queries, and some the book doesn't cover). Gold answers are permanent block ids, so
