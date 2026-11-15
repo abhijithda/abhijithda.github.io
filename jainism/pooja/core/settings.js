@@ -24,21 +24,26 @@ const DEFAULT_PAPER_SIZE = 'dynamic';
 // AI assistant engine (see ai/). 'off' is the default: 'local' downloads a
 // model of hundreds of MB, and 'cloud' sends the reader's question (plus the
 // passages found for it) to a server, so neither happens until chosen.
-//  - 'cloud'  : this site's own hosted assistant (ai/proxy/).
-//  - 'custom' : the reader's own AI service and API key, called straight from
-//               the browser. The key is NOT part of this object (see
-//               ai/engines/custom.js: it has its own storage so it can be
-//               session-only and is never copied along with the settings).
-//  - 'local'  : a model on the reader's own device, in one of three sizes.
-export const AI_ENGINES = ['off', 'cloud', 'custom', 'local'];
+//  - 'cloud' : a hosted service. Whose is a second setting, aiCloudSource below.
+//  - 'local' : a model on the reader's own device, in one of three sizes.
+export const AI_ENGINES = ['off', 'cloud', 'local'];
 const DEFAULT_AI_ENGINE = 'off';
+
+// Which hosted service 'cloud' means.
+//  - 'site' : this site's own free assistant (ai/proxy/). The default: nothing to set up.
+//  - 'own'  : the reader's own AI service and API key, called straight from the
+//             browser. The key is NOT part of this object (see ai/engines/custom.js:
+//             it has its own storage so it can be session-only and is never copied
+//             along with the settings).
+export const AI_CLOUD_SOURCES = ['site', 'own'];
+const DEFAULT_AI_CLOUD_SOURCE = 'site';
 
 // Size of the on-device model. The ids are stable; what each one means (model,
 // download size) lives in ai/config.js so it can change without touching saved settings.
 export const AI_LOCAL_TIERS = ['small', 'medium', 'large'];
 const DEFAULT_AI_LOCAL_TIER = 'small';
 
-// Custom service: which request format to speak. 'anthropic' is fixed to
+// The reader's own service: which request format to speak. 'anthropic' is fixed to
 // Anthropic's own address; 'openai' is the chat-completions format that OpenAI
 // and many other services and local servers share, at a base URL the reader gives.
 export const AI_PROVIDERS = ['anthropic', 'openai'];
@@ -101,6 +106,7 @@ export function loadSettings() {
         // it only starts when the reader turns it on (see core/offline.js).
         offline:      typeof saved?.offline      === 'boolean' ? saved.offline      : false,
         aiEngine:     AI_ENGINES.includes(saved?.aiEngine) ? saved.aiEngine : DEFAULT_AI_ENGINE,
+        aiCloudSource: AI_CLOUD_SOURCES.includes(saved?.aiCloudSource) ? saved.aiCloudSource : DEFAULT_AI_CLOUD_SOURCE,
         aiLocalModel: AI_LOCAL_TIERS.includes(saved?.aiLocalModel) ? saved.aiLocalModel : DEFAULT_AI_LOCAL_TIER,
         aiCustom:     loadAiCustom(saved?.aiCustom),
         aiPanelWidth,
@@ -125,7 +131,7 @@ export function saveSettings(partial) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_LOCAL_TIERS, AI_PROVIDERS, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_CLOUD_SOURCES, AI_LOCAL_TIERS, AI_PROVIDERS, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
         loadSettings, saveSettings, round1,
     });
 }

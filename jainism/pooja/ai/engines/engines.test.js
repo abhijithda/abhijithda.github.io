@@ -303,3 +303,21 @@ describe('local engine: failures while answering', () => {
         expect(unload).not.toHaveBeenCalled();
     });
 });
+
+
+describe('cloud engine: when the address is missing or the reply is not from the proxy', () => {
+    test('with no address it refuses before sending anything (an empty address would post to the page itself)', async () => {
+        const fetchImpl = jest.fn();
+        const e = createCloudEngine({ endpoint: '', fetchImpl });
+        await expect(e.generate(msgs)).rejects.toThrow(/isn.t set up/);
+        expect(fetchImpl).not.toHaveBeenCalled();
+    });
+
+    test('a reply that is a web page, not JSON, becomes a plain message, never "Unexpected token <"', async () => {
+        const html = { ok: true, status: 200, json: async () => { throw new SyntaxError('Unexpected token \'<\', "<!DOCTYPE "... is not valid JSON'); } };
+        const e = createCloudEngine({ endpoint: 'https://x.test', fetchImpl: async () => html });
+        const err = await e.generate(msgs).catch(x => x);
+        expect(err.message).toMatch(/can.t read/);
+        expect(err.message).not.toMatch(/Unexpected token/);
+    });
+});

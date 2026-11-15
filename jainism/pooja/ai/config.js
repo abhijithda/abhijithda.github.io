@@ -4,7 +4,7 @@
 // It holds the API key; the browser never does. Leave empty and "Cloud" stays
 // disabled in Settings, with an explanation. After deploying the proxy, paste
 // the URL it printed, e.g. 'https://pooja-ai-proxy.<your-subdomain>.workers.dev'.
-export const CLOUD_ENDPOINT = '';
+export const CLOUD_ENDPOINT = 'https://pooja-ai-proxy.abhijith-da.workers.dev';
 
 // Local engine: runs in the browser on WebGPU through WebLLM.
 // Loaded only when the reader picks "Local", from a CDN, pinned to an exact

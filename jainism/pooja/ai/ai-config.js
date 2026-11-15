@@ -1,10 +1,12 @@
-// ai/ai-config.js — The "Configure" dialog for the assistant: which size of
-// on-device model to use, and the reader's own AI service (provider, address,
-// model, API key). One dialog, opened from the Settings menu and from Home.
+// ai/ai-config.js — The "Configure" dialog for the assistant. Opened from the Settings
+// menu and from Home, and it shows only the settings of the engine that is selected:
+//  - Cloud : whose hosted service to use — this site's own assistant (free, nothing to
+//            set up) or the reader's own AI service (provider, address, model, API key).
+//  - Local : which size of on-device model to download.
 //
-// Everything is built with DOM nodes and textContent — nothing the reader types
-// is ever parsed as HTML. The API key goes to engines/custom.js's key store (its
-// own storage, session-only unless the reader opts in), never to the settings object.
+// Everything is built with DOM nodes and textContent — nothing the reader types is ever
+// parsed as HTML. The API key goes to engines/custom.js's key store (its own storage,
+// session-only unless the reader opts in), never to the settings object.
 
 import { loadSettings, saveSettings, AI_LOCAL_TIERS } from '../core/settings.js';
 import { LOCAL_TIERS } from './config.js';
@@ -30,6 +32,8 @@ function field(label, control, hint) {
     return wrap;
 }
 
+// Which parts of the dialog this opening shows: only the engine the reader picked has anything to set.
+let visible = { local: true, cloud: true };
 let keyStore = null;
 let onSavedCb = null;
 let lastFocus = null;
@@ -38,8 +42,8 @@ function build() {
     if ($('ai-config')) return;
     keyStore = createKeyStore();
 
-    // ── On-device model size ─────────────────────────────────────────────
-    const tiers = el('fieldset', { className: 'ai-config-section' }, el('legend', { text: 'On-device model (Local)' }));
+    // ── Local: size of the on-device model ───────────────────────────────
+    const tiers = el('fieldset', { id: 'ai-config-local', className: 'ai-config-section' }, el('legend', { text: 'On-device model' }));
     tiers.append(el('p', { className: 'ai-config-hint', text: 'Runs entirely on this device; nothing is sent anywhere. Bigger models usually write better summaries, but take longer to download and need more graphics memory. Only the models listed here are offered.' }));
     AI_LOCAL_TIERS.forEach(id => {
         const t = LOCAL_TIERS[id];
@@ -51,7 +55,10 @@ function build() {
                 el('span', { className: 'ai-config-hint', text: ` \u2014 download ${t.size}, needs ${t.gpu} of graphics memory` }))));
     });
 
-    // ── Custom service ───────────────────────────────────────────────────
+    // ── Cloud: this site's assistant, or the reader's own service ────────
+    const sourceSite = el('input', { type: 'radio', name: 'ai-cloud-source', value: 'site', id: 'ai-source-site' });
+    const sourceOwn = el('input', { type: 'radio', name: 'ai-cloud-source', value: 'own', id: 'ai-source-own' });
+
     const provider = el('select', { id: 'ai-config-provider' });
     Object.entries(PROVIDER_INFO).forEach(([id, info]) => provider.append(el('option', { value: id, text: info.label })));
     const base = el('input', { type: 'url', id: 'ai-config-base', autocomplete: 'off', spellcheck: false });
@@ -60,16 +67,23 @@ function build() {
     const remember = el('input', { type: 'checkbox', id: 'ai-config-remember' });
     const forget = el('button', { type: 'button', id: 'ai-config-forget', text: 'Forget my key' });
 
-    const custom = el('fieldset', { className: 'ai-config-section' },
-        el('legend', { text: 'Your own AI service (Custom)' }),
-        el('p', { className: 'ai-config-hint', text: 'Use your own account with a service you trust. Your questions go straight from this browser to that service, not through this site.' }),
+    const ownForm = el('div', { id: 'ai-config-custom', className: 'ai-config-own' },
+        el('p', { className: 'ai-config-hint', text: 'Your questions go straight from this browser to that service, not through this site.' }),
         field('Service', provider),
         el('div', { id: 'ai-config-base-row' }, field('Address', base, 'Use https://\u2026, or http://localhost\u2026 for a server on this computer. The service must allow requests from a web page.')),
         field('Model', model),
         field('API key', key),
         el('label', { className: 'ai-config-check' }, remember, el('span', { text: ' Remember the key on this device (otherwise it is forgotten when this tab closes)' })),
         forget,
-        el('p', { className: 'ai-config-warn', text: 'The key stays in this browser and is sent only to the address above. Anyone who can use this browser profile could read it, so don\u2019t use this on a shared computer, and prefer a key with a spending limit. The book passages found for your question are sent too, under that service\u2019s terms.' }));
+        el('p', { className: 'ai-config-warn', text: 'The key stays in this browser and is sent only to the address above. Anyone who can use this browser profile could read it, so don\u2019t use this on a shared computer. The book passages found for your question are sent too, under that service\u2019s terms.' }));
+
+    const cloud = el('fieldset', { id: 'ai-config-cloud', className: 'ai-config-section' },
+        el('legend', { text: 'Cloud assistant' }),
+        el('label', { className: 'ai-config-tier', htmlFor: 'ai-source-site' }, sourceSite,
+            el('span', {}, el('strong', { text: 'This site\u2019s assistant' }), el('span', { className: 'ai-config-hint', text: ' \u2014 free, nothing to set up' }))),
+        el('label', { className: 'ai-config-tier', htmlFor: 'ai-source-own' }, sourceOwn,
+            el('span', {}, el('strong', { text: 'My own AI service' }), el('span', { className: 'ai-config-hint', text: ' \u2014 your account and API key' }))),
+        ownForm);
 
     const error = el('p', { id: 'ai-config-error', className: 'ai-config-error', role: 'alert', hidden: true });
     const save = el('button', { type: 'button', id: 'ai-config-save', className: 'ai-config-primary', text: 'Save' });
@@ -77,7 +91,7 @@ function build() {
 
     const dialog = el('div', { className: 'ai-config', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ai-config-title' },
         el('h2', { id: 'ai-config-title', text: 'AI assistant settings' }),
-        tiers, custom, error,
+        cloud, tiers, error,
         el('div', { className: 'ai-config-actions' }, cancel, save));
     const overlay = el('div', { id: 'ai-config', className: 'ai-config-overlay', hidden: true }, dialog);
     document.body.appendChild(overlay);
@@ -89,6 +103,11 @@ function build() {
         model.placeholder = info.defaultModel || 'Model name from your service';
     };
     provider.addEventListener('change', syncProvider);
+
+    // The service form only matters when "my own service" is the chosen source.
+    const syncSource = () => { ownForm.hidden = !sourceOwn.checked; };
+    sourceSite.addEventListener('change', syncSource);
+    sourceOwn.addEventListener('change', syncSource);
 
     forget.addEventListener('click', () => {
         keyStore.clear();
@@ -104,24 +123,35 @@ function build() {
     overlay.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeAiConfig(); } });
 
     save.addEventListener('click', () => {
-        const info = PROVIDER_INFO[provider.value];
-        let baseUrl = base.value.trim();
-        if (info.needsBaseUrl && baseUrl) {
-            const ok = normalizeBaseUrl(baseUrl);
-            if (!ok) {
-                showError('That address isn\u2019t allowed. Use https://\u2026 (or http://localhost\u2026 for a server on this computer).');
-                return;
+        const partial = {};
+        if (visible.cloud) {
+            const source = sourceOwn.checked ? 'own' : 'site';
+            partial.aiCloudSource = source;
+            // The service form is only read when it is the chosen source; otherwise what was saved before is left alone.
+            if (source === 'own') {
+                const info = PROVIDER_INFO[provider.value];
+                let baseUrl = base.value.trim();
+                if (info.needsBaseUrl && baseUrl) {
+                    const ok = normalizeBaseUrl(baseUrl);
+                    if (!ok) {
+                        showError('That address isn\u2019t allowed. Use https://\u2026 (or http://localhost\u2026 for a server on this computer).');
+                        return;
+                    }
+                    baseUrl = ok;
+                }
+                partial.aiCustom = { provider: provider.value, baseUrl: info.needsBaseUrl ? baseUrl : '', model: model.value.trim() };
             }
-            baseUrl = ok;
         }
-        const chosen = overlay.querySelector('input[name="ai-local-tier"]:checked');
-        saveSettings({
-            aiLocalModel: chosen ? chosen.value : loadSettings().aiLocalModel,
-            aiCustom: { provider: provider.value, baseUrl: info.needsBaseUrl ? baseUrl : '', model: model.value.trim() },
-        });
-        // Empty box + a key already stored = keep it (the box is never pre-filled with the key).
-        keyStore.set(key.value.trim() || keyStore.get(), remember.checked);
-        key.value = '';
+        if (visible.local) {
+            const chosen = overlay.querySelector('input[name="ai-local-tier"]:checked');
+            partial.aiLocalModel = chosen ? chosen.value : loadSettings().aiLocalModel;
+        }
+        saveSettings(partial);
+        if (visible.cloud && partial.aiCloudSource === 'own') {
+            // Empty box + a key already stored = keep it (the box is never pre-filled with the key).
+            keyStore.set(key.value.trim() || keyStore.get(), remember.checked);
+            key.value = '';
+        }
         closeAiConfig();
         if (onSavedCb) onSavedCb();
     });
@@ -136,6 +166,9 @@ function showError(text) {
 function populate() {
     const s = loadSettings();
     document.querySelectorAll('input[name="ai-local-tier"]').forEach(r => { r.checked = r.value === s.aiLocalModel; });
+    $('ai-source-site').checked = s.aiCloudSource !== 'own';
+    $('ai-source-own').checked = s.aiCloudSource === 'own';
+    $('ai-source-own').dispatchEvent(new Event('change'));
     $('ai-config-provider').value = s.aiCustom.provider;
     $('ai-config-provider').dispatchEvent(new Event('change'));
     $('ai-config-base').value = s.aiCustom.baseUrl;
@@ -148,14 +181,24 @@ function populate() {
     showError('');
 }
 
-/** @param {{onSaved?: () => void}} [opts] onSaved runs after a save or after the key is forgotten */
-export function openAiConfig({ onSaved } = {}) {
+/**
+ * @param {{section?: 'local'|'cloud', onSaved?: () => void}} [opts]
+ *   section: show only that engine's settings (anything else shows both).
+ *   onSaved runs after a save or after the key is forgotten.
+ */
+export function openAiConfig({ section, onSaved } = {}) {
     build();
     onSavedCb = onSaved || null;
+    visible = { local: section !== 'cloud', cloud: section !== 'local' };
     lastFocus = document.activeElement;
     populate();
+    $('ai-config-local').hidden = !visible.local;
+    $('ai-config-cloud').hidden = !visible.cloud;
+    $('ai-config-title').textContent = section === 'local' ? 'On-device model'
+        : section === 'cloud' ? 'Cloud assistant'
+        : 'AI assistant settings';
     $('ai-config').hidden = false;
-    document.querySelector('input[name="ai-local-tier"]:checked')?.focus();
+    (visible.cloud ? document.querySelector('input[name="ai-cloud-source"]:checked') : document.querySelector('input[name="ai-local-tier"]:checked'))?.focus();
 }
 
 export function closeAiConfig() {

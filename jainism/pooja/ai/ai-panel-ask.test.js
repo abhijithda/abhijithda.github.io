@@ -116,3 +116,16 @@ test('with AI off, a question is still shown and the reader is told why nothing 
     expect(mockEngine.generate).not.toHaveBeenCalled();
     expect(document.getElementById('ai-send').disabled).toBe(false);     // and they can try again
 });
+
+test('an engine that cannot be used (Cloud with no address) is not called: the reader is told why', async () => {
+    const real = mockEngine.available;
+    mockEngine.available = () => ({ ok: false, reason: 'Cloud AI isn\u2019t set up for this site yet.' });
+    await ask('tell me about rani vishalakshi');
+    const msgs = [...document.querySelectorAll('.ai-msg')];
+    expect(msgs[0].textContent).toBe('tell me about rani vishalakshi');
+    expect(msgs[1].textContent).toMatch(/isn.t set up/);
+    expect(msgs[1].classList.contains('ai-msg--error')).toBe(true);
+    expect(mockEngine.generate).not.toHaveBeenCalled();
+    expect(document.getElementById('ai-send').disabled).toBe(false);
+    mockEngine.available = real;
+});

@@ -10,8 +10,8 @@ import { CLOUD_ENDPOINT, MAX_ANSWER_TOKENS } from '../config.js';
 const REFUSALS = {
     rate: 'Too many questions right now. Please try again in a minute.',
     busy: 'The assistant is very busy right now. Please try again in a minute.',
-    'ip-daily': 'You\u2019ve reached today\u2019s question limit for the cloud assistant. It resets tomorrow; the book\u2019s search and Local mode still work.',
-    budget: 'The cloud assistant has reached its limit for today and will be back tomorrow. The book\u2019s search and Local mode still work.',
+    'ip-daily': 'You\u2019ve reached today\u2019s question limit for the cloud assistant. It resets tomorrow. Meanwhile the book\u2019s search and Local mode still work, or use your own AI service (Settings \u2192 AI assistant \u2192 Configure).',
+    budget: 'The cloud assistant has reached its limit for today and will be back tomorrow. Meanwhile the book\u2019s search and Local mode still work, or use your own AI service (Settings \u2192 AI assistant \u2192 Configure).',
     unavailable: 'The cloud assistant is temporarily unavailable. Please try again shortly.',
 };
 
@@ -37,6 +37,8 @@ export function createCloudEngine({ endpoint = CLOUD_ENDPOINT, fetchImpl = (...a
 
         /** Returns the full answer; calls onToken once with it (no streaming in v1). */
         async generate(messages, { signal, onToken } = {}) {
+            // An empty address would make fetch() post to this very page and get HTML back.
+            if (!endpoint) throw new Error('Cloud AI isn\u2019t set up for this site yet.');
             const system = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
             const rest = messages.filter(m => m.role !== 'system');
             let res;
@@ -55,7 +57,8 @@ export function createCloudEngine({ endpoint = CLOUD_ENDPOINT, fetchImpl = (...a
                 throw new Error('Couldn\u2019t reach the cloud assistant. Check your internet connection and try again.');
             }
             if (!res.ok) throw new Error(await refusalMessage(res));
-            const { text } = await res.json();
+            let text;
+            try { ({ text } = await res.json()); } catch (_) { /* not JSON: a web page, a captive portal, a wrong address */ }
             if (typeof text !== 'string') throw new Error('The cloud assistant sent an answer in a form this page can\u2019t read.');
             // An empty answer is not an error: rag.js treats it like any answer with no citation and
             // shows the matching passages from the book, which is more useful than a message.
