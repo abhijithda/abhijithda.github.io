@@ -88,12 +88,17 @@ function safe(name) {
 
 // ── Engine ───────────────────────────────────────────────────────────────
 
-/** What is missing before this can be used, or '' when ready. Never mentions the key's value. */
-export function configProblem(config, key) {
+/**
+ * What is missing before this can be used, or '' when ready. Never mentions the key's value.
+ * @param {{loopbackOnly?: boolean}} [opts] loopbackOnly: the address must be a server on this computer
+ *   (used by the Local "model on this computer" option, whose privacy note promises nothing leaves the machine)
+ */
+export function configProblem(config, key, { loopbackOnly = false } = {}) {
     const info = PROVIDER_INFO[config?.provider];
     if (!info) return 'Choose an AI service under Configure.';
     if (info.needsBaseUrl) {
         const base = normalizeBaseUrl(config.baseUrl);
+        if (loopbackOnly && base && !isLocalBaseUrl(base)) return 'The address must be a server on this computer (http://localhost\u2026).';
         if (!base) return 'Enter the service\u2019s address under Configure (https://\u2026, or http://localhost\u2026 for a server on this computer).';
         if (!config.model) return 'Enter a model name under Configure.';
         if (!key && !isLocalBaseUrl(base)) return 'Add your API key under Configure.';
@@ -137,15 +142,20 @@ function friendlyFailure(status, host, detail) {
  * @param {Object} [opts]
  * @param {() => Object} [opts.getConfig]  { provider, baseUrl, model } — read on every call, so a change in Settings applies at once
  * @param {Object} [opts.keyStore]
+ * @param {string} [opts.id]               the engine's id ('custom'; the on-this-computer model server reports 'local')
+ * @param {boolean} [opts.loopbackOnly]    refuse any address that isn't a server on this computer
+ * @param {(host: string) => string} [opts.unreachable]   message for a request that never got an answer
+ * @param {(status: number, host: string, detail: string) => string|undefined} [opts.failure]   own message for an HTTP error
  */
 export function createCustomEngine({
     getConfig = () => ({}), keyStore = createKeyStore(), fetchImpl = (...a) => fetch(...a),
+    id = 'custom', loopbackOnly = false, unreachable = null, failure = null,
 } = {}) {
     return {
-        id: 'custom',
+        id,
 
         available() {
-            const problem = configProblem(getConfig(), keyStore.get());
+            const problem = configProblem(getConfig(), keyStore.get(), { loopbackOnly });
             return problem ? { ok: false, reason: problem } : { ok: true };
         },
 
@@ -154,7 +164,7 @@ export function createCustomEngine({
         async generate(messages, { signal, onToken } = {}) {
             const config = getConfig();
             const key = keyStore.get();
-            const problem = configProblem(config, key);
+            const problem = configProblem(config, key, { loopbackOnly });
             if (problem) throw new Error(problem);
 
             const info = PROVIDER_INFO[config.provider];
@@ -169,9 +179,12 @@ export function createCustomEngine({
                 } catch (err) {
                     if (err?.name === 'AbortError') throw err;
                     // A blocked cross-origin request and a dead address look the same to a web page.
-                    throw new Error(`Couldn\u2019t reach ${host}. Check the address and your connection, and that the service allows requests from a web page.`);
+                    throw new Error(unreachable ? unreachable(host)
+                        : `Couldn\u2019t reach ${host}. Check the address and your connection, and that the service allows requests from a web page.`);
                 }
             };
+            // `detail` is the service's own message, read once (a response body can only be read once).
+            const failed = (status, detail) => new Error((failure && failure(status, host, detail)) || friendlyFailure(status, host, detail));
 
             let text;
             if (config.provider === 'anthropic') {
@@ -180,7 +193,7 @@ export function createCustomEngine({
                     'anthropic-version': '2023-06-01',
                     'anthropic-dangerous-direct-browser-access': 'true',
                 }, { model, system, messages: rest, max_tokens: MAX_ANSWER_TOKENS });
-                if (!res.ok) throw new Error(friendlyFailure(res.status, host, await providerMessage(res, key)));
+                if (!res.ok) throw failed(res.status, await providerMessage(res, key));
                 const data = await res.json();
                 text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
             } else {
@@ -195,10 +208,10 @@ export function createCustomEngine({
                         const { max_tokens, ...withoutOld } = body;
                         res = await post(url, headers, { ...withoutOld, max_completion_tokens: max_tokens });
                     } else {
-                        throw new Error(friendlyFailure(400, host, detail));
+                        throw failed(400, detail);
                     }
                 }
-                if (!res.ok) throw new Error(friendlyFailure(res.status, host, await providerMessage(res, key)));
+                if (!res.ok) throw failed(res.status, await providerMessage(res, key));
                 const data = await res.json();
                 const content = data.choices?.[0]?.message?.content;
                 text = typeof content === 'string' ? content : '';

@@ -70,7 +70,7 @@ describe('changeFontScale', () => {
         expect(localStorage.length).toBe(1);
         const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
         expect(raw).toEqual({
-            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiCloudSource: 'site', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiPanelWidth: 420,
+            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiCloudSource: 'site', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiLocalSource: 'browser', aiLocalServer: { baseUrl: 'http://localhost:11434/v1', model: '' }, aiPanelWidth: 420,
             qrs: true, fontScale: 1.1, paperSize: 'a3',
         });
     });

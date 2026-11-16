@@ -65,3 +65,32 @@ test('every size names real-looking model ids and sizes', () => {
         expect(LOCAL_TIERS[t].size).toMatch(/GB/);
     });
 });
+
+describe('local: a model in this browser, or one already on this computer', () => {
+    test('the browser model is the default source', () => {
+        expect(getEngine('local').opts).toBeDefined();         // the (mocked) WebLLM engine
+    });
+
+    test('choosing the model server gives the server engine, which reads its details afresh each time', () => {
+        saveSettings({ aiLocalSource: 'server', aiLocalServer: { baseUrl: 'http://localhost:11434/v1', model: '' } });
+        const server = getEngine('local');
+        expect(server.id).toBe('local');
+        expect(server.opts).toBeUndefined();                    // not the WebLLM engine
+        expect(server.available().ok).toBe(false);              // no model chosen yet
+        saveSettings({ aiLocalServer: { baseUrl: 'http://localhost:11434/v1', model: 'llama3.2:3b' } });
+        expect(getEngine('local')).toBe(server);
+        expect(server.available().ok).toBe(true);
+    });
+
+    test('switching to the server frees the browser model, and back loads it afresh', () => {
+        saveSettings({ aiLocalSource: 'browser', aiLocalModel: 'small' });
+        const browser = getEngine('local');
+        saveSettings({ aiLocalSource: 'server', aiLocalServer: { baseUrl: 'http://localhost:11434/v1', model: 'm' } });
+        getEngine('local');
+        expect(browser.dispose).toHaveBeenCalledTimes(1);
+        saveSettings({ aiLocalSource: 'browser' });
+        const again = getEngine('local');
+        expect(again).not.toBe(browser);
+        expect(again.opts.modelId).toBe(LOCAL_TIERS.small.model);
+    });
+});
