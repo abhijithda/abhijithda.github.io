@@ -43,6 +43,16 @@ const DEFAULT_AI_CLOUD_SOURCE = 'site';
 export const AI_LOCAL_TIERS = ['small', 'medium', 'large'];
 const DEFAULT_AI_LOCAL_TIER = 'small';
 
+// Where 'local' gets its model from.
+//  - 'browser' : downloaded once into this browser (WebLLM, WebGPU), in the size chosen above. The default.
+//  - 'server'  : a model already on this computer, served by a local model server such as Ollama or LM Studio
+//                (nothing is downloaded by the page, and clearing the browser's data doesn't remove the model).
+//                The server's address (loopback only) and model name are `aiLocalServer` below.
+export const AI_LOCAL_SOURCES = ['browser', 'server'];
+const DEFAULT_AI_LOCAL_SOURCE = 'browser';
+// Ollama's own default address; LM Studio's is http://localhost:1234/v1.
+export const AI_LOCAL_SERVER_DEFAULT_URL = 'http://localhost:11434/v1';
+
 // The reader's own service: which request format to speak. 'anthropic' is fixed to
 // Anthropic's own address; 'openai' is the chat-completions format that OpenAI
 // and many other services and local servers share, at a base URL the reader gives.
@@ -55,6 +65,14 @@ function loadAiCustom(saved) {
         provider: AI_PROVIDERS.includes(saved?.provider) ? saved.provider : AI_PROVIDERS[0],
         baseUrl:  clean(saved?.baseUrl),
         model:    clean(saved?.model),
+    };
+}
+
+function loadAiLocalServer(saved) {
+    const clean = v => (typeof v === 'string' ? v.trim().slice(0, AI_CUSTOM_FIELD_MAX) : '');
+    return {
+        baseUrl: clean(saved?.baseUrl) || AI_LOCAL_SERVER_DEFAULT_URL,
+        model:   clean(saved?.model),
     };
 }
 
@@ -109,6 +127,8 @@ export function loadSettings() {
         aiCloudSource: AI_CLOUD_SOURCES.includes(saved?.aiCloudSource) ? saved.aiCloudSource : DEFAULT_AI_CLOUD_SOURCE,
         aiLocalModel: AI_LOCAL_TIERS.includes(saved?.aiLocalModel) ? saved.aiLocalModel : DEFAULT_AI_LOCAL_TIER,
         aiCustom:     loadAiCustom(saved?.aiCustom),
+        aiLocalSource: AI_LOCAL_SOURCES.includes(saved?.aiLocalSource) ? saved.aiLocalSource : DEFAULT_AI_LOCAL_SOURCE,
+        aiLocalServer: loadAiLocalServer(saved?.aiLocalServer),
         aiPanelWidth,
         paperSize,
         fontScale,
@@ -124,6 +144,7 @@ export function saveSettings(partial) {
     const merged = { ...loadSettings(), ...partial };
     // Keep only the known, non-secret fields, so nothing extra (an API key, say) can be saved by accident.
     if ('aiCustom' in partial) merged.aiCustom = loadAiCustom(partial.aiCustom);
+    if ('aiLocalServer' in partial) merged.aiLocalServer = loadAiLocalServer(partial.aiLocalServer);
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
     return merged;
 }
@@ -131,7 +152,7 @@ export function saveSettings(partial) {
 // CommonJS shim for Jest
 if (typeof module !== 'undefined' && module.exports) {
     Object.assign(module.exports, {
-        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_CLOUD_SOURCES, AI_LOCAL_TIERS, AI_PROVIDERS, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
+        SETTINGS_KEY, PAPER_SIZES, AI_ENGINES, AI_CLOUD_SOURCES, AI_LOCAL_TIERS, AI_LOCAL_SOURCES, AI_LOCAL_SERVER_DEFAULT_URL, AI_PROVIDERS, AI_PANEL_WIDTH_MIN, AI_PANEL_WIDTH_MAX, AI_PANEL_WIDTH_DEFAULT, FONT_SCALE_MIN, FONT_SCALE_MAX, FONT_SCALE_STEP,
         loadSettings, saveSettings, round1,
     });
 }

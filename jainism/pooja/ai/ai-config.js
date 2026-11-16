@@ -2,15 +2,21 @@
 // menu and from Home, and it shows only the settings of the engine that is selected:
 //  - Cloud : whose hosted service to use — this site's own assistant (free, nothing to
 //            set up) or the reader's own AI service (provider, address, model, API key).
-//  - Local : which size of on-device model to download.
+//  - Local : where the model comes from — downloaded into this browser (pick a size; it can also be saved to a
+//            folder and loaded back, so clearing browser data doesn't mean downloading again) or already on
+//            this computer behind a local model server (Ollama, LM Studio).
 //
 // Everything is built with DOM nodes and textContent — nothing the reader types is ever
 // parsed as HTML. The API key goes to engines/custom.js's key store (its own storage,
 // session-only unless the reader opts in), never to the settings object.
 
-import { loadSettings, saveSettings, AI_LOCAL_TIERS } from '../core/settings.js';
+import { loadSettings, saveSettings, AI_LOCAL_TIERS, AI_LOCAL_SERVER_DEFAULT_URL } from '../core/settings.js';
 import { LOCAL_TIERS } from './config.js';
-import { PROVIDER_INFO, normalizeBaseUrl, createKeyStore } from './engines/custom.js';
+import { PROVIDER_INFO, normalizeBaseUrl, isLocalBaseUrl, createKeyStore } from './engines/custom.js';
+import { listServerModels } from './engines/local-server.js';
+import {
+    saveModelsToFolder, loadModelsFromFolder, folderSource, fileListSource, loadRecordLookup, canSaveToFolder, ModelFolderError,
+} from './engines/model-files.js';
 
 const $ = id => document.getElementById(id);
 
@@ -42,18 +48,53 @@ function build() {
     if ($('ai-config')) return;
     keyStore = createKeyStore();
 
-    // ── Local: size of the on-device model ───────────────────────────────
-    const tiers = el('fieldset', { id: 'ai-config-local', className: 'ai-config-section' }, el('legend', { text: 'On-device model' }));
-    tiers.append(el('p', { className: 'ai-config-hint', text: 'Runs entirely on this device; nothing is sent anywhere. Bigger models usually write better summaries, but take longer to download and need more graphics memory. Only the models listed here are offered.' }));
+    // ── Local: where the model comes from ────────────────────────────────
+    const srcBrowser = el('input', { type: 'radio', name: 'ai-local-source', value: 'browser', id: 'ai-lsource-browser' });
+    const srcServer = el('input', { type: 'radio', name: 'ai-local-source', value: 'server', id: 'ai-lsource-server' });
+
+    const tierList = el('div', { id: 'ai-config-browser', className: 'ai-config-own' });
+    tierList.append(el('p', { className: 'ai-config-hint', text: 'Runs entirely on this device; nothing is sent anywhere. Bigger models usually write better summaries, but take longer to download and need more graphics memory. Only the models listed here are offered.' }));
     AI_LOCAL_TIERS.forEach(id => {
         const t = LOCAL_TIERS[id];
         const radio = el('input', { type: 'radio', name: 'ai-local-tier', value: id, id: `ai-tier-${id}` });
-        tiers.append(el('label', { className: 'ai-config-tier', htmlFor: `ai-tier-${id}` },
+        tierList.append(el('label', { className: 'ai-config-tier', htmlFor: `ai-tier-${id}` },
             radio,
             el('span', {},
                 el('strong', { text: t.label }),
                 el('span', { className: 'ai-config-hint', text: ` \u2014 download ${t.size}, needs ${t.gpu} of graphics memory` }))));
     });
+    // The browser keeps the model until its data is cleared; a copy in a folder survives that.
+    const saveFolder = el('button', { type: 'button', id: 'ai-config-save-folder', className: 'ai-config-small', text: 'Save downloaded model to a folder\u2026' });
+    const loadFolder = el('button', { type: 'button', id: 'ai-config-load-folder', className: 'ai-config-small', text: 'Load a saved model from a folder\u2026' });
+    const folderInput = el('input', { type: 'file', id: 'ai-config-folder-input', hidden: true, multiple: true });
+    folderInput.setAttribute('webkitdirectory', '');
+    const folderStatus = el('p', { id: 'ai-config-folder-status', className: 'ai-config-status', role: 'status' });
+    tierList.append(
+        el('p', { className: 'ai-config-hint', text: 'The browser keeps the model until its data is cleared. To avoid downloading it again after that, save a copy to a folder and load it back later.' }),
+        el('div', { className: 'ai-config-row' }, saveFolder, loadFolder, folderInput),
+        folderStatus);
+
+    const serverBase = el('input', { type: 'url', id: 'ai-config-server-base', autocomplete: 'off', spellcheck: false, placeholder: AI_LOCAL_SERVER_DEFAULT_URL });
+    const serverModel = el('input', { type: 'text', id: 'ai-config-server-model', autocomplete: 'off', spellcheck: false, placeholder: 'e.g. llama3.2:3b' });
+    serverModel.setAttribute('list', 'ai-config-server-models');   // `list` is read-only as a property
+    const serverModels = el('datalist', { id: 'ai-config-server-models' });
+    const serverCheck = el('button', { type: 'button', id: 'ai-config-server-check', className: 'ai-config-small', text: 'Check connection' });
+    const serverStatus = el('p', { id: 'ai-config-server-status', className: 'ai-config-status', role: 'status' });
+    const serverForm = el('div', { id: 'ai-config-server', className: 'ai-config-own' },
+        el('p', { className: 'ai-config-hint', text: 'Uses a model you already have on this computer, through a local model server such as Ollama (http://localhost:11434/v1) or LM Studio (http://localhost:1234/v1). Nothing is downloaded by this page, and clearing your browser\u2019s data doesn\u2019t remove the model.' }),
+        field('Server address', serverBase, 'Must be on this computer (http://localhost\u2026). The server has to allow requests from this page: Ollama needs its OLLAMA_ORIGINS setting to include this site\u2019s address, LM Studio needs \u201cEnable CORS\u201d. Your browser may also ask whether this site can access devices on your computer; choose Allow.'),
+        field('Model', serverModel, 'The name as the server lists it. \u201cCheck connection\u201d shows what it has. Choose a model installed on this computer: a server can also offer models it runs online, and those would not stay on this computer.'),
+        serverModels,
+        el('div', { className: 'ai-config-row' }, serverCheck),
+        serverStatus);
+
+    const tiers = el('fieldset', { id: 'ai-config-local', className: 'ai-config-section' }, el('legend', { text: 'On-device model' }),
+        el('label', { className: 'ai-config-tier', htmlFor: 'ai-lsource-browser' }, srcBrowser,
+            el('span', {}, el('strong', { text: 'In this browser' }), el('span', { className: 'ai-config-hint', text: ' \u2014 downloaded once, then kept by the browser' }))),
+        tierList,
+        el('label', { className: 'ai-config-tier', htmlFor: 'ai-lsource-server' }, srcServer,
+            el('span', {}, el('strong', { text: 'A model already on this computer' }), el('span', { className: 'ai-config-hint', text: ' \u2014 through Ollama, LM Studio or similar' }))),
+        serverForm);
 
     // ── Cloud: this site's assistant, or the reader's own service ────────
     const sourceSite = el('input', { type: 'radio', name: 'ai-cloud-source', value: 'site', id: 'ai-source-site' });
@@ -109,6 +150,75 @@ function build() {
     sourceSite.addEventListener('change', syncSource);
     sourceOwn.addEventListener('change', syncSource);
 
+    // Only the chosen local source's form is shown.
+    const syncLocalSource = () => { tierList.hidden = !srcBrowser.checked; serverForm.hidden = !srcServer.checked; };
+    srcBrowser.addEventListener('change', syncLocalSource);
+    srcServer.addEventListener('change', syncLocalSource);
+
+    // ── Local server: what does it have? ─────────────────────────────────
+    let checking = null;
+    serverCheck.addEventListener('click', async () => {
+        checking?.abort();
+        checking = new AbortController();
+        serverStatus.textContent = 'Checking\u2026';
+        const result = await listServerModels(serverBase.value, { signal: checking.signal }).catch(() => null);
+        if (!result) return;   // a newer check replaced this one
+        if (!result.ok) { serverStatus.textContent = result.reason; return; }
+        serverModels.replaceChildren(...result.models.map(m => el('option', { value: m })));
+        const wanted = serverModel.value.trim();
+        serverStatus.textContent = !result.models.length
+            ? 'Connected, but the server lists no models. Install one first (Ollama: ollama pull <name>).'
+            : wanted && !result.models.includes(wanted)
+                ? `Connected. The server doesn\u2019t list \u201c${wanted}\u201d. It has: ${result.models.slice(0, 8).join(', ')}.`
+                : `Connected. Models on the server: ${result.models.slice(0, 8).join(', ')}${result.models.length > 8 ? ', \u2026' : ''}. Click the Model box to choose.`;
+    });
+
+    // ── Local browser model: save to / load from a folder ────────────────
+    const setFolderBusy = busy => { saveFolder.disabled = busy; loadFolder.disabled = busy; };
+    const showFolderError = err => {
+        if (err?.name === 'AbortError') { folderStatus.textContent = ''; return; }   // the reader cancelled the folder picker
+        folderStatus.textContent = err instanceof ModelFolderError ? err.message : `That didn\u2019t work: ${err?.message || err}`;
+    };
+    const mb = bytes => `${Math.round(bytes / (1024 * 1024))} MB`;
+
+    saveFolder.addEventListener('click', async () => {
+        if (!canSaveToFolder()) {
+            folderStatus.textContent = 'Saving to a folder needs Chrome or Edge on a computer. (Loading a saved folder also works in other browsers.)';
+            return;
+        }
+        setFolderBusy(true);
+        try {
+            const dir = await window.showDirectoryPicker({ mode: 'readwrite', id: 'pooja-model' });
+            folderStatus.textContent = 'Preparing\u2026';
+            const lookup = await loadRecordLookup();
+            const models = Object.values(LOCAL_TIERS).flatMap(t => [t.model, t.compat])
+                .map(modelId => ({ modelId, record: lookup(modelId) })).filter(m => m.record);
+            const result = await saveModelsToFolder({ models, dir, caches: window.caches, onProgress: p => { folderStatus.textContent = p.text; } });
+            folderStatus.textContent = result.saved.length
+                ? `Saved ${result.saved.length === 1 ? 'one model' : result.saved.length + ' models'} (${mb(result.bytes)}) to that folder. Keep the folder; \u201cLoad a saved model\u201d puts it back without downloading.`
+                : 'Nothing to save yet: no model is fully downloaded in this browser. Ask a question with Local first (it downloads once), then save it.';
+        } catch (err) { showFolderError(err); } finally { setFolderBusy(false); }
+    });
+
+    const loadFrom = async source => {
+        folderStatus.textContent = 'Checking the folder\u2026';
+        const lookup = await loadRecordLookup();
+        const result = await loadModelsFromFolder({ source, recordFor: lookup, caches: window.caches, onProgress: p => { folderStatus.textContent = p.text; } });
+        folderStatus.textContent = `Loaded ${result.restored.length === 1 ? 'one model' : result.restored.length + ' models'} (${mb(result.bytes)}) into this browser. Local will start from it without downloading.`
+            + (result.warnings.length ? ' ' + result.warnings.join(' ') : '');
+    };
+    loadFolder.addEventListener('click', async () => {
+        setFolderBusy(true);
+        try {
+            if (canSaveToFolder()) await loadFrom(folderSource(await window.showDirectoryPicker({ id: 'pooja-model' })));
+            else folderInput.click();          // other browsers: pick the folder with a file input
+        } catch (err) { showFolderError(err); } finally { setFolderBusy(false); }
+    });
+    folderInput.addEventListener('change', async () => {
+        setFolderBusy(true);
+        try { await loadFrom(fileListSource(folderInput.files)); } catch (err) { showFolderError(err); } finally { folderInput.value = ''; setFolderBusy(false); }
+    });
+
     forget.addEventListener('click', () => {
         keyStore.clear();
         key.value = '';
@@ -145,6 +255,16 @@ function build() {
         if (visible.local) {
             const chosen = overlay.querySelector('input[name="ai-local-tier"]:checked');
             partial.aiLocalModel = chosen ? chosen.value : loadSettings().aiLocalModel;
+            partial.aiLocalSource = srcServer.checked ? 'server' : 'browser';
+            // The server form is only read when it is the chosen source; otherwise what was saved before is left alone.
+            if (srcServer.checked) {
+                const url = normalizeBaseUrl(serverBase.value) || '';
+                if (!url || !isLocalBaseUrl(url)) {
+                    showError('The server address must be on this computer, for example http://localhost:11434/v1.');
+                    return;
+                }
+                partial.aiLocalServer = { baseUrl: url, model: serverModel.value.trim() };
+            }
         }
         saveSettings(partial);
         if (visible.cloud && partial.aiCloudSource === 'own') {
@@ -166,6 +286,14 @@ function showError(text) {
 function populate() {
     const s = loadSettings();
     document.querySelectorAll('input[name="ai-local-tier"]').forEach(r => { r.checked = r.value === s.aiLocalModel; });
+    $('ai-lsource-browser').checked = s.aiLocalSource !== 'server';
+    $('ai-lsource-server').checked = s.aiLocalSource === 'server';
+    $('ai-lsource-server').dispatchEvent(new Event('change'));
+    $('ai-config-server-base').value = s.aiLocalServer.baseUrl;
+    $('ai-config-server-model').value = s.aiLocalServer.model;
+    $('ai-config-server-status').textContent = '';
+    $('ai-config-folder-status').textContent = '';
+    $('ai-config-save-folder').hidden = !canSaveToFolder();
     $('ai-source-site').checked = s.aiCloudSource !== 'own';
     $('ai-source-own').checked = s.aiCloudSource === 'own';
     $('ai-source-own').dispatchEvent(new Event('change'));

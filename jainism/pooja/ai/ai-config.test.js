@@ -5,6 +5,7 @@ const { initAi, applyAiSetting } = require('./ai-panel');
 const { openAiConfig, closeAiConfig, isAiConfigOpen } = require('./ai-config');
 const { saveSettings, loadSettings } = require('../core/settings');
 const { KEY_STORAGE_KEY } = require('./engines/custom');
+const modelFiles = require('./engines/model-files');
 
 const KEY = 'sk-test-SECRET-123';
 const $ = id => document.getElementById(id);
@@ -139,6 +140,184 @@ describe('on-device size', () => {
         expect(loadSettings().aiCloudSource).toBe('own');
         expect(loadSettings().aiCustom).toEqual({ provider: 'openai', baseUrl: 'https://llm.example.test/v1', model: 'm1' });
         expect(sessionStorage.getItem(KEY_STORAGE_KEY)).toBe(KEY);
+    });
+});
+
+describe('local: a model in this browser, or one already on this computer', () => {
+    const shown = id => !$(id).hidden;
+    const flush = () => new Promise(r => setTimeout(r, 0));
+
+    test('the browser is the default source: sizes shown, the server form hidden', () => {
+        openAiConfig({ section: 'local' });
+        expect($('ai-lsource-browser').checked).toBe(true);
+        expect(shown('ai-config-browser')).toBe(true);
+        expect(shown('ai-config-server')).toBe(false);
+    });
+
+    test('choosing the server shows its form, with Ollama\u2019s address ready, and hides the sizes', () => {
+        openAiConfig({ section: 'local' });
+        pick('ai-lsource-server');
+        expect(shown('ai-config-server')).toBe(true);
+        expect(shown('ai-config-browser')).toBe(false);
+        expect($('ai-config-server-base').value).toBe('http://localhost:11434/v1');
+        expect($('ai-config').textContent).toMatch(/OLLAMA_ORIGINS/);
+        expect($('ai-config').textContent).toMatch(/Allow/);
+    });
+
+    test('saving the server stores the source, address and model, and the note names the server; no WebGPU needed', () => {
+        saveSettings({ aiEngine: 'local' });
+        openAiConfig({ section: 'local', onSaved: applyAiSetting });
+        pick('ai-lsource-server');
+        fire($('ai-config-server-base'), ' http://localhost:1234/v1/ ');
+        fire($('ai-config-server-model'), ' llama3.2:3b ');
+        $('ai-config-save').click();
+        expect(loadSettings().aiLocalSource).toBe('server');
+        expect(loadSettings().aiLocalServer).toEqual({ baseUrl: 'http://localhost:1234/v1', model: 'llama3.2:3b' });
+        expect($('ai-engine-note').textContent).toMatch(/model server at localhost:1234, on this computer/);
+        expect($('ai-engine-note').textContent).toMatch(/Nothing is downloaded/);
+        expect($('ai-btn').hidden).toBe(false);                 // usable although this test browser has no WebGPU
+    });
+
+    test('an address that is not on this computer is refused, and nothing is saved', () => {
+        openAiConfig({ section: 'local' });
+        pick('ai-lsource-server');
+        fire($('ai-config-server-base'), 'https://api.example.test/v1');
+        fire($('ai-config-server-model'), 'm');
+        $('ai-config-save').click();
+        expect($('ai-config-error').hidden).toBe(false);
+        expect($('ai-config-error').textContent).toMatch(/on this computer/);
+        expect(isAiConfigOpen()).toBe(true);
+        expect(loadSettings().aiLocalSource).toBe('browser');
+    });
+
+    test('saving with the browser chosen keeps the saved server details, and the cloud settings and key', () => {
+        saveSettings({ aiLocalSource: 'server', aiLocalServer: { baseUrl: 'http://localhost:1234/v1', model: 'keep' }, aiCloudSource: 'own' });
+        sessionStorage.setItem(KEY_STORAGE_KEY, KEY);
+        openAiConfig({ section: 'local' });
+        pick('ai-lsource-browser');
+        $('ai-config-save').click();
+        expect(loadSettings().aiLocalSource).toBe('browser');
+        expect(loadSettings().aiLocalServer).toEqual({ baseUrl: 'http://localhost:1234/v1', model: 'keep' });
+        expect(loadSettings().aiCloudSource).toBe('own');
+        expect(sessionStorage.getItem(KEY_STORAGE_KEY)).toBe(KEY);
+    });
+
+    test('the dialog shows the saved source and details when it opens', () => {
+        saveSettings({ aiLocalSource: 'server', aiLocalServer: { baseUrl: 'http://localhost:1234/v1', model: 'qwen2.5:7b' } });
+        openAiConfig({ section: 'local' });
+        expect($('ai-lsource-server').checked).toBe(true);
+        expect(shown('ai-config-server')).toBe(true);
+        expect($('ai-config-server-model').value).toBe('qwen2.5:7b');
+    });
+
+    describe('Check connection', () => {
+        afterEach(() => { delete global.fetch; });
+        const open = () => { openAiConfig({ section: 'local' }); pick('ai-lsource-server'); };
+
+        test('lists the models the server has, as choices for the Model box', async () => {
+            global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ data: [{ id: 'llama3.2:3b' }, { id: 'qwen2.5:7b' }] }) });
+            open();
+            $('ai-config-server-check').click();
+            await flush();
+            expect(global.fetch.mock.calls[0][0]).toBe('http://localhost:11434/v1/models');
+            expect([...$('ai-config-server-models').children].map(o => o.value)).toEqual(['llama3.2:3b', 'qwen2.5:7b']);
+            expect($('ai-config-server-status').textContent).toMatch(/Connected.*llama3\.2:3b, qwen2\.5:7b/);
+        });
+
+        test('says when the chosen model is not one the server lists', async () => {
+            global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ data: [{ id: 'llama3.2:3b' }] }) });
+            open();
+            fire($('ai-config-server-model'), 'gemma');
+            $('ai-config-server-check').click();
+            await flush();
+            expect($('ai-config-server-status').textContent).toMatch(/doesn.t list .gemma./);
+        });
+
+        test('a server that can\u2019t be reached gets the explanation of what to allow', async () => {
+            global.fetch = jest.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+            open();
+            $('ai-config-server-check').click();
+            await flush();
+            expect($('ai-config-server-status').textContent).toMatch(/OLLAMA_ORIGINS/);
+        });
+
+        test('an address that is not on this computer is not contacted', async () => {
+            global.fetch = jest.fn();
+            open();
+            fire($('ai-config-server-base'), 'https://api.example.test/v1');
+            $('ai-config-server-check').click();
+            await flush();
+            expect(global.fetch).not.toHaveBeenCalled();
+            expect($('ai-config-server-status').textContent).toMatch(/on this computer/);
+        });
+    });
+
+    describe('saving the downloaded model to a folder, and loading it back', () => {
+        const flushAll = async () => { for (let i = 0; i < 5; i++) await flush(); };
+        afterEach(() => { delete window.showDirectoryPicker; jest.restoreAllMocks(); });
+
+        test('the Save button is offered only where a folder can be picked for writing', () => {
+            openAiConfig({ section: 'local' });
+            expect($('ai-config-save-folder').hidden).toBe(true);
+            window.showDirectoryPicker = jest.fn();
+            closeAiConfig();
+            openAiConfig({ section: 'local' });
+            expect($('ai-config-save-folder').hidden).toBe(false);
+        });
+
+        test('Load reports what it put back into the browser', async () => {
+            window.showDirectoryPicker = jest.fn().mockResolvedValue({});
+            jest.spyOn(modelFiles, 'loadRecordLookup').mockResolvedValue(() => ({}));
+            jest.spyOn(modelFiles, 'loadModelsFromFolder').mockResolvedValue({ restored: ['m'], warnings: ['Note.'], bytes: 3 * 1024 * 1024 });
+            openAiConfig({ section: 'local' });
+            $('ai-config-load-folder').click();
+            await flushAll();
+            expect($('ai-config-folder-status').textContent).toMatch(/Loaded one model \(3 MB\).*without downloading.*Note\./);
+            expect($('ai-config-load-folder').disabled).toBe(false);
+        });
+
+        test('Load shows a refused folder\u2019s own explanation', async () => {
+            window.showDirectoryPicker = jest.fn().mockResolvedValue({});
+            jest.spyOn(modelFiles, 'loadRecordLookup').mockResolvedValue(() => ({}));
+            jest.spyOn(modelFiles, 'loadModelsFromFolder').mockRejectedValue(new modelFiles.ModelFolderError('That folder doesn\u2019t hold a saved model.'));
+            openAiConfig({ section: 'local' });
+            $('ai-config-load-folder').click();
+            await flushAll();
+            expect($('ai-config-folder-status').textContent).toBe('That folder doesn\u2019t hold a saved model.');
+        });
+
+        test('cancelling the folder picker says nothing', async () => {
+            window.showDirectoryPicker = jest.fn().mockRejectedValue(new DOMException('cancelled', 'AbortError'));
+            openAiConfig({ section: 'local' });
+            $('ai-config-load-folder').click();
+            await flushAll();
+            expect($('ai-config-folder-status').textContent).toBe('');
+        });
+
+        test('Save says what it saved, or that nothing is downloaded yet', async () => {
+            window.showDirectoryPicker = jest.fn().mockResolvedValue({});
+            jest.spyOn(modelFiles, 'loadRecordLookup').mockResolvedValue(id => ({ model_id: id }));
+            const save = jest.spyOn(modelFiles, 'saveModelsToFolder');
+            save.mockResolvedValueOnce({ saved: ['a'], skipped: [], bytes: 5 * 1024 * 1024 });
+            openAiConfig({ section: 'local' });
+            $('ai-config-save-folder').click();
+            await flushAll();
+            expect($('ai-config-folder-status').textContent).toMatch(/Saved one model \(5 MB\)/);
+            // every size's normal and compatibility build is offered to save; only fully downloaded ones are written
+            expect(save.mock.calls[0][0].models).toHaveLength(6);
+            save.mockResolvedValueOnce({ saved: [], skipped: [], bytes: 0 });
+            $('ai-config-save-folder').click();
+            await flushAll();
+            expect($('ai-config-folder-status').textContent).toMatch(/Nothing to save yet.*downloads once/);
+        });
+
+        test('without a folder picker, Load falls back to a file input (a folder chosen with webkitdirectory)', () => {
+            openAiConfig({ section: 'local' });
+            const click = jest.spyOn($('ai-config-folder-input'), 'click').mockImplementation(() => {});
+            $('ai-config-load-folder').click();
+            expect(click).toHaveBeenCalled();
+            expect($('ai-config-folder-input').hasAttribute('webkitdirectory')).toBe(true);
+        });
     });
 });
 

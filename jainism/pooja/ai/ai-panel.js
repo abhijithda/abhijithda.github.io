@@ -11,7 +11,7 @@ import { answerQuestion } from './rag.js';
 import { getEngine } from './engines/index.js';
 import { LOCAL_TIERS } from './config.js';
 import { LOCAL_GPU_FAILED } from './engines/local.js';
-import { destinationHost, isLocalBaseUrl } from './engines/custom.js';
+import { destinationHost, isLocalBaseUrl, normalizeBaseUrl } from './engines/custom.js';
 import { openAiConfig } from './ai-config.js';
 
 // Short on purpose: it sits under the picker in the Settings menu.
@@ -26,6 +26,12 @@ function privacyNote(choice, settings) {
         return 'Sends your question and the passages found for it to this site\u2019s cloud assistant. Nothing to set up.';
     }
     if (choice === 'local') {
+        if (settings.aiLocalSource === 'server') {
+            let host = 'a server on this computer';
+            try { host = new URL(normalizeBaseUrl(settings.aiLocalServer.baseUrl)).host; } catch (_) { /* the engine's own message says what's wrong */ }
+            // Worded carefully: the page only talks to this computer, but a server could itself forward to an online model.
+            return `Sends your question and the passages found for it only to the model server at ${host}, on this computer. Nothing is downloaded.`;
+        }
         const t = LOCAL_TIERS[settings.aiLocalModel] || LOCAL_TIERS.small;
         return `Runs on this device. The first use downloads a model (${t.size}).`;
     }
