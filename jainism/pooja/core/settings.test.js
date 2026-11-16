@@ -6,6 +6,7 @@ const {
     AI_ENGINES,
     AI_CLOUD_SOURCES,
     AI_LOCAL_TIERS,
+    AI_LOCAL_SOURCES,
     AI_PROVIDERS,
     AI_PANEL_WIDTH_MIN,
     AI_PANEL_WIDTH_MAX,
@@ -16,7 +17,7 @@ const {
 // and font-scale.js each cover their own setting's applied *behavior*; this
 // file only covers the shared schema (defaults/validation) that both of
 // those settings, and every other one, are validated against here.
-const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1, aiEngine: 'off', aiCloudSource: 'site', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiPanelWidth: 420 };
+const DEFAULT_PAPER_FONT = { paperSize: 'dynamic', fontScale: 1, aiEngine: 'off', aiCloudSource: 'site', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiLocalSource: 'browser', aiLocalServer: { baseUrl: 'http://localhost:11434/v1', model: '' }, aiPanelWidth: 420 };
 
 beforeEach(() => {
     localStorage.clear();
@@ -134,7 +135,7 @@ describe('loadSettings / saveSettings', () => {
         expect(localStorage.length).toBe(1);
         const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
         expect(raw).toEqual({
-            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiCloudSource: 'site', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiPanelWidth: 420,
+            langs: ['kn', 'en'], videos: true, readTracking: false, offline: false, aiEngine: 'off', aiCloudSource: 'site', aiLocalModel: 'small', aiCustom: { provider: 'anthropic', baseUrl: '', model: '' }, aiLocalSource: 'browser', aiLocalServer: { baseUrl: 'http://localhost:11434/v1', model: '' }, aiPanelWidth: 420,
             qrs: true, fontScale: 1.1, paperSize: 'a3',
         });
     });
@@ -145,5 +146,35 @@ describe('loadSettings / saveSettings', () => {
         expect(loadSettings().offline).toBe(true);
         localStorage.setItem(SETTINGS_KEY, JSON.stringify({ offline: 'yes' }));
         expect(loadSettings().offline).toBe(false);
+    });
+});
+
+describe('local model source', () => {
+    test('defaults to the browser, with Ollama\u2019s own address ready for the server option', () => {
+        expect(AI_LOCAL_SOURCES).toEqual(['browser', 'server']);
+        const s = loadSettings();
+        expect(s.aiLocalSource).toBe('browser');
+        expect(s.aiLocalServer).toEqual({ baseUrl: 'http://localhost:11434/v1', model: '' });
+    });
+
+    test('saves the source and the server details, trimmed; an empty address falls back to the default', () => {
+        saveSettings({ aiLocalSource: 'server', aiLocalServer: { baseUrl: '  http://localhost:1234/v1 ', model: ' llama3.2:3b ' } });
+        expect(loadSettings().aiLocalSource).toBe('server');
+        expect(loadSettings().aiLocalServer).toEqual({ baseUrl: 'http://localhost:1234/v1', model: 'llama3.2:3b' });
+        saveSettings({ aiLocalServer: { baseUrl: '', model: 'x' } });
+        expect(loadSettings().aiLocalServer.baseUrl).toBe('http://localhost:11434/v1');
+    });
+
+    test('junk is ignored, and a field saved on its own leaves the other alone', () => {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiLocalSource: 'cloud', aiLocalServer: { baseUrl: 5, model: {} } }));
+        expect(loadSettings().aiLocalSource).toBe('browser');
+        expect(loadSettings().aiLocalServer).toEqual({ baseUrl: 'http://localhost:11434/v1', model: '' });
+        saveSettings({ aiLocalModel: 'large' });
+        expect(loadSettings().aiLocalServer.baseUrl).toBe('http://localhost:11434/v1');
+    });
+
+    test('nothing extra is saved with the server details', () => {
+        saveSettings({ aiLocalServer: { baseUrl: 'http://localhost:11434/v1', model: 'm', apiKey: 'sk-secret' } });
+        expect(localStorage.getItem(SETTINGS_KEY)).not.toMatch(/sk-secret|apiKey/);
     });
 });

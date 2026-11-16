@@ -1238,15 +1238,34 @@ ai/
   - "really?" and other follow-ups with no searchable words: searched together with the previous question; the on-device model isn't asked again (it would only repeat itself), the hosted model is.
 - **Done, partly:** the conversation now survives a reload (sessionStorage, this tab only, last 24 entries; see "Surviving a
   reload"). **Still to do:** a "clear conversation" button.
-- **TODO (his idea): Local with a model already on the laptop.** Let Local use a model that is already downloaded on the
-  computer, via a local model server (Ollama, LM Studio, llama.cpp), so nothing is re-downloaded when the browser cache is
-  cleared. The machinery mostly exists (the own-service engine already speaks to `http://localhost...` with no key). To do: a
-  "Use a model on this computer" choice in Local's Configure (address + model name, default `http://localhost:11434/v1`); keep it
-  separate from the Cloud own-service settings; treat it as `local` for the privacy note (nothing leaves the machine) and for
-  `rag.js`'s small-model rules until measured. **Verify first, on his machine:** the server must allow this page's origin (Ollama:
-  `OLLAMA_ORIGINS`; LM Studio: its CORS setting), and recent Chrome/Edge may ask permission before a public page may reach a
-  server on the same computer (local-network access): check what the reader sees and whether the error message can say so.
-  Browser-cached models (WebLLM) can't be pointed at files on disk, which is why a server is the route.
+- **Built, not yet verified on his machine: Local with a model already on the computer** (`engines/local-server.js`). In
+  Local's Configure, "A model already on this computer" uses a local model server (Ollama, LM Studio, llama.cpp) through the
+  chat-completions format; nothing is downloaded by the page and clearing browser data doesn't remove the model. Settings:
+  `aiLocalSource` (`browser` default | `server`) and `aiLocalServer` `{ baseUrl, model }` (default `http://localhost:11434/v1`),
+  separate from the Cloud own-service settings. The engine reports id `local`, so the privacy note and `rag.js`'s small-model
+  budget treat it as on-device. Only loopback addresses are accepted (checked in the dialog and again in the engine); no key.
+  The note says "only to the model server at <host>, on this computer", not "nothing leaves", because a server can itself
+  forward to an online model (e.g. Ollama's cloud models). "Check connection" asks `/models` and fills the Model box's choices.
+  Requests carry `targetAddressSpace: 'loopback'`, which is what lets recent Chrome/Edge show their local-network permission
+  prompt. **Verify on his machine:** (1) Ollama's `OLLAMA_ORIGINS` including the site's address (and LM Studio's CORS switch);
+  (2) what the reader sees if the browser's permission prompt is dismissed or denied (the error message names both causes, but
+  it is one network error to a page, so this can't be told apart in code); (3) Safari/Firefox behaviour toward `http://localhost`
+  from an https page is unchecked.
+- **Built, not yet verified with a real model: save the downloaded model to a folder, load it back** (`engines/model-files.js`,
+  buttons in Local's Configure under "In this browser"). WebLLM 0.2.79 keeps a model in the Cache API: `webllm/config`
+  (mlc-chat-config.json), `webllm/model` (ndarray-cache.json, params shards, tokenizer files), `webllm/wasm` (the record's
+  `model_lib`), each keyed by file address. Save copies every cached file of every offered model that is *completely* cached
+  into plain files plus `pooja-model-manifest.json` (written last, so an interrupted save is refused, not half-loaded); Load
+  checks everything first (manifest, each address belongs to an offered model, files present, sizes match the manifest and
+  ndarray-cache.json) and only then puts the files back under the same addresses, so WebLLM finds a full cache and downloads
+  nothing. Save needs `showDirectoryPicker` (Chrome/Edge on a computer); Load also works through a folder `<input>`. Weight
+  contents can't be verified, only sizes. It depends on WebLLM's internal cache layout, so re-check it with any WebLLM upgrade
+  (the manifest records the version; a mismatch is a warning and anything missing is downloaded). Tested with fakes
+  (`engines/model-files.test.js`) and the real Cache API plus a real folder handle (`test/e2e/core/model-files.test.js`, using a
+  small stand-in model); the real multi-GB model and the real folder picker were not exercised. **Verify on his machine:** save
+  after a real download, clear site data, load, confirm Local starts with no network traffic.
+- **Idea, not built:** `navigator.storage.persist()` before the first download would protect the model from the browser's
+  automatic eviction under disk pressure (not from the reader clearing data, which is what the folder copy is for).
 - **TODO (decide later):** keep or remove the optional Anthropic backend in the proxy (`BACKEND = "anthropic"`, off by default;
   the free Workers AI backend is the default). He tests with his own Anthropic key meanwhile.
 - **TODO (after the tags review):** tag-based ranking boost; related-question chips built from shared tags (no model needed).
