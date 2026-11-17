@@ -1,28 +1,34 @@
-# Jain Gods
+# abhijithda.github.io
 
-## Description
+Source of <https://abhijithda.github.io/> - D.A. Abhijith's personal site.
 
-Jain Gods Information including Tirthankaras, Siddhas, Yakshas, Yakshis and so on...
+Plain static files served directly by GitHub Pages (Jekyll is turned off by `.nojekyll`). There is no build step.
 
-### Notes
+## Layout
 
-Sootak: https://youtu.be/0a4CtFD0nY8?t=7m34s
+| Path | What it is |
+| --- | --- |
+| `index.html` | Home page |
+| `404.html` | Not-found page |
+| `assets/` | Shared CSS and images for the home page (Bootstrap 4.3.1, CSS only) |
+| `jainism/pooja/` | Jain Pooja F.A.Q.s web app - see [its README](jainism/pooja/README.md) |
+| `to-migrate/` | Old notes and media waiting to move to the new site; see its README |
+| `.github/workflows/` | CI, print-PDF publishing and AI-proxy deploy workflows (GitHub only reads workflows from here) |
 
-(Muktaagiri: https://youtu.be/0a4CtFD0nY8?t=8m10s)
+## Preview locally
 
-Muktaagiri ki atishay: 10th Kid gets back her voice, and other person is able to walk normal who usually uses crutches https://youtu.be/0a4CtFD0nY8?t=10m32s
+```
+python -m http.server 8000
+```
 
-Jaap Mala (Bhaav + vachan + kaya + Mann): https://youtu.be/0a4CtFD0nY8?t=56m9s
+Then open <http://localhost:8000/>.
 
-Story of Frog that becomes Dev: https://youtu.be/eAIaY9d7NBE?t=50s
+## Pooja app: tests
 
-Shantisagar : https://youtu.be/0a4CtFD0nY8?t=25m20s
+```
+cd jainism/pooja
+npm ci
+npm test
+```
 
-Using सोंठ (dry ginger) while traveling helps avoid nausea: https://youtu.be/zkS9Wb9FH1s?t=6m7s
-
-Parshawanatha swami yakshi "Padma" and Dharanendra deva's raani/indraani "Padmavati"  are two different devi’s: https://youtu.be/qBCurm77WoU?t=4m4s
-
-Uvasagga-haram stotra: http://www.jainworld.com/societies/Jain%20Calendar%202015.pdf
-
-Jinavani sutra Khsullak Dhyansagar maharaj ji audios: https://aagamdharaprod.s3-ap-southeast-1.amazonaws.com/
-
+CI (`.github/workflows/ci.yml`) runs the same on every push and pull request.

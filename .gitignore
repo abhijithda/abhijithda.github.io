@@ -1,8 +1,6 @@
-_site
-.sass-cache
-.jekyll-metadata
-vendor/
-*.js.map
+node_modules/
 *.log
 *.swp
-universe/solar2lunar/node_modules/**
+*.js.map
+.DS_Store
+Thumbs.db
