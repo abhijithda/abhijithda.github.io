@@ -1,6 +1,6 @@
 # abhijithda.github.io
 
-Source of <https://abhijithda.github.io/> - Abhijith D.A.'s personal site.
+Source of <https://abhijithda.github.io/> - D.A. Abhijith's personal site.
 
 Plain static files served directly by GitHub Pages (Jekyll is turned off by `.nojekyll`). There is no build step.
 
@@ -10,7 +10,7 @@ Plain static files served directly by GitHub Pages (Jekyll is turned off by `.no
 | --- | --- |
 | `index.html` | Home page |
 | `404.html` | Not-found page |
-| `assets/` | Shared CSS, JS and images for the home page (Bootstrap 4.3.1, jQuery) |
+| `assets/` | Shared CSS and images for the home page (Bootstrap 4.3.1, CSS only) |
 | `jainism/pooja/` | Jain Pooja F.A.Q.s web app - see [its README](jainism/pooja/README.md) |
 | `to-migrate/` | Old notes and media waiting to move to the new site; see its README |
 | `.github/workflows/` | CI, print-PDF publishing and AI-proxy deploy workflows (GitHub only reads workflows from here) |
