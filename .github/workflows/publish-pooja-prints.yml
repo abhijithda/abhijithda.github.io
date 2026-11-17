@@ -9,7 +9,7 @@ name: Publish Pooja Prints
 #              (no expiry), ready to share
 # Always renders the repo's real data.json; test data is never rendered or
 # published. Output is six PDFs, named like
-#   Jaina-Pooja-Vichara-Sankalana-Book-A4-2026-10-10.pdf
+#   Jina-Pooja-Questions-and-Answers-Book-A4-2026-10-10.pdf
 #   Continuous-A4 / Continuous-A3  whole-page layout, for reading
 #   Book-A4 / Book-A3              one numbered book page per PDF page
 #                                  (A4 sheet = A5 pages, A3 sheet = A4 pages)
@@ -127,7 +127,7 @@ jobs:
         gh release create "prints-${DATE}-${{ github.run_number }}" prints/*.pdf \
           --repo "${{ github.repository }}" \
           --target "${{ github.sha }}" \
-          --title "Jaina Pooja Vichara Sankalana — Prints (${DATE})" \
+          --title "Jina Pooja Questions & Answers — Prints (${DATE})" \
           --notes "Generated on ${DATE}. In every file name, A4 / A3 is the sheet of paper you print on.
 
         **Booklet-A4 / Booklet-A3: print these to make a folded book.** Print double-sided, flip on SHORT edge, actual size (100%, not fit-to-page), then fold the stack in half (Booklet-A4 gives an A5 book, Booklet-A3 an A4 book). Longer books are split into 16-page signatures to fold and sew separately.

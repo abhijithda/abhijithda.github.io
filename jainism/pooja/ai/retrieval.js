@@ -12,6 +12,15 @@
 // "ಅಭಿಷೇಕ". Latin words are lower-cased, lightly stemmed, and stop-worded.
 // Known gap: nothing maps Kannada script <-> transliterated Latin yet
 // (ಅಭಿಷೇಕ vs "abhisheka"), apart from the Latin tags on blocks.
+//
+// Transliterated Latin is spelled many ways ("Pujyapada" / "Poojyapaada",
+// "Moodhata" / "Mudhata", "Shripala" / "Shreepala"), so every Latin term is
+// also folded to a rough sound-key (see foldLatin): the book, the tags and the
+// reader's query all go through the same fold and meet in the middle.
+//
+// Blocks with no text of their own (a photo) are indexed too when they carry
+// tags, so a tag can find them; they are marked `textless` and left out of what
+// the model and the passage cards get (there is nothing to read in them).
 
 import { buildBlockIndex, formatIdForDisplay, resolveReference, hasAnyText } from '../core/blocks.js';
 import { LANG_CODES } from '../core/langs.js';
@@ -27,6 +36,26 @@ const STOPWORDS = new Set((
     'then there these this to was what when where which who whom why will with you your can could should would'
 ).split(' '));
 
+/**
+ * Folds a lower-case Latin word to a rough sound-key so that the common
+ * spellings of one transliterated word meet: long vowels (aa ee oo ii uu), w/v,
+ * sh/s, the aspirate h (bh dh gh kh th ... -> b d g k t), doubled letters, and
+ * a final "a" on longer words (abhisheka / abhishek). It is deliberately
+ * coarse: it only has to bring the readers' spellings together, and it runs on
+ * both sides (index and query), so two words that fold alike simply match.
+ * @param {string} word  lower-case Latin word
+ */
+export function foldLatin(word) {
+    let w = word.normalize('NFD').replace(/\p{M}/gu, '');
+    w = w.replace(/aa/g, 'a').replace(/ee|ii/g, 'i').replace(/oo|uu/g, 'u')
+        .replace(/w/g, 'v')
+        .replace(/sh/g, 's')
+        .replace(/([bcdgjkpt])h/g, '$1')
+        .replace(/([a-z])\1+/g, '$1');
+    if (w.length > 4 && w.endsWith('a')) w = w.slice(0, -1);
+    return w;
+}
+
 /** Splits text into search terms (see header comment for the Kannada/Latin handling). */
 export function tokenize(text) {
     const terms = [];
@@ -38,14 +67,16 @@ export function tokenize(text) {
             for (let i = 0; i + 3 <= chars.length; i++) terms.push(chars.slice(i, i + 3).join(''));
         } else {
             if (STOPWORDS.has(word) || word.length < 2) continue;
-            terms.push(word.length > 4 && word.endsWith('s') && !word.endsWith('ss') ? word.slice(0, -1) : word);
+            const stem = word.length > 4 && word.endsWith('s') && !word.endsWith('ss') ? word.slice(0, -1) : word;
+            terms.push(foldLatin(stem));
         }
     }
     return terms;
 }
 
 /**
- * Turns the dataset into one searchable chunk per block that has text.
+ * Turns the dataset into one searchable chunk per block that has text, plus
+ * one per tagged block without text (a photo), marked `textless`.
  * @param {Array} data  parsed data.json
  */
 export function createIndex(data) {
@@ -54,7 +85,8 @@ export function createIndex(data) {
 
     for (const item of data) {
         for (const block of item.blocks || []) {
-            if (!hasAnyText(block)) continue;
+            const hasText = hasAnyText(block);
+            if (!hasText && !(block.tags || []).length) continue;
             const text = {};
             for (const lang of LANG_CODES) {
                 const lines = (block.content?.[lang] || []).filter(l => l.trim() !== '');
@@ -74,6 +106,7 @@ export function createIndex(data) {
                 itemType: item.type,
                 blockType: block.type,
                 tags, text, tf, length,
+                textless: !hasText,
             });
         }
     }
@@ -86,14 +119,17 @@ export function createIndex(data) {
 
 /**
  * BM25 ranking. Returns up to `k` chunks, best first, each with its score.
+ * `textOnly` leaves out blocks that have no text of their own (photos found
+ * through their tags), for callers that need something to read.
  * @returns {{chunk: Object, score: number}[]}
  */
-export function search(index, query, { k = 6 } = {}) {
+export function search(index, query, { k = 6, textOnly = false } = {}) {
     const terms = [...new Set(tokenize(query))];
     if (!terms.length || !index.chunks.length) return [];
     const N = index.chunks.length;
     const scored = [];
     for (const chunk of index.chunks) {
+        if (textOnly && chunk.textless) continue;
         let score = 0;
         for (const term of terms) {
             const f = chunk.tf.get(term);
@@ -125,7 +161,7 @@ function passageFrom(chunk, langs) {
  * @returns {{id:string,label:string,tags:string[],text:Object,viaReference?:boolean}[]}
  */
 export function getContext(index, query, { langs = LANG_CODES, k = 5, budgetChars = 6000, minScore = 0.5 } = {}) {
-    const hits = search(index, query, { k }).filter(h => h.score >= minScore);
+    const hits = search(index, query, { k, textOnly: true }).filter(h => h.score >= minScore);
     const out = [];
     const seen = new Set();
     let used = 0;
@@ -147,7 +183,7 @@ export function getContext(index, query, { langs = LANG_CODES, k = 5, budgetChar
         for (const refId of item?.references || []) {
             const refBlock = resolveReference(refId, index.blockById, index.itemById);
             const refChunk = refBlock && index.chunks.find(c => c.id === refBlock.id);
-            if (refChunk) push({ ...passageFrom(refChunk, langs), viaReference: true });
+            if (refChunk && !refChunk.textless) push({ ...passageFrom(refChunk, langs), viaReference: true });
         }
     }
     return out;
@@ -162,7 +198,7 @@ export function getContext(index, query, { langs = LANG_CODES, k = 5, budgetChar
  */
 export function moreMatches(index, query, { langs = LANG_CODES, exclude = [], limit = 12, minScore = 0.5 } = {}) {
     const skip = new Set(exclude);
-    return search(index, query, { k: 60 })
+    return search(index, query, { k: 60, textOnly: true })
         .filter(h => h.score >= minScore && !skip.has(h.chunk.id))
         .slice(0, limit)
         .map(h => passageFrom(h.chunk, langs));
