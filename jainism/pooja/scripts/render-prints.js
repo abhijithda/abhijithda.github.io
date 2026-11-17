@@ -7,7 +7,7 @@
 // is ever committed. (Test fixtures are never rendered or published.)
 //
 // Both views (continuous, book) are rendered at each paper size:
-//   Jaina-Pooja-Vichara-Sankalana-<View>-<Size>-<YYYY-MM-DD>.pdf
+//   Jina-Pooja-Questions-and-Answers-<View>-<Size>-<YYYY-MM-DD>.pdf
 // Paper sizes: a4 and a3. (The app's 'dynamic' paper size prints exactly like
 // A4 — confirmed over several runs — so it isn't rendered separately.)
 //
@@ -36,7 +36,8 @@ const { imposeBooklet } = require('./impose-booklet');
 
 const ROOT = path.join(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'prints');
-const TITLE = 'Jaina Pooja Vichara Sankalana';
+const TITLE = 'Jina Pooja Questions & Answers';
+const FILE_TITLE = 'Jina-Pooja-Questions-and-Answers';   // no spaces or "&" in file names
 
 const ALL_SIZES = ['a4', 'a3'];
 const argSizes = process.argv.find(a => a.startsWith('--sizes='));
@@ -150,7 +151,7 @@ async function imagesLoaded(page) {
                 await page.evaluate(t => { document.title = t; },
                     `${TITLE} — ${view.label} (${sizeLabel}) — ${PRINT_DATE}`);
 
-                const fileName = `${TITLE.replace(/ /g, '-')}-${view.label}-${sizeLabel}-${FILE_DATE}.pdf`;
+                const fileName = `${FILE_TITLE}-${view.label}-${sizeLabel}-${FILE_DATE}.pdf`;
                 await page.pdf({
                     path: path.join(OUT_DIR, fileName),
                     preferCSSPageSize: true,   // honour the app's own @page rule (size + orientation)

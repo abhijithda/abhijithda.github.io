@@ -89,10 +89,10 @@ function setViewMode(mode) {
     // Dynamically swap the <title> for perfect printing!
     if (isBook) {
         // Book View (Landscape): Uses Unicode Em Spaces (\u2003) to push English to the right
-        document.title = "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ \u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003 Jaina Pooja Vichara Sankalana";
+        document.title = "ಜಿನ ಪೂಜೆ ಪ್ರಶ್ನೋತ್ತರಗಳು \u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003\u2003 Jina Pooja Questions & Answers";
     } else {
         // Continuous View (Portrait): Uses a clean pipe separator for narrower paper
-        document.title = "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ | Jaina Pooja Vichara Sankalana";
+        document.title = "ಜಿನ ಪೂಜೆ ಪ್ರಶ್ನೋತ್ತರಗಳು | Jina Pooja Questions & Answers";
     }
 
     // The .active class on the toggle buttons/Home icon is already handled

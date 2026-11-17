@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { tokenize, createIndex, search, getContext, moreMatches } = require('./retrieval');
+const { tokenize, foldLatin, createIndex, search, getContext, moreMatches } = require('./retrieval');
 
 const data = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf8'));
 const index = createIndex(data);
@@ -8,7 +8,7 @@ const labels = hits => hits.map(h => h.chunk.label);
 
 describe('tokenize', () => {
     test('lower-cases Latin, drops stop words and a plural s', () => {
-        expect(tokenize('What are the Devatas?')).toEqual(['devata']);
+        expect(tokenize('What are the Devatas?')).toEqual([foldLatin('devata')]);
     });
 
     test('keeps short Kannada words whole and splits long ones into overlapping trigrams', () => {
@@ -23,6 +23,26 @@ describe('tokenize', () => {
         expect(tokenize('ಅಭಿಷೇಕವನ್ನು').some(t => root.has(t))).toBe(true);
     });
 
+    test('common spellings of one transliterated word fold to the same term', () => {
+        const same = [
+            ['Pujyapada', 'Poojyapaada'], ['Manatunga', 'Maanatunga'], ['Moodhata', 'Mudhata'],
+            ['Shripala', 'Shreepala'], ['Arghya', 'Argya'], ['Nishchaya', 'Nischaya'],
+            ['Shasana', 'Shaasana'], ['Samyaktva', 'Samyaktv'], ['Abhisheka', 'Abhishek'],
+            ['Bhagawan', 'Bhagavan'], ['Chakreshwari', 'Chakreswari'], ['Tirthankara', 'Thirthankara'],
+        ];
+        same.forEach(([a, b]) => expect([a, tokenize(a)]).toEqual([a, tokenize(b)]));
+    });
+
+    test('different words stay different', () => {
+        expect(tokenize('Daana')).not.toEqual(tokenize('Dharma'));
+        expect(tokenize('Vrati')).not.toEqual(tokenize('Avrati'));
+        expect(tokenize('Indra')).not.toEqual(tokenize('Indrani'));
+    });
+
+    test('Latin diacritics are ignored', () => {
+        expect(tokenize('Śāsana')).toEqual(tokenize('Shasana'));
+    });
+
     test('handles empty / non-string input', () => {
         expect(tokenize('')).toEqual([]);
         expect(tokenize(undefined)).toEqual([]);
@@ -30,12 +50,25 @@ describe('tokenize', () => {
 });
 
 describe('createIndex', () => {
-    test('indexes only blocks that have text, one chunk each, with display labels', () => {
+    test('indexes blocks that have text, one chunk each, with display labels', () => {
         expect(index.chunks.length).toBeGreaterThan(100);
         index.chunks.forEach(c => {
-            expect(Object.keys(c.text).length).toBeGreaterThan(0);
+            if (!c.textless) expect(Object.keys(c.text).length).toBeGreaterThan(0);
             expect(c.label).not.toBe('?');
         });
+    });
+
+    test('a tagged block with no text (a photo) is indexed, marked textless; an untagged one is not', () => {
+        const photos = index.chunks.filter(c => c.textless);
+        expect(photos.length).toBeGreaterThan(0);
+        photos.forEach(c => {
+            expect(c.tags.length).toBeGreaterThan(0);
+            expect(Object.keys(c.text)).toEqual([]);
+        });
+        const withTags = data.flatMap(i => i.blocks || []).filter(b => (b.tags || []).length);
+        const untaggedEmpty = data.flatMap(i => i.blocks || []).filter(b => !(b.tags || []).length && !index.chunks.some(c => c.id === b.id));
+        expect(withTags.every(b => index.chunks.some(c => c.id === b.id))).toBe(true);
+        untaggedEmpty.forEach(b => expect(index.chunks.some(c => c.id === b.id)).toBe(false));
     });
 });
 
@@ -56,7 +89,35 @@ describe('search (real data.json)', () => {
 
     test('a Kannada-script query reaches Kannada text', () => {
         const hits = search(index, 'ಶಾಸನ ದೇವತೆ', { k: 3 });
-        expect(hits.some(h => h.chunk.tags.includes('ShasanaDevata'))).toBe(true);
+        expect(hits.some(h => h.chunk.tags.includes('Shasana Devata'))).toBe(true);
+    });
+
+    test('a spaced tag matches on either of its words, and in other spellings', () => {
+        ['shasana', 'devata', 'shaasana devata'].forEach(q => {
+            const hits = search(index, q, { k: 5 });
+            expect(hits.length).toBeGreaterThan(0);
+            expect(hits.some(h => h.chunk.tags.includes('Shasana Devata'))).toBe(true);
+        });
+    });
+
+    test('a reader\'s spelling finds the same blocks as the tag spelling', () => {
+        const ids = q => new Set(search(index, q, { k: 30 }).map(h => h.chunk.id));
+        [['pujyapada', 'poojyapaada'], ['manatunga', 'maanatunga'], ['moodhata', 'mudhata'],
+         ['shripala', 'shreepala'], ['arghya', 'argya'], ['nishchaya', 'nischaya']].forEach(([a, b]) => {
+            expect(ids(a).size).toBeGreaterThan(0);
+            expect(ids(b)).toEqual(ids(a));
+        });
+    });
+
+    test('a photo is found through its tag', () => {
+        const hits = search(index, 'bawangaja', { k: 10 });
+        expect(hits.some(h => h.chunk.textless)).toBe(true);
+    });
+
+    test('textOnly leaves photos out', () => {
+        const hits = search(index, 'bawangaja', { k: 10, textOnly: true });
+        expect(hits.length).toBeGreaterThan(0);
+        hits.forEach(h => expect(h.chunk.textless).toBe(false));
     });
 
     test('results are best-first and limited to k', () => {
@@ -99,6 +160,13 @@ describe('getContext', () => {
 
     test('returns nothing when no block is relevant', () => {
         expect(getContext(index, 'zzqxv wwkjh')).toEqual([]);
+    });
+
+    test('never hands the model or the cards a block with no text', () => {
+        const ctx = getContext(index, 'bawangaja adinatha', { k: 8 });
+        expect(ctx.length).toBeGreaterThan(0);
+        ctx.forEach(p => expect(Object.keys(p.text).length).toBeGreaterThan(0));
+        moreMatches(index, 'bawangaja adinatha').forEach(p => expect(Object.keys(p.text).length).toBeGreaterThan(0));
     });
 });
 

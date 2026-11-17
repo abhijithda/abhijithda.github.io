@@ -16,10 +16,10 @@
         ],
         "content": {
           "kn": [
-            "ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ"
+            "ಜಿನ ಪೂಜೆ ಪ್ರಶ್ನೋತ್ತರಗಳು"
           ],
           "en": [
-            "Jaina Pooja Vichara Sankalana"
+            "Jina Pooja Questions & Answers"
           ]
         }
       }
@@ -36,7 +36,8 @@
         "num": 1,
         "type": "images",
         "tags": [
-          "personal"
+          "Bharata",
+          "Bahubali"
         ],
         "videos": [],
         "images": [
@@ -71,7 +72,8 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Shasana Devata",
+          "Deva Moodhata"
         ],
         "videos": [],
         "images": []
@@ -99,7 +101,8 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Shasana Devata",
+          "Deva Moodhata"
         ],
         "videos": [
           {
@@ -157,7 +160,8 @@
           "en": []
         },
         "tags": [
-          "Samyaktva"
+          "Samyaktva",
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -176,7 +180,8 @@
         },
         "tags": [
           "Samyaktva",
-          "ShasanaDevata"
+          "Shasana Devata",
+          "Boons"
         ],
         "videos": [],
         "images": []
@@ -194,8 +199,8 @@
           ]
         },
         "tags": [
-          "Samyaktva",
-          "VidyaDevata"
+          "Vidya Devata",
+          "Samyaktva"
         ],
         "videos": [
           {
@@ -227,7 +232,8 @@
           ]
         },
         "tags": [
-          "SankatNivarana"
+          "Sankat Nivarana",
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -255,7 +261,9 @@
           ]
         },
         "tags": [
-          "SankatNivarana"
+          "Sankat Nivarana",
+          "Shasana Devata",
+          "Samyaktva"
         ],
         "videos": [],
         "images": []
@@ -273,8 +281,9 @@
           ]
         },
         "tags": [
-          "SankatNivarana",
-          "Vrati"
+          "Sankat Nivarana",
+          "Vrati",
+          "Vidya Devata"
         ],
         "videos": [
           {
@@ -298,8 +307,9 @@
           ]
         },
         "tags": [
-          "SankatNivarana",
-          "Vrati"
+          "Sankat Nivarana",
+          "Vrati",
+          "Padmavati"
         ],
         "videos": [
           {
@@ -322,8 +332,9 @@
           ]
         },
         "tags": [
-          "SankatNivarana",
-          "Avrati"
+          "Sankat Nivarana",
+          "Avrati",
+          "Gunasthana"
         ],
         "videos": [
           {
@@ -346,7 +357,8 @@
           ]
         },
         "tags": [
-          "Shloka"
+          "Vrati",
+          "Sankat Nivarana"
         ],
         "videos": [
           {
@@ -381,7 +393,8 @@
         },
         "tags": [
           "Vrati",
-          "SankatNivarana"
+          "Sankat Nivarana",
+          "Bhagawan"
         ],
         "videos": [],
         "images": []
@@ -409,7 +422,8 @@
           ]
         },
         "tags": [
-          "Bhagawan"
+          "Bhagawan",
+          "Jina Sahasranama"
         ],
         "videos": [],
         "images": []
@@ -437,7 +451,8 @@
           ]
         },
         "tags": [
-          "Names"
+          "Jina Sahasranama",
+          "Boons"
         ],
         "videos": [
           {
@@ -460,7 +475,8 @@
           ]
         },
         "tags": [
-          "JinaSahasranama"
+          "Jina Sahasranama",
+          "Jinasena"
         ],
         "videos": [],
         "images": []
@@ -478,7 +494,7 @@
         "num": 1,
         "type": "images",
         "tags": [
-          "personal"
+          "Personal"
         ],
         "videos": [],
         "images": [
@@ -516,7 +532,8 @@
         },
         "tags": [
           "Bhagawan",
-          "Daana"
+          "Daana",
+          "Jina Sahasranama"
         ],
         "videos": [],
         "images": []
@@ -545,7 +562,8 @@
         },
         "tags": [
           "Bhagawan",
-          "Daana"
+          "Daana",
+          "Samavasarana"
         ],
         "videos": [],
         "images": []
@@ -637,8 +655,7 @@
         "tags": [
           "Bhagawan",
           "Daana",
-          "NishchayaNaya",
-          "VyavaharaNaya"
+          "Nishchaya Naya"
         ],
         "videos": [],
         "images": []
@@ -668,10 +685,8 @@
           ]
         },
         "tags": [
-          "Bhagawan",
-          "Daana",
-          "NishchayaNaya",
-          "VyavaharaNaya"
+          "Nishchaya Naya",
+          "Vyavahara Naya"
         ],
         "videos": [],
         "images": []
@@ -691,10 +706,7 @@
           ]
         },
         "tags": [
-          "Bhagawan",
-          "Daana",
-          "NishchayaNaya",
-          "VyavaharaNaya"
+          "Nishchaya Naya"
         ],
         "videos": [],
         "images": []
@@ -716,10 +728,7 @@
           ]
         },
         "tags": [
-          "Bhagawan",
-          "Daana",
-          "NishchayaNaya",
-          "VyavaharaNaya"
+          "Nishchaya Naya"
         ],
         "videos": [],
         "images": []
@@ -737,10 +746,9 @@
           ]
         },
         "tags": [
-          "Bhagawan",
+          "Nishchaya Naya",
           "Daana",
-          "NishchayaNaya",
-          "VyavaharaNaya"
+          "Bhagawan"
         ],
         "videos": [],
         "images": []
@@ -758,10 +766,9 @@
           ]
         },
         "tags": [
-          "Bhagawan",
           "Daana",
-          "NishchayaNaya",
-          "VyavaharaNaya"
+          "Nishchaya Naya",
+          "Vyavahara Naya"
         ],
         "videos": [
           {
@@ -796,7 +803,8 @@
         },
         "tags": [
           "Bhagawan",
-          "Daana"
+          "Daana",
+          "Kevala Labdhi"
         ],
         "videos": [],
         "images": []
@@ -825,7 +833,8 @@
         },
         "tags": [
           "Bhagawan",
-          "Daana"
+          "Daana",
+          "Kevala Labdhi"
         ],
         "videos": [],
         "images": []
@@ -843,8 +852,9 @@
           ]
         },
         "tags": [
-          "Bhagawan",
-          "Daana"
+          "Kevala Labdhi",
+          "Nemichandra",
+          "Gommatasara"
         ],
         "videos": [],
         "images": []
@@ -880,8 +890,7 @@
           ]
         },
         "tags": [
-          "Bhagawan",
-          "Daana"
+          "Kevala Labdhi"
         ],
         "videos": [],
         "images": []
@@ -940,7 +949,8 @@
         },
         "tags": [
           "Bhagawan",
-          "Daana"
+          "Daana",
+          "Kundakunda"
         ],
         "videos": [],
         "images": []
@@ -958,7 +968,8 @@
           ]
         },
         "tags": [
-          "Shloka"
+          "Bhagawan",
+          "Daana"
         ],
         "videos": [
           {
@@ -993,7 +1004,7 @@
         },
         "tags": [
           "Vrati",
-          "ShasanaDevata",
+          "Shasana Devata",
           "Dharma"
         ],
         "videos": [],
@@ -1023,8 +1034,7 @@
         },
         "tags": [
           "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -1042,9 +1052,9 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Shasana Devata",
+          "Kundakunda",
+          "Kushmandini"
         ],
         "videos": [
           {
@@ -1067,9 +1077,9 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Shasana Devata",
+          "Jinasena",
+          "Harivamsha Purana"
         ],
         "videos": [],
         "images": []
@@ -1087,9 +1097,8 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Shasana Devata",
+          "Obstacles"
         ],
         "videos": [
           {
@@ -1112,9 +1121,8 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Manatunga",
+          "Bhaktamara"
         ],
         "videos": [],
         "images": []
@@ -1132,9 +1140,8 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Manatunga",
+          "Bhaktamara"
         ],
         "videos": [],
         "images": []
@@ -1152,9 +1159,9 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Manatunga",
+          "Kali Devi",
+          "Kalidasa"
         ],
         "videos": [],
         "images": []
@@ -1172,9 +1179,9 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Manatunga",
+          "Chakreshwari",
+          "Kali Devi"
         ],
         "videos": [],
         "images": []
@@ -1192,9 +1199,9 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Manatunga",
+          "Chakreshwari",
+          "Kali Devi"
         ],
         "videos": [],
         "images": []
@@ -1212,9 +1219,9 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Shasana Devata",
+          "Bhaktamara",
+          "Harivamsha Purana"
         ],
         "videos": [],
         "images": []
@@ -1234,8 +1241,9 @@
           ]
         },
         "tags": [
-          "Shloka",
-          "ShasanaDevata"
+          "Shasana Devata",
+          "Bhaktamara",
+          "Chakreshwari"
         ],
         "videos": [],
         "images": []
@@ -1253,9 +1261,9 @@
           ]
         },
         "tags": [
-          "Vrati",
-          "ShasanaDevata",
-          "Dharma"
+          "Yaksha Yakshi",
+          "Pooja",
+          "Kanakagiri"
         ],
         "videos": [],
         "images": []
@@ -1284,7 +1292,9 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Samantabhadra",
+          "Ratnakaranda Shravakachara"
         ],
         "videos": [],
         "images": []
@@ -1306,8 +1316,9 @@
           ]
         },
         "tags": [
-          "Shloka",
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Samantabhadra",
+          "Ratnakaranda Shravakachara"
         ],
         "videos": [],
         "images": []
@@ -1335,7 +1346,9 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Devagati",
+          "Ratnakaranda Shravakachara"
         ],
         "videos": [],
         "images": []
@@ -1353,7 +1366,8 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Boons"
         ],
         "videos": [],
         "images": []
@@ -1371,7 +1385,8 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Shasana Devata"
         ],
         "videos": [
           {
@@ -1394,7 +1409,7 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata"
         ],
         "videos": [],
         "images": []
@@ -1412,7 +1427,7 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata"
         ],
         "videos": [
           {
@@ -1446,7 +1461,8 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Devagati"
         ],
         "videos": [],
         "images": []
@@ -1474,7 +1490,9 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Samantabhadra",
+          "Ratnakaranda Shravakachara"
         ],
         "videos": [],
         "images": []
@@ -1496,7 +1514,8 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Moodhata"
         ],
         "videos": [],
         "images": []
@@ -1514,7 +1533,9 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Devagati",
+          "Boons"
         ],
         "videos": [],
         "images": []
@@ -1530,7 +1551,9 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Samantabhadra",
+          "Boons"
         ],
         "videos": [],
         "images": []
@@ -1546,7 +1569,9 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Boons",
+          "Bhagawan"
         ],
         "videos": [],
         "images": []
@@ -1562,7 +1587,8 @@
           ]
         },
         "tags": [
-          "DevaMoodhata"
+          "Deva Moodhata",
+          "Bhagawan"
         ],
         "videos": [],
         "images": []
@@ -1590,7 +1616,7 @@
         },
         "tags": [
           "Asanyami",
-          "AcharyaKundakunda",
+          "Kundakunda",
           "Pooja"
         ],
         "videos": [],
@@ -1638,10 +1664,11 @@
           ]
         },
         "tags": [
+          "Asanyami",
           "Saudharmendra",
           "Kubera",
-          "Abhisheka",
-          "Asanyami"
+          "Janma Kalyanaka",
+          "Abhisheka"
         ],
         "videos": [],
         "images": []
@@ -1659,8 +1686,10 @@
           ]
         },
         "tags": [
+          "Garbha Kalyana",
+          "Saudharmendra",
+          "Kubera",
           "Neminatha",
-          "GarbhaKalyana",
           "Abhisheka"
         ],
         "videos": [],
@@ -1679,8 +1708,9 @@
           ]
         },
         "tags": [
-          "AcharyaKundakunda",
-          "Asanyami"
+          "Asanyami",
+          "Kundakunda",
+          "Samyag Drishti"
         ],
         "videos": [
           {
@@ -1701,8 +1731,9 @@
           ]
         },
         "tags": [
+          "Asanyami",
           "Samavasarana",
-          "ShasanaDevata"
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -1733,7 +1764,7 @@
         "tags": [
           "Vrati",
           "Samyaktva",
-          "ShasanaDevata"
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -1763,6 +1794,8 @@
         "tags": [
           "Shravaka",
           "Vrati",
+          "Avrati",
+          "Shasana Devata",
           "Pooja"
         ],
         "videos": [],
@@ -1803,7 +1836,7 @@
         "tags": [
           "Vatsalya",
           "Boons",
-          "ShasanaDevata"
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -1821,9 +1854,9 @@
           ]
         },
         "tags": [
-          "Phala",
           "Obstacles",
-          "ShasanaDevata"
+          "Shasana Devata",
+          "Pooja"
         ],
         "videos": [
           {
@@ -1858,7 +1891,8 @@
         },
         "tags": [
           "Pooja",
-          "ShasanaDevata"
+          "Shasana Devata",
+          "Boons"
         ],
         "videos": [],
         "images": []
@@ -1886,10 +1920,11 @@
           ]
         },
         "tags": [
-          "AcharyaPujyapada",
-          "AbhishekPatha",
+          "Pujyapada",
+          "Abhisheka Patha",
           "Arghya",
-          "Pooja"
+          "Nava Devata",
+          "Shasana Devata"
         ],
         "videos": [
           {
@@ -1912,8 +1947,8 @@
           ]
         },
         "tags": [
-          "Shloka",
-          "Yajna"
+          "Yajna",
+          "Arghya"
         ],
         "videos": [],
         "images": []
@@ -1936,7 +1971,8 @@
         },
         "tags": [
           "Yajna",
-          "Daana"
+          "Daana",
+          "Arghya"
         ],
         "videos": [],
         "images": []
@@ -1954,9 +1990,9 @@
           ]
         },
         "tags": [
-          "ShasanaDevata",
-          "Dharma",
-          "Agama"
+          "Shasana Devata",
+          "Agama",
+          "Arghya"
         ],
         "videos": [
           {
@@ -1971,7 +2007,8 @@
         "num": 4,
         "type": "images",
         "tags": [
-          "personal"
+          "Bawangaja",
+          "Adinatha"
         ],
         "videos": [],
         "images": [
@@ -1997,9 +2034,10 @@
           ]
         },
         "tags": [
-          "GyanmatiAmma",
-          "AdinathSwami",
-          "YakshaYakshi"
+          "Gyanmati Amma",
+          "Bawangaja",
+          "Adinatha",
+          "Yaksha Yakshi"
         ],
         "videos": [],
         "images": []
@@ -2009,7 +2047,9 @@
         "num": 5,
         "type": "images",
         "tags": [
-          "personal"
+          "Bawangaja",
+          "Adinatha",
+          "Yaksha Yakshi"
         ],
         "videos": [],
         "images": [
@@ -2035,9 +2075,10 @@
           ]
         },
         "tags": [
-          "AcharyaVidyasagar",
-          "KshullakDhyanasagar",
-          "ShasanaDevata"
+          "Vidyasagar",
+          "Dhyanasagar",
+          "Shasana Devata",
+          "Yaksha Yakshi"
         ],
         "videos": [],
         "images": [
@@ -2060,7 +2101,11 @@
           "kn": [
             "ಓಂ ಹ್ರೀಂ ಶ್ರೀಂ ಕ್ಲೀಂ ಐಂ ಅರ್ಹಂ ಶ್ರೀ ವೃಷಭ ತೀರ್ಥಕರ ಪರಮ ಜಿನ ದೇವಾಯ ಗೋವದನ ಅಪ್ರತಿಚಕ್ರೇ ಯಕ್ಷ ಯಕ್ಷೀ ಸಹಿತಾಯ, ಸಮವಸರಣ ಅಷ್ಟ ಪ್ರಾತಿಹಾರ್ಯ ಆದಿ ವಿಭೂಷಿತಾಯ ನಮಃ"
           ]
-        }
+        },
+        "tags": [
+          "Adinatha",
+          "Yaksha Yakshi"
+        ]
       },
       {
         "id": "zxc6tt",
@@ -2075,9 +2120,10 @@
           ]
         },
         "tags": [
+          "Dhyanasagar",
           "Samavasarana",
           "Gandhakuti",
-          "ShasanaDevata"
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -2099,8 +2145,8 @@
         "tags": [
           "Kundalpur",
           "Golakot",
-          "AdinathSwami",
-          "YakshaYakshi"
+          "Adinatha",
+          "Yaksha Yakshi"
         ],
         "videos": [],
         "images": [
@@ -2138,7 +2184,6 @@
         },
         "tags": [
           "Bhagawan",
-          "Examples",
           "Phala"
         ],
         "videos": [],
@@ -2168,7 +2213,8 @@
         },
         "tags": [
           "Manatunga",
-          "Bhaktamara"
+          "Bhaktamara",
+          "Stotra"
         ],
         "videos": [
           {
@@ -2191,8 +2237,9 @@
           ]
         },
         "tags": [
-          "AcharyaPujyapada",
-          "Shantyastaka"
+          "Pujyapada",
+          "Shantyastaka",
+          "Stotra"
         ],
         "videos": [],
         "images": []
@@ -2210,9 +2257,10 @@
           ]
         },
         "tags": [
-          "Shreepaal",
-          "MadanaSundari",
-          "Siddhachakra"
+          "Shripala",
+          "Madana Sundari",
+          "Siddhachakra",
+          "Vidhana"
         ],
         "videos": [],
         "images": []
@@ -2230,8 +2278,9 @@
           ]
         },
         "tags": [
-          "VaadirajMuni",
-          "Ekibhaav"
+          "Vadiraj Muni",
+          "Ekibhava",
+          "Stotra"
         ],
         "videos": [
           {
@@ -2254,8 +2303,9 @@
           ]
         },
         "tags": [
-          "VardhamaanSagar",
-          "Shantyastaka"
+          "Vardhamansagar",
+          "Shantyastaka",
+          "Stotra"
         ],
         "videos": [],
         "images": []
@@ -2273,8 +2323,10 @@
           ]
         },
         "tags": [
-          "KshullakDhyaanSagar",
-          "Bhaktamara"
+          "Dhyanasagar",
+          "Bhaktamara",
+          "Shantyastaka",
+          "Stotra"
         ],
         "videos": [],
         "images": []
@@ -2293,7 +2345,8 @@
         },
         "tags": [
           "Parshwanatha",
-          "Muktagiri"
+          "Muktagiri",
+          "Darshan"
         ],
         "videos": [
           {
@@ -2328,8 +2381,7 @@
           ]
         },
         "tags": [
-          "Process",
-          "SaatishayaPunya"
+          "Satishaya Punya"
         ],
         "videos": [],
         "images": []
@@ -2357,7 +2409,7 @@
           ]
         },
         "tags": [
-          "SaatishayaPunya"
+          "Satishaya Punya"
         ],
         "videos": [],
         "images": []
@@ -2383,9 +2435,10 @@
           ]
         },
         "tags": [
+          "Satishaya Punya",
           "Abhisheka",
           "Shantidhara",
-          "Vidhaan",
+          "Vidhana",
           "Tapa"
         ],
         "videos": [],
@@ -2404,8 +2457,8 @@
           ]
         },
         "tags": [
-          "SaatishayaPunya",
-          "Phala"
+          "Satishaya Punya",
+          "Boons"
         ],
         "videos": [
           {
@@ -2439,8 +2492,9 @@
           ]
         },
         "tags": [
-          "SamyagDrishti",
-          "Sansaara"
+          "Samyag Drishti",
+          "Satishaya Punya",
+          "Sansara"
         ],
         "videos": [],
         "images": []
@@ -2468,8 +2522,9 @@
           ]
         },
         "tags": [
-          "SamyagDrishti",
-          "Sansaara",
+          "Samyag Drishti",
+          "Satishaya Punya",
+          "Sansara",
           "Moksha"
         ],
         "videos": [
@@ -2506,7 +2561,7 @@
         "tags": [
           "Abhisheka",
           "Pooja",
-          "Vidhaan"
+          "Vidhana"
         ],
         "videos": [],
         "images": []
@@ -2538,8 +2593,9 @@
           ]
         },
         "tags": [
-          "GautamaCharitra",
-          "RaniVishalakshi",
+          "Gautama Charitra",
+          "Dharmachand",
+          "Rani Vishalakshi",
           "Abhisheka"
         ],
         "videos": [
@@ -2569,7 +2625,7 @@
           ]
         },
         "tags": [
-          "Shloka",
+          "Gautama Charitra",
           "Abhisheka"
         ],
         "videos": [
@@ -2593,8 +2649,9 @@
           ]
         },
         "tags": [
-          "MahaviraSwami",
-          "IndrabhutiGautama",
+          "Mahavira",
+          "Rani Vishalakshi",
+          "Indrabhuti Gautama",
           "Abhisheka"
         ],
         "videos": [],
@@ -2613,7 +2670,7 @@
           ]
         },
         "tags": [
-          "PadmanandiPanchavimshati",
+          "Padmanandi Panchavimshati",
           "Abhisheka"
         ],
         "videos": [
@@ -2637,8 +2694,8 @@
           ]
         },
         "tags": [
-          "PadmaPurana",
-          "AcharyaRavishena",
+          "Padma Purana",
+          "Ravishena",
           "Abhisheka"
         ],
         "videos": [],
@@ -2657,8 +2714,10 @@
           ]
         },
         "tags": [
-          "MahaPurana",
-          "PushpadantaSwami",
+          "Maha Purana",
+          "Gunabhadra",
+          "Pushpadanta",
+          "Janma Kalyanaka",
           "Abhisheka"
         ],
         "videos": [
@@ -2687,8 +2746,8 @@
         },
         "tags": [
           "Panchamruta",
-          "AkalankaDeva",
-          "Shloka"
+          "Akalanka",
+          "Abhisheka"
         ],
         "videos": [
           {
@@ -2716,7 +2775,7 @@
         },
         "tags": [
           "Panchamruta",
-          "AbhishekaDravya"
+          "Abhisheka Dravya"
         ],
         "videos": [],
         "images": []
@@ -2764,8 +2823,10 @@
           ]
         },
         "tags": [
-          "Abhisheka",
-          "Dravya"
+          "Janma Kalyanaka",
+          "Indra",
+          "Abhisheka Dravya",
+          "Samudra"
         ],
         "videos": [],
         "images": []
@@ -2819,9 +2880,10 @@
           ]
         },
         "tags": [
-          "JanmaKalyanaka",
-          "Samudra",
-          "Abhisheka"
+          "Vidyasagar",
+          "Janma Kalyanaka",
+          "Abhisheka",
+          "Phala"
         ],
         "videos": [
           {
@@ -2852,9 +2914,10 @@
           "en": []
         },
         "tags": [
+          "Shasana Devata",
           "Arghya",
-          "DevataPooja",
-          "Abhisheka"
+          "Abhisheka",
+          "Pooja"
         ],
         "videos": [],
         "images": []
@@ -2881,9 +2944,11 @@
           "en": []
         },
         "tags": [
-          "JayaDhawala",
-          "Moolachara",
-          "Pooja"
+          "Virasena",
+          "Jayadhavala",
+          "Mulachara",
+          "Pooja",
+          "Abhisheka"
         ],
         "videos": [
           {
@@ -2904,9 +2969,9 @@
           "en": []
         },
         "tags": [
-          "AaharaDaana",
-          "Dravya",
-          "Devata"
+          "Ahara Daana",
+          "Shasana Devata",
+          "Sadhu"
         ],
         "videos": [
           {
@@ -2937,9 +3002,8 @@
           "en": []
         },
         "tags": [
-          "Acharyas",
-          "Shravaka",
-          "Dharma"
+          "Sadhu",
+          "Shravaka"
         ],
         "videos": [],
         "images": []
@@ -2966,7 +3030,7 @@
         },
         "tags": [
           "Shastra",
-          "Kalyana"
+          "Agama"
         ],
         "videos": [
           {
@@ -3016,7 +3080,9 @@
         "tags": [
           "Gandhodhaka",
           "Prasada",
-          "Abhisheka"
+          "Abhisheka",
+          "Shasana Devata",
+          "Asanyami"
         ],
         "videos": [],
         "images": []
@@ -3040,7 +3106,8 @@
           "en": []
         },
         "tags": [
-          "Gandhodhaka"
+          "Gandhodhaka",
+          "Prasada"
         ],
         "videos": [
           {
@@ -3063,8 +3130,10 @@
           "en": []
         },
         "tags": [
-          "AcharyaShantiSagar",
-          "Abhisheka"
+          "Shantisagar",
+          "Abhisheka",
+          "Padmavati",
+          "Shasana Devata"
         ],
         "videos": [
           {
@@ -3093,7 +3162,9 @@
           ]
         },
         "tags": [
-          "AcharyaVidyasagar"
+          "Vidyasagar",
+          "Sadhu",
+          "Shastra"
         ],
         "videos": [
           {
@@ -3118,7 +3189,8 @@
           ]
         },
         "tags": [
-          "MuniSudhasagar"
+          "Sudhasagar",
+          "Agama"
         ],
         "videos": [
           {
@@ -3141,8 +3213,9 @@
           "en": []
         },
         "tags": [
-          "AcharyaVeerasena",
-          "DhawalaGrantha"
+          "Virasena",
+          "Dhavala",
+          "Agama"
         ],
         "videos": [
           {
@@ -3175,7 +3248,7 @@
         "tags": [
           "Vrati",
           "Gunasthana",
-          "ShasanaDevata"
+          "Shasana Devata"
         ],
         "videos": [],
         "images": []
@@ -3201,8 +3274,9 @@
           "en": []
         },
         "tags": [
-          "AcharyaPujyapada",
-          "AbhishekaPatha"
+          "Gyanmati Amma",
+          "Pujyapada",
+          "Abhisheka Patha"
         ],
         "videos": [
           {
@@ -3225,7 +3299,8 @@
         },
         "tags": [
           "Pratikramana",
-          "MamaMangalam"
+          "Mama Mangalam",
+          "Samyag Drishti"
         ],
         "videos": [
           {
@@ -3275,9 +3350,10 @@
           ]
         },
         "tags": [
-          "JanmaKalyanaka",
+          "Janma Kalyanaka",
           "Indra",
-          "Abhisheka"
+          "Stree Abhisheka",
+          "Rani Vishalakshi"
         ],
         "videos": [],
         "images": []
@@ -3306,8 +3382,10 @@
           ]
         },
         "tags": [
-          "Devas",
-          "Abhisheka"
+          "Janma Kalyanaka",
+          "Indra",
+          "Abhisheka",
+          "Stree Abhisheka"
         ],
         "videos": [
           {
@@ -3330,8 +3408,10 @@
           ]
         },
         "tags": [
-          "StreeAbhisheka",
-          "Acharyas"
+          "Stree Abhisheka",
+          "Shantisagar",
+          "Jnanasagar",
+          "Vidyasagar"
         ],
         "videos": [
           {
@@ -3363,7 +3443,8 @@
           ]
         },
         "tags": [
-          "Panchamruta"
+          "Panchamruta",
+          "Hindu Pandits"
         ],
         "videos": [],
         "images": []
@@ -3396,7 +3477,11 @@
         },
         "tags": [
           "Panchamruta",
-          "HinduPandits"
+          "Abhisheka",
+          "Hindu Pandits",
+          "Kundakunda",
+          "Pujyapada",
+          "Jinasena"
         ],
         "videos": [],
         "images": []
@@ -3414,8 +3499,9 @@
           ]
         },
         "tags": [
-          "AcharyaVidyasagar",
-          "Panchamruta"
+          "Vidyasagar",
+          "Panchamruta",
+          "Stree Abhisheka"
         ],
         "videos": [
           {
@@ -3447,8 +3533,9 @@
           ]
         },
         "tags": [
-          "TaruRasa",
-          "PushpaVrusti"
+          "Panchamruta",
+          "Taru Rasa",
+          "Pushpa Vrishti"
         ],
         "videos": [],
         "images": []
@@ -3477,8 +3564,9 @@
           ]
         },
         "tags": [
-          "PushpaVrusti",
-          "Samavasararna"
+          "Pushpa Vrishti",
+          "Samavasarana",
+          "Gandhakuti"
         ],
         "videos": [
           {
@@ -3509,8 +3597,10 @@
           ]
         },
         "tags": [
-          "NandhishwaraDweepa",
-          "DivyaPooja"
+          "Nandishwara Dweepa",
+          "Kundakunda",
+          "Pujyapada",
+          "Pushpa Vrishti"
         ],
         "videos": [
           {
@@ -3547,7 +3637,7 @@
         },
         "tags": [
           "Indrani",
-          "Devis"
+          "Abhisheka"
         ],
         "videos": [],
         "images": []
@@ -3577,9 +3667,11 @@
           ]
         },
         "tags": [
-          "PadmaCharitam",
+          "Padma Charitam",
           "Indrani",
-          "GandhaUpaLepana"
+          "Gandha Upalepana",
+          "Abhisheka",
+          "Adinatha"
         ],
         "videos": [
           {
@@ -3601,7 +3693,8 @@
           ]
         },
         "tags": [
-          "SurapatiIndra",
+          "Indra",
+          "Janma Kalyanaka",
           "Abhisheka"
         ],
         "videos": [

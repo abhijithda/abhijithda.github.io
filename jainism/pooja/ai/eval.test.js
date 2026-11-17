@@ -23,6 +23,8 @@ const labelOf = new Map(index.chunks.map(c => [c.id, c.label]));
 const answerable = questions.filter(q => q.gold.length);
 const unanswerable = questions.filter(q => !q.gold.length);
 
+// Search here leaves out photo-only blocks (textOnly), like getContext does: the
+// model and the passage cards only ever get blocks that have text to read.
 // What the on-device model is given (see rag.js).
 const LOCAL_CONTEXT = { langs: ['kn', 'en'], k: 4, budgetChars: 5000 };
 
@@ -31,7 +33,7 @@ function evaluate(qs) {
     const misses = [];
     for (const q of qs) {
         const t0 = performance.now();
-        const hits = search(index, q.q, { k: 20 });
+        const hits = search(index, q.q, { k: 20, textOnly: true });
         ms += performance.now() - t0;
         const rank = hits.findIndex(h => q.gold.includes(h.chunk.id)) + 1;   // 0 = not in top 20
         if (rank === 1) r1++;
@@ -59,8 +61,8 @@ function report() {
         `${name.padEnd(9)} ${String(m.n).padStart(2)}  ${pct(m['recall@1'])}       ${pct(m['recall@3'])}       ${pct(m['recall@5'])}      ${m.mrr.toFixed(2)}  ${pct(m['model sees it'])}          ${m['ms/query'].toFixed(2)}`));
     lines.push('', 'Misses (not in top 5):');
     overall.misses.forEach(x => lines.push(`  [${x.lang}] ${x.q}\n        got: ${x.top || '(nothing)'}   wanted: ${x.want}   rank: ${x.rank}`));
-    const tops = unanswerable.map(q => ({ q: q.q, score: (search(index, q.q, { k: 1 })[0]?.score || 0) }));
-    const real = answerable.map(q => search(index, q.q, { k: 1 })[0]?.score || 0).sort((a, b) => a - b);
+    const tops = unanswerable.map(q => ({ q: q.q, score: (search(index, q.q, { k: 1, textOnly: true })[0]?.score || 0) }));
+    const real = answerable.map(q => search(index, q.q, { k: 1, textOnly: true })[0]?.score || 0).sort((a, b) => a - b);
     lines.push('', 'Top score for questions the book does NOT cover (a wrong match this high would reach the model):');
     tops.forEach(t => lines.push(`  ${t.score.toFixed(2).padStart(5)}  ${t.q}`));
     lines.push(`Lowest top score among answerable questions: ${real[0]?.toFixed(2)}  (median ${real[Math.floor(real.length / 2)]?.toFixed(2)})`, '');

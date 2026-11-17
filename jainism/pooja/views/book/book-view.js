@@ -419,8 +419,8 @@ export function initBookView(data, activeLangs, containerId = 'book-container') 
         <div class="book-shell">
             <div class="book-spread" id="book-spread">
                 <div class="book-spine"></div>
-                <div class="book-static-head left">ಜೈನ ಪೂಜಾ ವಿಚಾರ ಸಂಕಲನ</div>
-                <div class="book-static-head right">Jaina Pooja Vichara Sankalana</div>
+                <div class="book-static-head left">ಜಿನ ಪೂಜೆ ಪ್ರಶ್ನೋತ್ತರಗಳು</div>
+                <div class="book-static-head right">Jina Pooja Questions &amp; Answers</div>
 
                 <div class="book-columns" id="book-columns"></div>
 

@@ -1132,7 +1132,7 @@ column, so book pagination is unaffected; hidden in print).
 ```
 ai/
 ├── config.js          deploy-time values: CLOUD_ENDPOINT, WebLLM URL, LOCAL_TIERS (model per size)
-├── retrieval.js       in-browser BM25 + tag boost over data.json (no build step)
+├── retrieval.js       in-browser BM25 + tag boost over data.json, spelling-folded Latin terms (no build step)
 ├── prompt.js          system rules, message building, [A-3.1] citation parsing
 ├── rag.js             single-shot RAG: retrieve -> one engine call
 ├── ai-panel.js / .css Settings picker, Ask button, drawer, citation chips
@@ -1268,7 +1268,13 @@ ai/
   automatic eviction under disk pressure (not from the reader clearing data, which is what the folder copy is for).
 - **TODO (decide later):** keep or remove the optional Anthropic backend in the proxy (`BACKEND = "anthropic"`, off by default;
   the free Workers AI backend is the default). He tests with his own Anthropic key meanwhile.
-- **TODO (after the tags review):** tag-based ranking boost; related-question chips built from shared tags (no model needed).
+- **Done (after the tags review, 2026-11-16):** the tag boost already existed (a tag hit counts as 3 body hits) and works with the
+  new spaced tags ("shasana" or "devata" alone hits the tag). Latin terms (tags, text and queries alike) are now folded to a
+  rough sound-key by `foldLatin` (aa/ee/oo, w/v, sh/s, aspirate h, doubled letters, final "a"), so "Poojyapaada" finds what
+  "Pujyapada" finds and "shreepala", "argya", "nischaya", "mudhata" no longer return nothing. Tagged blocks without text
+  (photos) are indexed as `textless` chunks so a tag can find them; `search(..., {textOnly: true})`, `getContext` and
+  `moreMatches` leave them out (nothing to read), and the eval searches text-only. Eval is unchanged (recall@1/3/5 65/81/89%, MRR 0.75).
+- **TODO:** related-question chips built from shared tags (no model needed); they can use the textless photo chunks.
 - **Tried and rejected (measured with the eval):** boosting question blocks over answer blocks made recall worse
   (recall@5 86% -> 81% at 1.15x, 70% at 3x), so retrieval weights are unchanged.
 - **Known gaps:** Cloud (either source) is non-streaming; Local needs WebGPU and a pinned WebLLM
