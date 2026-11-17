@@ -3,88 +3,64 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Welcome to Abhijith's space</title>
-  <meta name="description" content="Abhijith D.A. - software engineering, and Jain Pooja F.A.Q.s.">
-  <meta property="og:title" content="Welcome to Abhijith's space">
-  <meta property="og:description" content="Abhijith D.A. - software engineering, and Jain Pooja F.A.Q.s.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%99%8F%3C/text%3E%3C/svg%3E">
+  <title>abhijithda</title>
+  <meta name="description" content="D.A. Abhijith's personal site: software projects and the Jain Pooja F.A.Q.s.">
+  <meta property="og:title" content="abhijithda">
+  <meta property="og:description"
+    content="D.A. Abhijith's personal site: software projects and the Jain Pooja F.A.Q.s.">
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%99%8F%3C/text%3E%3C/svg%3E">
 
-  <!-- Bootstrap -->
+  <!-- Bootstrap (CSS only; no JavaScript needed) -->
   <link href="assets/css/bootstrap-4.3.1.css" rel="stylesheet">
 </head>
 
 <body>
 
-  <div>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="/">Abhijith D.A.</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="jainism/pooja/">Jaina Pooja F.A.Q.s</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    <div class="jumbotron jumbotron-fluid text-center">
-      <h1 class="display-4">Welcome to Abhijith's space</h1>
-    </div>
-
-    <div class="container">
-      <hr>
-      <br>
-      <div class="row">
-        <div class="col-md-4">
-          <div class="card">
-            <img src="assets/img/Software-Profession-2055387.jpg" alt="Software Profession" height="200" width="200">
-            <div class="card-body">
-              <h4 class="card-title">Profession</h4>
-              <p class="card-text">My software professional life here!.</p>
-              <br><br>
-              <a href="https://github.com/abhijithda" class="btn btn-primary">GitHub</a>
-              <a href="https://github.com/VeritasOS/software-update-manager" class="btn btn-outline-primary">ASUM</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4"></div>
-        <div class="col-md-4">
-          <div class="card">
-            <img class="card-img-top" src="assets/img/Meditation-Transparent-2387586.png" alt="Life">
-            <div class="card-body">
-              <h5 class="card-title">Life</h5>
-              <p class="card-text">Rest of my life outside work.</p>
-            </div>
-            <div class="card-body">
-              <a href="jainism/pooja/" class="btn btn-primary">Jaina Pooja F.A.Q.s</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <br>
-      <hr>
-      <div class="row">
-        <div class="text-center col-lg-6 offset-lg-3">
-          <p>&copy; <span id="year">2026</span> Abhijith D.A. &middot; All Rights Reserved</p>
-        </div>
-      </div>
-    </div>
-
-    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="assets/js/jquery-3.3.1.min.js"></script>
-    <script src="assets/js/popper.min.js"></script>
-    <script src="assets/js/bootstrap-4.3.1.js"></script>
+  <div class="jumbotron jumbotron-fluid text-center mb-5">
+    <h1 class="display-4">Welcome to Abhijith's space</h1>
   </div>
+
+  <div class="container">
+    <div class="row align-items-center">
+
+      <div class="col-md-3 text-center mb-4">
+        <img src="assets/img/Software-Profession-2055387.jpg" alt="" class="img-fluid" style="max-width: 220px;">
+      </div>
+
+      <div class="col-md-6 text-center mb-4">
+        <div class="mb-4">
+          <a class="h5" href="jainism/pooja/">Jain Pooja F.A.Q.s</a><br>
+          <span class="text-muted">Questions and answers on Jain pooja in Kannada and English, with videos, a printable
+            book and an AI assistant.</span>
+        </div>
+        <div class="mb-4">
+          <a class="h5" href="https://github.com/VeritasOS/software-update-manager">ASUM</a><br>
+          <span class="text-muted">Appliance Software Update Manager.</span>
+        </div>
+        <div class="mb-4">
+          <a class="h5" href="https://github.com/VeritasOS/plugin-manager">Plugin Manager</a><br>
+          <span class="text-muted">Runs plugins with systemd-style dependencies. Written in Go.</span>
+        </div>
+        <div>
+          <a class="h5" href="https://github.com/abhijithda">GitHub</a><br>
+          <span class="text-muted">My other repositories.</span>
+        </div>
+      </div>
+
+      <div class="col-md-3 text-center mb-4">
+        <img src="assets/img/Meditation-Transparent-2387586.png" alt="" class="img-fluid" style="max-width: 280px;">
+      </div>
+
+    </div>
+
+    <hr>
+    <p class="text-center text-muted small">&copy; <span id="year">2026</span> D.A. Abhijith &middot; All Rights
+      Reserved</p>
+  </div>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 
 </html>
